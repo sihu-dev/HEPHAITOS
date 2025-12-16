@@ -19,7 +19,7 @@ export const dynamic = 'force-dynamic'
 
 export default function HomePage() {
   return (
-    <main className="relative bg-gray-50">
+    <main className="relative bg-[#0D0D0F]">
       {/* Aurora Background Effect */}
       <AuroraBackground />
 
