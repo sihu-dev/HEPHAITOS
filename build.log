@@ -1,0 +1,106 @@
+
+> hephaitos@2.0.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ⚠ Compiled with warnings
+
+./node_modules/require-in-the-middle/index.js
+Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
+
+Import trace for requested module:
+./node_modules/require-in-the-middle/index.js
+./node_modules/@opentelemetry/instrumentation/build/esm/platform/node/instrumentation.js
+./node_modules/@opentelemetry/instrumentation/build/esm/platform/node/index.js
+./node_modules/@opentelemetry/instrumentation/build/esm/platform/index.js
+./node_modules/@opentelemetry/instrumentation/build/esm/index.js
+./node_modules/@sentry/node/build/cjs/integrations/tracing/postgresjs.js
+./node_modules/@sentry/node/build/cjs/index.js
+./node_modules/@sentry/nextjs/build/cjs/index.server.js
+./src/lib/monitoring/sentry.ts
+./src/lib/error-handler.ts
+./src/lib/api-response.ts
+./src/app/api/celebrities/route.ts
+
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/37) ...
+   Generating static pages (9/37) 
+   Generating static pages (18/37) 
+   Generating static pages (27/37) 
+ ✓ Generating static pages (37/37)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ƒ /                                    1.45 kB        89.8 kB
+├ ƒ /_not-found                          161 B          88.5 kB
+├ ƒ /api/ai/agent                        0 B                0 B
+├ ƒ /api/ai/entry-point                  0 B                0 B
+├ ƒ /api/ai/generate-strategy            0 B                0 B
+├ ƒ /api/ai/report                       0 B                0 B
+├ ƒ /api/ai/strategy                     0 B                0 B
+├ ƒ /api/ai/trade-analysis               0 B                0 B
+├ ƒ /api/ai/tutor                        0 B                0 B
+├ ƒ /api/broker                          0 B                0 B
+├ ƒ /api/celebrities                     0 B                0 B
+├ ƒ /api/celebrities/mirror              0 B                0 B
+├ ƒ /api/celebrities/trades              0 B                0 B
+├ ƒ /api/coaching                        0 B                0 B
+├ ƒ /api/exchange/markets                0 B                0 B
+├ ƒ /api/exchange/ohlcv                  0 B                0 B
+├ ƒ /api/exchange/orderbook              0 B                0 B
+├ ƒ /api/exchange/tickers                0 B                0 B
+├ ○ /api/health                          0 B                0 B
+├ ƒ /api/market                          0 B                0 B
+├ ƒ /api/payments/cancel                 0 B                0 B
+├ ƒ /api/payments/confirm                0 B                0 B
+├ ƒ /api/payments/create                 0 B                0 B
+├ ƒ /api/payments/subscription           0 B                0 B
+├ ƒ /api/payments/webhook                0 B                0 B
+├ ƒ /api/portfolio                       0 B                0 B
+├ ƒ /api/portfolio/compare               0 B                0 B
+├ ƒ /api/simulation                      0 B                0 B
+├ ƒ /api/simulation/trade                0 B                0 B
+├ ƒ /api/strategies                      0 B                0 B
+├ ƒ /api/strategies/[id]                 0 B                0 B
+├ ƒ /api/trades                          0 B                0 B
+├ ƒ /api/user/onboarding                 0 B                0 B
+├ ƒ /api/user/profile                    0 B                0 B
+├ ƒ /auth/callback                       0 B                0 B
+├ ƒ /auth/login                          2.99 kB         190 kB
+├ ƒ /auth/signup                         2.46 kB         190 kB
+├ ƒ /backtest                            161 B          88.5 kB
+├ ƒ /dashboard                           4.52 kB         140 kB
+├ ƒ /dashboard/ai-strategy               10.8 kB         170 kB
+├ ƒ /dashboard/backtest                  17.5 kB         226 kB
+├ ƒ /dashboard/coaching                  7.11 kB         207 kB
+├ ƒ /dashboard/compare                   4.22 kB         139 kB
+├ ƒ /dashboard/copy-trading              1.17 kB         120 kB
+├ ƒ /dashboard/history                   4.31 kB         131 kB
+├ ƒ /dashboard/mirroring                 3.24 kB         212 kB
+├ ƒ /dashboard/portfolio                 4.26 kB         131 kB
+├ ƒ /dashboard/settings                  1.46 kB         120 kB
+├ ƒ /dashboard/settings/billing          25.5 kB         193 kB
+├ ƒ /dashboard/strategies                1.22 kB         129 kB
+├ ƒ /dashboard/strategy-builder          5.59 kB         136 kB
+├ ƒ /demo                                1.15 kB         129 kB
+├ ƒ /docs                                3.81 kB         101 kB
+├ ƒ /login                               161 B          88.5 kB
+├ ƒ /onboarding                          9.85 kB         162 kB
+├ ƒ /signup                              161 B          88.5 kB
+├ ƒ /strategies                          161 B          88.5 kB
+└ ƒ /strategies/new                      161 B          88.5 kB
++ First Load JS shared by all            88.3 kB
+  ├ chunks/2117-48dd18144c165231.js      31.7 kB
+  ├ chunks/fd9d1056-7a33d494291d7834.js  53.6 kB
+  └ other shared chunks (total)          2.98 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

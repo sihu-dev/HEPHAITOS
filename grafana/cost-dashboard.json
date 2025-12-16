@@ -1,0 +1,163 @@
+{
+  "dashboard": {
+    "title": "HEPHAITOS AI Cost Dashboard",
+    "tags": ["observability", "cost", "ai"],
+    "timezone": "Asia/Seoul",
+    "editable": true,
+    "panels": [
+      {
+        "id": 1,
+        "title": "월 전체 AI 비용 (KRW)",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "rawSql": "SELECT sum(cost_estimate_krw) as total_cost FROM ai_usage_events WHERE created_at >= date_trunc('month', now())"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "krw",
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 300000, "color": "yellow" },
+                { "value": 500000, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "기능별 평균 원가 (최근 30일)",
+        "type": "table",
+        "gridPos": { "x": 6, "y": 0, "w": 18, "h": 8 },
+        "targets": [
+          {
+            "rawSql": "SELECT feature, usage_count, avg_cost_krw, total_cost_krw, failure_rate_pct FROM feature_cost_summary ORDER BY total_cost_krw DESC"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "feature": "기능",
+                "usage_count": "사용 횟수",
+                "avg_cost_krw": "평균 원가 (₩)",
+                "total_cost_krw": "총 비용 (₩)",
+                "failure_rate_pct": "실패율 (%)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "시간별 비용 추이 (최근 24시간)",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "rawSql": "SELECT hour, hourly_cost FROM realtime_cost_monitor ORDER BY hour"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "krw",
+            "color": { "mode": "palette-classic" }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "모델별 성능 비교 (최근 7일)",
+        "type": "table",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "rawSql": "SELECT model_used, usage_count, avg_latency_ms, avg_cost_krw, tokens_per_second, failure_rate_pct FROM model_performance_comparison"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "model_used": "모델",
+                "usage_count": "사용 횟수",
+                "avg_latency_ms": "평균 지연 (ms)",
+                "avg_cost_krw": "평균 비용 (₩)",
+                "tokens_per_second": "속도 (tok/s)",
+                "failure_rate_pct": "실패율 (%)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "기능별 원가/수익 마진",
+        "type": "gauge",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 6 },
+        "targets": [
+          {
+            "rawSql": "SELECT feature, (82.0 * CASE feature WHEN 'strategy-generation' THEN 10 WHEN 'backtest' THEN 3 WHEN 'ai-tutor' THEN 1 WHEN 'live-coaching' THEN 20 WHEN 'portfolio-analysis' THEN 5 END - avg_cost_krw) / (82.0 * CASE feature WHEN 'strategy-generation' THEN 10 WHEN 'backtest' THEN 3 WHEN 'ai-tutor' THEN 1 WHEN 'live-coaching' THEN 20 WHEN 'portfolio-analysis' THEN 5 END) * 100 as margin_pct FROM feature_cost_summary"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                { "value": -100, "color": "red" },
+                { "value": 0, "color": "yellow" },
+                { "value": 50, "color": "green" }
+              ]
+            },
+            "min": -100,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "사용자별 월 비용 Top 10",
+        "type": "table",
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 6 },
+        "targets": [
+          {
+            "rawSql": "SELECT user_id, total_requests, total_cost, avg_cost_per_request FROM user_monthly_cost WHERE month = date_trunc('month', now()) ORDER BY total_cost DESC LIMIT 10"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "user_id": "사용자 ID",
+                "total_requests": "총 요청",
+                "total_cost": "총 비용 (₩)",
+                "avg_cost_per_request": "평균 요청 비용 (₩)"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "비용 알림 (Threshold 초과)",
+        "type": "logs",
+        "gridPos": { "x": 0, "y": 22, "w": 24, "h": 6 },
+        "targets": [
+          {
+            "rawSql": "SELECT * FROM check_cost_threshold(500000)"
+          }
+        ]
+      }
+    ],
+    "refresh": "1m",
+    "time": { "from": "now-30d", "to": "now" }
+  }
+}

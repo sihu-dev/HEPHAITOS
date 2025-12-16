@@ -1,0 +1,8 @@
+export { Sidebar } from './Sidebar'
+export { DashboardHeader } from './DashboardHeader'
+export { PortfolioOverview } from './PortfolioOverview'
+export { ActiveStrategies } from './ActiveStrategies'
+export { PerformanceChart } from './PerformanceChart'
+export { RecentTrades } from './RecentTrades'
+export { QuickActions } from './QuickActions'
+export { MarketOverview } from './MarketOverview'

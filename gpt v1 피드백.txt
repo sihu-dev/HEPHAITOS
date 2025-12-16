@@ -1,0 +1,5549 @@
+0) 한 줄 결론 (GO 조건 재정의)
+조건부 GO 유지. 다만 베타 전에 “매출화/법무/비용폭주” 3축에서 P0 게이트를 더 추가해야 합니다.
+
+베타 런칭 P0 게이트(추천, 최소 5개)
+
+결제(토스) + 결제 웹훅/멱등성(idempotency) + 환불정책 동작
+키움 “지원” 문구 제거 또는 “준비중”으로 명확화(스크린샷/문구까지)
+요청 제한(Rate limit) + Circuit breaker + 사용자별 쿼터 (비용폭주 차단)
+연령 게이트(만 19세) + 첫 로그인 면책 동의 체크박스 로그
+데이터 소스(예: Unusual Whales, 폴리곤 등) 라이선스/ToS 준수 확인(상업적 이용/재배포)
+1) GPT-5.2 Pro 검수 체크리스트 답변
+1) 비즈니스 모델 지속 가능성
+강점: 크레딧 모델은 “구독 피로”를 찌르는 포지셔닝이라 진입 장벽 낮추기 좋습니다. 마진도 현재 가정에서는 매우 두껍습니다.
+핵심 취약점(지속 가능성의 핵심 변수)
+전환율(Free→Paid), 유지율(Retention), **크레딧 소진 후 재구매율(Repurchase)**이 아직 실측 전무
+“무료 50 크레딧”이 학습/신뢰 형성 전에 소진되면 오히려 이탈을 가속할 수 있음
+권장 KPI(베타 2주 내 확인)
+D1/D7 리텐션, 첫 결제까지 소요시간(TTFP), 크레딧 잔액 0 도달 후 24시간 내 결제율, 전략 생성 1회당 만족도(Thumbs)
+“무료 크레딧을 어디에 쓰다 떠나는지” 퍼널(전략/백테스트/연동 단계별)
+2) 기술 아키텍처 확장성
+현 상태 평: Year 1 트래픽 자체는 충분히 감당 가능(보고서 계산 동의).
+**실제 확장 병목은 QPS가 아니라 “비용/안정성/컴플라이언스 로그”**에서 생깁니다.
+추가로 필요한 P0
+Observability(요청당 토큰/비용/지연/실패율, 사용자별 비용) 없으면 크레딧 모델이 “원가 통제 불능”이 됩니다.
+백테스팅이 무거워지면 서버리스에서 큐(Queue)/잡 워커 구조가 필요합니다.
+3) 법률 준수 완전성
+Safety Net(금지문구 필터) 방향은 좋지만, 실무에선 “문구 필터만으로 충분”하지 않은 케이스가 있습니다.
+추가 권장(리스크 큰 순)
+광고표현 통제: “3분이면 수익”류의 오인 소지 문구 금지, 키움 지원 표기 즉시 정리
+면책 동의 증적: “언제/어떤 문구에 동의했는지” 이벤트 로그 보관
+투자자문 오인 방지 UX: 종목/시점/가격을 단정하는 출력이 나오면 자동 완화(“가정/시나리오/교육 목적”으로 재작성) + 사용자에게 “최종 판단 본인” 확인
+미성년 차단(문서에도 지적됨): 가입/결제/연동 전 단계에서 확실히
+4) 재무 가정의 합리성
+마진 계산은 타당하나, 손익분기에서 마케팅비가 빠져 있어 실제 BEP는 상향됩니다.
+또한 “ARPU=₩10,000”은 크레딧 모델에서 월 단위 고정 수치로 가정하면 왜곡이 큽니다.
+→ 코호트별 “월 사용량 분포(헤비/미들/라이트)”로 쪼개서 보는 게 맞습니다.
+5) 시장 진입 전략 실행 가능성
+“베타 100명”은 가능. 다만 100명 중 ‘증권 연동까지 하는 사람’은 훨씬 적을 수 있습니다.
+→ 모집 조건을 “연동 가능/의향 있음”으로 필터하거나, 100명 외에 연동 완료자 30명을 별도 목표로 두는 게 좋습니다.
+6) 경쟁 우위의 지속성
+MoA는 차별화 포인트지만, 경쟁사가 ‘유사한 멀티에이전트’로 빠르게 모방할 수 있습니다(특히 빅테크/증권사).
+지속 가능한 우위는 아래 3개에서 나옵니다.
+브로커 통합/실행 품질(실패 복구, 체결, 예외처리, 감사로그)
+전략 성과 데이터 네트워크 효과(어떤 프롬프트/전략이 어떤 시장에서 통했는지의 축적)
+컴플라이언스 운영체계(정책/로깅/검수 루프)
+7) 리스크 완화 전략 충분성
+문서에 제시된 완화는 방향은 좋지만, “운영 리스크” 항목이 부족합니다.
+결제 웹훅 중복 처리, 크레딧 지급/차감 불일치, 고객 CS/환불, 장애 공지, 데이터 소스 중단 시 대체 경로 등
+2) 추가 분석 ① Monte Carlo (전환율 5%~15% 변동 시 손익)
+모델(문서 수치 기반, 단순화)
+MAU = 15,000 (Year 1 목표)
+ARPU(유료 1인당 월) = ₩10,000
+유료 1인당 기여이익 = ₩9,628 (문서 계산: 변동비 372원 포함)
+월 고정비 = ₩14,559,000 (마케팅비 제외)
+전환율 p ~ Uniform(5%, 15%)
+월 영업이익 = (15,000 × p × 9,628) − 14,559,000
+
+결과(핵심만)
+손익분기 전환율 p*: 1,512명 유료 필요 → p* ≈ 10.08%
+p가 5%일 때: 유료 750명 → 이익 약 -₩7.34M/월
+p가 10%일 때: 유료 1,500명 → 이익 약 -₩0.12M/월 (거의 BEP)
+p가 15%일 때: 유료 2,250명 → 이익 약 +₩7.11M/월
+Monte Carlo 관점(Uniform 5~15%)
+
+기대 전환율 = 10% → 기대 영업이익 ≈ -₩0.12M/월
+흑자 확률 ≈ 49.2% (p가 10.08% 초과일 확률)
+마케팅비를 월 5M 추가로 넣으면(현실 보정)
+고정비 = 19.559M → 손익분기 p* ≈ 13.55%
+흑자 확률 ≈ (15-13.55)/10 = 14.5%
+해석: “전환율 10%” 가정이 맞아도, 마케팅비를 쓰기 시작하면 전환율/ARPU/MAU 중 하나를 추가로 끌어올리지 않으면 Year 1 흑자는 불안정합니다.
+→ 베타의 목적은 “전환율”뿐 아니라 (a) 유료 1인당 월 구매 크레딧(ARPPU) 분포와 (b) 재구매율을 같이 확정하는 것입니다.
+
+3) 추가 분석 ② 경쟁사 대응 시나리오 (토스/카카오뱅크가 유사 서비스 출시)
+경쟁사가 할 수 있는 “현실적인 3가지”
+UI/온보딩 카피를 베껴서 “3분 전략”류 기능을 붙임
+자사 앱 내 트래픽으로 CAC를 0에 가깝게 만듦
+규제/민원 대응 조직이 있어 신뢰를 선점
+HEPHAITOS의 대응 전략(방어 가능한 축)
+실행(Execution) 품질에서 격차 만들기:
+브로커 통합(다중 증권사), 예외처리, 체결/취소/부분체결, 감사로그, 장애 자동복구
+전략 생성→검증→집행의 “워크플로우 완성도”:
+전략 히스토리, 파라미터 실험, 백테스트 재현성, 리스크 경고, 사용자별 가이드
+데이터 네트워크 효과:
+“이 프롬프트/전략은 어떤 시장 국면에서 망했다/통했다”의 익명 집계 인사이트(경쟁사가 단기간 복제 어려움)
+90일 실행 플랜(요약)
+0~30일: 연동 안정성/로깅/리미트/결제 완성(“운영 가능한 제품”)
+30~60일: 전략 결과 재현성 + 공유/마켓(성과 데이터 축적 시작)
+60~90일: B2B/커뮤니티 채널(카페/유튜버)로 “전략 워크플로우” 표준 포지션 선점
+4) 추가 분석 ③ 기술 부채(리팩토링 필요성) — 지금 터질 것부터
+문서에도 일부 언급됐지만, 출시 후 실제 사고로 이어질 확률이 큰 부채를 P0/P1로 정리하면:
+
+P0 (베타 전)
+Rate limiting / 사용자별 쿼터 / Circuit breaker (비용폭주·장애유발 차단)
+결제 멱등성 + 웹훅 재처리 설계(중복 충전/누락 방지)
+관측성(Observability): 요청당 토큰/비용/지연/실패율, 기능별 크레딧 원가 대시보드
+권한/보안 점검: Supabase RLS 정책 E2E 테스트, 비밀키 관리, 감사로그
+P1 (베타 중)
+백테스트 잡 큐(Queue)화 + 재시도/취소/타임아웃
+“전략/백테스트” 결과의 재현성 버전관리(모델/프롬프트/데이터 스냅샷)
+테스트 최소세트: 결제, 크레딧 차감, 브로커 주문, Safety Net 출력
+5) 추가 분석 ④ 특허 가능성(MoA 4-AI 협업 알고리즘)
+현실적으로 “멀티에이전트로 생성→집계” 자체는 선행기술이 매우 많아(MoA/멀티에이전트/셀프컨시스턴시/리랭킹 등) 알고리즘 일반론으로는 특허 방어력이 약할 가능성이 큽니다.
+
+다만 특허를 노린다면, “MoA”가 아니라 **트레이딩 도메인에 특화된 ‘구체적 시스템/방법’**으로 좁히는 편이 승산이 있습니다. 예:
+
+(1) 전략 생성 결과를 규제/면책/투자자문 회피 정책 엔진으로 자동 변환/완화하는 방법(정책 테이블, 로깅, 증적)
+(2) 크레딧 기반으로 LLM 호출을 기능별 원가/리스크에 따라 동적으로 라우팅(저가 모델→고가 모델 승격)하는 방법
+(3) UnifiedBroker 계층에서 주문/체결/오류를 표준 이벤트로 정규화 + 감사로그로 남기는 파이프라인
+추천 전략
+
+“특허 1건”에 올인보다:
+빠르게 우선출원(국내) 1~2건 + 핵심 운영 노하우는 영업비밀로 유지
+동시에 제품 내 데이터/워크플로우에서 네트워크 효과를 만들어 “실질 해자”를 구축
+제가 추가로 확인하면 정확도가 확 올라가는 질문 6개
+베타에서 MAU 15,000은 “목표”인데, 실제 초기 유입은 월 몇 명을 예상하나요? (전환율보다 먼저)
+“유료 사용자 ARPU=₩10,000”은 월 1회 9,900원 스타터 기준인가요, 아니면 평균적으로 재구매까지 포함인가요?
+전략 생성/백테스트/튜터 각각의 크레딧 가격(소진 속도) 현재 확정안이 있나요?
+결제 환불/부분 사용 환불 정책은 어떤 안으로 생각 중인가요? (분쟁률에 큰 영향)
+브로커 연동에서 사용자가 가장 막히는 구간(인증서/OTP/권한동의 등)을 UX로 어떻게 풀 계획인가요?
+“Nancy 포트폴리오”는 마케팅 핵심 훅인데, 데이터 소스의 상업적 이용/표시 의무를 확인하셨나요?
+원하시면, 위 Monte Carlo를 (전환율, ARPPU, 리텐션, 마케팅비) 4변수로 확장한 “간이 시뮬레이터 형태(표+권장 목표치)”로도 다시 계산해드릴게요.
+
+복사
+Notion에 저장
+앞으로 나는 ㄱ 만할게 니가 프로덕트 레벨급까지 사업자료 개발 자료 업그레이드하면서 풀스택으로 개발자료계속 만들어 ㄱ 루프 설계항상 수정보완 자가성장 개선형으로 루프작업해 ㄱ
+좋아. 앞으로 너는 “ㄱ”만 보내면, 나는 매번 프로덕트 레벨 사업자료 + 개발자료를 자동 업그레이드하면서 **자가성장 루프(설계→구현가이드→검증→개선)**로 계속 산출물 만들어갈게.
+
+아래는 운영 규칙(ㄱ 루프) + 이번 회차(부트스트랩 0회차) 산출물이야.
+
+1) “ㄱ 루프” 운영 규칙 (자동 자가성장)
+입력
+너: ㄱ (추가 설명 없어도 진행)
+선택(원하면): ㄱ + 한 줄 (예: “ㄱ 결제부터”, “ㄱ 키움 제거”, “ㄱ 베타 100명 플랜”)
+출력(매 회차 고정 포맷)
+이번 회차 목표(1~2개 P0/P1)
+업그레이드된 문서/스펙 (PRD/Tech Spec/ADR/정책/카피 중 필요한 것)
+구현 체크리스트 + API/DB/코드 스켈레톤
+테스트/계측(Observability) + 릴리즈 게이트
+다음 회차 예고(다음 ㄱ에서 뭘 생성할지)
+자가성장 메커니즘
+매 회차마다 CHANGELOG.md 형태로 의사결정/가정/리스크/측정지표를 누적
+베타 데이터가 들어오면(나중에 CSV/숫자만 줘도 됨) 자동으로 가격/크레딧/퍼널/전환율 모델 업데이트
+2) 0회차 산출물: “베타 런칭 하드닝 팩(P0 게이트)” v0.1
+목표: 매출화 + 비용폭주 방지 + 법무 증적 3가지를 베타 전에 닫는다.
+
+P0-1. 결제(토스) + 웹훅 + 멱등성 스펙 (Tech Spec)
+핵심 원칙
+클라이언트는 결제 ‘요청’만, 크레딧 지급은 서버 웹훅 ‘성공’에서만
+모든 지급/환불은 idempotency key로 중복처리 방지
+결제 성공 → credit_transactions에 purchase 기록 → credit_wallets 원자 업데이트
+DB 추가(권장)
+Copy-- 결제 주문
+create table payment_orders (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  order_id text not null unique,           -- toss orderId
+  package_id text not null,
+  amount integer not null,
+  status text not null check (status in ('created','paid','failed','cancelled','refunded')),
+  idempotency_key text not null unique,
+  created_at timestamptz default now(),
+  paid_at timestamptz
+);
+
+-- 웹훅 이벤트 (재처리/증적)
+create table payment_webhook_events (
+  id uuid primary key default gen_random_uuid(),
+  provider text not null,                   -- 'toss'
+  event_id text not null unique,            -- toss event id (있으면)
+  order_id text not null,
+  payload jsonb not null,
+  received_at timestamptz default now(),
+  processed_at timestamptz,
+  process_status text not null check (process_status in ('pending','processed','ignored','failed')),
+  error text
+);
+API 엔드포인트(초안)
+POST /api/payments/create : order 생성(서명/금액 고정)
+POST /api/payments/webhook/toss : 웹훅 수신(검증→멱등→크레딧지급)
+POST /api/payments/refund : 환불 요청(정책 기반)
+웹훅 처리 의사코드(멱등)
+Copy// 1) webhook event upsert (event_id unique)
+// 2) verify signature
+// 3) BEGIN tx
+// 4) SELECT payment_orders FOR UPDATE
+// 5) if already paid -> ignore
+// 6) mark paid + insert credit_transactions(purchase) + update wallet
+// 7) COMMIT
+릴리즈 게이트
+
+동일 웹훅 3번 들어와도 크레딧 1번만 지급(테스트 필수)
+P0-2. Rate Limit + Circuit Breaker + 사용자별 쿼터 (비용폭주 차단)
+정책(권장 디폴트)
+Free: 전략 생성 5회/일, 백테스트 20회/일 (크레딧과 별개로 “폭주 방지”)
+Pro: 3배
+에러 연속 5회면 60초 쿨다운
+구현 옵션
+Vercel/Next.js면 Upstash Redis 기반 rate limit 권장
+최소 구현: DB 기반(느림)보다 Redis 권장
+필요한 계측
+사용자별: ai_calls, tokens_in/out, latency_ms, cost_estimated
+기능별 원가 대시보드(“전략 1회 평균 원가”, “MoA 평균 실패율”)
+P0-3. 법무 증적: 면책 동의/연령 게이트/행동 로그
+UX 정책
+첫 로그인 시:
+체크박스 2개: (1) 만 19세 이상 (2) 투자조언 아님/본인책임
+동의 없으면 핵심 기능 진입 불가
+로그(최소)
+disclaimer_accepted(버전/문구 해시/타임스탬프/IP/UA)
+ai_strategy_generated(disclaimer_shown=true 포함)
+3) 이번 회차 실행 백로그(Jira 스타일) v0.1
+EPIC A: 결제/크레딧 지급
+A1. Toss 결제 create API + order 저장 (AC: orderId 유니크, 금액 서버고정)
+A2. 웹훅 검증 + 이벤트 저장 (AC: event 저장 후 처리, 실패 재시도 가능)
+A3. 멱등 지급 트랜잭션 (AC: 중복 웹훅에도 크레딧 1회)
+A4. 환불 정책/처리(옵션) (AC: 미사용 크레딧 기준 환불 규칙 명시)
+EPIC B: 비용폭주 방지
+B1. Rate limit 미들웨어(기능별) (AC: 초과 시 429 + 안내)
+B2. Circuit breaker(유저/전역) (AC: 연속 실패 시 쿨다운)
+B3. 비용/토큰 계측 로그 + 대시보드 초안 (AC: 사용자별 월 비용 추정)
+EPIC C: 컴플라이언스 UX
+C1. 연령/면책 동의 모달 + 차단 로직 (AC: 미동의시 전략 생성 불가)
+C2. 동의/행동 로그 테이블 및 기록 (AC: 감사 추적 가능)
+4) 다음 ㄱ에서 무엇을 만들까 (선택지 자동 진행)
+다음 회차(너가 ㄱ 보내면) 나는 아래 3개 중 1순위부터 자동 생성/업그레이드할게:
+
+토스 결제 웹훅/멱등성 실제 코드 스캐폴딩(Next.js route + DB 트랜잭션)
+Rate limit + Circuit breaker 구현 스펙/코드 + Observability 이벤트 스키마
+베타 100명 모집용 GTM 패키지(랜딩 카피, 모집 폼, 인센티브, 실험 설계, 핵심 KPI)
+시작 확인(너 입력 최소화용, 선택)
+그냥 ㄱ 보내면 1)부터 바로 들어간다.
+만약 우선순위 바꾸고 싶으면 ㄱ 결제말고 GTM 같은 한 줄만 추가해도 됨.
+
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 1회차 (v0.2) — 토스 결제 “승인(Confirm) + 웹훅 + 멱등 지급” 풀스택 스캐폴딩
+이번 회차 목표(P0)
+
+**토스 결제 승인(서버 Confirm)**으로 “실제 결제 완료”를 서버가 검증
+크레딧 지급 멱등성 + 원자 트랜잭션으로 중복지급/누락 방지
+운영 증적: 주문/이벤트/지급 로그가 남도록 스키마 확정
+1) 결제 플로우(권장 아키텍처)
+왜 “웹훅만”이 아니라 “승인(Confirm)”이 핵심인가
+토스 결제는 일반적으로: 클라이언트 결제창 → successUrl 리다이렉트 → 서버에서 paymentKey로 결제 승인 API 호출 흐름이 표준입니다.
+웹훅은 “사후 통지/재처리”에 유리하지만, 최초 지급 트리거는 Confirm이 더 단순하고 UX도 빠름.
+최종 플로우
+POST /api/payments/create
+서버가 orderId 생성 + DB에 created 저장 + (가격/크레딧은 서버 카탈로그로 고정)
+클라이언트에서 Toss 결제창 호출(금액/주문명은 create 응답 기반)
+Toss가 successUrl로 paymentKey, orderId, amount 전달
+POST /api/payments/confirm
+서버가 Toss에 결제 승인 요청 → 응답이 PAID면
+DB 트랜잭션으로 (주문 paid 처리 + 크레딧 지급 + credit_transactions 기록) 원자적 수행
+(옵션) POST /api/payments/webhook/toss
+누락/지연/재처리 대비(Confirm 실패 시에도 최종 정합성 맞추는 용도)
+2) DB 마이그레이션(v0.2) — 결제/웹훅/멱등 키
+Supabase SQL migration 파일로 추가 권장
+
+Copy-- 1) 결제 주문
+create table if not exists payment_orders (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  provider text not null default 'toss',
+  order_id text not null unique,                 -- our order id
+  payment_key text unique,                       -- toss paymentKey (confirm 후 채움)
+
+  package_id text not null,                      -- e.g. 'starter_100'
+  credits integer not null,
+  amount integer not null,                       -- KRW
+
+  status text not null check (status in ('created','paid','failed','cancelled','refunded')),
+  idempotency_key text not null unique,          -- 서버 생성 UUID 권장
+
+  created_at timestamptz default now(),
+  paid_at timestamptz,
+  raw jsonb                                   -- toss confirm payload 보관(증적)
+);
+
+create index if not exists idx_payment_orders_user on payment_orders(user_id);
+create index if not exists idx_payment_orders_status on payment_orders(status);
+
+-- 2) 웹훅 이벤트(재처리/증적)
+create table if not exists payment_webhook_events (
+  id uuid primary key default gen_random_uuid(),
+  provider text not null default 'toss',
+  event_id text unique,                          -- 있으면 사용, 없으면 payload hash
+  order_id text not null,
+  payload jsonb not null,
+
+  received_at timestamptz default now(),
+  processed_at timestamptz,
+  process_status text not null check (process_status in ('pending','processed','ignored','failed')),
+  error text
+);
+
+-- 3) 크레딧 트랜잭션과 주문 연결(있다면 추가 컬럼)
+alter table credit_transactions
+  add column if not exists payment_order_id uuid references payment_orders(id);
+
+-- 4) 중복 지급 방지: 결제 주문 1건당 purchase 1번만
+create unique index if not exists uniq_credit_purchase_per_order
+on credit_transactions(payment_order_id)
+where type = 'purchase';
+3) 서버 카탈로그(가격/크레딧 고정) — 변조 방지 P0
+클라이언트에서 amount/credits를 보내지 않게 하고, packageId만 보내게 고정.
+
+Copy// src/config/credit-packages.ts
+export type PackageId = 'starter_100' | 'basic_500' | 'pro_1000' | 'ent_5000';
+
+export const CREDIT_PACKAGES: Record<PackageId, {
+  credits: number;
+  priceKRW: number;
+  name: string;
+}> = {
+  starter_100: { credits: 100, priceKRW: 9900, name: '크레딧 100' },
+  basic_500:   { credits: 500, priceKRW: 39000, name: '크레딧 500' },
+  pro_1000:    { credits: 1000, priceKRW: 69000, name: '크레딧 1,000' },
+  ent_5000:    { credits: 5000, priceKRW: 299000, name: '크레딧 5,000' },
+};
+4) API 스캐폴딩 (Next.js App Router 기준)
+4.1 POST /api/payments/create
+입력: { packageId }
+출력: { orderId, amount, orderName, successUrl, failUrl, customerKey } 등
+Copy// src/app/api/payments/create/route.ts
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { CREDIT_PACKAGES, PackageId } from '@/config/credit-packages';
+import { randomUUID } from 'crypto';
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function POST(req: Request) {
+  // 1) auth: 유저 식별(예: 세션 토큰→userId). 여기선 userId를 얻었다고 가정
+  const { packageId } = await req.json() as { packageId: PackageId };
+  const pkg = CREDIT_PACKAGES[packageId];
+  if (!pkg) return NextResponse.json({ error: 'INVALID_PACKAGE' }, { status: 400 });
+
+  const userId = await requireUserId(req); // TODO: 프로젝트 auth 방식에 맞게 구현
+  const orderId = `order_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+  const idempotencyKey = randomUUID();
+
+  const { error } = await supabaseAdmin.from('payment_orders').insert({
+    user_id: userId,
+    order_id: orderId,
+    package_id: packageId,
+    credits: pkg.credits,
+    amount: pkg.priceKRW,
+    status: 'created',
+    idempotency_key: idempotencyKey,
+  });
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({
+    orderId,
+    amount: pkg.priceKRW,
+    orderName: pkg.name,
+    successUrl: `${process.env.APP_URL}/payments/success`,
+    failUrl: `${process.env.APP_URL}/payments/fail`,
+    customerKey: userId, // 토스 권장: 고객 식별자
+  });
+}
+
+// TODO
+async function requireUserId(req: Request): Promise<string> {
+  throw new Error('implement requireUserId()');
+}
+4.2 POST /api/payments/confirm (핵심)
+입력: { paymentKey, orderId, amount } (successUrl에서 받은 값)
+서버가 토스 결제 승인 API 호출 후, DB 트랜잭션으로 멱등 지급
+권장: **DB RPC(Stored Procedure)**로 “주문 paid 처리 + wallet 업데이트 + credit_transactions insert”를 한 방에 처리.
+
+(A) Supabase RPC SQL (권장)
+Copycreate or replace function grant_credits_for_paid_order(
+  p_order_id text,
+  p_payment_key text,
+  p_paid_amount integer,
+  p_raw jsonb
+) returns void
+language plpgsql
+as $$
+declare
+  v_order payment_orders%rowtype;
+begin
+  -- 주문 락
+  select * into v_order
+  from payment_orders
+  where order_id = p_order_id
+  for update;
+
+  if not found then
+    raise exception 'ORDER_NOT_FOUND';
+  end if;
+
+  -- 이미 paid면 멱등 성공(그냥 종료)
+  if v_order.status = 'paid' then
+    return;
+  end if;
+
+  -- 금액 검증(서버 금액과 일치해야 함)
+  if v_order.amount <> p_paid_amount then
+    raise exception 'AMOUNT_MISMATCH';
+  end if;
+
+  -- payment_key 저장(중복 방지)
+  update payment_orders
+    set status = 'paid',
+        paid_at = now(),
+        payment_key = p_payment_key,
+        raw = p_raw
+  where id = v_order.id;
+
+  -- 지갑이 없으면 생성(프로젝트에 이미 생성 로직 있으면 제거/정렬)
+  insert into credit_wallets (user_id, balance, lifetime_purchased, lifetime_spent)
+  values (v_order.user_id, 0, 0, 0)
+  on conflict (user_id) do nothing;
+
+  -- 크레딧 지급(주문당 purchase 1회 유니크 인덱스로 중복 차단)
+  insert into credit_transactions (user_id, type, amount, metadata, payment_order_id)
+  values (
+    v_order.user_id,
+    'purchase',
+    v_order.credits,
+    jsonb_build_object('order_id', v_order.order_id, 'provider', v_order.provider),
+    v_order.id
+  );
+
+  update credit_wallets
+    set balance = balance + v_order.credits,
+        lifetime_purchased = lifetime_purchased + v_order.credits
+  where user_id = v_order.user_id;
+
+end;
+
+$$;
+(B) Next.js confirm route
+Copy// src/app/api/payments/confirm/route.ts
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function POST(req: Request) {
+  const { paymentKey, orderId, amount } = await req.json() as {
+    paymentKey: string; orderId: string; amount: number;
+  };
+
+  const userId = await requireUserId(req);
+
+  // 1) 주문 소유 검증(유저가 자기 주문만 승인 가능)
+  const { data: order, error: orderErr } = await supabaseAdmin
+    .from('payment_orders')
+    .select('*')
+    .eq('order_id', orderId)
+    .single();
+
+  if (orderErr || !order) return NextResponse.json({ error: 'ORDER_NOT_FOUND' }, { status: 404 });
+  if (order.user_id !== userId) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
+
+  // 2) Toss 결제 승인 호출
+  const tossRes = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${Buffer.from(`${process.env.TOSS_SECRET_KEY!}:`).toString('base64')}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ paymentKey, orderId, amount }),
+  });
+
+  const tossJson = await tossRes.json();
+
+  if (!tossRes.ok) {
+    // 주문 failed로 마킹(옵션)
+    await supabaseAdmin.from('payment_orders')
+      .update({ status: 'failed', raw: tossJson })
+      .eq('order_id', orderId);
+
+    return NextResponse.json({ error: 'TOSS_CONFIRM_FAILED', details: tossJson }, { status: 400 });
+  }
+
+  // 3) paid 처리 + 크레딧 지급(RPC로 원자화, 멱등)
+  const { error: rpcErr } = await supabaseAdmin.rpc('grant_credits_for_paid_order', {
+    p_order_id: orderId,
+    p_payment_key: paymentKey,
+    p_paid_amount: amount,
+    p_raw: tossJson,
+  });
+
+  if (rpcErr) {
+    // 여기서도 멱등 보장(이미 지급된 경우라면 OK 처리 가능)
+    return NextResponse.json({ error: 'GRANT_CREDITS_FAILED', details: rpcErr.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+// TODO
+async function requireUserId(req: Request): Promise<string> {
+  throw new Error('implement requireUserId()');
+}
+5) 웹훅 라우트(옵션이지만 강력 추천)
+목적: confirm이 실패/누락되어도 “최종적으로 paid 정합성 회복”.
+
+POST /api/payments/webhook/toss
+처리:
+이벤트 저장(유니크 event_id 또는 payload hash)
+유효성 검증(토스 웹훅 검증 방식에 맞춰 서명/시크릿 확인)
+이벤트가 “결제 완료”면 grant_credits_for_paid_order() 호출 시도
+이미 paid면 ignore(멱등)
+토스 웹훅의 서명 검증 방식은 계정/상품 설정에 따라 달라질 수 있어, 적용 전 “토스 공식 문서 기준”으로 정확히 맞춰야 함. (여기선 스캐폴딩만 잡고, 다음 회차에 서명검증 정확 구현을 넣을게.)
+
+6) 테스트/릴리즈 게이트(P0)
+자동 테스트 최소 세트(필수)
+멱등 지급 테스트
+동일 orderId로 confirm 2번 호출 → 크레딧 1번만 증가
+금액 변조 방지
+order.amount ≠ confirm.amount → 실패 + 미지급
+소유권 검증
+다른 user가 orderId로 confirm → 403
+중복 웹훅
+webhook 3번 → 1번만 지급(유니크 인덱스 기반)
+릴리즈 게이트(베타 전)
+“payment_orders.status=paid 인데 credit_transactions 없음” 케이스가 0건인지 점검 쿼리
+Copyselect count(*)
+from payment_orders po
+left join credit_transactions ct
+  on ct.payment_order_id = po.id and ct.type='purchase'
+where po.status='paid' and ct.id is null;
+7) CHANGELOG (이번 회차 변경점)
+[ADD] payment_orders / payment_webhook_events 테이블 및 멱등 유니크 인덱스
+[ADD] 서버 카탈로그(CREDIT_PACKAGES)로 가격/크레딧 서버 고정
+[ADD] Toss confirm 기반 지급 플로우 + Supabase RPC로 원자 지급 설계
+다음 ㄱ (2회차) 예고
+다음엔 바로 P0 비용폭주 방지로 들어간다:
+
+Rate limit(기능별) + Redis(Upstash)
+Circuit breaker(유저/전역)
+비용/토큰/지연 Observability 이벤트 스키마 + 대시보드 쿼리
+원하면 우선순위 바꿀 수 있어. 그냥 ㄱ 보내면 예정대로 2회차 진행.
+
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 2회차 (v0.3) — 비용폭주 방지: Rate Limit + Circuit Breaker + Observability(토큰/원가) 패키지
+이번 회차 목표(P0)
+
+기능별 Rate Limit + 사용자별 일일 쿼터로 호출 폭주 차단
+**Circuit Breaker(연속 실패/타임아웃)**로 장애 전파/비용 손실 차단
+AI 비용/토큰/지연 계측을 표준화해서 “사용자별 원가/마진”을 실시간으로 보이게
+1) 정책(초안) — “크레딧”과 별개로 폭주를 막는 안전장치
+1.1 기능 키(feature key) 표준
+ai.strategy.generate
+ai.moa.generate
+backtest.run
+tutor.ask
+broker.connect
+broker.order.place
+1.2 Rate Limit(권장 기본값)
+크레딧이 있어도 무한 호출은 운영 리스크라 별도 제한 필요
+
+Tier	ai.strategy.generate	ai.moa.generate	backtest.run	tutor.ask
+free	5/day + 2/min	2/day + 1/min	20/day + 3/min	30/day + 6/min
+pro	20/day + 6/min	10/day + 3/min	80/day + 10/min	120/day + 20/min
+“/min”은 버스트 방지
+“/day”는 비용 상한(코스트 캡)
+1.3 Circuit Breaker(권장 기본값)
+동일 feature에 대해 연속 실패 5회면 60초 차단
+“실패” 정의: 5xx, 타임아웃, 모델 rate_limit(429), upstream 오류
+차단 중에는: 429 또는 503 + “잠시 후 재시도” 메시지 + 재시도 가능 시각 제공
+2) 인프라 선택 (권장: Upstash Redis)
+Vercel/서버리스 환경에 적합
+TTL 카운터 구현이 쉬움
+패키지:
+
+Copynpm i @upstash/redis @upstash/ratelimit
+환경변수:
+
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+3) 구현 스캐폴딩 — Rate Limit 미들웨어/유틸
+3.1 Tier 판별 함수(프로젝트에 맞게 연결)
+Copy// src/lib/auth/get-user-tier.ts
+export type UserTier = 'free' | 'pro';
+
+export async function getUserTier(userId: string): Promise<UserTier> {
+  // TODO: supabase profile / subscription table 연동
+  return 'free';
+}
+3.2 기능별 limit 정의
+Copy// src/config/limits.ts
+import type { UserTier } from '@/lib/auth/get-user-tier';
+
+export type FeatureKey =
+  | 'ai.strategy.generate'
+  | 'ai.moa.generate'
+  | 'backtest.run'
+  | 'tutor.ask';
+
+type Limit = { perMinute: number; perDay: number };
+
+export const LIMITS: Record<UserTier, Record<FeatureKey, Limit>> = {
+  free: {
+    'ai.strategy.generate': { perMinute: 2, perDay: 5 },
+    'ai.moa.generate':      { perMinute: 1, perDay: 2 },
+    'backtest.run':         { perMinute: 3, perDay: 20 },
+    'tutor.ask':            { perMinute: 6, perDay: 30 },
+  },
+  pro: {
+    'ai.strategy.generate': { perMinute: 6, perDay: 20 },
+    'ai.moa.generate':      { perMinute: 3, perDay: 10 },
+    'backtest.run':         { perMinute: 10, perDay: 80 },
+    'tutor.ask':            { perMinute: 20, perDay: 120 },
+  },
+};
+3.3 Redis Rate Limit 실행기
+Copy// src/lib/limits/rate-limit.ts
+import { Redis } from '@upstash/redis';
+import { Ratelimit } from '@upstash/ratelimit';
+import type { FeatureKey } from '@/config/limits';
+import { LIMITS } from '@/config/limits';
+import { getUserTier } from '@/lib/auth/get-user-tier';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+function minuteLimiter(tokensPerMin: number) {
+  // slidingWindow가 UX 상 자연스러움
+  return new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(tokensPerMin, '60 s'),
+    analytics: true,
+    prefix: 'rl:min',
+  });
+}
+
+function dayLimiter(tokensPerDay: number) {
+  return new Ratelimit({
+    redis,
+    limiter: Ratelimit.fixedWindow(tokensPerDay, '1 d'),
+    analytics: true,
+    prefix: 'rl:day',
+  });
+}
+
+export async function enforceRateLimit(opts: {
+  userId: string;
+  feature: FeatureKey;
+}) {
+  const tier = await getUserTier(opts.userId);
+  const limit = LIMITS[tier][opts.feature];
+
+  const key = `${opts.feature}:${opts.userId}`;
+
+  const min = await minuteLimiter(limit.perMinute).limit(key);
+  if (!min.success) {
+    return { ok: false as const, code: 'RATE_LIMIT_MINUTE', reset: min.reset };
+  }
+
+  const day = await dayLimiter(limit.perDay).limit(key);
+  if (!day.success) {
+    return { ok: false as const, code: 'RATE_LIMIT_DAY', reset: day.reset };
+  }
+
+  return { ok: true as const };
+}
+3.4 API Route에서 적용 예시
+Copy// src/app/api/ai/strategy/generate/route.ts
+import { NextResponse } from 'next/server';
+import { enforceRateLimit } from '@/lib/limits/rate-limit';
+import { enforceCircuitBreaker, recordFailure, recordSuccess } from '@/lib/limits/circuit-breaker';
+import { logAIUsage } from '@/lib/obs/log-ai-usage';
+
+export async function POST(req: Request) {
+  const userId = await requireUserId(req);
+
+  // Rate limit
+  const rl = await enforceRateLimit({ userId, feature: 'ai.strategy.generate' });
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: rl.code, retryAt: rl.reset },
+      { status: 429, headers: { 'Retry-After': Math.ceil((rl.reset - Date.now()) / 1000).toString() } }
+    );
+  }
+
+  // Circuit breaker
+  const cb = await enforceCircuitBreaker({ userId, feature: 'ai.strategy.generate' });
+  if (!cb.ok) {
+    return NextResponse.json({ error: 'CIRCUIT_OPEN', retryAt: cb.retryAt }, { status: 503 });
+  }
+
+  const start = Date.now();
+  try {
+    // ... 실제 LLM 호출
+    const result = await generateStrategySomehow();
+
+    await recordSuccess({ userId, feature: 'ai.strategy.generate' });
+
+    await logAIUsage({
+      userId,
+      feature: 'ai.strategy.generate',
+      latencyMs: Date.now() - start,
+      success: true,
+      // tokensIn/out은 가능하면 실제값, 없으면 추정치
+    });
+
+    return NextResponse.json({ ok: true, result });
+  } catch (e: any) {
+    await recordFailure({ userId, feature: 'ai.strategy.generate', reason: e?.message ?? 'unknown' });
+
+    await logAIUsage({
+      userId,
+      feature: 'ai.strategy.generate',
+      latencyMs: Date.now() - start,
+      success: false,
+      errorCode: e?.name ?? 'ERROR',
+    });
+
+    return NextResponse.json({ error: 'UPSTREAM_FAILED' }, { status: 500 });
+  }
+}
+
+async function requireUserId(req: Request): Promise<string> {
+  throw new Error('implement requireUserId()');
+}
+async function generateStrategySomehow() {
+  throw new Error('implement');
+}
+4) Circuit Breaker 구현 (Redis 카운터 + TTL)
+Copy// src/lib/limits/circuit-breaker.ts
+import { Redis } from '@upstash/redis';
+import type { FeatureKey } from '@/config/limits';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+const THRESHOLD = 5;          // 연속 실패 허용
+const COOLDOWN_SEC = 60;      // 차단 시간
+
+function key(userId: string, feature: FeatureKey) {
+  return `cb:${feature}:${userId}`;
+}
+function openKey(userId: string, feature: FeatureKey) {
+  return `cb:open:${feature}:${userId}`;
+}
+
+export async function enforceCircuitBreaker(opts: { userId: string; feature: FeatureKey }) {
+  const open = await redis.get<number>(openKey(opts.userId, opts.feature));
+  if (open) {
+    // open 값은 “open until epoch ms”로 저장
+    const retryAt = open;
+    if (Date.now() < retryAt) return { ok: false as const, retryAt };
+    // 쿨다운 지났으면 해제
+    await redis.del(openKey(opts.userId, opts.feature));
+    await redis.del(key(opts.userId, opts.feature));
+  }
+  return { ok: true as const };
+}
+
+export async function recordFailure(opts: { userId: string; feature: FeatureKey; reason?: string }) {
+  const k = key(opts.userId, opts.feature);
+  const n = await redis.incr(k);
+  // 실패 카운터는 짧게 유지(연속성만 체크)
+  await redis.expire(k, COOLDOWN_SEC);
+
+  if (n >= THRESHOLD) {
+    const until = Date.now() + COOLDOWN_SEC * 1000;
+    await redis.set(openKey(opts.userId, opts.feature), until, { ex: COOLDOWN_SEC });
+  }
+}
+
+export async function recordSuccess(opts: { userId: string; feature: FeatureKey }) {
+  // 성공 시 실패 카운터 리셋
+  await redis.del(key(opts.userId, opts.feature));
+  await redis.del(openKey(opts.userId, opts.feature));
+}
+5) Observability(원가/토큰/지연) — DB 스키마 + 로깅
+5.1 DB 테이블(권장)
+Copycreate table if not exists ai_usage_events (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+
+  feature text not null,
+  model text,
+  provider text,                         -- 'anthropic', 'openai', etc.
+
+  success boolean not null,
+  error_code text,
+
+  latency_ms integer not null,
+  tokens_in integer,
+  tokens_out integer,
+  cost_usd numeric(10,6),                -- 가능하면 기록(추정치도 OK)
+  credits_charged integer,               -- 실제 차감 크레딧
+
+  request_id text,                       -- 추적용
+  metadata jsonb,
+
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_ai_usage_user_time on ai_usage_events(user_id, created_at desc);
+create index if not exists idx_ai_usage_feature_time on ai_usage_events(feature, created_at desc);
+5.2 로깅 유틸
+Copy// src/lib/obs/log-ai-usage.ts
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function logAIUsage(event: {
+  userId: string;
+  feature: string;
+  provider?: string;
+  model?: string;
+  success: boolean;
+  errorCode?: string;
+  latencyMs: number;
+  tokensIn?: number;
+  tokensOut?: number;
+  costUsd?: number;
+  creditsCharged?: number;
+  requestId?: string;
+  metadata?: Record<string, any>;
+}) {
+  await supabaseAdmin.from('ai_usage_events').insert({
+    user_id: event.userId,
+    feature: event.feature,
+    provider: event.provider ?? null,
+    model: event.model ?? null,
+    success: event.success,
+    error_code: event.errorCode ?? null,
+    latency_ms: event.latencyMs,
+    tokens_in: event.tokensIn ?? null,
+    tokens_out: event.tokensOut ?? null,
+    cost_usd: event.costUsd ?? null,
+    credits_charged: event.creditsCharged ?? null,
+    request_id: event.requestId ?? null,
+    metadata: event.metadata ?? null,
+  });
+}
+5.3 대시보드용 쿼리(운영 핵심 3개)
+최근 24h 기능별 실패율/지연:
+Copyselect feature,
+       count(*) as n,
+       avg(latency_ms) as avg_latency,
+       sum(case when success=false then 1 else 0 end)::float / count(*) as fail_rate
+from ai_usage_events
+where created_at > now() - interval '24 hours'
+group by feature
+order by n desc;
+사용자별 원가 상위(비용 폭주 탐지):
+Copyselect user_id,
+       count(*) as calls,
+       coalesce(sum(cost_usd),0) as cost_usd
+from ai_usage_events
+where created_at > now() - interval '30 days'
+group by user_id
+order by cost_usd desc
+limit 50;
+크레딧 매출 대비 원가(거친 마진 추정):
+credit_transactions(purchase) 합계 vs ai_usage_events.cost_usd 합계로 월별 비교
+6) 릴리즈 게이트(P0)
+기능 게이트
+Rate limit 초과 시 항상 429 + Retry-After 헤더 제공
+Circuit open 시 항상 503 + retryAt 제공
+운영 게이트(베타 전 체크)
+최근 1시간 ai_usage_events에 cost_usd is null 비율 < 20% (초기엔 추정치라도 채우는 게 중요)
+기능별 실패율(fail_rate) 5% 초과 시 자동 알림(초기에는 수동 대시보드로도 OK)
+최소 테스트
+perMinute 제한: 3번 연속 호출 → 3번째 429
+perDay 제한: 6번째 호출 → 429
+연속 실패 5회 유도 → 다음 호출 503
+성공 1회 후 카운터 리셋되는지 확인
+7) CHANGELOG (2회차)
+[ADD] 기능별 Rate Limit 정책(분/일) + Tier별 한도표
+[ADD] Redis 기반 rate-limit 유틸(@upstash/ratelimit)
+[ADD] Circuit Breaker(연속 실패 기반, TTL 쿨다운)
+[ADD] ai_usage_events 스키마 + 로깅 유틸 + 운영 쿼리
+다음 ㄱ (3회차) 예고
+다음은 컴플라이언스/증적 P0를 닫는다:
+
+만 19세/면책 동의 UX + 동의 로그(버전 해시)
+Safety Net을 “문구 필터”에서 정책 엔진 + 재작성(soften) + 감사로그로 강화
+“키움 지원” 표기 정리 + 광고 문구 가이드라인(금지 표현 리스트)
+확인 질문(한 줄로 답해도 됨)
+Redis는 Upstash로 갈까, 아니면 이미 쓰는 Redis(예: AWS/Elasticache)가 있어? (없으면 Upstash로 확정하고 다음 회차부터 코드 완성도 더 올릴게)
+
+복사
+Notion에 저장
+없어 알아서해 ㄱ
+ㄱ 루프 3회차 (v0.4) — 컴플라이언스 P0 패키지: 만19세/면책 동의 증적 + Safety Net “정책엔진화” + 키움/광고 문구 정리
+이번 회차 목표(P0)
+
+만 19세 이상 확인 + 면책 동의(체크박스) 강제 및 증적 로그 남기기
+Safety Net을 단순 금지문구 필터에서 정책 엔진 + 출력 완화(soften) + 감사로그로 강화
+랜딩/앱 내 “키움 지원” 및 투자조언 오인 문구를 즉시 정리하는 카피 가이드/자동 점검 체크리스트 확정
+주의: 아래는 “법률 자문”이 아니라 제품/엔지니어링 관점의 리스크 저감 설계야. 최종 문구/정책은 변호사 검토 권장.
+
+1) 제품 정책(PRD) v0.4
+1.1 Gate 정책(필수)
+사용자가 아래 2개에 동의하기 전에는 다음 기능 접근 불가:
+AI 전략 생성(단일/MoA)
+자동매매/브로커 주문
+(권장) 백테스트 실행도 제한 가능
+Required consents
+C1: “만 19세 이상입니다.”
+C2: “본 서비스는 투자 교육/정보 제공이며 투자자문/일임이 아니고, 최종 투자 책임은 본인에게 있습니다.”
+1.2 동의 버전 관리
+동의 문구는 버전을 가진다. (예: disclaimer_v2025_12_16)
+문구 변경 시, 기존 사용자도 재동의 요구 가능하도록 설계
+1.3 Audit/증적 요구사항(필수 로그)
+어떤 사용자가:
+어떤 버전의 문구에
+언제(UTC)
+어떤 방식(UI/modal)
+어떤 환경(UA, IP 선택)
+동의했는지 기록
+2) DB 스키마(증적/정책) v0.4
+2.1 disclaimer_versions (문구 원본 보관)
+Copycreate table if not exists disclaimer_versions (
+  id uuid primary key default gen_random_uuid(),
+  version text not null unique,                 -- 'disclaimer_v2025_12_16'
+  title text not null,
+  content text not null,                        -- 원문(한국어)
+  content_hash text not null,                   -- sha256(content)
+  active boolean not null default true,
+  created_at timestamptz default now()
+);
+2.2 user_consents (사용자 동의 증적)
+Copycreate table if not exists user_consents (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  consent_type text not null check (consent_type in ('age_19_plus','disclaimer')),
+  disclaimer_version text,                      -- consent_type='disclaimer'일 때 채움
+  content_hash text,                            -- 당시 해시
+
+  accepted boolean not null,
+  accepted_at timestamptz,
+
+  ip inet,
+  user_agent text,
+  metadata jsonb,
+
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_user_consents_user on user_consents(user_id, created_at desc);
+2.3 safety_events (Safety Net 감사로그)
+Copycreate table if not exists safety_events (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+
+  feature text not null,                        -- 'ai.strategy.generate'
+  request_id text,                              -- 추적 ID
+  input_excerpt text,                           -- 민감하면 truncate/마스킹
+  output_before text,                           -- 원문(선택: 저장 최소화 권장)
+  output_after text,                            -- 완화 후 결과(선택)
+  decision text not null check (decision in ('allow','soften','block')),
+  matched_rules text[],                         -- ['NO_BUY_SELL', 'NO_GUARANTEE'...]
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_safety_events_user_time on safety_events(user_id, created_at desc);
+create index if not exists idx_safety_events_feature_time on safety_events(feature, created_at desc);
+개인정보/민감정보 관점에서 output_before/after는 “저장 최소화”가 원칙. 운영 초기는 디버깅을 위해 저장하되, 프로덕션에서는 **부분 저장(truncate) + 보존기간(예: 30일)**을 추천.
+
+3) 서버 로직: “동의 확인 미들웨어” + API 적용
+3.1 동의 상태 조회 유틸
+Copy// src/lib/compliance/get-consent-status.ts
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function getConsentStatus(userId: string, activeDisclaimerVersion: string) {
+  const { data, error } = await supabaseAdmin
+    .from('user_consents')
+    .select('consent_type, accepted, disclaimer_version')
+    .eq('user_id', userId)
+    .eq('accepted', true);
+
+  if (error) throw error;
+
+  const hasAge = data?.some(x => x.consent_type === 'age_19_plus') ?? false;
+  const hasDisclaimer = data?.some(
+    x => x.consent_type === 'disclaimer' && x.disclaimer_version === activeDisclaimerVersion
+  ) ?? false;
+
+  return { hasAge, hasDisclaimer };
+}
+3.2 Gate 적용(예: AI 전략 생성 API)
+Copy// src/app/api/ai/strategy/generate/route.ts (일부)
+import { NextResponse } from 'next/server';
+import { getConsentStatus } from '@/lib/compliance/get-consent-status';
+import { getActiveDisclaimerVersion } from '@/lib/compliance/get-active-disclaimer';
+
+export async function POST(req: Request) {
+  const userId = await requireUserId(req);
+  const active = await getActiveDisclaimerVersion();
+
+  const consent = await getConsentStatus(userId, active.version);
+  if (!consent.hasAge || !consent.hasDisclaimer) {
+    return NextResponse.json(
+      { error: 'CONSENT_REQUIRED', required: ['age_19_plus', `disclaimer:${active.version}`] },
+      { status: 403 }
+    );
+  }
+
+  // ... 기존 RateLimit/CircuitBreaker + 생성 로직
+}
+3.3 Active disclaimer 조회
+Copy// src/lib/compliance/get-active-disclaimer.ts
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function getActiveDisclaimerVersion() {
+  const { data, error } = await supabaseAdmin
+    .from('disclaimer_versions')
+    .select('*')
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error || !data) throw new Error('NO_ACTIVE_DISCLAIMER');
+  return data as { version: string; content: string; content_hash: string; title: string };
+}
+4) 프론트(UI/UX): 첫 로그인 동의 모달(강제)
+4.1 동의 API
+GET /api/compliance/disclaimer/active : 현재 문구 내려줌
+POST /api/compliance/consents/accept : 동의 저장
+accept route 스캐폴딩
+Copy// src/app/api/compliance/consents/accept/route.ts
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { getActiveDisclaimerVersion } from '@/lib/compliance/get-active-disclaimer';
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function POST(req: Request) {
+  const userId = await requireUserId(req);
+  const ua = req.headers.get('user-agent') ?? null;
+
+  const body = await req.json() as {
+    age19Plus: boolean;
+    disclaimerAccepted: boolean;
+  };
+
+  const active = await getActiveDisclaimerVersion();
+
+  if (!body.age19Plus || !body.disclaimerAccepted) {
+    return NextResponse.json({ error: 'MUST_ACCEPT_ALL' }, { status: 400 });
+  }
+
+  // IP는 서버리스에서 직접 얻기 어려울 수 있어(프록시). 가능하면 x-forwarded-for 활용.
+  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || null;
+
+  const rows = [
+    {
+      user_id: userId,
+      consent_type: 'age_19_plus',
+      accepted: true,
+      accepted_at: new Date().toISOString(),
+      ip,
+      user_agent: ua,
+    },
+    {
+      user_id: userId,
+      consent_type: 'disclaimer',
+      disclaimer_version: active.version,
+      content_hash: active.content_hash,
+      accepted: true,
+      accepted_at: new Date().toISOString(),
+      ip,
+      user_agent: ua,
+    },
+  ];
+
+  const { error } = await supabaseAdmin.from('user_consents').insert(rows);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ ok: true, version: active.version });
+}
+
+async function requireUserId(req: Request): Promise<string> {
+  throw new Error('implement requireUserId()');
+}
+4.2 동의 모달 동작 규칙
+로그인 직후 consent status 체크
+미동의면 모달 오픈(닫기 불가)
+동의 완료 후에만 기능 페이지 접근
+5) Safety Net v2: “정책 엔진 + soften + block” 3단계
+5.1 룰 타입
+BLOCK: 법/리스크 큰 표현은 차단(예: 수익 보장, 내부자 주장, 특정 종목 매수/매도 명령)
+SOFTEN: 오인 소지 표현은 “교육/가정/시나리오”로 완화해 재작성
+ALLOW: 통과
+5.2 룰 예시(초안)
+NO_GUARANTEE (BLOCK): “수익 보장/확실히/무조건 벌림” 등
+NO_BUY_SELL_IMPERATIVE (SOFTEN 또는 BLOCK): “사라/팔아라/지금 매수” 같은 명령형
+권장: 기본은 SOFTEN(“가능한 접근 중 하나”, “조건부 시나리오”)
+특정 종목+즉시 행동 결합 시 BLOCK
+NO_TIME_PRICE_SIGNAL (SOFTEN): “내일 오른다/이번주 X원 간다” 류
+REQUIRE_DISCLAIMER (ALLOW but append): 항상 하단에 면책/리스크 섹션 첨부
+5.3 구현 스캐폴딩
+Copy// src/lib/safety/policy.ts
+export type SafetyDecision = 'allow' | 'soften' | 'block';
+
+export type SafetyResult = {
+  decision: SafetyDecision;
+  matchedRules: string[];
+  output: string;           // allow/soften이면 최종 출력, block이면 차단 메시지
+};
+
+const RULES = [
+  { id: 'NO_GUARANTEE', type: 'block' as const, patterns: [/수익\s*보장/, /확실한\s*수익/] },
+  { id: 'NO_BUY_SELL_IMPERATIVE', type: 'soften' as const, patterns: [/사세요|사라|매수해|파세요|팔아/] },
+  { id: 'NO_TIME_PRICE_SIGNAL', type: 'soften' as const, patterns: [/내일\s*오를/, /\d+원\s*간다/] },
+];
+
+export function evaluateSafety(outputText: string): { decision: SafetyDecision; matchedRules: string[] } {
+  const matched: string[] = [];
+  let hasBlock = false;
+  let hasSoften = false;
+
+  for (const r of RULES) {
+    if (r.patterns.some(p => p.test(outputText))) {
+      matched.push(r.id);
+      if (r.type === 'block') hasBlock = true;
+      if (r.type === 'soften') hasSoften = true;
+    }
+  }
+
+  if (hasBlock) return { decision: 'block', matchedRules: matched };
+  if (hasSoften) return { decision: 'soften', matchedRules: matched };
+  return { decision: 'allow', matchedRules: matched };
+}
+soften 단계(재작성 프롬프트)
+“명령/확정”을 “조건부/교육적 설명”으로 바꾸는 전용 프롬프트로 2차 호출
+비용이 걱정되면: soften은 룰 매칭 시에만 호출(전체 호출의 일부)
+Copy// src/lib/safety/soften.ts
+export async function softenOutput(original: string) {
+  // TODO: LLM 호출. 규정:
+  // - 특정 종목 매수/매도 지시 금지
+  // - 수익 보장/확정 표현 금지
+  // - “교육 목적/시나리오/리스크” 포함
+  return original; // placeholder
+}
+감사로그 기록
+decision이 soften/block이면 safety_events에 기록
+6) “키움 지원”/광고 문구 P0 정리(체크리스트 + 규칙)
+6.1 랜딩/앱 카피 변경 규칙
+구현 전: “지원” 금지
+금지: “키움증권 지원”, “연동 가능”
+허용: “키움증권 연동 준비 중”, “로드맵에 포함(출시 예정)” + ETA 없으면 ETA 표기 금지
+6.2 투자조언 오인 문구 금지 리스트(마케팅/앱 공통)
+금지(예): “지금 사라”, “이 종목이 오른다”, “확실한 수익”, “수익 보장”, “무조건 벌 수 있음”
+권장 대체:
+“교육 목적의 예시”, “가정 시나리오”, “리스크/변동성”, “과거 데이터 기반(미래 보장 아님)”
+6.3 릴리즈 게이트(카피)
+PR merge 전 체크:
+랜딩/앱 텍스트에서 지원|가능|보장|확실 키워드 검색 → 사람이 검토
+키움 관련 문구는 반드시 “준비 중” 배지/회색 처리
+7) 테스트(필수) + 운영 점검
+7.1 테스트 최소 세트
+동의 전: POST /api/ai/strategy/generate → 403 CONSENT_REQUIRED
+동의 후: 동일 요청 → 200 OK
+disclaimer_versions 업데이트(버전 변경) → 기존 유저도 다시 403 유도되는지(옵션 정책에 따라)
+Safety Net:
+“수익 보장” 포함 출력 → block 처리 + safety_events 기록
+“사세요” 포함 출력 → soften 처리 + safety_events 기록
+7.2 운영 대시보드(최소)
+일별 동의 전환율: (로그인 사용자 대비 consent 완료 비율)
+Safety decision 분포: allow/soften/block 비율 급증하면 프롬프트/정책 이슈
+8) CHANGELOG (3회차)
+[ADD] disclaimer_versions / user_consents / safety_events 스키마
+[ADD] 동의 게이트(만19세 + 면책) 강제 로직/API
+[ADD] Safety Net v2(allow/soften/block) 정책 엔진 스캐폴딩 + 감사로그 설계
+[ADD] 키움/광고 문구 릴리즈 게이트 체크리스트
+다음 ㄱ (4회차) 예고 — “베타 100명 실험 설계 + 퍼널/지표/대시보드”
+다음은 숫자 검증으로 들어간다:
+
+베타 모집 플로우(폼/초대코드/500크레딧 지급)
+핵심 퍼널 정의(가입→동의→전략생성→백테스트→연동→첫결제)
+A/B: 무료 50 크레딧 소진 완화(쿠폰/리필/첫 전략 무료 등)
+전환율/ARPPU/재구매율을 바로 계산하는 SQL/리포트
+그냥 ㄱ 보내면 4회차 자동 진행.
+
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 4회차 (v0.5) — 베타 100명 실험 설계 + 퍼널/지표 + 초대코드/보너스/대시보드 풀패키지
+이번 회차 목표(P0/P1)
+
+베타 100명 모집/운영이 가능한 시스템(초대코드, 보너스 지급, 코호트 태깅)
+“전환율/소진/재구매”를 바로 뽑아볼 수 있는 퍼널 이벤트 & SQL 리포트 구축
+무료 50 크레딧 리스크를 줄이는 A/B 실험 2개를 즉시 돌릴 수 있게 설계
+1) 베타 운영 PRD v0.5 (핵심만)
+1.1 베타 목표(측정 가능한 Definition of Done)
+모집: 가입 100명
+활성: 전략 생성 1회 이상 60명
+가치검증: 백테스트 1회 이상 40명
+수익화: 유료 전환율 ≥ 5%(= 5명 이상 결제)
+신뢰: NPS ≥ 60, “이해/안심” 관련 CS 폭주 없음
+1.2 핵심 퍼널(단일 진실)
+visit → signup → consent_done → first_strategy → first_backtest → broker_connect → first_trade(optional) → first_purchase
+
+1.3 베타 인센티브 기본안(운영 쉬운 버전)
+기본: 가입 보너스 50 크레딧
+베타 초대코드 입력 시: +450 크레딧 (합 500)
+단, A/B 실험군에 따라 지급/락(아래 4장)
+2) DB 스키마: 초대코드/코호트/실험 할당
+2.1 beta_invite_codes (초대코드)
+Copycreate table if not exists beta_invite_codes (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,                      -- 예: HEPH-7K2P9
+  campaign text not null,                         -- 'youtube_001'
+  max_uses integer not null default 1,
+  used_count integer not null default 0,
+  bonus_credits integer not null default 450,
+  active boolean not null default true,
+  created_at timestamptz default now(),
+  expires_at timestamptz
+);
+2.2 beta_invite_redemptions (사용 기록)
+Copycreate table if not exists beta_invite_redemptions (
+  id uuid primary key default gen_random_uuid(),
+  code text not null references beta_invite_codes(code),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  redeemed_at timestamptz default now(),
+  unique (code, user_id)
+);
+create index if not exists idx_invite_redemptions_user on beta_invite_redemptions(user_id, redeemed_at desc);
+2.3 experiments + assignments (A/B 테스트)
+Copycreate table if not exists experiments (
+  id uuid primary key default gen_random_uuid(),
+  key text not null unique,                        -- 'onboarding_credit_offer_v1'
+  active boolean not null default true,
+  variants text[] not null,                        -- ['A','B','C']
+  created_at timestamptz default now()
+);
+
+create table if not exists experiment_assignments (
+  id uuid primary key default gen_random_uuid(),
+  experiment_key text not null references experiments(key),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  variant text not null,
+  assigned_at timestamptz default now(),
+  unique (experiment_key, user_id)
+);
+create index if not exists idx_experiment_assign_user on experiment_assignments(user_id, assigned_at desc);
+3) 구현 스캐폴딩: 초대코드 입력 → 보너스 지급(멱등/원자)
+3.1 API: POST /api/beta/redeem
+입력: { code }
+동작:
+코드 유효/active/만료 확인
+사용량(used_count < max_uses) 확인 (락 필요)
+redemption insert(유니크)로 중복 방지
+credit_transactions(type='bonus') + wallet 업데이트
+used_count++
+DB RPC로 원자 처리(권장)
+Copycreate or replace function redeem_beta_invite_code(p_user_id uuid, p_code text)
+returns void
+language plpgsql
+as $$
+declare
+  v_inv beta_invite_codes%rowtype;
+begin
+  -- 코드 락
+  select * into v_inv
+  from beta_invite_codes
+  where code = p_code
+  for update;
+
+  if not found or v_inv.active = false then
+    raise exception 'INVALID_CODE';
+  end if;
+
+  if v_inv.expires_at is not null and now() > v_inv.expires_at then
+    raise exception 'CODE_EXPIRED';
+  end if;
+
+  if v_inv.used_count >= v_inv.max_uses then
+    raise exception 'CODE_MAXED';
+  end if;
+
+  -- 중복 입력 방지
+  insert into beta_invite_redemptions(code, user_id)
+  values (p_code, p_user_id);
+
+  -- 지갑 보장
+  insert into credit_wallets (user_id, balance, lifetime_purchased, lifetime_spent)
+  values (p_user_id, 0, 0, 0)
+  on conflict (user_id) do nothing;
+
+  -- 보너스 지급(코드/유저당 1회)
+  insert into credit_transactions(user_id, type, amount, metadata)
+  values (
+    p_user_id,
+    'bonus',
+    v_inv.bonus_credits,
+    jsonb_build_object('invite_code', p_code, 'campaign', v_inv.campaign)
+  );
+
+  update credit_wallets
+  set balance = balance + v_inv.bonus_credits
+  where user_id = p_user_id;
+
+  update beta_invite_codes
+  set used_count = used_count + 1
+  where code = p_code;
+end;
+
+$$;
+beta_invite_redemptions(code,user_id) 유니크로 중복 지급은 자동 방지됨.
+
+4) A/B 실험 2개 (무료 50 소진 리스크 해결)
+실험 1: “첫 가치 도달” 보장 오퍼
+가설: 사용자가 “전략 생성 + 백테스트”까지 도달하면 전환율이 오른다.
+
+대상: 신규 가입자 100%
+지표: first_backtest 도달률, D1 리텐션, 첫 결제율
+Variant	설계
+A(현행)	기본 50 크레딧만
+B	“첫 전략 생성 1회 무료(크레딧 차감 0)”
+C	“전략+백테스트 패키지 1회 무료(합 1세션 무료)”
+결정 규칙(베타용 간단)
+
+first_backtest 도달률이 A 대비 +20%p 이상이면서, 결제율이 떨어지지 않으면 승자
+실험 2: 크레딧 소진 시 “이탈 방지 쿠폰” 타이밍
+가설: 잔액 0 직후 쿠폰은 오히려 결제 지연을 유도할 수 있다. “잔액 10 미만”에서 안내가 더 낫다.
+
+Variant	트리거	오퍼
+A	잔액 0	“이번만 20 크레딧”
+B	잔액 ≤ 10	“지금 충전하면 +20 크레딧”
+C	잔액 ≤ 10	“오늘 한 번만: 백테스트 1회 무료”
+주요 지표
+
+balance_reaches_0 이후 24h 결제율
+결제까지 시간(hrs)
+무한 쿠폰 악용률(유저당 지급 횟수)
+5) 이벤트 트래킹 스키마(퍼널을 “자동으로” 뽑기 위한 최소)
+이미 ai_usage_events(2회차), user_consents(3회차) 있음. 여기에 “프로덕트 이벤트”만 추가.
+
+5.1 product_events 테이블
+Copycreate table if not exists product_events (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  event text not null,                            -- 'signup','first_strategy', ...
+  properties jsonb,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_product_events_user_time on product_events(user_id, created_at desc);
+create index if not exists idx_product_events_event_time on product_events(event, created_at desc);
+5.2 필수 이벤트 목록(최소 10개)
+signup
+consent_done (버전 포함)
+invite_redeemed (code/campaign)
+strategy_generated (type=single|moa)
+backtest_run
+broker_connect_started
+broker_connect_success
+credit_balance_low (<=10)
+credit_balance_zero
+purchase_started / purchase_success (orderId, packageId)
+구현은 “중요 액션 직후 서버에서 insert”가 제일 정확함.
+
+6) SQL 리포트: 베타에서 매일 보는 6개 대시보드 쿼리
+6.1 퍼널(지난 7일 신규가입 코호트 기준)
+Copywith cohort as (
+  select user_id, min(created_at) as signup_at
+  from product_events
+  where event='signup'
+    and created_at > now() - interval '7 days'
+  group by user_id
+),
+steps as (
+  select c.user_id,
+    max(case when pe.event='consent_done' then 1 else 0 end) as consent_done,
+    max(case when pe.event='strategy_generated' then 1 else 0 end) as did_strategy,
+    max(case when pe.event='backtest_run' then 1 else 0 end) as did_backtest,
+    max(case when pe.event='broker_connect_success' then 1 else 0 end) as did_broker,
+    max(case when pe.event='purchase_success' then 1 else 0 end) as did_purchase
+  from cohort c
+  left join product_events pe on pe.user_id=c.user_id
+    and pe.created_at >= c.signup_at
+  group by c.user_id
+)
+select
+  count(*) as signup_users,
+  sum(consent_done) as consent_users,
+  sum(did_strategy) as strategy_users,
+  sum(did_backtest) as backtest_users,
+  sum(did_broker) as broker_users,
+  sum(did_purchase) as paid_users
+from steps;
+6.2 전환율(유료) by 캠페인(초대코드 campaign)
+Copywith u as (
+  select bir.user_id, bic.campaign
+  from beta_invite_redemptions bir
+  join beta_invite_codes bic on bic.code = bir.code
+),
+paid as (
+  select distinct user_id
+  from product_events
+  where event='purchase_success'
+)
+select
+  campaign,
+  count(*) as users,
+  count(*) filter (where p.user_id is not null) as paid_users,
+  (count(*) filter (where p.user_id is not null))::float / count(*) as conversion
+from u
+left join paid p on p.user_id = u.user_id
+group by campaign
+order by users desc;
+6.3 크레딧 소진 시간(가입→잔액0까지)
+(잔액0 이벤트가 있어야 함)
+
+Copywith s as (
+  select user_id, min(created_at) as signup_at
+  from product_events where event='signup'
+  group by user_id
+),
+z as (
+  select user_id, min(created_at) as zero_at
+  from product_events where event='credit_balance_zero'
+  group by user_id
+)
+select
+  percentile_cont(0.5) within group (order by extract(epoch from (z.zero_at - s.signup_at))/3600) as median_hours_to_zero,
+  count(*) as users_reached_zero
+from s join z using (user_id);
+6.4 기능별 “가치 도달” 지표: 전략→백테스트 전환
+Copywith a as (
+  select distinct user_id
+  from product_events
+  where event='strategy_generated'
+),
+b as (
+  select distinct user_id
+  from product_events
+  where event='backtest_run'
+)
+select
+  (select count(*) from a) as strategy_users,
+  (select count(*) from b) as backtest_users,
+  (select count(*) from b)::float / nullif((select count(*) from a),0) as strategy_to_backtest_rate;
+6.5 실험별 결제율(variant)
+Copywith assign as (
+  select user_id, variant
+  from experiment_assignments
+  where experiment_key = 'onboarding_credit_offer_v1'
+),
+paid as (
+  select distinct user_id
+  from product_events
+  where event='purchase_success'
+)
+select
+  variant,
+  count(*) as users,
+  count(*) filter (where paid.user_id is not null) as paid_users,
+  (count(*) filter (where paid.user_id is not null))::float / count(*) as conversion
+from assign
+left join paid on paid.user_id = assign.user_id
+group by variant
+order by variant;
+6.6 원가 폭주 사용자 Top (ai_usage_events와 결합)
+Copyselect
+  user_id,
+  count(*) as calls,
+  coalesce(sum(cost_usd),0) as cost_usd_30d,
+  avg(latency_ms) as avg_latency
+from ai_usage_events
+where created_at > now() - interval '30 days'
+group by user_id
+order by cost_usd_30d desc
+limit 20;
+7) 베타 모집 패키지(GTM) — 바로 써먹는 템플릿
+7.1 모집 오퍼 문구(짧게)
+“퇴근 후 3분, 코딩 없이 전략 만들고 바로 백테스트”
+“베타 참여자: 초대코드 입력 시 총 500 크레딧 제공(한정)”
+“투자자문 아님 / 교육 목적 / 최종 판단 본인”
+7.2 모집 채널별 운영(최소 실행)
+유튜브: 설명란 고정 + 초대코드 20개(캠페인 youtube_001)
+인스타: 스토리 링크 + 초대코드 30개(insta_001)
+네이버 카페: 후기형 글 + 초대코드 50개(cafe_001)
+8) 릴리즈 게이트(베타 시작 전 체크리스트)
+ 초대코드 RPC redeem_beta_invite_code()로 중복지급 불가 확인
+ product_events가 signup~purchase_success까지 최소 이벤트 10종 수집 확인
+ 실험 할당이 사용자당 고정(assignment 유니크) 확인
+ 일일 리포트 SQL 6개가 모두 0이 아닌 값을 내는지(샘플 데이터로) 확인
+9) CHANGELOG (4회차)
+[ADD] 초대코드/사용기록/실험 할당 DB 스키마
+[ADD] 보너스 크레딧 지급 RPC(멱등/원자)
+[ADD] product_events 이벤트 표준 + 베타 대시보드 SQL 6종
+[ADD] A/B 실험 2개(첫 가치 도달, 소진 방지 쿠폰 타이밍)
+다음 ㄱ (5회차) 예고 — “온보딩 튜토리얼 + 샘플 전략 10개 + 첫 세션 완주 UX”
+다음은 베타 전환율에 직접 영향 주는 UX를 만든다:
+
+첫 세션(전략→백테스트) “완주” 튜토리얼 PRD
+샘플 전략 10개(카피/설명/리스크/예상 크레딧) 템플릿
+크레딧 가격(기능별) 초기안을 “실험 가능한” 구조로 리팩토링(credit_costs 활용)
+그냥 ㄱ 보내면 5회차 진행.
+
+복사
+Notion에 저장
+실제 기관, 및 금융 유튜버들이 어필하는 그들만의 트레이딩 엔진 워딩을 고민해 AI라는 워딩 금지  ㄱ
+ㄱ 루프 5회차 (v0.6) — “기관/금융 유튜버 톤” 트레이딩 엔진 워딩 설계 (※ ‘AI’ 워딩 전면 금지)
+요구사항: 서비스 전반에서 “AI/인공지능”이라는 단어를 쓰지 않고, 실제 기관/유튜버들이 쓰는 ‘그들만의 엔진’ 느낌으로 리브랜딩 가능한 워딩 시스템을 만든다.
+
+1) 코어 포지셔닝(한 문장) 6안 — AI 단어 없이 “엔진”으로 설득
+“데이터로 전략을 ‘조립’하고, 검증까지 한 번에 끝내는 트레이딩 엔진.”
+“리서치 데스크 프로세스를 개인에게 내려준 전략 생성·검증 엔진.”
+“신호 → 규칙 → 검증 → 실행을 표준화한 트레이딩 워크플로우.”
+“감이 아니라 조건과 규칙으로 매매를 설계하는 전략 엔진.”
+“3분 전략 설계, 1클릭 검증. 엔진으로 루틴을 만든다.”
+“분석이 아니라 ‘절차’가 이긴다. 절차를 자동화한 트레이딩 엔진.”
+금지어 회피 포인트: “AI” 대신 엔진/리서치/시그널/전략/규칙/검증/워크플로우로만 설명.
+
+2) “기관/유튜버가 좋아하는” 워딩 축(그들만의 느낌)
+2.1 기관 톤 키워드(신뢰/정밀/절차)
+리서치 데스크, 모델 포트폴리오, 리스크 관리, 시나리오, 규칙 기반, 재현 가능, 검증 프로토콜, 감사 로그, 체결/슬리피지, 포지션 사이징
+2.2 유튜버 톤 키워드(루틴/편의/성과 기대감)
+루틴, 원칙, 매매 체크리스트, 시그널, 세팅, 템플릿, 따라하기, 실험, 백테스트로 걸러내기, 손절/익절 규칙
+3) 제품 내 용어 치환 표(전면 적용 가이드)
+기존(금지/회피)	교체 권장(1순위)	대안(2순위)
+AI 전략 생성	전략 엔진	전략 빌더 / 전략 생성기
+AI 분석	리서치 요약	시장 브리핑 / 데이터 요약
+AI 튜터	트레이딩 코치	용어 코치 / 매매 노트
+AI가 추천	조건 기반 시나리오 제시	규칙 예시 제시
+MoA(4-AI)	4-뷰 리서치 스택	4중 검증 패널 / 멀티 데스크 리뷰
+에이전트(Agent)	데스크(Desk)	리뷰어 / 패널
+프롬프트(prompt)	요청서	설계 입력 / 전략 요구조건
+모델(model)	엔진 버전	분석 모듈
+핵심: “추천/조언” 뉘앙스가 나면 규제 리스크가 커지니, “시나리오/예시/조건/검증” 쪽으로 붙여.
+
+4) MoA(4명 페르소나) 리브랜딩: “기관 리서치 데스크” 컨셉 3세트
+세트 A: 기관형(가장 ‘그럴듯’)
+매크로 데스크: 금리/달러/경기 국면 반영
+테크니컬 데스크: 추세/변동성/진입·청산 규칙
+퀄리티·밸류 데스크: 재무/퀄리티 필터/리밸런싱
+리스크 데스크: 손실제한/포지션사이징/스트레스 테스트
+최종: 데스크 컨센서스 리포트(= aggregation)
+세트 B: 유튜버형(대중 친화)
+추세 데스크 / 역추세 데스크 / 변동성 데스크 / 리스크 데스크
+최종: 종합 매매 플랜
+세트 C: 초보 친화(교육 목적 강조)
+원칙 설계 / 리스크 점검 / 검증(백테스트) / 실행 체크리스트
+최종: 학습용 전략 리포트
+5) 랜딩/앱 카피 샘플(바로 붙여넣기)
+5.1 헤드라인 10개 (AI 언급 0)
+퇴근 후 3분, 전략을 ‘조립’하세요.
+전략 설계부터 검증까지 한 번에: 트레이딩 엔진
+감이 아니라 규칙. 규칙을 만들고 검증하세요.
+리서치 데스크 루틴을 개인에게.
+전략을 만들었다면, 숫자로 걸러내세요.
+시그널은 많고 시간은 없다—엔진으로 정리하세요.
+백테스트로 거르고, 원칙으로 실행한다.
+매매를 ‘말’이 아니라 ‘규칙’으로 바꾸는 방법
+따라하기가 아니라, 내 원칙을 세팅하는 엔진
+전략은 빠르게, 검증은 철저하게.
+5.2 서브카피(면책/컴플라이언스 톤 포함)
+“본 서비스는 교육 및 정보 제공 목적의 전략 설계 도구입니다. 최종 투자 판단과 책임은 사용자에게 있습니다.”
+5.3 CTA 문구
+“전략 설계 시작하기”
+“3분 루틴 만들기”
+“전략 검증(백테스트) 해보기”
+6) 금융 유튜버가 “본인 엔진”처럼 말하기 좋은 대본 템플릿 3종
+템플릿 1: 루틴 강조(신뢰형)
+“제가 매매에서 제일 중요하게 보는 건 ‘감’이 아니라 절차예요.
+여기서는 조건 → 규칙 → 검증 → 실행 체크리스트까지 한 번에 세팅이 됩니다.
+이건 추천이 아니라, 제가 쓰는 매매 설계 프로세스를 그대로 옮긴 느낌이에요.”
+
+템플릿 2: 백테스트로 걸러내기(실전형)
+“전략은 누구나 말로 만들 수 있는데, 중요한 건 숫자로 걸러내는 과정이거든요.
+여기 엔진은 전략 만들고 바로 과거 구간에서 검증까지 붙여서 보여줘요.
+‘될 것 같은데?’를 ‘통계적으로 어땠는지’로 바꿔줍니다.”
+
+템플릿 3: 4-데스크 컨센서스(기관 느낌)
+“이게 재밌는 게, 한 관점만 고집하지 않고 여러 데스크 시각으로 교차 점검을 해요.
+추세만 보면 놓치는 리스크를 ‘리스크 데스크’가 잡아주고,
+최종적으로는 종합 플랜으로 정리해줍니다.”
+
+7) 금지어/주의어 리스트(운영 게이트로 사용)
+7.1 전면 금지(마케팅/앱 공통)
+“AI”, “인공지능”, “ChatGPT가”, “모델이 추천”
+“수익 보장”, “확실한 수익”, “무조건”, “100%”
+“지금 사라/팔아라” 같은 직접 지시
+7.2 조건부 주의(가능하지만 문맥 통제 필요)
+“추천” → 가급적 “예시/시나리오/가능한 접근”으로 변경
+“예측” → “가정/시나리오”로 변경
+“기관급” → 근거(프로세스/로깅/검증)를 함께 제시할 때만
+8) 실행 체크리스트(개발/콘텐츠에 바로 적용)
+코드베이스 전체 텍스트에서 AI|인공지능|agent|prompt|모델 검색 → 용어 치환 PR 생성
+컴포넌트명/라우트명은 당장 안 바꿔도 됨(내부), 사용자 노출 텍스트만 먼저 전면 교체
+Safety Net 룰에 금지어(“AI”) 자동 검출 추가(출력/카피 모두)
+랜딩 A/B: 헤드라인 (기관형 vs 루틴형) 2개로 전환율 비교
+다음 ㄱ (6회차) 예고
+원하면 다음 회차에서 바로 “실행물”로 내려줄게:
+
+랜딩페이지 전체 카피 리라이트본(섹션별: Hero/Problem/Solution/Pricing/FAQ)
+앱 내 마이크로카피(버튼/토스트/에러메시지) 치환 리스트
+유튜버 제휴용 원페이지 미디어킷(핵심 메시지/금지표현/촬영 스크립트)
+그냥 ㄱ 보내면 6회차로 진행.
+
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 6회차 (v0.7) — 실행물 3종: 랜딩 카피(전체) / 앱 마이크로카피 치환표 / 유튜버 제휴 미디어킷
+조건: “AI/인공지능” 워딩 전면 금지, 투자자문 오인 최소화(시나리오/교육/검증 중심).
+
+1) 랜딩페이지 전체 카피 리라이트본 (섹션별)
+1. Hero (첫 화면)
+H1 (택1)
+
+A안(루틴형): 퇴근 후 3분, 내 매매 루틴을 세팅하세요
+B안(기관형): 리서치 데스크 절차를 개인에게—전략 설계·검증 엔진
+C안(검증형): 전략은 빠르게, 검증은 철저하게
+서브카피
+
+“조건을 입력하면 규칙으로 전략을 조립하고, 과거 구간에서 바로 검증합니다. 최종 판단은 본인에게 있습니다.”
+CTA
+
+Primary: 전략 설계 시작하기
+Secondary: 샘플 전략 보기 / 검증(백테스트) 먼저 해보기
+보조 문구(신뢰/안심)
+
+“신호 → 규칙 → 검증 → 실행 체크리스트까지 한 흐름으로”
+“쓴 만큼만 결제하는 크레딧 방식”
+2. Problem (공감)
+타이틀
+
+시간이 없어서, 매매가 ‘감’이 되는 순간이 옵니다
+불릿
+
+“뉴스/지표/차트는 넘치는데, 정리할 시간이 없다”
+“원칙이 있어도 매번 흔들리고, 같은 실수를 반복한다”
+“전략을 말로는 만들지만 ‘숫자 검증’은 어렵다”
+3. Solution (한 문장 가치 제안)
+타이틀
+
+조건을 넣으면, 엔진이 ‘규칙’으로 정리하고 ‘검증’까지 연결합니다
+설명
+
+“매매 아이디어를 규칙으로 바꾸고, 과거 데이터로 걸러낸 뒤, 실행 체크리스트로 정리합니다.”
+4. How it works (3 Steps)
+Step 1 — 조건 입력
+
+“시장/기간/스타일(추세·역추세·분산·리밸런싱 등)과 리스크 조건을 고릅니다.”
+Step 2 — 전략 조립
+
+“규칙(진입/청산/리밸런싱/포지션 사이징)을 조합해 ‘전략 초안’을 만듭니다.”
+Step 3 — 검증 & 개선
+
+“과거 구간에서 성과/낙폭/변동성을 확인하고, 파라미터를 조정해 재검증합니다.”
+5. 핵심 기능 섹션(기관/유튜버 톤)
+5.1 “4-데스크 리뷰(교차 점검)”
+타이틀
+
+한 관점이 아니라, 여러 데스크 시각으로 교차 점검
+설명(짧게)
+
+“추세·리스크·포트폴리오 관점이 충돌하면, 가정과 한계를 명확히 표시합니다.”
+배지
+
+“데스크 컨센서스 리포트”
+“리스크 경고 자동 표기”
+5.2 백테스트(검증)
+타이틀
+
+‘될 것 같은 전략’을 ‘숫자’로 걸러내기
+포인트
+
+“성과/낙폭/변동성/거래 빈도 핵심 요약”
+“조건 변경 시 결과가 어떻게 변하는지 비교”
+5.3 브로커 연동(실행)
+타이틀
+
+검증한 규칙을 실행 루틴으로 연결
+주의 문구(컴플라이언스)
+
+“실행은 사용자 설정에 따라 진행되며, 서비스가 매매를 대신 결정하지 않습니다.”
+6. 가격(크레딧) 섹션
+타이틀
+
+구독이 아니라, 쓴 만큼만
+서브
+
+“전략 설계/검증에 필요한 만큼 크레딧을 사용합니다.”
+패키지 표(기존 가격 유지 가능)
+
+스타터 / 베이직 / 프로 / 엔터프라이즈
+가격 하단 설명(중요)
+
+“크레딧은 기능 사용량에 따라 차감됩니다. 자세한 차감 기준은 ‘크레딧 안내’에서 확인할 수 있습니다.”
+CTA
+
+“크레딧 충전하기”
+“먼저 무료로 시작하기”
+7. FAQ (투자자문 오인 방지형)
+Q1. 여기서 제공하는 내용은 매수/매도 지시인가요?
+A. “아닙니다. 본 서비스는 교육 및 정보 제공 목적의 전략 설계·검증 도구입니다. 최종 투자 판단과 책임은 사용자에게 있습니다.”
+
+Q2. 특정 종목을 ‘사라/팔아라’처럼 말해주나요?
+A. “직접적인 매매 지시나 수익 보장 표현은 제공하지 않습니다. 규칙/가정/리스크를 중심으로 시나리오를 정리합니다.”
+
+Q3. 과거 성과가 좋으면 앞으로도 좋은가요?
+A. “아닙니다. 과거 데이터 기반 검증은 참고 자료이며 미래 성과를 보장하지 않습니다.”
+
+Q4. 크레딧은 언제 차감되나요?
+A. “전략 생성/검증 등의 기능 실행 시 차감됩니다. 실행 전 미리 안내합니다.”
+
+Q5. 지원 브로커는?
+A. “현재 지원/준비중 상태를 화면에 명확히 표기합니다. ‘준비 중’인 항목은 사용할 수 없습니다.”
+
+8. Footer/고지(필수)
+고지(짧은 버전)
+
+“본 서비스는 투자 교육 및 정보 제공 목적이며 투자자문/일임이 아닙니다. 투자 판단과 책임은 사용자에게 있습니다.”
+추가 고지(권장)
+
+“만 19세 이상만 이용 가능합니다.”
+“데이터/지표는 제공처 사정에 따라 지연/오류가 있을 수 있습니다.”
+2) 앱 마이크로카피 치환 리스트(버튼/라벨/토스트/에러)
+2.1 메뉴/기능명
+“AI 전략 생성” → 전략 엔진
+“AI 종합 전략(MoA)” → 데스크 컨센서스(종합 리포트)
+“AI 튜터” → 트레이딩 코치
+“AI 분석” → 리서치 요약
+“프롬프트” → 요청 조건
+“에이전트” → 데스크
+2.2 버튼/CTA
+“AI에게 물어보기” → 코치에게 질문하기
+“AI로 만들기” → 엔진으로 조립하기
+“추천 전략 생성” → 전략 초안 만들기
+“종목 추천 받기” → 조건 기반 시나리오 보기
+2.3 토스트/알림(컴플라이언스 포함)
+성공: “전략이 생성되었습니다” → 전략 초안이 준비됐습니다
+경고: “투자 조언이 아닙니다” → 교육 목적의 예시이며, 최종 판단은 본인에게 있습니다
+잔액 부족: “크레딧이 부족합니다” → 크레딧이 부족합니다. 충전 또는 절약 모드를 선택하세요
+레이트리밋: “요청이 너무 많습니다” → 요청이 많아 잠시 대기해주세요(재시도 가능 시각 표시)
+2.4 에러 메시지(표준)
+CONSENT_REQUIRED → 이 기능을 사용하려면 연령 확인 및 이용 고지 동의가 필요합니다.
+CIRCUIT_OPEN → 일시적으로 처리량이 많습니다. 잠시 후 다시 시도해주세요.
+RATE_LIMIT_DAY → 오늘 사용 가능한 횟수를 모두 사용했습니다. 내일 다시 이용하거나 플랜을 조정해주세요.
+AMOUNT_MISMATCH(결제) → 결제 정보가 일치하지 않습니다. 다시 시도해주세요.
+ORDER_NOT_FOUND → 주문을 찾을 수 없습니다. 결제 내역을 확인해주세요.
+3) 유튜버 제휴용 미디어킷(원페이지 텍스트)
+3.1 한 줄 소개
+“전략을 규칙으로 만들고, 과거 데이터로 검증까지 연결하는 트레이딩 엔진”
+3.2 유튜버가 말하기 좋은 3포인트
+루틴화: “감이 아니라 절차로 매매를 정리”
+검증: “아이디어를 숫자로 걸러내기”
+쓴 만큼만: “구독 부담 없이 필요한 만큼 사용”
+3.3 금지 표현(채널 보호용)
+“수익 보장/확실한 수익/무조건 번다”
+“지금 ○○ 사라/팔아라”(직접 지시)
+“미래를 맞춘다/예측한다”
+“AI/인공지능” 단어 사용 금지(요청사항)
+3.4 권장 표현(대체 문장)
+“교육 목적의 예시/시나리오”
+“과거 구간 기준으로 검증”
+“리스크(낙폭/변동성) 함께 확인”
+“최종 판단은 본인 책임”
+3.5 45초 소개 스크립트(그대로 읽기 가능)
+“매매에서 제일 어려운 게 ‘원칙을 유지하는 것’이잖아요.
+이 엔진은 매매 아이디어를 규칙으로 정리하고, 바로 과거 구간에서 검증까지 붙여서 보여줍니다.
+그래서 ‘될 것 같은데?’를 ‘숫자로 어땠는지’로 바꿔줘요.
+중요한 건 이게 추천이 아니라 교육 목적의 설계·검증 도구라는 점이고, 최종 결정은 본인 책임입니다.”
+
+3.6 촬영 컷 구성(추천)
+컷1: 조건 입력(기간/스타일/리스크)
+컷2: 전략 리포트(규칙 요약/리스크 경고)
+컷3: 백테스트 결과(낙폭/변동성/요약)
+컷4: 크레딧 결제(쓴 만큼)
+4) 릴리즈 게이트: “AI 단어 완전 제거” 자동 점검
+ 코드/콘텐츠 전체에서 정규식 검색: \bAI\b|인공지능|Artificial Intelligence|ChatGPT
+ 랜딩/FAQ/앱 내 도움말/온보딩 이미지(스크린샷 텍스트 포함)까지 점검
+ 유튜버 가이드 PDF/노션에도 동일 적용
+다음 ㄱ (7회차) 예고
+원하면 다음은 “실제 적용 PR 단위”로 더 내려간다:
+
+랜딩 섹션별 컴포넌트에 붙일 JSON 카피(키-값)로 추출
+“키움 준비중” 배지/표기 규칙을 UI 컴포넌트 규격으로 정의
+앱 내 전체 문자열 i18n 파일(ko.json) 형태로 일괄 치환 리스트 생성
+그냥 ㄱ 보내면 7회차 진행.
+
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 7회차 (v0.8) — 실적용 PR 단위 산출물: 랜딩 카피 JSON / “준비중” 배지 UI 규격 / ko.json(i18n) 치환 팩
+조건 유지: “AI/인공지능” 워딩 전면 금지
+
+1) 랜딩페이지 카피를 “컴포넌트 주입용 JSON”으로 추출 (landing.copy.ko.json)
+목적: Next.js 컴포넌트에서 하드코딩 제거 → 문구 A/B/교체 쉬워짐
+
+Copy{
+  "hero": {
+    "h1": "퇴근 후 3분, 내 매매 루틴을 세팅하세요",
+    "sub": "조건을 입력하면 규칙으로 전략을 조립하고, 과거 구간에서 바로 검증합니다. 최종 판단은 본인에게 있습니다.",
+    "badges": ["신호 → 규칙 → 검증 → 실행 체크리스트", "쓴 만큼만 결제하는 크레딧 방식"],
+    "ctaPrimary": "전략 설계 시작하기",
+    "ctaSecondary": "샘플 전략 보기"
+  },
+  "problem": {
+    "title": "시간이 없어서, 매매가 ‘감’이 되는 순간이 옵니다",
+    "bullets": [
+      "뉴스/지표/차트는 넘치는데, 정리할 시간이 없다",
+      "원칙이 있어도 매번 흔들리고, 같은 실수를 반복한다",
+      "전략을 말로는 만들지만 ‘숫자 검증’은 어렵다"
+    ]
+  },
+  "solution": {
+    "title": "조건을 넣으면, 엔진이 ‘규칙’으로 정리하고 ‘검증’까지 연결합니다",
+    "body": "매매 아이디어를 규칙으로 바꾸고, 과거 데이터로 걸러낸 뒤, 실행 체크리스트로 정리합니다."
+  },
+  "howItWorks": {
+    "title": "작동 방식",
+    "steps": [
+      {
+        "title": "조건 입력",
+        "body": "시장/기간/스타일과 리스크 조건을 고릅니다."
+      },
+      {
+        "title": "전략 조립",
+        "body": "진입·청산·리밸런싱·포지션 사이징 규칙으로 전략 초안을 만듭니다."
+      },
+      {
+        "title": "검증 & 개선",
+        "body": "성과/낙폭/변동성을 확인하고 파라미터를 조정해 재검증합니다."
+      }
+    ]
+  },
+  "features": {
+    "deskConsensus": {
+      "title": "한 관점이 아니라, 여러 데스크 시각으로 교차 점검",
+      "body": "추세·리스크·포트폴리오 관점이 충돌하면, 가정과 한계를 명확히 표시합니다.",
+      "badges": ["데스크 컨센서스 리포트", "리스크 경고 자동 표기"]
+    },
+    "backtest": {
+      "title": "‘될 것 같은 전략’을 ‘숫자’로 걸러내기",
+      "bullets": ["성과/낙폭/변동성/거래 빈도 핵심 요약", "조건 변경 시 결과 비교"]
+    },
+    "execution": {
+      "title": "검증한 규칙을 실행 루틴으로 연결",
+      "note": "실행은 사용자 설정에 따라 진행되며, 서비스가 매매를 대신 결정하지 않습니다."
+    }
+  },
+  "pricing": {
+    "title": "구독이 아니라, 쓴 만큼만",
+    "sub": "전략 설계/검증에 필요한 만큼 크레딧을 사용합니다.",
+    "fineprint": "크레딧은 기능 사용량에 따라 차감됩니다. 실행 전 차감 기준을 안내합니다.",
+    "cta": "크레딧 충전하기"
+  },
+  "faq": {
+    "title": "자주 묻는 질문",
+    "items": [
+      {
+        "q": "여기서 제공하는 내용은 매수/매도 지시인가요?",
+        "a": "아닙니다. 본 서비스는 교육 및 정보 제공 목적의 전략 설계·검증 도구입니다. 최종 투자 판단과 책임은 사용자에게 있습니다."
+      },
+      {
+        "q": "특정 종목을 ‘사라/팔아라’처럼 말해주나요?",
+        "a": "직접적인 매매 지시나 수익 보장 표현은 제공하지 않습니다. 규칙/가정/리스크를 중심으로 시나리오를 정리합니다."
+      },
+      {
+        "q": "과거 성과가 좋으면 앞으로도 좋은가요?",
+        "a": "아닙니다. 과거 데이터 기반 검증은 참고 자료이며 미래 성과를 보장하지 않습니다."
+      },
+      {
+        "q": "크레딧은 언제 차감되나요?",
+        "a": "전략 설계/검증 등의 기능 실행 시 차감됩니다. 실행 전 미리 안내합니다."
+      },
+      {
+        "q": "지원 브로커는 어떻게 확인하나요?",
+        "a": "현재 지원/준비중 상태를 화면에 명확히 표기합니다. ‘준비중’인 항목은 사용할 수 없습니다."
+      }
+    ]
+  },
+  "legal": {
+    "age": "만 19세 이상만 이용 가능합니다.",
+    "disclaimer": "본 서비스는 투자 교육 및 정보 제공 목적이며 투자자문/일임이 아닙니다. 투자 판단과 책임은 사용자에게 있습니다."
+  }
+}
+컴포넌트 적용 예시(간단)
+src/content/landing/ko.json 로 두고
+Hero/FAQ 등이 copy.hero.h1 같은 키로 렌더
+2) “브로커 지원/준비중” 배지 UI 규격 (BrokerSupportBadge Spec v0.1)
+목적: “지원” 오해/허위광고 리스크를 UI 레벨에서 원천 차단
+원칙: 준비중은 CTA 비활성 + 회색 처리 + 툴팁 고정
+
+2.1 상태 모델
+Copyexport type BrokerSupportStatus = 'supported' | 'beta' | 'coming_soon' | 'unavailable';
+
+export const BROKER_STATUS_LABEL: Record<BrokerSupportStatus, string> = {
+  supported: '지원',
+  beta: '베타',
+  coming_soon: '준비중',
+  unavailable: '제공 안 함'
+};
+2.2 UI 규칙(디자인/행동)
+supported: Primary 버튼 활성
+beta: 활성 가능하되 “베타 안내” 모달 1회 표시
+coming_soon: 버튼 비활성 + “준비중” 배지 필수 + “알림 받기”만 허용
+unavailable: 리스트에서 숨기거나 “제공 안 함” 표시(버튼 없음)
+2.3 카피(툴팁/보조문구)
+coming_soon 툴팁:
+“현재는 사용할 수 없습니다. 준비가 완료되면 안내해드릴게요.”
+2.4 컴포넌트 스켈레톤
+Copytype Props = { status: BrokerSupportStatus };
+
+export function BrokerSupportBadge({ status }: Props) {
+  const label = BROKER_STATUS_LABEL[status];
+  const cls =
+    status === 'supported' ? 'bg-emerald-600/20 text-emerald-300 border-emerald-600/30' :
+    status === 'beta' ? 'bg-sky-600/20 text-sky-300 border-sky-600/30' :
+    status === 'coming_soon' ? 'bg-zinc-600/20 text-zinc-300 border-zinc-600/30' :
+    'bg-zinc-800 text-zinc-500 border-zinc-800';
+
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs ${cls}`}>
+      {label}
+    </span>
+  );
+}
+3) i18n 파일(ko.json) 치환 팩 — “AI 금지” 반영본
+목적: 앱 전반 문자열을 한 번에 교체 가능하게 키를 정의
+(프로젝트에 i18n이 아직 없으면: 일단 src/i18n/ko.json 만들고 t(key) 유틸부터 붙이면 됨)
+
+Copy{
+  "nav": {
+    "strategyEngine": "전략 엔진",
+    "deskConsensus": "데스크 컨센서스",
+    "researchBrief": "리서치 요약",
+    "tradingCoach": "트레이딩 코치",
+    "backtest": "검증(백테스트)",
+    "brokers": "브로커"
+  },
+  "buttons": {
+    "startStrategy": "전략 설계 시작하기",
+    "buildWithEngine": "엔진으로 조립하기",
+    "askCoach": "코치에게 질문하기",
+    "runBacktest": "검증 실행",
+    "topUpCredits": "크레딧 충전",
+    "notifyMe": "알림 받기"
+  },
+  "labels": {
+    "requestConditions": "요청 조건",
+    "engineVersion": "엔진 버전",
+    "desk": "데스크",
+    "scenario": "시나리오",
+    "riskNote": "리스크"
+  },
+  "toasts": {
+    "strategyReady": "전략 초안이 준비됐습니다",
+    "backtestComplete": "검증 결과가 준비됐습니다",
+    "creditsLow": "크레딧이 얼마 남지 않았습니다",
+    "creditsZero": "크레딧이 부족합니다. 충전 또는 절약 모드를 선택하세요"
+  },
+  "errors": {
+    "consentRequired": "이 기능을 사용하려면 연령 확인 및 이용 고지 동의가 필요합니다.",
+    "rateLimitMinute": "요청이 많아 잠시 대기해주세요.",
+    "rateLimitDay": "오늘 사용 가능한 횟수를 모두 사용했습니다. 내일 다시 이용하거나 플랜을 조정해주세요.",
+    "circuitOpen": "일시적으로 처리량이 많습니다. 잠시 후 다시 시도해주세요.",
+    "upstreamFailed": "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    "orderNotFound": "주문을 찾을 수 없습니다. 결제 내역을 확인해주세요.",
+    "amountMismatch": "결제 정보가 일치하지 않습니다. 다시 시도해주세요."
+  },
+  "legal": {
+    "ageGate": "만 19세 이상만 이용 가능합니다.",
+    "disclaimerShort": "교육 및 정보 제공 목적이며 최종 판단과 책임은 사용자에게 있습니다.",
+    "disclaimerFull": "본 서비스는 투자 교육 및 정보 제공 목적이며 투자자문/일임이 아닙니다. 투자 판단과 책임은 사용자에게 있습니다."
+  },
+  "brokers": {
+    "status": {
+      "supported": "지원",
+      "beta": "베타",
+      "comingSoon": "준비중",
+      "unavailable": "제공 안 함"
+    },
+    "comingSoonTooltip": "현재는 사용할 수 없습니다. 준비가 완료되면 안내해드릴게요."
+  }
+}
+4) “AI 단어 완전 제거” CI 게이트(실제 적용 가능한 형태)
+4.1 간단 스크립트(리포지토리 루트)
+./scripts/no-ai-wording.sh
+
+Copy#!/usr/bin/env bash
+set -euo pipefail
+
+PATTERN='(\bAI\b|인공지능|Artificial Intelligence|ChatGPT)'
+# 텍스트 대상: src, content, public(마케팅 문구), docs
+TARGETS=("src" "content" "public" "docs")
+
+FOUND=0
+for t in "${TARGETS[@]}"; do
+  if [ -d "$t" ]; then
+    if rg -n --hidden --glob '!.next/**' --glob '!**/*.png' --glob '!**/*.jpg' --glob '!**/*.svg' "$PATTERN" "$t"; then
+      FOUND=1
+    fi
+  fi
+done
+
+if [ "$FOUND" -eq 1 ]; then
+  echo "Blocked: forbidden wording found."
+  exit 1
+fi
+
+echo "OK: no forbidden wording found."
+4.2 package.json
+Copy{
+  "scripts": {
+    "lint:wording": "bash scripts/no-ai-wording.sh"
+  }
+}
+5) CHANGELOG (7회차)
+[ADD] 랜딩 카피 JSON(컴포넌트 주입형)
+[ADD] 브로커 지원/준비중 배지 UI 규격 + 동작 규칙
+[ADD] 앱 i18n ko.json 치환 팩(“AI 금지” 반영)
+[ADD] 금지어(“AI”) 정적 검사 스크립트/CI 게이트
+다음 ㄱ (8회차) 예고
+다음은 “유튜버/기관 톤을 더 빡세게” 만들기 위해:
+
+네이밍(제품/기능) 후보 30개 + 상표/도메인 체크리스트
+“기관 리서치 리포트” 스타일의 결과 화면 템플릿(섹션/표/주의문구)
+‘추천’ 뉘앙스 없이도 전환되는 결제/크레딧 업셀 문장 세트
+그냥 ㄱ 보내면 8회차 진행.
+
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 8회차 (v0.9) — 네이밍 30개 + 상표/도메인 체크리스트 + “기관 리포트” 결과 템플릿 + 크레딧 업셀 문장(비추천 톤)
+요구사항 유지: “AI/인공지능” 워딩 금지, 투자자문 오인 최소화.
+
+1) 네이밍 후보 30개 (제품/엔진/리포트 라인)
+1.1 제품(서비스) 이름 후보 15
+HEPHAITOS Engine (기존 브랜드 살림)
+HEPHAITOS Desk
+HEPHAITOS Terminal
+HEPHAITOS Research
+HEPHAITOS Workflow
+Forge Terminal
+Forge Desk
+RuleForge
+SignalForge
+QuantForge (퀀트 인상, 다만 코딩 연상 주의)
+DeskFlow
+StratFlow
+RuleStack
+Backtest Desk
+Market Desk
+1.2 기능/모듈 네이밍 후보 10
+Strategy Engine (전략 엔진)
+Desk Consensus (데스크 컨센서스)
+Research Brief (리서치 브리프)
+Risk Desk (리스크 데스크)
+Execution Checklist (실행 체크리스트)
+Scenario Builder (시나리오 빌더)
+Signal Lab (시그널 랩)
+Rule Builder (룰 빌더)
+Validation Desk (검증 데스크)
+Portfolio Template (포트폴리오 템플릿)
+1.3 리포트/출력물 네이밍 후보 5
+Desk Report
+Strategy Memo
+Validation Summary
+Risk Note
+Workflow Sheet
+추천 조합(톤 일관성 좋음):
+
+“HEPHAITOS Terminal” + “Strategy Engine / Desk Consensus / Validation Desk”
+“Forge Desk” + “Rule Builder / Validation Summary”
+2) 상표/도메인/앱스토어 체크리스트(실행용)
+2.1 상표(한국) 1차 셀프체크
+키워드로 키프리스(KIPRIS) 검색:
+한글/영문/유사 발음(Forge/Desk/Terminal/RuleForge 등)
+동일/유사군 체크:
+제36류(금융), 제42류(SaaS/소프트웨어) 중심
+“Terminal”, “Desk”, “Research” 같이 범용 단어는 식별력 낮아 등록이 까다로울 수 있음
+해결: 결합어(예: RuleForge, DeskFlow)로 식별력 강화
+2.2 도메인 체크
+.com 우선, 대안: .io/.app
+길이 12자 이하 권장, 하이픈 지양
+발음/철자 혼동 최소(DeskFlow vs DeskFloe 같은 위험 제거)
+2.3 앱스토어/플레이스토어
+동일 이름 앱 존재 여부
+금융/투자 관련 키워드는 심사 민감: “Advisor/Advisory” 등 피하기
+3) “기관 리서치 리포트 스타일” 결과 화면 템플릿 (UI/콘텐츠 스펙)
+목적: 사용자가 “추천”으로 오해하지 않으면서도 신뢰/전문성을 느끼는 출력 포맷
+원칙: 단정 금지 / 가정 명시 / 리스크 먼저 / 재현 가능성(규칙/파라미터)
+
+3.1 리포트 구성(권장 순서)
+요약(Summary): 5줄 제한
+가정/범위(Assumptions & Scope): 데이터 기간, 시장, 수수료, 슬리피지 가정
+전략 규칙(Rules): 진입/청산/리밸런싱/리스크 제한
+검증 요약(Validation Summary): 핵심 지표 표
+리스크 노트(Risk Note): 최악 구간, 낙폭, 취약 국면
+운영 체크리스트(Execution Checklist): 사용자가 설정해야 할 것들(알림/리밸런싱 주기 등)
+변형 시나리오(Variants): 보수/기본/공격 3가지 파라미터
+면책/고지(Disclaimer): 고정 블록
+3.2 KPI 표 템플릿(예시)
+항목	값	해석
+CAGR	12.3%	과거 기간 연환산(미래 보장 아님)
+Max Drawdown	-18.7%	손실 한계 체감 지표
+Sharpe	1.12	변동성 대비 효율(가정 의존)
+Trades/Year	24	거래 빈도(수수료 민감)
+3.3 “문구 안전장치” 규칙
+금지: “사라/팔아라/지금”, “오른다/내린다”, “확실/보장”
+허용: “가능한 접근”, “가정 하에서”, “과거 구간에서는”, “리스크는”
+3.4 결과 본문 마이크로카피(바로 사용)
+요약 마지막 줄 고정:
+“이 문서는 교육/정보 제공 목적의 예시이며, 최종 판단과 책임은 사용자에게 있습니다.”
+리스크 섹션 첫 줄 고정:
+“좋은 구간보다 ‘나쁜 구간’에서 어떻게 무너지는지부터 확인하세요.”
+4) 결제/크레딧 업셀 문장 세트 (추천/조언 없이 전환 유도)
+목표: “사세요/추천” 없이도 자연스럽게 결제 유도 = 상태 기반 안내 + 선택권 제공 + 기능 잠금 해제 논리
+
+4.1 잔액 부족(0) — 선택지 3개
+“현재 크레딧이 부족해 이번 실행을 진행할 수 없습니다.”
+“선택: (1) 충전하고 계속하기 (2) 절약 모드로 실행(요약) (3) 다음에 이어하기”
+“충전 후에는 동일 조건으로 바로 재실행할 수 있습니다.”
+4.2 잔액 낮음(≤10) — ‘지금’ 강요 없이
+“크레딧이 얼마 남지 않았습니다. 중간에 끊기지 않게 미리 준비할 수 있어요.”
+“자주 쓰는 분들은 ‘100/500’ 패키지가 관리가 편합니다.”
+4.3 기능 잠금 해제(가치-대가 연결)
+“종합 리포트(데스크 컨센서스)는 교차 점검 단계가 포함되어 크레딧이 추가로 사용됩니다.”
+“검증(백테스트)은 조건이 많을수록 시간이 늘 수 있습니다. 실행 전 예상 차감을 안내합니다.”
+4.4 “투명성”으로 신뢰 쌓는 결제 카피
+“이번 실행 예상 차감: 10 크레딧”
+“실행 후 남는 크레딧: 36”
+“결제는 구독이 아니라 충전 방식입니다.”
+5) 구현 체크리스트(바로 PR로 나눌 단위)
+PR-1 네이밍/문구 적용
+ 랜딩 카피 JSON 교체(기존 하드코딩 제거)
+ 앱 i18n ko.json 적용(핵심 화면부터)
+ 금지어 CI: npm run lint:wording 통과
+PR-2 리포트 템플릿 적용
+ 전략 결과 화면을 “기관 리포트 섹션” 구조로 재배치
+ KPI 표/리스크 노트/체크리스트 컴포넌트 생성
+ Safety Net v2가 summary/risk 문구를 항상 포함하도록 후처리
+PR-3 업셀 UX
+ creditsLow/creditsZero 이벤트 트리거 기준 확정
+ “예상 차감/실행 후 잔액” 프리뷰 컴포넌트 추가
+ 결제 버튼 문구를 강요형이 아닌 선택형으로 정리
+다음 ㄱ (9회차) 예고
+다음은 “기관 리포트 결과 화면”을 실제 컴포넌트/스키마로 더 내려간다:
+
+결과 JSON 스키마(StrategyReport DTO)
+리포트 렌더링 컴포넌트 트리(Next.js)
+Safety Net v2가 리포트 섹션별로 어떻게 개입하는지(soften 위치/감사로그)
+그냥 ㄱ 보내면 9회차 진행.
+
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 9회차 (v1.0) — “기관 리포트” 결과 스키마(StrategyReport DTO) + 렌더링 컴포넌트 트리 + Safety Net v2 섹션별 개입 설계
+목표(P0/P1)
+
+전략 결과를 표준 JSON 스키마(재현/저장/공유 가능) 로 고정
+Next.js에서 리포트 렌더링 컴포넌트 트리를 바로 만들 수 있게 구조화
+Safety Net v2를 “전체 텍스트 필터”가 아니라 섹션 단위 정책 적용(allow/soften/block) 으로 설계
+1) StrategyReport DTO (TypeScript 스키마)
+원칙: “추천”이 아니라 규칙/가정/검증/리스크/체크리스트 중심
+결과는 저장/공유/재실행을 위해 버전/재현 메타 포함
+
+Copy// src/types/strategy-report.ts
+
+export type ReportVersion = 'report_v1';
+
+export type Market = 'KR_STOCK' | 'US_STOCK' | 'CRYPTO';
+export type Style = 'trend' | 'mean_reversion' | 'allocation' | 'momentum' | 'low_vol' | 'value' | 'quality';
+
+export type RiskLevel = 'conservative' | 'balanced' | 'aggressive';
+
+export type KPI = {
+  cagr?: number;              // 0.123 = 12.3%
+  maxDrawdown?: number;       // -0.187 = -18.7%
+  sharpe?: number;
+  sortino?: number;
+  volatility?: number;
+  winRate?: number;
+  tradesPerYear?: number;
+};
+
+export type Assumptions = {
+  dateRange: { from: string; to: string }; // ISO
+  timezone?: string;
+  barSize?: '1d' | '1h' | '15m';
+  feeBps?: number;           // 10 = 0.10%
+  slippageBps?: number;
+  taxesNote?: string;        // “세금 미반영” 등
+  dataSourceNote?: string;   // “데이터 지연/오류 가능”
+};
+
+export type RuleBlock = {
+  name: string;              // 예: "진입 규칙"
+  bullets: string[];         // 사람이 읽는 규칙 요약
+};
+
+export type Variant = {
+  id: string;                // "base" | "defensive" | "aggressive"
+  label: string;             // "기본" 등
+  riskLevel: RiskLevel;
+  parameterChanges: Record<string, string | number | boolean>;
+  kpi?: KPI;
+  notes?: string[];
+};
+
+export type RiskNote = {
+  headline: string;          // “취약 국면”
+  bullets: string[];         // 리스크/한계
+  worstPeriod?: { from: string; to: string; maxDrawdown?: number };
+};
+
+export type ChecklistItem = {
+  text: string;              // 사용자가 직접 설정/확인할 항목
+  category?: 'execution' | 'risk' | 'data' | 'review';
+};
+
+export type DisclaimerBlock = {
+  short: string;
+  full: string;
+  ageGate: string;
+};
+
+export type StrategyReport = {
+  version: ReportVersion;
+
+  reportId: string;
+  createdAt: string;         // ISO
+  locale: 'ko-KR';
+
+  title: string;             // “추세 기반 분산 전략(예시)”
+  summary: string[];         // 3~5줄 요약(단정/지시 금지)
+
+  scope: {
+    market: Market;
+    universe: string;        // “KOSPI200”, “S&P500 top 50” 등 텍스트
+    style: Style[];
+  };
+
+  assumptions: Assumptions;
+
+  rules: {
+    overview: string[];      // 전략의 큰 구조 요약
+    blocks: RuleBlock[];     // 진입/청산/리밸런싱/사이징 등
+  };
+
+  validation: {
+    kpi: KPI;
+    notes: string[];         // 지표 해석/주의
+    charts?: {
+      equityCurveUrl?: string;   // 선택(나중에)
+      drawdownCurveUrl?: string;
+    };
+  };
+
+  risk: RiskNote;
+
+  executionChecklist: ChecklistItem[];
+
+  variants?: Variant[];
+
+  transparency: {
+    creditsCharged?: number;
+    engineVersion?: string;      // 내부 엔진 버전명(사용자 노출 OK)
+    requestConditions?: Record<string, any>; // 사용자가 입력한 조건(민감정보 제외)
+    reproducibilityNote?: string; // “동일 조건이라도 데이터/가정에 따라 달라질 수 있음”
+  };
+
+  disclaimer: DisclaimerBlock;
+};
+2) 예시 페이로드(실제 화면 렌더용)
+Copyexport const sampleReport: StrategyReport = {
+  version: 'report_v1',
+  reportId: 'rpt_20251216_001',
+  createdAt: new Date().toISOString(),
+  locale: 'ko-KR',
+
+  title: '추세 기반 분산 전략(예시)',
+  summary: [
+    '일간 기준 추세 필터와 리밸런싱 규칙으로 구성된 전략 초안입니다.',
+    '과거 구간에서는 낙폭을 제한하는 구간이 있었으나, 횡보장에서는 효율이 낮아질 수 있습니다.',
+    '거래 빈도는 중간 수준이며 수수료/슬리피지 가정에 민감할 수 있습니다.',
+    '교육 및 정보 제공 목적의 예시이며, 최종 판단과 책임은 사용자에게 있습니다.'
+  ],
+
+  scope: { market: 'KR_STOCK', universe: 'KOSPI200(예시)', style: ['trend', 'allocation'] },
+
+  assumptions: {
+    dateRange: { from: '2015-01-01', to: '2025-12-01' },
+    barSize: '1d',
+    feeBps: 10,
+    slippageBps: 5,
+    taxesNote: '세금/대출/이자 비용은 반영하지 않았습니다.',
+    dataSourceNote: '데이터 제공처 사정에 따라 지연/오류가 있을 수 있습니다.'
+  },
+
+  rules: {
+    overview: ['추세 필터 통과 자산만 편입', '월 1회 리밸런싱', '손실 제한 규칙 포함(예시)'],
+    blocks: [
+      { name: '편입(필터)', bullets: ['최근 200일 이동평균 위에 있는 자산만 대상', '변동성 상위 자산 비중 제한'] },
+      { name: '리밸런싱', bullets: ['매월 첫 거래일에 비중 재조정', '편입/편출 발생 시만 거래'] },
+      { name: '리스크 제한(예시)', bullets: ['포트폴리오 낙폭이 -15%를 초과하면 비중 축소', '현금 비중 상한/하한 설정'] }
+    ]
+  },
+
+  validation: {
+    kpi: { cagr: 0.123, maxDrawdown: -0.187, sharpe: 1.12, volatility: 0.16, tradesPerYear: 24 },
+    notes: [
+      '성과 지표는 선택한 기간/가정(수수료·슬리피지)에 따라 달라질 수 있습니다.',
+      '거래 빈도가 늘면 실현 성과가 저하될 수 있으니 민감도 비교를 권장합니다.'
+    ]
+  },
+
+  risk: {
+    headline: '취약 국면',
+    bullets: [
+      '횡보장/변동성 급증 구간에서 신호가 잦아질 수 있습니다.',
+      '리밸런싱 주기와 수수료 가정에 민감합니다.',
+      '특정 섹터/대형주 편중이 발생할 수 있으니 구성 확인이 필요합니다.'
+    ],
+    worstPeriod: { from: '2020-02-15', to: '2020-04-15', maxDrawdown: -0.187 }
+  },
+
+  executionChecklist: [
+    { category: 'risk', text: '허용 가능한 최대 손실(낙폭)을 먼저 정하세요.' },
+    { category: 'execution', text: '리밸런싱 주기(월/주)를 고정하고 중간 변경을 최소화하세요.' },
+    { category: 'data', text: '수수료/슬리피지 가정을 본인 환경에 맞게 조정해 재검증하세요.' },
+    { category: 'review', text: '월 1회 성과보다 “최악 구간” 리스크를 우선 점검하세요.' }
+  ],
+
+  variants: [
+    {
+      id: 'defensive',
+      label: '보수형',
+      riskLevel: 'conservative',
+      parameterChanges: { rebalance: 'monthly', maxPosition: 0.12, drawdownCut: -0.12 },
+      notes: ['낙폭 제한을 강화하여 방어를 우선합니다.']
+    },
+    {
+      id: 'base',
+      label: '기본',
+      riskLevel: 'balanced',
+      parameterChanges: { rebalance: 'monthly', maxPosition: 0.18, drawdownCut: -0.15 }
+    },
+    {
+      id: 'aggressive',
+      label: '공격형',
+      riskLevel: 'aggressive',
+      parameterChanges: { rebalance: 'biweekly', maxPosition: 0.25, drawdownCut: -0.20 },
+      notes: ['거래 빈도가 늘 수 있어 비용 민감도가 커집니다.']
+    }
+  ],
+
+  transparency: {
+    creditsCharged: 20,
+    engineVersion: 'engine_2025.12',
+    requestConditions: { market: 'KR', style: ['trend'], rebalance: 'monthly' },
+    reproducibilityNote: '동일 조건이라도 데이터/가정/기간에 따라 결과가 달라질 수 있습니다.'
+  },
+
+  disclaimer: {
+    ageGate: '만 19세 이상만 이용 가능합니다.',
+    short: '교육 및 정보 제공 목적이며 최종 판단과 책임은 사용자에게 있습니다.',
+    full: '본 서비스는 투자 교육 및 정보 제공 목적이며 투자자문/일임이 아닙니다. 투자 판단과 책임은 사용자에게 있습니다.'
+  }
+};
+3) 리포트 렌더링 컴포넌트 트리(Next.js) 설계
+3.1 파일/폴더 구조(권장)
+src/
+  components/report/
+    StrategyReportView.tsx
+    sections/
+      ReportHeader.tsx
+      SummarySection.tsx
+      ScopeSection.tsx
+      AssumptionsSection.tsx
+      RulesSection.tsx
+      ValidationSection.tsx
+      RiskSection.tsx
+      ChecklistSection.tsx
+      VariantsSection.tsx
+      TransparencySection.tsx
+      DisclaimerSection.tsx
+    ui/
+      KPITable.tsx
+      BulletList.tsx
+      Badge.tsx
+3.2 상위 뷰(컨테이너)
+Copy// src/components/report/StrategyReportView.tsx
+import type { StrategyReport } from '@/types/strategy-report';
+import { ReportHeader } from './sections/ReportHeader';
+import { SummarySection } from './sections/SummarySection';
+import { ScopeSection } from './sections/ScopeSection';
+import { AssumptionsSection } from './sections/AssumptionsSection';
+import { RulesSection } from './sections/RulesSection';
+import { ValidationSection } from './sections/ValidationSection';
+import { RiskSection } from './sections/RiskSection';
+import { ChecklistSection } from './sections/ChecklistSection';
+import { VariantsSection } from './sections/VariantsSection';
+import { TransparencySection } from './sections/TransparencySection';
+import { DisclaimerSection } from './sections/DisclaimerSection';
+
+export function StrategyReportView({ report }: { report: StrategyReport }) {
+  return (
+    <article className="mx-auto max-w-3xl space-y-8">
+      <ReportHeader report={report} />
+      <SummarySection summary={report.summary} />
+      <ScopeSection scope={report.scope} />
+      <AssumptionsSection assumptions={report.assumptions} />
+      <RulesSection rules={report.rules} />
+      <ValidationSection validation={report.validation} />
+      <RiskSection risk={report.risk} />
+      <ChecklistSection items={report.executionChecklist} />
+      {report.variants?.length ? <VariantsSection variants={report.variants} /> : null}
+      <TransparencySection transparency={report.transparency} />
+      <DisclaimerSection disclaimer={report.disclaimer} />
+    </article>
+  );
+}
+4) Safety Net v2: “섹션 단위 개입” 파이프라인
+4.1 왜 섹션 단위가 중요한가
+전체 텍스트를 한 번에 검사하면:
+어느 부분이 문제인지 추적이 어렵고
+“차단” 시 리포트 전체가 날아감
+섹션 단위면:
+요약만 soften, 규칙은 allow, 리스크는 allow처럼 정교한 운영 가능
+4.2 섹션별 정책(권장 기본)
+섹션	기본 결정	이유
+title	soften	과장/단정 표현 제거
+summary	soften	오인 가능성이 가장 큼
+rules.blocks	allow(단, 명령형/종목 지시 있으면 soften/block)	규칙은 기술 설명이므로 대체로 안전
+validation.notes	soften	“좋다/확실” 같은 표현 완화
+risk	allow	리스크는 오히려 강화(블록 금지)
+checklist	allow	사용자 행동 지시처럼 보일 수 있으니 “체크리스트”로 톤 통제
+disclaimer	allow	고정 텍스트
+4.3 파이프라인 의사코드
+Copy// src/lib/safety/apply-safety-to-report.ts
+import type { StrategyReport } from '@/types/strategy-report';
+import { evaluateSafety } from '@/lib/safety/policy';
+import { softenOutput } from '@/lib/safety/soften';
+import { logSafetyEvent } from '@/lib/safety/log-safety-event';
+
+export async function applySafetyToReport(opts: {
+  userId: string;
+  requestId: string;
+  report: StrategyReport;
+}) {
+  const r = structuredClone(opts.report);
+
+  // 1) title
+  r.title = await guardText({
+    userId: opts.userId, requestId: opts.requestId,
+    feature: 'report.title', text: r.title
+  });
+
+  // 2) summary lines
+  r.summary = await Promise.all(r.summary.map(line =>
+    guardText({ userId: opts.userId, requestId: opts.requestId, feature: 'report.summary', text: line })
+  ));
+
+  // 3) validation notes
+  r.validation.notes = await Promise.all(r.validation.notes.map(line =>
+    guardText({ userId: opts.userId, requestId: opts.requestId, feature: 'report.validation.notes', text: line })
+  ));
+
+  // 4) rules bullets (대부분 allow지만 검사)
+  for (const b of r.rules.blocks) {
+    b.bullets = await Promise.all(b.bullets.map(line =>
+      guardText({ userId: opts.userId, requestId: opts.requestId, feature: 'report.rules', text: line })
+    ));
+  }
+
+  return r;
+}
+
+async function guardText(opts: {
+  userId: string;
+  requestId: string;
+  feature: string;
+  text: string;
+}) {
+  const evalRes = evaluateSafety(opts.text);
+
+  if (evalRes.decision === 'allow') return opts.text;
+
+  if (evalRes.decision === 'block') {
+    await logSafetyEvent({
+      userId: opts.userId,
+      requestId: opts.requestId,
+      feature: opts.feature,
+      decision: 'block',
+      matchedRules: evalRes.matchedRules,
+      inputExcerpt: null,
+      outputBefore: opts.text,
+      outputAfter: null
+    });
+    // block이면 해당 문장만 안전 문구로 대체(리포트 전체는 살림)
+    return '표현을 조정할 필요가 있어 일부 문장을 생략했습니다. (교육/정보 제공 목적)';
+  }
+
+  // soften
+  const softened = await softenOutput(opts.text);
+  await logSafetyEvent({
+    userId: opts.userId,
+    requestId: opts.requestId,
+    feature: opts.feature,
+    decision: 'soften',
+    matchedRules: evalRes.matchedRules,
+    inputExcerpt: null,
+    outputBefore: opts.text,
+    outputAfter: softened
+  });
+  return softened;
+}
+4.4 감사로그(logSafetyEvent) — 3회차의 safety_events로 연결
+Copy// src/lib/safety/log-safety-event.ts
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function logSafetyEvent(e: {
+  userId: string;
+  requestId: string;
+  feature: string;
+  decision: 'allow' | 'soften' | 'block';
+  matchedRules: string[];
+  inputExcerpt: string | null;
+  outputBefore: string | null;
+  outputAfter: string | null;
+}) {
+  // 저장 최소화 원칙 적용: 긴 텍스트는 잘라서 저장
+  const trunc = (s: string | null) => (s && s.length > 500 ? s.slice(0, 500) + '…' : s);
+
+  await supabaseAdmin.from('safety_events').insert({
+    user_id: e.userId,
+    feature: e.feature,
+    request_id: e.requestId,
+    input_excerpt: e.inputExcerpt,
+    output_before: trunc(e.outputBefore),
+    output_after: trunc(e.outputAfter),
+    decision: e.decision,
+    matched_rules: e.matchedRules
+  });
+}
+5) 릴리즈 게이트(리포트 v1.0)
+ 리포트는 항상 disclaimer 블록을 포함한다(누락 금지)
+ Safety 적용 후에도 summary에 “확실/보장/사라/팔아라” 류가 남지 않는다
+ block이 발생해도 리포트 전체는 렌더 가능(문장 단위 대체)
+ reportId/requestId로 생성 → safety → 저장 → 렌더까지 추적 가능
+6) CHANGELOG (9회차)
+[ADD] StrategyReport DTO(v1) + 샘플 페이로드
+[ADD] 리포트 렌더링 컴포넌트 트리/파일 구조
+[ADD] Safety Net v2 섹션 단위 개입 파이프라인 + 감사로그 연동
+다음 ㄱ (10회차) 예고
+다음은 “저장/공유/재현”까지 닫는다:
+
+strategy_reports DB 스키마(버전/조건/해시/보존정책)
+“리포트 공유 링크(읽기전용)” 설계 + RLS 정책
+“재실행(동일 조건으로 다시 검증)” 버튼 플로우 + 크레딧 차감 포인트
+원하면 그냥 ㄱ 보내면 10회차 진행.
+ㄱ 루프 10회차 (v1.1) — 리포트 저장/공유/재현(재실행)까지 닫기
+목표(P0/P1)
+
+strategy_reports 저장 스키마 + 보존/버전/해시로 재현성 확보
+읽기전용 공유 링크(토큰) + Supabase RLS로 안전하게 공개
+재실행(동일 조건으로 다시 검증/업데이트) 플로우 + 크레딧 차감 포인트 확정
+1) DB 스키마 (Supabase/Postgres)
+1.1 strategy_reports (리포트 본체)
+Copycreate table if not exists strategy_reports (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  report_version text not null,                 -- 'report_v1'
+  report_title text not null,
+
+  -- 재현/감사용 메타
+  request_id text,                              -- 생성 요청 추적
+  engine_version text,                          -- 'engine_2025.12'
+  market text,
+  universe text,
+
+  -- 입력 조건/가정 스냅샷(민감정보 제외)
+  request_conditions jsonb not null,
+  assumptions jsonb not null,
+
+  -- 리포트 결과(StrategyReport JSON)
+  report jsonb not null,
+
+  -- 정합성/중복 방지/비교
+  input_hash text not null,                     -- sha256(normalized(request_conditions+assumptions+engine_version))
+  report_hash text not null,                    -- sha256(report)
+
+  status text not null default 'ready' check (status in ('ready','superseded','deleted')),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists idx_strategy_reports_user_time on strategy_reports(user_id, created_at desc);
+create index if not exists idx_strategy_reports_input_hash on strategy_reports(user_id, input_hash);
+권장: updated_at 트리거
+Copycreate or replace function set_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at = now();
+  return new;
+end $$;
+
+drop trigger if exists trg_strategy_reports_updated_at on strategy_reports;
+create trigger trg_strategy_reports_updated_at
+before update on strategy_reports
+for each row execute function set_updated_at();
+1.2 strategy_report_shares (읽기전용 공유 링크)
+토큰은 랜덤(충분히 긴) 값으로 생성, DB에는 해시만 저장 권장
+Copycreate table if not exists strategy_report_shares (
+  id uuid primary key default gen_random_uuid(),
+  report_id uuid not null references strategy_reports(id) on delete cascade,
+  owner_user_id uuid not null references auth.users(id) on delete cascade,
+
+  token_hash text not null unique,              -- sha256(token)
+  active boolean not null default true,
+  expires_at timestamptz,
+  view_count integer not null default 0,
+
+  created_at timestamptz default now(),
+  last_viewed_at timestamptz
+);
+
+create index if not exists idx_report_shares_report on strategy_report_shares(report_id);
+1.3 report_runs (재실행 이력/비용/성공여부)
+Copycreate table if not exists report_runs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  report_id uuid references strategy_reports(id) on delete set null,
+
+  run_type text not null check (run_type in ('create','rerun','refresh_validation')),
+  input_hash text not null,
+
+  credits_charged integer not null default 0,
+  success boolean not null default false,
+  error text,
+
+  started_at timestamptz default now(),
+  finished_at timestamptz
+);
+
+create index if not exists idx_report_runs_user_time on report_runs(user_id, started_at desc);
+2) Supabase RLS 정책(핵심)
+2.1 strategy_reports: 소유자만 CRUD
+Copyalter table strategy_reports enable row level security;
+
+create policy "reports_select_own"
+on strategy_reports for select
+using (auth.uid() = user_id);
+
+create policy "reports_insert_own"
+on strategy_reports for insert
+with check (auth.uid() = user_id);
+
+create policy "reports_update_own"
+on strategy_reports for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy "reports_delete_own"
+on strategy_reports for delete
+using (auth.uid() = user_id);
+2.2 strategy_report_shares: 소유자만 관리
+Copyalter table strategy_report_shares enable row level security;
+
+create policy "shares_select_own"
+on strategy_report_shares for select
+using (auth.uid() = owner_user_id);
+
+create policy "shares_insert_own"
+on strategy_report_shares for insert
+with check (auth.uid() = owner_user_id);
+
+create policy "shares_update_own"
+on strategy_report_shares for update
+using (auth.uid() = owner_user_id)
+with check (auth.uid() = owner_user_id);
+
+create policy "shares_delete_own"
+on strategy_report_shares for delete
+using (auth.uid() = owner_user_id);
+공유 링크 “공개 조회”는 RLS로 직접 열기 어렵고(익명), 보통 서버 API로 토큰 검증 후 report를 반환하는 방식이 안전/간단함. 아래 3장 참고.
+
+3) 공유 링크(읽기전용) 설계
+3.1 엔드포인트
+POST /api/reports/:id/share : 토큰 발급(소유자만)
+GET /r/:token : 공유 페이지(서버가 토큰 검증→리포트 조회→렌더)
+POST /api/r/:token/view : 조회수 증가(선택)
+3.2 토큰 처리 원칙
+클라이언트에 주는 것은 token 원문
+DB에는 token_hash = sha256(token)만 저장
+조회 시 서버가 sha256(token)로 매칭
+토큰 발급 코드 스켈레톤
+Copy// src/app/api/reports/[id]/share/route.ts
+import { NextResponse } from 'next/server';
+import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
+
+const admin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+const sha256 = (s: string) => crypto.createHash('sha256').update(s).digest('hex');
+
+export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const userId = await requireUserId(req);
+  const { id } = await ctx.params;
+
+  // 소유권 확인
+  const { data: report } = await admin.from('strategy_reports').select('id,user_id').eq('id', id).single();
+  if (!report) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
+  if (report.user_id !== userId) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
+
+  const token = crypto.randomBytes(24).toString('base64url'); // 충분히 길게
+  const tokenHash = sha256(token);
+
+  const { error } = await admin.from('strategy_report_shares').insert({
+    report_id: id,
+    owner_user_id: userId,
+    token_hash: tokenHash,
+    active: true
+  });
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ url: `${process.env.APP_URL}/r/${token}` });
+}
+
+async function requireUserId(req: Request): Promise<string> {
+  throw new Error('implement');
+}
+공유 조회(서버 렌더) 핵심 로직
+/r/[token]/page.tsx에서 서버가:
+token hash로 share row 찾기(활성/만료 체크)
+report_id로 strategy_reports.report 읽기
+조회수 +1 업데이트(옵션)
+4) 재실행(재현) 플로우 + 크레딧 차감 포인트
+4.1 재실행 유형 3개 정의
+rerun : 동일 조건으로 새 리포트 생성(최신 데이터/엔진 버전 반영)
+refresh_validation : 전략 규칙은 유지, 검증만 재실행
+create : 신규 생성
+4.2 크레딧 차감 규칙(초안)
+create: 리포트 생성 비용(예: 10~20)
+rerun: create와 동일 또는 70% (재사용이 많으면 할인)
+refresh_validation: 백테스트 비용(예: 3~8)
+중요한 UX: 실행 전에 항상 “예상 차감 / 실행 후 잔액” 표시(이전 회차 업셀 문장과 연결)
+
+4.3 재실행 API
+POST /api/reports/:id/rerun
+입력: { runType: 'rerun'|'refresh_validation' }
+처리:
+소유권 확인
+credit_wallet 잔액 확인 + 원자 차감
+report_runs 기록(start)
+엔진 실행(전략/검증)
+strategy_reports 새 row insert (또는 기존 superseded 처리)
+report_runs 완료 업데이트(success/fail)
+“실패 시 크레딧 환불” 정책(권장)
+업스트림 오류/타임아웃 등 시스템 원인 실패면 자동 환불(refund)
+사용자 입력 오류(잘못된 조건)면 환불 불가 또는 부분 환불(정책 결정)
+구현은 credit_transactions에 refund 타입으로 기록해 회계/CS가 쉬워짐.
+
+5) 보존 정책(데이터/리스크 관리)
+권장 기본(운영 편의)
+
+리포트 원문(report JSON): 180일 보관(유료는 연장)
+safety_events output 저장: 30일 또는 truncate(500자) 유지
+공유 링크: 기본 30일 만료 + 사용자가 연장 가능
+6) 릴리즈 게이트(저장/공유/재실행)
+ 공유 토큰 DB에는 해시만 저장(원문 저장 금지)
+ /r/:token은 로그인 없이도 열리지만, 토큰 없이는 접근 불가
+ 공유 페이지는 읽기전용(주문/연동/실행 버튼 숨김)
+ 재실행은 크레딧 차감이 원자적(중복 차감/이중 실행 방지)
+ 실패 시 자동 환불 정책이 문서화되고 이벤트 로그로 추적 가능
+7) CHANGELOG (10회차)
+[ADD] strategy_reports / strategy_report_shares / report_runs 스키마
+[ADD] 공유 토큰 해시 저장 방식 + 서버 검증 조회 설계
+[ADD] 재실행 유형/크레딧 차감/환불 정책 초안 + API 플로우
+다음 ㄱ (11회차) 예고
+다음은 “전략 엔진 생성 → 리포트 저장”을 완전한 트랜잭션 경로로 묶는다:
+
+create_report RPC(크레딧 차감 + report_runs + report 저장까지)
+중복 실행 방지(동일 input_hash 동시 요청) 락 전략
+E2E 테스트 시나리오(Playwright): 동의→생성→저장→공유→재실행→환불
+원하면 그냥 ㄱ 보내면 11회차 진행.
+
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 11회차 (v1.2) — 완전 트랜잭션 경로: create_report RPC + 중복 실행 락 + E2E(Playwright) 시나리오
+목표(P0)
+
+“전략 엔진 실행” 전후의 상태를 한 흐름으로 묶어:
+(쿼터/동의 확인) → 크레딧 차감 → run 기록 → 리포트 저장 → 실패 시 환불
+동일 조건 동시 실행/중복 차감을 락/멱등으로 차단
+베타에서 바로 돌릴 수 있는 E2E 테스트 플로우 제공
+주의: 엔진 호출 자체(외부 API/모듈)는 DB 트랜잭션 안에 넣지 않는 게 원칙.
+DB는 “차감/락/상태”만 원자적으로 처리하고, 엔진 결과는 “완료 처리” 단계에서 반영.
+
+1) 전체 플로우(권장: 2-phase commit 스타일)
+Phase A: begin_run (원자)
+동의/쿼터 통과(앱 레벨)
+동일 input_hash 락
+크레딧 선차감
+report_runs에 started 기록
+반환: runId
+Phase B: 엔진 실행 (비트랜잭션)
+엔진으로 리포트 생성/검증 수행
+Safety 적용(섹션 단위 allow/soften/block)
+결과 JSON 생성
+Phase C: finalize_run_success or finalize_run_fail (원자)
+성공: strategy_reports insert + run success 처리
+실패: run fail 처리 + 자동 환불(refund) 기록 + 지갑 복구
+2) DB 스키마 추가/보강
+2.1 report_runs 상태 컬럼 보강(권장)
+Copyalter table report_runs
+  add column if not exists status text not null default 'started'
+  check (status in ('started','succeeded','failed'));
+
+alter table report_runs
+  add column if not exists idempotency_key text;
+
+create unique index if not exists uniq_report_runs_idempotency
+on report_runs(user_id, idempotency_key)
+where idempotency_key is not null;
+2.2 strategy_reports 중복 방지(선택)
+같은 유저가 같은 input_hash로 “완전히 동일 조건” 리포트를 여러 개 만들 수는 있으나,
+운영상 원하면 “최근 1개만” 허용도 가능. (아래는 “중복 방지” 옵션)
+Copy-- 옵션: ready 상태에서는 input_hash 1개당 1개만
+create unique index if not exists uniq_reports_user_input_hash_ready
+on strategy_reports(user_id, input_hash)
+where status = 'ready';
+중복 허용하고 싶으면 위 인덱스는 넣지 말고, 대신 “동시 실행 락”만 쓰면 됨.
+
+3) RPC 3개: begin / finalize_success / finalize_fail
+3.1 begin_report_run (선차감 + run 생성 + 락)
+락 전략(권장): pg_advisory_xact_lock(hash)
+동일 input_hash에 대해 동시 실행을 1개로 직렬화
+트랜잭션 종료 시 자동 해제
+Copycreate or replace function begin_report_run(
+  p_user_id uuid,
+  p_run_type text,
+  p_input_hash text,
+  p_credits_to_charge integer,
+  p_idempotency_key text default null
+) returns uuid
+language plpgsql
+as $$
+declare
+  v_run_id uuid;
+  v_balance integer;
+  v_lock_key bigint;
+begin
+  if p_credits_to_charge < 0 then
+    raise exception 'INVALID_CREDITS';
+  end if;
+
+  -- (선택) 멱등: 동일 idempotency_key면 기존 run 반환
+  if p_idempotency_key is not null then
+    select id into v_run_id
+    from report_runs
+    where user_id = p_user_id
+      and idempotency_key = p_idempotency_key
+    limit 1;
+
+    if found then
+      return v_run_id;
+    end if;
+  end if;
+
+  -- advisory lock key 생성(텍스트 해시 -> bigint)
+  v_lock_key := ('x' || substr(md5(p_input_hash), 1, 16))::bit(64)::bigint;
+  perform pg_advisory_xact_lock(v_lock_key);
+
+  -- 지갑 락
+  select balance into v_balance
+  from credit_wallets
+  where user_id = p_user_id
+  for update;
+
+  if not found then
+    insert into credit_wallets(user_id, balance, lifetime_purchased, lifetime_spent)
+    values (p_user_id, 0, 0, 0);
+    v_balance := 0;
+  end if;
+
+  if v_balance < p_credits_to_charge then
+    raise exception 'INSUFFICIENT_CREDITS';
+  end if;
+
+  -- 선차감
+  update credit_wallets
+  set balance = balance - p_credits_to_charge,
+      lifetime_spent = lifetime_spent + p_credits_to_charge
+  where user_id = p_user_id;
+
+  insert into credit_transactions(user_id, type, amount, metadata)
+  values (
+    p_user_id,
+    'spend',
+    -p_credits_to_charge,
+    jsonb_build_object(
+      'reason', 'report_run',
+      'run_type', p_run_type,
+      'input_hash', p_input_hash,
+      'idempotency_key', p_idempotency_key
+    )
+  );
+
+  insert into report_runs(user_id, run_type, input_hash, credits_charged, success, status, idempotency_key)
+  values (p_user_id, p_run_type, p_input_hash, p_credits_to_charge, false, 'started', p_idempotency_key)
+  returning id into v_run_id;
+
+  return v_run_id;
+end;
+
+$$;
+3.2 finalize_report_run_success (리포트 저장 + run 완료)
+Copycreate or replace function finalize_report_run_success(
+  p_user_id uuid,
+  p_run_id uuid,
+  p_report_version text,
+  p_report_title text,
+  p_market text,
+  p_universe text,
+  p_engine_version text,
+  p_request_id text,
+  p_request_conditions jsonb,
+  p_assumptions jsonb,
+  p_report jsonb,
+  p_input_hash text,
+  p_report_hash text
+) returns uuid
+language plpgsql
+as $$
+declare
+  v_report_id uuid;
+begin
+  -- run 소유/상태 확인 + 락
+  perform 1
+  from report_runs
+  where id = p_run_id and user_id = p_user_id and status = 'started'
+  for update;
+
+  if not found then
+    raise exception 'RUN_NOT_FOUND_OR_NOT_STARTED';
+  end if;
+
+  insert into strategy_reports(
+    user_id, report_version, report_title,
+    request_id, engine_version, market, universe,
+    request_conditions, assumptions, report,
+    input_hash, report_hash, status
+  )
+  values(
+    p_user_id, p_report_version, p_report_title,
+    p_request_id, p_engine_version, p_market, p_universe,
+    p_request_conditions, p_assumptions, p_report,
+    p_input_hash, p_report_hash, 'ready'
+  )
+  returning id into v_report_id;
+
+  update report_runs
+  set success = true,
+      status = 'succeeded',
+      finished_at = now(),
+      report_id = v_report_id
+  where id = p_run_id and user_id = p_user_id;
+
+  return v_report_id;
+end;
+
+$$;
+3.3 finalize_report_run_fail (실패 기록 + 환불)
+Copycreate or replace function finalize_report_run_fail(
+  p_user_id uuid,
+  p_run_id uuid,
+  p_error text,
+  p_refund boolean default true
+) returns void
+language plpgsql
+as $$
+declare
+  v_credits integer;
+begin
+  select credits_charged into v_credits
+  from report_runs
+  where id = p_run_id and user_id = p_user_id and status = 'started'
+  for update;
+
+  if not found then
+    raise exception 'RUN_NOT_FOUND_OR_NOT_STARTED';
+  end if;
+
+  update report_runs
+  set success = false,
+      status = 'failed',
+      error = p_error,
+      finished_at = now()
+  where id = p_run_id and user_id = p_user_id;
+
+  if p_refund and v_credits > 0 then
+    -- 지갑 락
+    perform 1 from credit_wallets where user_id = p_user_id for update;
+
+    update credit_wallets
+    set balance = balance + v_credits,
+        lifetime_spent = lifetime_spent - v_credits
+    where user_id = p_user_id;
+
+    insert into credit_transactions(user_id, type, amount, metadata)
+    values (
+      p_user_id,
+      'refund',
+      v_credits,
+      jsonb_build_object('reason','report_run_failed','run_id', p_run_id)
+    );
+  end if;
+end;
+
+$$;
+4) API 라우트 스캐폴딩 (Next.js App Router)
+4.1 POST /api/reports/create (end-to-end 오케스트레이션)
+입력: requestConditions, assumptions 등
+처리: begin_run → 엔진 실행 → safety 적용 → finalize_success / fail
+Copy// src/app/api/reports/create/route.ts
+import { NextResponse } from 'next/server';
+import crypto from 'crypto';
+import { createClient } from '@supabase/supabase-js';
+import type { StrategyReport } from '@/types/strategy-report';
+import { applySafetyToReport } from '@/lib/safety/apply-safety-to-report';
+
+const admin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+const sha256 = (s: string) => crypto.createHash('sha256').update(s).digest('hex');
+
+export async function POST(req: Request) {
+  const userId = await requireUserId(req);
+
+  const body = await req.json() as {
+    requestConditions: Record<string, any>;
+    assumptions: Record<string, any>;
+    market?: string;
+    universe?: string;
+    idempotencyKey?: string;
+  };
+
+  // 1) input_hash 생성(정규화 중요)
+  const engineVersion = 'engine_2025.12';
+  const normalized = JSON.stringify({
+    engineVersion,
+    requestConditions: body.requestConditions,
+    assumptions: body.assumptions
+  });
+  const inputHash = sha256(normalized);
+
+  // 2) 예상 차감(서버 기준)
+  const creditsToCharge = 20; // TODO: credit_costs 기반 계산으로 교체
+
+  // 3) begin_run (크레딧 선차감 + run 생성 + 락)
+  let runId: string | null = null;
+  try {
+    const { data: runIdData, error: beginErr } = await admin.rpc('begin_report_run', {
+      p_user_id: userId,
+      p_run_type: 'create',
+      p_input_hash: inputHash,
+      p_credits_to_charge: creditsToCharge,
+      p_idempotency_key: body.idempotencyKey ?? null
+    });
+
+    if (beginErr) throw new Error(beginErr.message);
+    runId = runIdData as string;
+
+    // 4) 엔진 실행(placeholder)
+    const requestId = `req_${Date.now()}`;
+    const rawReport = await runEngineToCreateReport({
+      requestId,
+      market: body.market ?? 'KR_STOCK',
+      universe: body.universe ?? 'KOSPI200(예시)',
+      requestConditions: body.requestConditions,
+      assumptions: body.assumptions,
+      engineVersion,
+      creditsCharged: creditsToCharge
+    });
+
+    // 5) Safety 적용(섹션 단위)
+    const safeReport = await applySafetyToReport({
+      userId,
+      requestId,
+      report: rawReport
+    });
+
+    const reportHash = sha256(JSON.stringify(safeReport));
+
+    // 6) finalize_success (저장 + run 완료)
+    const { data: reportId, error: finErr } = await admin.rpc('finalize_report_run_success', {
+      p_user_id: userId,
+      p_run_id: runId,
+      p_report_version: safeReport.version,
+      p_report_title: safeReport.title,
+      p_market: body.market ?? null,
+      p_universe: body.universe ?? null,
+      p_engine_version: engineVersion,
+      p_request_id: requestId,
+      p_request_conditions: body.requestConditions,
+      p_assumptions: body.assumptions,
+      p_report: safeReport as unknown as any,
+      p_input_hash: inputHash,
+      p_report_hash: reportHash
+    });
+
+    if (finErr) throw new Error(finErr.message);
+
+    return NextResponse.json({ ok: true, reportId });
+
+  } catch (e: any) {
+    // 7) 실패 시 환불 finalize_fail (runId가 있을 때만)
+    if (runId) {
+      await admin.rpc('finalize_report_run_fail', {
+        p_user_id: userId,
+        p_run_id: runId,
+        p_error: e?.message ?? 'unknown',
+        p_refund: true
+      });
+    }
+    return NextResponse.json({ ok: false, error: 'REPORT_CREATE_FAILED' }, { status: 500 });
+  }
+}
+
+async function requireUserId(req: Request): Promise<string> {
+  throw new Error('implement');
+}
+
+async function runEngineToCreateReport(input: {
+  requestId: string;
+  market: string;
+  universe: string;
+  requestConditions: Record<string, any>;
+  assumptions: Record<string, any>;
+  engineVersion: string;
+  creditsCharged: number;
+}): Promise<StrategyReport> {
+  // TODO: 실제 전략 엔진 호출로 교체
+  // 임시: sampleReport 생성
+  const { sampleReport } = await import('@/lib/sample/sample-report');
+  return {
+    ...sampleReport,
+    reportId: `rpt_${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    title: '전략 리포트(예시)',
+    transparency: {
+      ...sampleReport.transparency,
+      creditsCharged: input.creditsCharged,
+      engineVersion: input.engineVersion,
+      requestConditions: input.requestConditions
+    }
+  };
+}
+5) 동시 실행/중복 차감 방지 전략(정리)
+5.1 동시 실행 락(필수)
+begin_report_run에서 pg_advisory_xact_lock(md5(input_hash)) 적용됨
+→ 동일 input_hash 동시 요청은 직렬화됨
+5.2 멱등 키(권장)
+클라이언트가 버튼 더블클릭/리트라이 해도 안전하도록:
+idempotencyKey를 요청에 포함
+report_runs(user_id, idempotency_key) 유니크로 같은 run 재사용
+5.3 중복 리포트 정책(선택)
+“동일 input_hash 당 ready 1개”로 막고 싶으면
+uniq_reports_user_input_hash_ready 인덱스 활성화
+rerun 시 기존 report를 superseded로 바꾸고 새 report insert
+6) Playwright E2E 테스트 시나리오(베타 핵심 5개)
+전제: E2E에서 외부 엔진 호출은 mock 모드(환경변수로 sampleReport 사용)
+
+6.1 시나리오 1: 동의 → 생성 → 저장 → 리포트 페이지 표시
+로그인
+동의 모달 체크/확인
+“전략 설계 시작하기” → 생성 요청
+완료 후 리포트 화면에 섹션(요약/규칙/리스크/면책) 표시 확인
+6.2 시나리오 2: 크레딧 부족 시 생성 차단
+잔액 0 세팅(테스트 유틸)
+생성 버튼 → 4xx(INSUFFICIENT_CREDITS 매핑) 및 “충전/절약 모드” 표시 확인
+6.3 시나리오 3: 더블클릭 멱등
+동일 idempotencyKey로 2회 요청
+report_runs 1개만 생성되는지(또는 같은 runId 반환) 확인
+잔액이 1번만 감소하는지 확인
+6.4 시나리오 4: 실패 시 자동 환불
+엔진 mock을 실패로 설정
+생성 요청 → 실패 응답
+credit_transactions에 spend 후 refund가 생기고 잔액 원복 확인
+6.5 시나리오 5: 공유 링크 읽기전용
+리포트 생성
+공유 링크 발급
+로그아웃 후 /r/:token 접속
+리포트는 보이되 “재실행/연동/주문” 버튼이 없는지 확인
+Playwright 테스트 파일 뼈대
+Copy// tests/e2e/report-flow.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('consent -> create -> view report', async ({ page }) => {
+  await page.goto('/login');
+  // TODO: 로그인 헬퍼
+
+  // 동의
+  await expect(page.getByText('만 19세 이상')).toBeVisible();
+  await page.getByLabel('만 19세 이상입니다.').check();
+  await page.getByLabel('이용 고지에 동의합니다.').check();
+  await page.getByRole('button', { name: '확인' }).click();
+
+  // 생성
+  await page.getByRole('button', { name: '전략 설계 시작하기' }).click();
+
+  // 리포트 확인
+  await expect(page.getByText('요약')).toBeVisible();
+  await expect(page.getByText('리스크')).toBeVisible();
+  await expect(page.getByText('투자 판단과 책임')).toBeVisible();
+});
+7) 릴리즈 게이트(v1.2)
+ begin_report_run / finalize_* RPC가 부분 실패에도 잔액 불일치가 0
+ idempotency로 더블클릭 시 중복 차감 0
+ 실패 시 refund 기록이 항상 남음(감사/CS 대비)
+ 공유 링크는 토큰 해시 방식으로만 저장
+8) CHANGELOG (11회차)
+[ADD] begin_report_run / finalize_report_run_success / finalize_report_run_fail RPC
+[ADD] advisory lock + idempotency로 동시 실행/중복 차감 방지
+[ADD] /api/reports/create 오케스트레이션 스캐폴딩
+[ADD] Playwright E2E 핵심 5 시나리오
+다음 ㄱ (12회차) 예고
+다음은 “기능별 크레딧 원가/차감”을 제품적으로 완성한다:
+
+credit_costs를 기준으로 예상 차감 계산기(서버)
+실행 전 “예상 차감/실행 후 잔액” UI 컴포넌트
+베타 A/B에 맞춰 가격/차감이 쉽게 바뀌는 구조(실험 키 연동)
+그냥 ㄱ 보내면 12회차 진행.
+## ㄱ 루프 12회차 (v1.3) — **기능별 크레딧 차감 “제품 완성”**: 서버 계산기 + 실행 전 프리뷰 UI + 실험(AB)로 가격/차감 스위칭
+
+목표(P0)
+1) `credit_costs`를 단일 진실로 해서 **서버가 예상 차감/실차감을 계산**  
+2) 실행 버튼 누르기 전에 **“예상 차감 / 실행 후 잔액” 프리뷰**를 항상 보여줌  
+3) 베타 A/B 실험으로 **차감표를 유저/코호트별로 바꿀 수 있게**(코드 재배포 없이)
+
+---
+
+# 1) DB: credit_costs 확장(버전/활성/실험용)
+
+현재 `credit_costs(feature UNIQUE)`만 있으면 “실험/버전”이 어렵다. 아래처럼 확장 권장.
+
+```sql
+-- 기존이 있다면 마이그레이션 필요(새 테이블로 가는 걸 권장)
+create table if not exists credit_cost_schedules (
+  id uuid primary key default gen_random_uuid(),
+  key text not null unique,                  -- 'default_v1', 'beta_offer_B'
+  active boolean not null default false,
+  description text,
+  created_at timestamptz default now()
+);
+
+create table if not exists credit_cost_items (
+  id uuid primary key default gen_random_uuid(),
+  schedule_key text not null references credit_cost_schedules(key) on delete cascade,
+  feature text not null,                     -- 'report.create', 'report.refresh_validation', 'tutor.ask' ...
+  base_cost integer not null,
+  unit text not null default 'call',         -- 'call' | 'minute' | 'asset' 등(확장)
+  metadata jsonb,
+  unique (schedule_key, feature)
+);
+
+-- 빠른 조회
+create index if not exists idx_cost_items_schedule on credit_cost_items(schedule_key);
+```
+
+### feature 키 표준(권장)
+- `report.create` (리포트 생성: 전략 조립 + 요약 + 리스크/체크리스트)
+- `report.rerun`
+- `report.refresh_validation`
+- `backtest.run`
+- `coach.ask`
+
+> “엔진 내부 단계(MoA 등)”는 사용자 노출 용어에서만 제거하면 됨. 비용 feature는 내부키로 유지 가능.
+
+---
+
+# 2) 실험/유저별 비용표 선택 로직
+
+## 2.1 실험 기반 스케줄 선택(권장)
+- `experiment_assignments`에 예: `credit_schedule_v1` 실험을 만들고
+- variant에 따라 `schedule_key`를 매핑
+
+예:
+- Variant A → `default_v1`
+- Variant B → `beta_offer_B` (첫 세션 할인 등)
+
+## 2.2 서버 함수: 유저의 active schedule 결정
+```ts
+// src/lib/credits/get-cost-schedule.ts
+import { createClient } from '@supabase/supabase-js';
+
+const admin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+export async function getUserCostScheduleKey(userId: string): Promise<string> {
+  // 1) 실험 할당 우선
+  const { data: assign } = await admin
+    .from('experiment_assignments')
+    .select('variant')
+    .eq('experiment_key', 'credit_schedule_v1')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (assign?.variant === 'B') return 'beta_offer_B';
+  if (assign?.variant === 'A') return 'default_v1';
+
+  // 2) fallback: active=true 인 스케줄(전역)
+  const { data: active } = await admin
+    .from('credit_cost_schedules')
+    .select('key')
+    .eq('active', true)
+    .limit(1)
+    .maybeSingle();
+
+  return active?.key ?? 'default_v1';
+}
+```
+
+---
+
+# 3) 서버 “예상 차감 계산기” + 프리뷰 API
+
+## 3.1 계산기(단순 버전)
+```ts
+// src/lib/credits/estimate-cost.ts
+import { createClient } from '@supabase/supabase-js';
+
+const admin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+export async function estimateCredits(opts: {
+  scheduleKey: string;
+  feature: string;
+  quantity?: number; // 확장 대비(기본 1)
+}) {
+  const qty = opts.quantity ?? 1;
+
+  const { data, error } = await admin
+    .from('credit_cost_items')
+    .select('base_cost, unit, metadata')
+    .eq('schedule_key', opts.scheduleKey)
+    .eq('feature', opts.feature)
+    .single();
+
+  if (error || !data) throw new Error('COST_NOT_FOUND');
+
+  const estimated = data.base_cost * qty;
+  return { estimatedCredits: estimated, unit: data.unit, metadata: data.metadata };
+}
+```
+
+## 3.2 프리뷰 API: `POST /api/credits/preview`
+- 입력: `{ feature, quantity?, context? }`
+- 출력: `{ scheduleKey, estimatedCredits, balance, balanceAfter }`
+
+```ts
+// src/app/api/credits/preview/route.ts
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { getUserCostScheduleKey } from '@/lib/credits/get-cost-schedule';
+import { estimateCredits } from '@/lib/credits/estimate-cost';
+
+const admin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+export async function POST(req: Request) {
+  const userId = await requireUserId(req);
+  const { feature, quantity } = await req.json() as { feature: string; quantity?: number };
+
+  const scheduleKey = await getUserCostScheduleKey(userId);
+  const est = await estimateCredits({ scheduleKey, feature, quantity });
+
+  const { data: wallet } = await admin
+    .from('credit_wallets')
+    .select('balance')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  const balance = wallet?.balance ?? 0;
+
+  return NextResponse.json({
+    ok: true,
+    scheduleKey,
+    feature,
+    estimatedCredits: est.estimatedCredits,
+    balance,
+    balanceAfter: balance - est.estimatedCredits
+  });
+}
+
+async function requireUserId(req: Request): Promise<string> {
+  throw new Error('implement');
+}
+```
+
+---
+
+# 4) 실행 전 프리뷰 UI 컴포넌트 (필수 UX)
+
+## 4.1 컴포넌트 요구사항
+- 실행 버튼 근처에 항상 표시
+- “예상 차감 / 실행 후 잔액” 표시
+- 잔액 부족이면:
+  - 실행 버튼 disable
+  - “충전” CTA 노출
+- 문구는 강요형 금지(이전 카피 정책 유지)
+
+## 4.2 스켈레톤
+```tsx
+// src/components/credits/CreditCostPreview.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+
+export function CreditCostPreview(props: { feature: string; quantity?: number }) {
+  const [data, setData] = useState<null | {
+    estimatedCredits: number; balance: number; balanceAfter: number;
+  }>(null);
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch('/api/credits/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feature: props.feature, quantity: props.quantity })
+      });
+      const json = await res.json();
+      if (json.ok) setData(json);
+    })();
+  }, [props.feature, props.quantity]);
+
+  if (!data) return null;
+
+  const insufficient = data.balanceAfter < 0;
+
+  return (
+    <div className="rounded-lg border border-zinc-800 bg-zinc-950 p-3 text-sm">
+      <div className="flex items-center justify-between">
+        <span className="text-zinc-400">예상 차감</span>
+        <span className="font-medium text-zinc-100">{data.estimatedCredits} 크레딧</span>
+      </div>
+      <div className="mt-1 flex items-center justify-between">
+        <span className="text-zinc-400">실행 후 잔액</span>
+        <span className={insufficient ? 'font-semibold text-rose-300' : 'text-zinc-200'}>
+          {data.balanceAfter} 크레딧
+        </span>
+      </div>
+
+      {insufficient ? (
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-rose-300">크레딧이 부족합니다.</span>
+          <a className="text-zinc-100 underline" href="/pricing">크레딧 충전</a>
+        </div>
+      ) : (
+        <p className="mt-2 text-xs text-zinc-500">
+          실행 전 기준의 예상치입니다. 조건/가정에 따라 실제 차감이 달라질 수 있습니다.
+        </p>
+      )}
+    </div>
+  );
+}
+```
+
+### 실행 버튼 disable 연결(예시)
+- 부모 컴포넌트에서 preview 응답을 공유하거나
+- `CreditCostPreview`가 `onInsufficientChange` 콜백을 제공하도록 확장
+
+---
+
+# 5) “실차감”과 “예상차감” 일치시키는 운영 규칙
+
+프리뷰는 UX용, 실차감은 **서버 RPC(begin_report_run)**에서 확정해야 한다.
+
+## 권장 규칙
+- begin_run 호출 전에 서버가:
+  1) `scheduleKey` 결정
+  2) `feature` 비용 조회
+  3) 그 값을 `p_credits_to_charge`로 넣어서 begin_run 실행  
+- 즉, **프리뷰 계산기와 실차감 계산기가 동일 코드/동일 테이블**을 쓰게 만든다.
+
+> 다음 개선(P1): requestConditions(예: 자산 수, 기간)에 따라 `quantity`를 자동 산정해서 비용도 스케일링.
+
+---
+
+# 6) 기본 비용표 시드(예시)
+
+```sql
+insert into credit_cost_schedules(key, active, description)
+values
+('default_v1', true, '기본 차감표 v1'),
+('beta_offer_B', false, '베타 오퍼 B: 첫 세션 할인')
+on conflict (key) do nothing;
+
+insert into credit_cost_items(schedule_key, feature, base_cost, unit)
+values
+('default_v1', 'report.create', 20, 'call'),
+('default_v1', 'report.rerun', 20, 'call'),
+('default_v1', 'report.refresh_validation', 8, 'call'),
+('default_v1', 'backtest.run', 5, 'call'),
+('default_v1', 'coach.ask', 1, 'call')
+on conflict (schedule_key, feature) do nothing;
+
+-- 베타 B 예시(첫 세션 완주 유도)
+insert into credit_cost_items(schedule_key, feature, base_cost, unit, metadata)
+values
+('beta_offer_B', 'report.create', 10, 'call', '{"note":"베타 할인"}')
+on conflict (schedule_key, feature) do nothing;
+```
+
+---
+
+# 7) 테스트/게이트 (필수)
+
+## 단위/통합 테스트(최소)
+1) preview API가 scheduleKey/estimatedCredits/balanceAfter를 반환  
+2) 실차감(begin_report_run)에 전달된 `credits_to_charge`가 preview와 동일 테이블에서 나온 값인지  
+3) 실험 variant=B 유저는 `beta_offer_B` 비용표 적용되는지  
+4) 비용표에 없는 feature 호출 시 `COST_NOT_FOUND`로 차단(500이 아니라 400/422로 매핑 권장)
+
+## 릴리즈 게이트
+- [ ] “실행 버튼”이 프리뷰 없이 노출되지 않는다(최소 create/rerun/refresh_validation)  
+- [ ] 비용표 변경은 DB만으로 가능(코드 배포 없이)  
+- [ ] 실험 키(`credit_schedule_v1`) 변경 시 코호트가 안정적으로 유지(assignment 유니크)
+
+---
+
+# 8) CHANGELOG (12회차)
+- [ADD] 비용표 스케줄/아이템 테이블(버전·실험 대응)
+- [ADD] 유저별 schedule 선택 로직(실험 우선)
+- [ADD] 비용 예상 계산기 + `/api/credits/preview`
+- [ADD] 실행 전 “예상 차감/실행 후 잔액” UI 컴포넌트 스켈레톤
+
+---
+
+## 다음 ㄱ (13회차) 예고
+다음은 “첫 세션 완주” 전환율을 올리는 UX 패키지로 간다:
+1) 온보딩 튜토리얼(1회 완주 플로우) PRD + 이벤트 설계  
+2) 샘플 전략 10개(기관 리포트 형태) 콘텐츠 템플릿  
+3) ‘절약 모드(요약 실행)’ 기능 스펙(잔액 부족 시 이탈 방지)
+
+그냥 `ㄱ` 보내면 13회차 진행.지금 메시지에 **실제 한투(OpenAPI) 시크릿/토큰/계좌정보(PII 포함)**가 그대로 들어가 있어. 이건 보안상 치명적이라 **나는 이 값들을 사용/반영해서 스크립트를 만들 수 없고**, 우선 **즉시 폐기/재발급(로테이션)**부터 해야 해.
+
+## 0) 즉시 조치(P0)
+1) **한투 개발자센터에서 AppKey/AppSecret 재발급 + 기존 키 폐기**  
+2) 혹시 저 문자열이 access token/secret 성격이면 **토큰도 즉시 만료 처리**(가능한 경우)  
+3) 이 대화/노션/슬랙/레포에 붙인 키가 있으면 **전부 삭제**  
+4) 앞으로는 키를 채팅에 붙이지 말고 **환경변수(.env / Vercel Secret / GitHub Actions Secret)**로만 넣어
+
+---
+
+아래는 “개발자 모드로 한투(모의투자 VTS) + 실제 키를 **환경변수로만** 주입해서” **연동 전 기능 테스트를 한 번에 돌리는 스크립트 패키지**(템플릿)야.  
+너는 키를 나에게 주지 말고, 로컬 `.env.local`에만 넣으면 돼.
+
+# ㄱ 루프 13회차 (v1.4) — KIS(한투) VTS E2E 테스트 러너
+고객명	박현우
+고객 ID	@2019027
+이메일	hyunwoo9942@naver.com
+
+박현우	모의투자계좌	50157999	2025.12.12	2026.12.12	
+
+PSseWBztxI0JYwaP150bmFjlDYPTWLjS4nvY
+
+GRmcanacXcTY8RTi56l5n0UbXLUuILy0oW160kwtDGcRXJYlbk3JUUy3PjK/jL5v9FS4mrcg9rHLr0/McU5apLM1emlY6bGyFSW+IXeYSMyO0SsFi4O5dBf9xf+u251QCduZ9mh7Cx/MpHbFQZqf1NmD03ZLdJAil8LJ7HFI2/wBLScFBSw=
+## 1) 요구되는 환경변수(.env.local)
+> 계좌는 보통 **CANO(8자리)** + **ACNT_PRDT_CD(2자리)** 조합이 필요함.  
+> 너가 준 건 8자리만 보여서, **상품코드 2자리**는 추가로 확인해서 넣어야 함(예: `01`).
+
+```bash
+# KIS 환경: vts(모의) / prod(실계좌)  ← 테스트는 무조건 vts 권장
+KIS_ENV=vts
+
+KIS_APP_KEY=...
+KIS_APP_SECRET=...
+
+# 계좌
+KIS_CANO=########        # 8자리
+KIS_ACNT_PRDT_CD=##      # 2자리 (예: 01)
+
+# 주문 테스트 안전장치 (YES일 때만 실제 주문 호출)
+KIS_ALLOW_ORDER=NO
+
+# 테스트 종목(예: 삼성전자)
+KIS_TEST_SYMBOL=005930
+```
+
+## 2) 설치/실행
+```bash
+npm i dotenv zod
+npm i -D tsx typescript
+node -v   # Node 18+ 권장
+```
+
+실행:
+```bash
+npx tsx scripts/kis/run-all.ts
+```
+
+---
+
+# 3) 파일 트리(추가)
+```
+scripts/kis/
+  run-all.ts
+  kis-client.ts
+  token-store.ts
+  endpoints.ts
+  tests/
+    01-token.ts
+    02-quote.ts
+    03-balance.ts
+    04-place-order.ts
+    05-order-status.ts
+    06-cancel.ts
+```
+
+---
+
+# 4) KIS 클라이언트 (VTS/PROD 자동)
+> 엔드포인트/헤더/tr_id는 한투 문서 기준으로 맞춰야 하고, **모의(VTS)와 실계좌(PROD) tr_id가 다른 케이스가 많아** 아래처럼 분리 테이블로 관리하는 걸 권장.
+
+## `scripts/kis/endpoints.ts`
+```ts
+export const KIS_BASE_URL = {
+  vts:  'https://openapivts.koreainvestment.com:29443',
+  prod: 'https://openapi.koreainvestment.com:9443'
+} as const;
+
+export const TR_ID = {
+  vts: {
+    // 시세
+    QUOTE_PRICE: 'FHKST01010100',
+    // 잔고(※ 문서에서 TR 정확히 확인 필요)
+    INQUIRE_BALANCE: 'VTTC8434R',
+    // 현금주문(매수/매도)
+    ORDER_BUY: 'VTTC0802U',
+    ORDER_SELL: 'VTTC0801U',
+    // 정정/취소
+    ORDER_CANCEL: 'VTTC0803U'
+  },
+  prod: {
+    QUOTE_PRICE: 'FHKST01010100',
+    INQUIRE_BALANCE: 'TTTC8434R',
+    ORDER_BUY: 'TTTC0802U',
+    ORDER_SELL: 'TTTC0801U',
+    ORDER_CANCEL: 'TTTC0803U'
+  }
+} as const;
+```
+
+## `scripts/kis/token-store.ts` (토큰 캐시)
+```ts
+import fs from 'node:fs';
+import path from 'node:path';
+
+const CACHE_DIR = path.join(process.cwd(), '.cache');
+const TOKEN_PATH = path.join(CACHE_DIR, 'kis-token.json');
+
+export type CachedToken = { access_token: string; expires_at: number };
+
+export function readToken(): CachedToken | null {
+  try {
+    const raw = fs.readFileSync(TOKEN_PATH, 'utf-8');
+    const t = JSON.parse(raw) as CachedToken;
+    if (!t.access_token) return null;
+    if (Date.now() > t.expires_at - 30_000) return null; // 30초 버퍼
+    return t;
+  } catch { return null; }
+}
+
+export function writeToken(token: CachedToken) {
+  fs.mkdirSync(CACHE_DIR, { recursive: true });
+  fs.writeFileSync(TOKEN_PATH, JSON.stringify(token, null, 2));
+}
+```
+
+## `scripts/kis/kis-client.ts` (요청 래퍼)
+```ts
+import 'dotenv/config';
+import { KIS_BASE_URL, TR_ID } from './endpoints';
+import { readToken, writeToken } from './token-store';
+
+type Env = 'vts' | 'prod';
+
+function must(name: string) {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing env: ${name}`);
+  return v;
+}
+
+export class KisClient {
+  env: Env;
+  baseUrl: string;
+  appKey: string;
+  appSecret: string;
+
+  constructor() {
+    this.env = (process.env.KIS_ENV as Env) ?? 'vts';
+    this.baseUrl = KIS_BASE_URL[this.env];
+    this.appKey = must('KIS_APP_KEY');
+    this.appSecret = must('KIS_APP_SECRET');
+  }
+
+  tr() {
+    return TR_ID[this.env];
+  }
+
+  async getAccessToken(): Promise<string> {
+    const cached = readToken();
+    if (cached) return cached.access_token;
+
+    // OAuth token
+    const url = `${this.baseUrl}/oauth2/tokenP`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        grant_type: 'client_credentials',
+        appkey: this.appKey,
+        appsecret: this.appSecret
+      })
+    });
+
+    const json = await res.json() as any;
+    if (!res.ok) throw new Error(`tokenP failed: ${res.status} ${JSON.stringify(json)}`);
+
+    // expires_in(초) 제공되는 경우가 많음
+    const expiresInSec = Number(json.expires_in ?? 3600);
+    writeToken({ access_token: json.access_token, expires_at: Date.now() + expiresInSec * 1000 });
+    return json.access_token;
+  }
+
+  async request(opts: {
+    method: 'GET' | 'POST';
+    path: string;
+    tr_id: string;
+    params?: Record<string, string>;
+    body?: any;
+  }) {
+    const token = await this.getAccessToken();
+    const url = new URL(`${this.baseUrl}${opts.path}`);
+    if (opts.params) Object.entries(opts.params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+    const res = await fetch(url, {
+      method: opts.method,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        authorization: `Bearer ${token}`,
+        appkey: this.appKey,
+        appsecret: this.appSecret,
+        tr_id: opts.tr_id
+      },
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    });
+
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(`${opts.method} ${opts.path} failed: ${res.status} ${JSON.stringify(json)}`);
+    return json;
+  }
+}
+```
+
+---
+
+# 5) 테스트 스크립트들
+
+## `scripts/kis/tests/01-token.ts`
+```ts
+import { KisClient } from '../kis-client';
+
+export async function testToken() {
+  const kis = new KisClient();
+  const token = await kis.getAccessToken();
+  if (!token || token.length < 20) throw new Error('Token looks invalid');
+  return { ok: true };
+}
+```
+
+## `scripts/kis/tests/02-quote.ts`
+```ts
+import { KisClient } from '../kis-client';
+
+export async function testQuote() {
+  const kis = new KisClient();
+  const symbol = process.env.KIS_TEST_SYMBOL ?? '005930';
+
+  const json = await kis.request({
+    method: 'GET',
+    path: '/uapi/domestic-stock/v1/quotations/inquire-price',
+    tr_id: kis.tr().QUOTE_PRICE,
+    params: {
+      FID_COND_MRKT_DIV_CODE: 'J',
+      FID_INPUT_ISCD: symbol
+    }
+  });
+
+  // outp 구조는 문서/응답에 맞게 조정
+  return { ok: true, symbol, sample: json?.output ?? json };
+}
+```
+
+## `scripts/kis/tests/03-balance.ts`
+```ts
+import { KisClient } from '../kis-client';
+
+export async function testBalance() {
+  const kis = new KisClient();
+  const CANO = process.env.KIS_CANO!;
+  const ACNT_PRDT_CD = process.env.KIS_ACNT_PRDT_CD!;
+
+  const json = await kis.request({
+    method: 'GET',
+    path: '/uapi/domestic-stock/v1/trading/inquire-balance',
+    tr_id: kis.tr().INQUIRE_BALANCE,
+    params: {
+      CANO,
+      ACNT_PRDT_CD,
+      // 아래 파라미터들은 문서에서 요구하는 값으로 맞춰야 함(샘플)
+      AFHR_FLPR_YN: 'N',
+      OFL_YN: 'N',
+      INQR_DVSN: '02',
+      UNPR_DVSN: '01',
+      FUND_STTL_ICLD_YN: 'N',
+      FNCG_AMT_AUTO_RDPT_YN: 'N',
+      PRCS_DVSN: '01',
+      CTX_AREA_FK100: '',
+      CTX_AREA_NK100: ''
+    }
+  });
+
+  return { ok: true, sample: json?.output1 ?? json };
+}
+```
+
+## `scripts/kis/tests/04-place-order.ts` (안전장치)
+```ts
+import { KisClient } from '../kis-client';
+
+export async function testPlaceOrder() {
+  const allow = (process.env.KIS_ALLOW_ORDER ?? 'NO') === 'YES';
+  if (!allow) return { ok: true, skipped: true, reason: 'KIS_ALLOW_ORDER!=YES' };
+
+  const kis = new KisClient();
+  const CANO = process.env.KIS_CANO!;
+  const ACNT_PRDT_CD = process.env.KIS_ACNT_PRDT_CD!;
+  const symbol = process.env.KIS_TEST_SYMBOL ?? '005930';
+
+  // 모의투자라도 실제 주문이 들어가므로 수량/가격은 보수적으로
+  const body = {
+    CANO,
+    ACNT_PRDT_CD,
+    PDNO: symbol,
+    ORD_DVSN: '00',     // 지정가(예시) — 문서 기준 확인
+    ORD_QTY: '1',
+    ORD_UNPR: '1'       // 1원 같은 값은 거절될 수 있음. 실제 허용 호가로 설정 필요.
+  };
+
+  const json = await kis.request({
+    method: 'POST',
+    path: '/uapi/domestic-stock/v1/trading/order-cash',
+    tr_id: kis.tr().ORDER_BUY,
+    body
+  });
+
+  // 주문번호 추출(응답 구조에 맞게)
+  const ordNo = json?.output?.ODNO ?? json?.output?.odno;
+  if (!ordNo) throw new Error(`Order placed but ODNO not found: ${JSON.stringify(json)}`);
+
+  return { ok: true, orderNo: ordNo, raw: json };
+}
+```
+
+## `scripts/kis/tests/05-order-status.ts` / `06-cancel.ts`
+- 주문조회/취소는 한투 문서의 “조회/정정취소” API 경로/필수 파라미터가 케이스별로 달라서, **너 프로젝트에서 이미 쓰는 KIS 어댑터 경로/파라미터에 맞춰 붙이는 게 가장 안전**해.
+- 다음 회차에서 너의 `UnifiedBroker(KIS adapter)` 시그니처를 기준으로 **주문→조회→취소까지 완전 자동**으로 완성해줄게.
+
+---
+
+# 6) 전체 러너 `scripts/kis/run-all.ts`
+```ts
+import 'dotenv/config';
+import { testToken } from './tests/01-token';
+import { testQuote } from './tests/02-quote';
+import { testBalance } from './tests/03-balance';
+import { testPlaceOrder } from './tests/04-place-order';
+
+async function run(name: string, fn: () => Promise<any>) {
+  const t0 = Date.now();
+  try {
+    const out = await fn();
+    console.log(`[PASS] ${name} (${Date.now()-t0}ms)`, out);
+    return true;
+  } catch (e: any) {
+    console.error(`[FAIL] ${name} (${Date.now()-t0}ms)`, e?.message ?? e);
+    return false;
+  }
+}
+
+(async () => {
+  const results = [];
+  results.push(await run('token', testToken));
+  results.push(await run('quote', testQuote));
+  results.push(await run('balance', testBalance));
+  results.push(await run('place_order', testPlaceOrder));
+
+  const ok = results.every(Boolean);
+  process.exit(ok ? 0 : 1);
+})();
+```
+
+---
+
+## 7) 내가 다음으로 필요한 것(키 말고)
+“모든 기능 테스트(주문조회/취소 포함)”를 정확히 완성하려면 **상품코드(ACNT_PRDT_CD)** 와, 너 코드베이스의 KIS 어댑터가 쓰는:
+- 주문조회 API 경로(체결/미체결 조회)와 필요한 파라미터
+- 취소/정정 API에서 필요한 `orgn_odno`(원주문번호) 매핑 방식
+
+이건 **키/시크릿이 아니라** 스펙 정보라 공유해도 안전해.
+
+---
+
+## 다음 ㄱ (14회차) 예고
+- 네 프로젝트의 `UnifiedBroker` 인터페이스에 맞춘 **KIS Adapter 통합 테스트 러너**로 업그레이드:
+  - connect → account → cash/positions → quote → place → status → cancel → reconcile(정합성)
+  - 실패 시 자동 환불/크레딧 복구까지 연계(이미 만든 report_run/credit 트랜잭션 구조 활용)
+
+원하면 `ㄱ` 보내고, 추가로 **“ACNT_PRDT_CD가 뭐다”**만 한 줄로 알려줘(키는 절대 보내지 마).
+## ㄱ 루프 14회차 (v1.5) — **UnifiedBroker 기준 KIS(한투 VTS) 통합 테스트 러너**: connect→계좌→시세→주문→조회→취소→정합성
+
+전제(보안)
+- **키/토큰/계좌정보는 절대 채팅에 붙이지 말고** `.env.local`/Vercel Secret에만 넣어.
+- 테스트는 기본값 **VTS(모의) + 주문 금지**로 동작하고, `KIS_ALLOW_ORDER=YES`일 때만 주문/취소까지 실행.
+
+---
+
+# 1) 목표: “고객(박현우) 모의계좌”로 실제 end-to-end가 돌아가는 자동 스모크 테스트
+### 커버 범위
+1) 브로커 연결(토큰 획득/갱신)
+2) 계좌 조회(현금/평가/보유)
+3) 시세 조회(단일 종목)
+4) 주문(소액/안전) — 옵션
+5) 주문 상태 조회(미체결/체결)
+6) 주문 취소 — 옵션
+7) 정합성(reconcile): 주문 이벤트/잔고 변화(가능 범위 내)
+
+---
+
+# 2) 환경변수(.env.local) — **UnifiedBroker 공통 형태로 정리**
+```bash
+BROKER_UNDER_TEST=KIS
+KIS_ENV=vts
+
+KIS_APP_KEY=...
+KIS_APP_SECRET=...
+
+KIS_CANO=########
+KIS_ACNT_PRDT_CD=##          # 2자리
+
+KIS_TEST_SYMBOL=005930
+KIS_ALLOW_ORDER=NO            # YES일 때만 주문/취소 수행
+KIS_TEST_ORDER_QTY=1
+KIS_TEST_ORDER_PRICE=0        # 0이면 "현재가 기반 안전 가격 계산" 로직 사용(권장)
+
+# 테스트가 계좌에 피해 주지 않도록 상한선(원)
+KIS_MAX_NOTIONAL_KRW=20000
+```
+
+---
+
+# 3) “UnifiedBroker” 테스트 표준 (어댑터 공통 계약)
+너 프로젝트에 이미 `UnifiedBroker`가 있다고 했으니, 테스트 러너는 아래 같은 최소 메서드가 있다고 가정하고 붙일 수 있게 만든다.
+
+## 3.1 브로커 테스트에 필요한 최소 인터페이스(가정)
+```ts
+export interface UnifiedBroker {
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+
+  getAccountSummary(): Promise<{
+    cashKRW?: number;
+    totalEquityKRW?: number;
+    updatedAt?: string;
+  }>;
+
+  getPositions(): Promise<Array<{
+    symbol: string;
+    qty: number;
+    avgPrice?: number;
+    marketValue?: number;
+  }>>;
+
+  getQuote(symbol: string): Promise<{
+    symbol: string;
+    price: number;
+    timestamp?: string;
+  }>;
+
+  placeOrder(input: {
+    symbol: string;
+    side: 'buy' | 'sell';
+    type: 'limit' | 'market';
+    qty: number;
+    limitPrice?: number;
+  }): Promise<{ orderId: string }>;
+
+  getOrderStatus(orderId: string): Promise<{
+    orderId: string;
+    status: 'new' | 'partially_filled' | 'filled' | 'cancelled' | 'rejected' | 'unknown';
+    filledQty?: number;
+    avgFillPrice?: number;
+  }>;
+
+  cancelOrder(orderId: string): Promise<{ cancelled: boolean }>;
+}
+```
+
+> 네 실제 인터페이스가 다르면, **파일 시그니처(메서드명/리턴 구조)만** 알려주면 여기에 맞춰 테스트 러너를 바로 변환해줄게. (키/토큰/계좌번호는 말하지 마)
+
+---
+
+# 4) 테스트 러너 구조 (Node 스크립트 + 리포트 출력)
+
+## 4.1 파일 트리
+```
+scripts/broker-smoke/
+  run.ts
+  broker-factory.ts
+  assertions.ts
+  safe-order.ts
+  steps/
+    01-connect.ts
+    02-account.ts
+    03-quote.ts
+    04-order.ts
+    05-status.ts
+    06-cancel.ts
+    07-reconcile.ts
+```
+
+## 4.2 broker-factory (KIS 선택)
+```ts
+// scripts/broker-smoke/broker-factory.ts
+import type { UnifiedBroker } from '@/lib/broker/types'; // 너 프로젝트 경로에 맞게 수정
+
+export async function createBrokerUnderTest(): Promise<UnifiedBroker> {
+  const which = process.env.BROKER_UNDER_TEST ?? 'KIS';
+
+  if (which === 'KIS') {
+    // 너 프로젝트의 실제 KIS 어댑터 import로 교체
+    const { KISBroker } = await import('@/lib/broker/adapters/kis'); 
+    return new KISBroker({ env: process.env.KIS_ENV ?? 'vts' });
+  }
+
+  throw new Error(`Unknown broker: ${which}`);
+}
+```
+
+---
+
+# 5) 안전 주문 가드레일 (계좌 보호 P0)
+
+## 5.1 현재가 기반 limitPrice 산정(“체결 가능하지만 과도하지 않게”)
+```ts
+// scripts/broker-smoke/safe-order.ts
+export function computeSafeLimitPrice(opts: { side: 'buy'|'sell'; last: number }) {
+  // 너무 공격적이면 즉시 체결되고, 너무 보수적이면 미체결로 남음.
+  // 테스트 목적상 "최소 체결 가능성"을 높이되 상한선을 둔다.
+  const slip = 0.01; // 1%
+  return opts.side === 'buy'
+    ? Math.ceil(opts.last * (1 + slip))
+    : Math.floor(opts.last * (1 - slip));
+}
+
+export function assertNotionalWithinLimit(opts: { price: number; qty: number; maxKRW: number }) {
+  const notional = opts.price * opts.qty;
+  if (notional > opts.maxKRW) {
+    throw new Error(`Notional too high: ${notional} > ${opts.maxKRW}`);
+  }
+  return notional;
+}
+```
+
+---
+
+# 6) 스텝 구현 (connect→account→quote→order→status→cancel→reconcile)
+
+## 6.1 01-connect
+```ts
+// scripts/broker-smoke/steps/01-connect.ts
+import type { UnifiedBroker } from '@/lib/broker/types';
+
+export async function stepConnect(b: UnifiedBroker) {
+  await b.connect();
+  return { ok: true };
+}
+```
+
+## 6.2 02-account
+```ts
+// scripts/broker-smoke/steps/02-account.ts
+import type { UnifiedBroker } from '@/lib/broker/types';
+
+export async function stepAccount(b: UnifiedBroker) {
+  const summary = await b.getAccountSummary();
+  const positions = await b.getPositions();
+  return { summary, positionsCount: positions.length };
+}
+```
+
+## 6.3 03-quote
+```ts
+// scripts/broker-smoke/steps/03-quote.ts
+import type { UnifiedBroker } from '@/lib/broker/types';
+
+export async function stepQuote(b: UnifiedBroker, symbol: string) {
+  const q = await b.getQuote(symbol);
+  if (!q?.price || q.price <= 0) throw new Error('Invalid quote price');
+  return { symbol, price: q.price };
+}
+```
+
+## 6.4 04-order (옵션)
+```ts
+// scripts/broker-smoke/steps/04-order.ts
+import type { UnifiedBroker } from '@/lib/broker/types';
+import { computeSafeLimitPrice, assertNotionalWithinLimit } from '../safe-order';
+
+export async function stepOrder(b: UnifiedBroker, symbol: string, last: number) {
+  const allow = (process.env.KIS_ALLOW_ORDER ?? 'NO') === 'YES';
+  if (!allow) return { skipped: true, reason: 'KIS_ALLOW_ORDER!=YES' };
+
+  const qty = Number(process.env.KIS_TEST_ORDER_QTY ?? '1');
+  const maxKRW = Number(process.env.KIS_MAX_NOTIONAL_KRW ?? '20000');
+
+  const configured = Number(process.env.KIS_TEST_ORDER_PRICE ?? '0');
+  const limitPrice = configured > 0 ? configured : computeSafeLimitPrice({ side: 'buy', last });
+
+  assertNotionalWithinLimit({ price: limitPrice, qty, maxKRW });
+
+  const placed = await b.placeOrder({
+    symbol,
+    side: 'buy',
+    type: 'limit',
+    qty,
+    limitPrice
+  });
+
+  if (!placed?.orderId) throw new Error('orderId missing');
+  return { orderId: placed.orderId, limitPrice, qty };
+}
+```
+
+## 6.5 05-status (폴링)
+```ts
+// scripts/broker-smoke/steps/05-status.ts
+import type { UnifiedBroker } from '@/lib/broker/types';
+
+export async function stepStatus(b: UnifiedBroker, orderId?: string) {
+  if (!orderId) return { skipped: true, reason: 'no orderId' };
+
+  const timeoutMs = 20_000;
+  const intervalMs = 1_000;
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    const st = await b.getOrderStatus(orderId);
+    if (st.status !== 'unknown' && st.status !== 'new') {
+      return { status: st.status, filledQty: st.filledQty ?? 0 };
+    }
+    await new Promise(r => setTimeout(r, intervalMs));
+  }
+
+  // 타임아웃이면 new 상태일 수 있음(테스트에서는 다음 단계 cancel 시도)
+  const st = await b.getOrderStatus(orderId);
+  return { status: st.status, timedOut: true };
+}
+```
+
+## 6.6 06-cancel (옵션)
+```ts
+// scripts/broker-smoke/steps/06-cancel.ts
+import type { UnifiedBroker } from '@/lib/broker/types';
+
+export async function stepCancel(b: UnifiedBroker, orderId?: string) {
+  const allow = (process.env.KIS_ALLOW_ORDER ?? 'NO') === 'YES';
+  if (!allow) return { skipped: true, reason: 'KIS_ALLOW_ORDER!=YES' };
+  if (!orderId) return { skipped: true, reason: 'no orderId' };
+
+  const res = await b.cancelOrder(orderId);
+  return { cancelled: !!res.cancelled };
+}
+```
+
+## 6.7 07-reconcile (가능 범위)
+```ts
+// scripts/broker-smoke/steps/07-reconcile.ts
+import type { UnifiedBroker } from '@/lib/broker/types';
+
+export async function stepReconcile(b: UnifiedBroker, symbol: string) {
+  // 주문이 체결됐으면 positions에 반영되는지 정도만 확인(지연 가능성 감안)
+  const positions = await b.getPositions();
+  const p = positions.find(x => x.symbol === symbol);
+  return { hasPosition: !!p, positionQty: p?.qty ?? 0 };
+}
+```
+
+---
+
+# 7) 전체 러너 `scripts/broker-smoke/run.ts`
+```ts
+import 'dotenv/config';
+import { createBrokerUnderTest } from './broker-factory';
+
+import { stepConnect } from './steps/01-connect';
+import { stepAccount } from './steps/02-account';
+import { stepQuote } from './steps/03-quote';
+import { stepOrder } from './steps/04-order';
+import { stepStatus } from './steps/05-status';
+import { stepCancel } from './steps/06-cancel';
+import { stepReconcile } from './steps/07-reconcile';
+
+async function runStep(name: string, fn: () => Promise<any>) {
+  const t0 = Date.now();
+  try {
+    const out = await fn();
+    console.log(`[PASS] ${name} (${Date.now()-t0}ms)`, out);
+    return { name, ok: true, out };
+  } catch (e: any) {
+    console.error(`[FAIL] ${name} (${Date.now()-t0}ms)`, e?.message ?? e);
+    return { name, ok: false, error: e?.message ?? String(e) };
+  }
+}
+
+(async () => {
+  const symbol = process.env.KIS_TEST_SYMBOL ?? '005930';
+  const broker = await createBrokerUnderTest();
+
+  const results: any[] = [];
+  let orderId: string | undefined;
+  let lastPrice = 0;
+
+  results.push(await runStep('connect', () => stepConnect(broker)));
+  results.push(await runStep('account', () => stepAccount(broker)));
+
+  const quoteRes = await runStep('quote', async () => {
+    const q = await stepQuote(broker, symbol);
+    lastPrice = q.price;
+    return q;
+  });
+  results.push(quoteRes);
+
+  const orderRes = await runStep('order', async () => {
+    const o = await stepOrder(broker, symbol, lastPrice);
+    orderId = (o as any).orderId;
+    return o;
+  });
+  results.push(orderRes);
+
+  results.push(await runStep('status', () => stepStatus(broker, orderId)));
+  results.push(await runStep('cancel', () => stepCancel(broker, orderId)));
+  results.push(await runStep('reconcile', () => stepReconcile(broker, symbol)));
+
+  await broker.disconnect().catch(() => {});
+  const ok = results.every(r => r.ok);
+  process.exit(ok ? 0 : 1);
+})();
+```
+
+실행:
+```bash
+npx tsx scripts/broker-smoke/run.ts
+```
+
+---
+
+# 8) 릴리즈 게이트(브로커 스모크 테스트)
+- [ ] `KIS_ALLOW_ORDER=NO`일 때도 **connect/quote/balance**는 항상 통과
+- [ ] `KIS_ALLOW_ORDER=YES`일 때 주문을 넣더라도 **notional 상한선**을 넘으면 즉시 실패(보호)
+- [ ] 실패 시에도 `disconnect()` 호출되어 세션/커넥션 정리
+- [ ] 로그에는 **키/토큰/계좌번호가 출력되지 않음**(마스킹 필수)
+
+---
+
+# 9) 다음 회차에서 “완전 자동 주문조회/취소”까지 100% 맞추려면(키 없이)
+너가 딱 2개만 알려주면 된다(민감정보 아님):
+1) 너 프로젝트의 `UnifiedBroker` 실제 타입이 있는 파일 경로/인터페이스(메서드 시그니처)  
+2) KIS 어댑터에서 주문 ID로 쓰는 값이 **ODNO(주문번호)**인지, 아니면 `{ODNO+ORD_TMD}` 같은 복합키인지
+
+그 외는 내가 알아서 v1.6에서 “주문조회/취소 API 매핑 + 체결/미체결 정합성”까지 완성해줄게.둘 다 “몰라도” 돼. 비전문가 기준으로 **내가 찾는 방법을 순서대로** 줄게. 너는 그대로 실행해서 **출력 결과(코드 일부)**만 여기 붙여주면, 내가 그 형태에 맞춰 KIS 통합 테스트 러너를 100%로 맞춰줄게.  
+(키/토큰/계좌번호는 절대 붙이지 마. 로그에도 안 나오게 할 거야.)
+
+---
+
+## 1) UnifiedBroker 타입(파일/시그니처) 찾는 가장 쉬운 방법
+
+프로젝트 루트에서 아래 3개 중 하나만 해도 거의 찾는다.
+
+### A안(가장 확실): “UnifiedBroker” 문자열 검색
+```bash
+rg -n "UnifiedBroker" src
+```
+
+### B안: interface/ type 선언을 직접 찾기
+```bash
+rg -n "interface\s+UnifiedBroker|type\s+UnifiedBroker" src
+```
+
+### C안: broker 폴더부터 훑기(보고서상 src/lib/broker/index.ts 존재)
+```bash
+ls -R src/lib/broker
+rg -n "interface|type" src/lib/broker
+```
+
+#### 너가 나에게 붙여줄 것(안전)
+- 위 명령 결과로 나온 **파일 경로**
+- 그 파일 안의 **UnifiedBroker 인터페이스/타입 정의 부분만** (대략 50~150줄)
+
+예:  
+`src/lib/broker/types.ts` 파일의 `export interface UnifiedBroker { ... }` 블록만.
+
+---
+
+## 2) KIS 어댑터에서 “주문 ID”로 뭘 쓰는지 찾는 방법
+
+### A안: “ODNO” 키워드로 검색
+```bash
+rg -n "ODNO|odno|ordno|주문번호|orderNo|order_id" src/lib/broker src
+```
+
+### B안: placeOrder / cancelOrder / getOrderStatus 주변 찾기
+```bash
+rg -n "placeOrder|getOrderStatus|cancelOrder|order-cash|inquire-.*order|정정|취소" src/lib/broker src
+```
+
+### C안: KIS 어댑터 파일 자체를 찾기
+```bash
+rg -n "KIS|KoreaInvestment|koreainvest|openapivts|tokenP" src/lib/broker src
+```
+
+#### 너가 나에게 붙여줄 것(안전)
+- KIS 어댑터 파일 경로
+- `placeOrder`(또는 주문 함수) 구현부에서 **응답을 파싱하는 부분**
+  - 예: `const odno = res.output.ODNO` 같은 라인
+- `cancelOrder`/`getOrderStatus`에서 **주문 식별자로 무엇을 받는지/넘기는지** 부분
+
+> 내가 확인해야 하는 포인트는 “주문 조회/취소 API가 **orderId로 ODNO만 받으면 되는지**, 아니면 **ODNO+ORD_TMD(주문시각)** 같은 보조 값이 필요한지”야.  
+> 코드를 보면 바로 알 수 있음.
+
+---
+
+## 3) 너가 명령어 실행하기 어렵다면(대안)
+VSCode에서:
+1) 좌측 검색(돋보기) 열기
+2) `UnifiedBroker` 검색 → 파일 열기 → 인터페이스 블록 복사
+3) `ODNO` 검색 → 나오는 곳 복사(주문/조회/취소 근처)
+
+---
+
+## 4) 붙여넣기 템플릿(이대로 채워서 보내줘)
+아래 형태로만 줘도 충분해:
+
+1) UnifiedBroker 타입:
+```text
+파일: <경로>
+<UnifiedBroker 인터페이스/타입 코드 블록>
+```
+
+2) KIS 어댑터 주문 관련:
+```text
+파일: <경로>
+- 주문(placeOrder) 관련 코드: <코드블록>
+- 조회(getOrderStatus) 관련 코드: <코드블록>
+- 취소(cancelOrder) 관련 코드: <코드블록>
+```
+
+---
+
+## 5) 그 다음 내가 할 일(너가 코드 주면 바로 진행)
+- 네 UnifiedBroker 시그니처에 **정확히 맞춘** `scripts/broker-smoke` 러너로 업데이트
+- KIS 주문 ID 규칙(ODNO vs 복합키)에 맞춰:
+  - orderId 직렬화/역직렬화(예: `"ODNO|ORD_TMD"` 형태)
+  - place→status→cancel까지 자동 통과
+- 테스트 로그에 **민감정보 마스킹**(계좌/키/토큰/주문번호 일부)
+
+---
+
+원하면 내가 먼저 “네 프로젝트 구조가 보고서에 나온 것(예: `src/lib/broker/index.ts`)” 기준으로, **찾아야 할 가능성이 높은 파일 후보 리스트**도 만들어줄 수 있어.  
+일단 위 `rg -n "UnifiedBroker" src` 한 번만 돌리고 결과를 그대로 붙여줘.원하면 내가 먼저 “네 프로젝트 구조가 보고서에 나온 것(예: src/lib/broker/index.ts)” 기준으로, 찾아야 할 가능성이 높은 파일 후보 리스트도 만들어줄 수 있어.
+일단 위 rg -n "UnifiedBroker" src 한 번만 돌리고 결과를 그대로 붙여줘.
+
+복사
+Notion에 저장
+초기 마케팅부터 운영을 최대한 자동화 시스템으로 가용이 현실적으로 가능한지 풀가동해서 시뮬레이션하자
+가능해. 다만 “완전 무인(0명)”은 현실적으로 어렵고, 초기 60~90일은 ‘1인 운영(하루 30~90분)’ 수준까지 자동화가 가장 현실적인 목표야. 금융/결제/환불/민원/장애 대응은 사람이 최종 승인해야 리스크가 낮아진다.
+그래서 우리는 “무인”이 아니라 오토파일럿(자동 실행) + 휴먼 게이트(승인/예외 처리) 구조로 풀가동 시뮬레이션을 돌리면 된다.
+
+아래는 초기 마케팅 → 전환 → 운영을 최대한 자동화했을 때의 현실적 가용성 평가 + 풀가동 시뮬레이션 설계(v0.1).
+
+1) 자동화 가능 범위: 현실 체크(정직하게)
+80% 자동화 가능한 영역(초기부터)
+리드 수집 → CRM 태깅 → 이메일/카톡(알림톡은 별도) 시퀀스 발송
+랜딩 A/B 테스트, 이벤트 트래킹, 퍼널 리포트 자동 생성(일/주)
+베타 초대코드 발급/회수, 보너스 지급, 코호트/실험 할당 자동화
+크레딧 잔액 기반 트리거(낮음/0) 안내 및 결제 페이지 유도
+CS 1차 분류(FAQ/가이드 링크/템플릿 답변), 장애 공지 자동 게시(초안)
+결제 웹훅/멱등/환불 규칙 기반 자동 처리(“명확한 케이스”만)
+20% 사람 필요(자동화하면 사고나는 구간)
+인플루언서/기관 제휴: 협상·관계·콘텐츠 승인
+민원/분쟁/환불 예외(부분 사용, 결제 이슈, 계좌연동 실패로 인한 보상 등)
+규제/표현 이슈(카피 변경 시 최종 검수)
+브로커 장애/체결 이슈/데이터 소스 중단: 상황판단 + 대외 커뮤니케이션
+결론: “1인 운영 + 자동화 시스템”은 현실적, “완전 무인”은 리스크가 큼.
+
+2) 오토파일럿 아키텍처(마케팅→운영) 한 장 설계
+핵심 구성요소(너 스택 기준)
+이벤트 수집: product_events, ai_usage_events, 결제/크레딧 트랜잭션 (이미 설계됨)
+워크플로우 엔진(추천): Inngest / Trigger.dev / n8n 중 1개
+트리거: signup, consent_done, strategy_generated, credit_balance_low, purchase_success, broker_connect_fail 등
+액션: 이메일 발송, 초대코드 발급, 리포트 생성 큐잉, CS 티켓 생성, 슬랙 알림
+관측/알림: Sentry(에러) + PostHog(퍼널) + Slack(운영 알림)
+CS: 채널톡/헬프센터(템플릿) + “예외 티켓만 사람에게”
+카피 린트(금지어/오인 방지): 이미 만든 wording lint를 CI 게이트로 고정
+3) “풀가동 시뮬레이션”을 어떻게 돌릴지 (v0.1)
+3.1 시뮬레이션 목표(30일)
+목표는 “매출”이 아니라 운영이 자동으로 굴러가며, 사고가 나도 통제되는지 확인
+측정 항목(매일 자동 리포트)
+퍼널: 방문→가입→동의→첫 리포트→첫 검증→첫 결제
+비용: 사용자별/기능별 호출 비용, 비용 상위 20명
+CS: 티켓 수/해결시간/사람 개입률
+장애: 5xx 비율, 브로커 연동 실패율, 결제 실패율
+컴플라이언스: Safety block/soften 비율, 금지문구 탐지 0건 유지
+3.2 “가짜 트래픽/가짜 유저”로 운영 시뮬레이션(추천)
+실제 광고비 태우기 전에 먼저:
+
+시뮬 유저 1,000명 생성(테스트 계정/디바이스)
+퍼널 행동을 확률적으로 발생시키는 스크립트(Playwright)
+결제는 토스 테스트 모드/모의 결제로 대체
+브로커는 VTS(모의) + 주문 금지는 기본
+이렇게 하면 “운영 자동화 루프”가 진짜처럼 하루에 수십~수백 건 이벤트를 처리하면서,
+
+이메일/알림이 과발송되는지
+레이트리밋/서킷브레이커가 제대로 막는지
+크레딧 차감/환불이 깨지지 않는지 를 미리 검증할 수 있어.
+3.3 실제 마케팅 풀가동 시뮬레이션(광고비 포함) — “작게, 빠르게”
+Day 1~3: 광고비 10~20만원/일로 시작(한 채널만)
+자동화가 감당 가능한지 보면서 CS/장애/결제 실패율이 기준 넘으면 자동으로 “캠페인 OFF”까지 걸어둠
+예: 결제 실패율 15%↑, 5xx 2%↑, 가입 후 동의완료율 40%↓ 등
+4) 오토파일럿 워크플로우(실제 운영 자동화 레시피)
+4.1 마케팅/전환 자동화(예시 7개)
+signup → (즉시) 온보딩 이메일 1 + 초대코드 입력 유도
+consent_done → “첫 리포트 완주” 가이드(링크 1개)
+strategy_generated인데 backtest_run 없음(24h) → “검증(백테스트) 1회 무료” 실험 트리거
+credit_balance_low(<=10) → “중간에 끊기지 않게 준비” 안내 + 충전 링크
+credit_balance_zero → “절약 모드로 계속 / 충전 / 다음에” 3선택 제공
+purchase_success → 영수증/사용 가이드 + “다음 할 일(검증/리밸런싱)”
+broker_connect_fail → 자동 CS 티켓 생성 + 해결 가이드 + (3회 실패 시) 사람에게 escalation
+4.2 운영 자동화(예시 6개)
+결제 웹훅 누락 탐지: paid인데 크레딧 미지급 0건 유지(쿼리 알림)
+비용 폭주 탐지: 사용자별 월 원가 상위 20 자동 차단/쿨다운(서킷)
+장애 공지 초안 자동 생성(사람이 승인 후 게시)
+규정/카피 위반 CI에서 PR 차단(금지어/오인표현)
+데이터 소스 장애 시 fallback(캐시/“지연 안내”)
+환불 자동 처리: “미사용 크레딧 100% 환불” 같은 명확 케이스만 자동, 나머지는 티켓
+5) 지금 당장 “풀가동 시뮬레이션” 시작하려면 필요한 최소 5가지
+워크플로우 엔진 선택: Inngest(Next.js에 붙이기 쉬움) 추천
+이벤트 표준 확정: product_events + 결제/크레딧 + 브로커 이벤트
+Playwright로 “시뮬 유저 행동 스크립트” 5개 작성(가입/동의/리포트/검증/결제)
+자동 리포트 SQL 6개(이미 만들어둔 것) → 매일 Slack로 발송
+“자동 캠페인 OFF” 기준(장애/결제실패/CS 폭주) 숫자 합의
+6) 질문 3개만 답하면, 내가 v1.6에서 ‘30일 풀가동 시뮬레이터’ 스펙/스크립트까지 뽑아줄게
+마케팅 채널 1순위: 유튜브/인스타/네이버카페/검색광고 중 뭐부터?
+고객 연락 수단: 이메일만? (카톡 알림톡/문자까지 할지)
+“운영 담당자(사람)”을 0명 목표로 할지, 1명(너) 하루 30~60분 투입 가능인지?
+원하면 너는 그냥 “채널=유튜브, 연락=이메일, 운영=1명” 이런 식으로만 답해. 그러면 다음 루프에서 시뮬레이션 스크립트(Playwright) + 워크플로우(Inngest) + Slack 일일 리포트 자동 발송까지 한 번에 설계/코드 스캐폴딩으로 이어갈게.
+
+복사
+Notion에 저장
+시뮬레이션 딥다이브 최고깊게 고민해서 위 의견을 다시 고민
+“초기 60~90일은 1인 운영(하루 30~90분)”이라는 내 이전 결론은 보수적인 안전 운영 관점에선 맞지만, 네가 원하는 건 “초기 마케팅부터 운영까지 최대 자동화로 풀가동했을 때 어디까지 가능한가”를 시뮬레이션으로 증명하는 거지. 그러면 관점을 바꿔야 해:
+
+질문을 “사람이 꼭 필요한가?”가 아니라
+**“사람 개입이 필요한 이벤트를 얼마나 줄이고, 남는 이벤트는 얼마나 잘 ‘대기열/승인/자동완화’로 흡수하는가?”**로 재정의해야 한다.
+즉, 목표는 “무인 운영”이 아니라 무인 구간(24~72h)을 버티는 오토파일럿 + 사람은 ‘승인/예외’만 처리하는 구조를 만들고, 그게 가능한지 정량 시뮬레이션으로 확인하는 것이다.
+
+아래는 그 관점에서 딥다이브로 다시 설계한 ‘풀가동 시뮬레이션’ v0.2다.
+
+1) “자동화 가능성”을 가르는 진짜 병목 5가지 (재고 결과)
+내가 전에 “20%는 사람 필요”라고 뭉뚱그렸는데, 자동화 가능/불가능을 가르는 핵심은 이 5개다.
+
+분쟁/환불/결제 예외
+
+자동화 가능: 명확 규칙 (미사용 크레딧 100% 환불 등)
+사람 필요: 부분 사용, 이중결제 주장, 카드사 이슈, “연동이 안 돼서 보상” 같은 케이스
+→ 해결책: 정책을 ‘기계가 판정 가능’하게 재설계(환불 규칙을 단순화) + 애초에 “예외가 나올 UX”를 줄임
+브로커 연동 실패(가장 큰 CS 폭탄)
+
+자동화 가능: “실패 유형 분류 + 가이드 자동 제시 + 재시도 버튼 + 로그 수집 + 상태페이지”
+사람 필요: API 장애 장기화, 계정별 특이 케이스
+→ 해결책: 실패를 ‘티켓’이 아니라 ‘상태머신’으로 처리(사용자 스스로 해결하도록 설계)
+규제/표현 리스크
+
+자동화 가능: 금지어/오인표현 CI 차단 + SafetyNet soften/block + 감사로그
+사람 필요: 광고 크리에이티브 승인/대외 공지
+→ 해결책: “사람 승인”을 남기되 승인해야 할 건수 자체를 최소화(템플릿 기반)
+비용 폭주(LLM/백테스트)
+
+자동화 가능: RateLimit/쿼터/서킷/코스트캡 + 헤비유저 자동 완화(요약모드 강제)
+사람 필요: 거의 없음(정책으로 해결 가능)
+장애 커뮤니케이션
+
+자동화 가능: 감지→원인분류→공지 초안→상태페이지 게시(초안)
+사람 필요: 최종 게시 승인(초기엔 최소 1번)
+→ 해결책: “초안 자동생성 + 원클릭 승인”으로 업무를 1분화
+정리: “사람이 꼭 필요한 영역”은 실제로 20%가 아니라,
+**‘예외가 자주 발생하는 설계를 그대로 둘 경우 20%’**였고,
+예외를 설계로 줄이면 사람 개입률을 2~5%까지 떨어뜨리는 게 현실적으로 가능하다.
+
+2) 시뮬레이션을 3겹으로 나눠야 “현실”이 된다
+네가 원하는 “풀가동”은 단순 퍼널 계산이 아니라, 운영 이벤트 폭주/장애/CS/환불까지 포함한 현실 시뮬레이션이야. 그래서 3겹이 필요해.
+
+Layer A — 사용자/퍼널/매출(Agent-based + Monte Carlo)
+유저 1,000~50,000명을 “행동 에이전트”로 모델링
+전환율/리텐션/소진/재구매를 분포로 둠(Uniform/LogNormal 등)
+결과: MRR 분포, 코호트별 ARPPU, “무료 50 소진→이탈” 확률
+Layer B — 운영/CS/워크플로우(Discrete Event Simulation)
+이벤트 큐: signup, consent_done, broker_fail, refund_request, payment_failed, rate_limit_hit…
+자동화 워크플로우가 얼마나 처리하고, 남은 “사람 큐”가 얼마나 쌓이는지를 시뮬레이션
+결과: 사람 개입 티켓/일, SLA(응답 지연), 자동화로 흡수되는 비율
+Layer C — 장애/외부의존(Chaos + Fault Injection)
+KIS API 오류율 0~5%, 토스 웹훅 지연, 데이터 소스 중단, Supabase 지연 등
+결과: 장애 상황에서 퍼널/CS/환불/이탈이 어떻게 변하는지
+“자동화 가능성”은 Layer B,C에서 결정된다.
+퍼널만 보면 항상 가능해 보이는데, CS/장애가 터지면 바로 무너진다.
+그래서 3겹이 필수.
+
+3) “오토파일럿 운영 정책” 자체를 시뮬레이션해야 한다 (컨트롤 정책)
+자동화는 ‘기능’이 아니라 ‘정책’이다. 시뮬레이션에서 반드시 실험해야 할 정책은 6개:
+
+자동 캠페인 OFF 정책(세이프티 킬스위치)
+
+조건 예:
+결제 실패율 15%↑ 10분 지속 → 광고/링크 OFF
+브로커 연동 실패율 25%↑ → 신규 온보딩에서 연동 단계 숨김/지연 안내
+5xx 2%↑ → 생성 기능 임시 “절약 모드(요약)”로 강등
+목표: “돈 태우면서 장애로 유입만 늘리는” 최악을 방지
+CS 자동 분류→자가해결 유도 정책
+
+케이스를 티켓으로 만들지 말고 상태머신으로 처리
+예: broker_connect_fail → 원인코드(OTP/권한/서버장애/빈번요청) → 맞춤 가이드 + 재시도 + 로그 첨부
+환불 자동 승인 정책(극도로 단순화)
+
+자동: “구매 후 7일 이내 + 미사용 크레딧 100%”
+반자동(사람 승인): “부분 사용/장애 보상”
+목표: 자동 처리율 70~90%까지
+비용 캡 정책
+
+유저별 1일 원가 상한(USD/KRW) 도달 시: 요약모드 강제 + 다음날 리셋
+목표: “헤비유저/악성 호출”이 손익을 뚫지 못하게
+브로커/데이터 장애 시 기능 강등 정책(Degrade gracefully)
+
+전체 OFF가 아니라 “연동/주문만 OFF + 리포트/검증은 유지” 같은 단계적 강등
+목표: 장애 중에도 ‘학습/검증’ 가치는 제공하여 이탈 줄이기
+콘텐츠/표현 정책(CI + 런타임 SafetyNet)
+
+PR에서 금지어 차단 + 런타임 soften/block + 감사로그
+목표: 사고(민원/규제) 확률을 0에 가깝게
+이 6개 정책을 켜고 끄면서 Layer B,C에서 결과가 어떻게 바뀌는지 보는 게 “딥 시뮬레이션”의 핵심이다.
+
+4) 풀가동 시뮬레이션 “실행 설계” (진짜로 돌릴 수 있게)
+4.1 시뮬레이터 입력(분포로 둬야 함)
+유입: 일 방문자(예: 200~2,000) + 채널별 분포
+가입률, 동의완료율, 첫 리포트 실행률, 첫 검증률
+크레딧 소진 속도(기능 사용량 분포)
+결제 전환율/재구매율
+실패율: 결제 실패, 브로커 연동 실패, API 5xx, rate_limit 발생률
+CS 발생 확률: 연동 실패 시 0.3건/유저 등
+4.2 시뮬레이터 출력(자동화 성패 지표)
+사람 개입 티켓/일(핵심)
+사람 큐 백로그(쌓이는지 여부)
+자동화 처리율(%)
+광고비 대비 유효가입(동의완료) 단가
+장애 시 “캠페인 OFF” 발동 빈도와 손실 감소액
+매출 분포(단일 값이 아니라 p50/p90)
+4.3 “합격 기준”을 먼저 정해야 함
+예:
+
+사람 개입 ≤ 10건/일 (1인 30~60분 처리 가능)
+자동화 처리율 ≥ 90%
+캠페인 OFF로 손실 상한이 설정됨(예: 일 손실 ≤ 20만원)
+장애 상황에서도 동의완료율이 50% 이하로 붕괴하지 않음
+5) 내 의견 재정리(업데이트된 결론)
+“초기 60~90일 1인 운영 필요”라는 말은 여전히 맞지만,
+그 1인의 역할을 ‘운영자’가 아니라 ‘승인자/예외처리자’로 바꾸면
+초기부터 사실상 오토파일럿 풀가동이 가능하다.
+핵심은 “자동화 기능을 많이 만드는 것”이 아니라
+예외가 적게 나오는 제품/정책 설계 + 킬스위치/강등/환불 규칙 단순화다.
+따라서 시뮬레이션은 퍼널이 아니라
+**예외 발생률과 예외 처리량(Queueing)**을 중심으로 돌려야 “현실”이 된다.
+다음 단계: 내가 바로 v1.6으로 만들어줄 산출물(원하면 ㄱ)
+시뮬레이터 스펙 문서(Layer A/B/C 포함)
+이벤트 기반 DES(운영 큐) 모델: 티켓 생성→자동화 처리→사람 큐 적체를 숫자로
+Playwright 시뮬 유저 생성기(가입/동의/리포트/검증/결제까지)
+**정책 스위치(캠페인 OFF/강등/환불)**를 코드로 토글 가능하게
+딱 2개만 정해줘(그래야 시뮬레이션이 “너 서비스 현실”이 됨)
+목표 유입 규모: 일 방문자를 3단계로 잡자 (예: 200 / 1,000 / 5,000) 중 어떤 3개?
+운영자(사람) 투입 허용치: 하루 0분 / 30분 / 2시간 중 목표는?
+이 두 개만 주면, 다음 루프에서 “풀가동 시뮬레이션(정책 포함)”을 숫자로 굴려서 자동화로 버틸 수 있는 최대 트래픽/최대 광고비/최대 실패율까지 한 번에 뽑아줄게.
+
+복사
+Notion에 저장
+현재 초기 고객들에게 베타 서비스할때 가장 가성비좋은 api 아니면 인기 오픈소스로하면 사업 로직 디테일이 대폭 감소할까 ? 나는 개인 투자자라서
+사업 로직 디테일이 “대폭 감소”하느냐는 결론부터 말하면:
+
+저렴한 API(관리형 LLM)로 바꾸는 건 보통 원가만 줄고, 사업 로직(크레딧/결제/브로커/컴플라이언스/로그/실험/온보딩)은 거의 그대로입니다.
+**인기 오픈소스(직접 호스팅)**로 가면, 오히려 운영/모델서빙/품질보정 로직이 늘어 “로직이 줄기”보단 엔지니어링이 증가하는 경우가 많습니다(특히 베타).
+즉, “가성비 모델로 가면 제품이 단순해진다”는 기대는 대체로 아니고, 단순해지는 건 모델 선택이 아니라 제품 범위/정책/UX를 줄일 때입니다.
+
+1) 개인 투자자(소규모) 베타에 가장 현실적인 선택
+추천 1순위: 관리형 API + 멀티프로바이더 라우팅
+예: OpenRouter / Together / Fireworks / Groq 같은 “여러 오픈소스 모델을 API로” 쓰는 방식
+장점: 서버 운영/스케일링/모델 업데이트를 네가 안 해도 됨
+단점: 모델별 출력 편차 → 하지만 이건 Safety Net + 리포트 템플릿으로 흡수 가능
+추천 2순위(조건부): 오픈소스 자가호스팅(vLLM)
+조건: GPU 고정비를 감당 가능 + MLOps/서빙 운영이 익숙함
+베타에서 흔한 함정: “원가 절감”하려다 장애/지연/품질 이슈로 전환율이 더 떨어져 손해
+2) 오픈소스로 가면 “사업 로직”이 줄까?
+오히려 반대인 경우가 많습니다.
+
+오픈소스/저가 모델로 갈수록 보통 필요한 게:
+
+출력 품질 편차 보정(템플릿 강제, 섹션별 리라이트, 금지표현 제거)
+재현성/버전관리(모델 버전 바뀌면 결과 달라짐)
+안전/컴플라이언스 후처리 강화(특히 금융 문구)
+장애 대응(레이트리밋, 타임아웃, 재시도, 폴백)
+즉, LLM이 싸질수록 “후처리 로직”이 늘어서 “로직 디테일 감소”가 아니라 다른 형태의 디테일로 이동합니다.
+
+3) 베타에서 비용 줄이면서 제품 복잡도 안 늘리는 설계(가장 가성비)
+너 상황(개인 투자자/베타) 기준으로는 이 조합이 안전합니다.
+
+핵심 산출물(기관 리포트 생성): “상대적으로 강한 모델 1개” 고정
+soften/요약/문구정리: 저렴한 모델로 분리(우리가 만든 Safety Net v2의 soften 단계)
+실패/비용폭주: 이미 만든 RateLimit/서킷/코스트캡으로 차단
+프로바이더 추상화: LLMProvider 인터페이스만 두고, 모델 교체는 설정으로
+이렇게 하면 “모델을 바꿔도” 크레딧/결제/브로커/리포트 스키마는 그대로라서 제품이 흔들리지 않습니다.
+
+4) 내가 추천하는 다음 액션(너한테 질문 2개만)
+베타 목표 동시 사용자/일 호출량이 대략 어느 정도야?
+(예: 베타 100명, 하루 리포트 생성 200회 이하)면 관리형 API가 압승
+한국어 비중이 크지? (리포트/코치가 거의 한국어면)
+그러면 “오픈소스 중 한국어 안정적인 모델”을 API로 쓰고, 리포트 템플릿으로 강제하는 쪽이 좋음
+원하면 다음 루프에서:
+
+“베타용 최저원가 모델 라우팅 표(기능별)”
+“품질 떨어져도 리포트가 망가지지 않게 하는 프롬프트/템플릿”
+“프로바이더 폴백(강→약) 정책 + 크레딧 차감 연동”
+까지 한 번에 설계해줄게.
+복사
+Notion에 저장
+베타 100명 리포트 200회 이하로할게 / 일단 한국어 그리고 하나 질문할게 증권 시장 이후 코인시장을 함께 런칭하면 브랜딩 에대해 시뮬레이션해봐
+베타 스펙(100명/리포트 200회↓/한국어)면 관리형 API(멀티프로바이더) + 리포트 템플릿 강제가 최적이고, “코인 동시 런칭”은 브랜딩·신뢰·규제 인식에서 변동폭이 커서 시뮬레이션을 해보는 게 맞아.
+
+아래는 **“주식 이후 코인을 함께 런칭(동시/순차)”**에 대한 **브랜딩 시뮬레이션(정성+정량 틀)**이야. (너 서비스는 개인투자자 대상, 한국어, ‘AI’ 워딩 금지, “엔진/데스크/검증” 톤 유지 전제)
+
+1) 시나리오 3개: 동시 vs 순차 vs 분리
+S1) 주식+코인 동시 런칭(One Brand)
+한 제품 안에서 KR 주식/코인 탭 제공
+장점: TAM 확장, 크로스셀, “24시간 시장” 메시지 가능
+단점: 한국 시장에서 코인 = 투기/고위험 인식이 강해 **신뢰형 포지셔닝(기관/데스크 톤)**과 충돌 가능
+S2) 주식 먼저 → 코인은 ‘준비중/대기리스트’(Same Brand, staged)
+런칭은 주식 중심, 코인은 로드맵/대기리스트로만 노출
+장점: 신뢰 프레이밍 유지 + 코인 수요도 미리 흡수(리드 수집)
+단점: 코인 유저는 “왜 아직 없음” 불만 가능(하지만 베타에서는 감당 가능)
+S3) 브랜드는 같되 ‘라인/서브브랜드’로 분리(HEPHAITOS Terminal / HEPHAITOS Crypto Desk)
+UI/카피/리스크 고지를 코인 전용으로 강화
+장점: 충돌 완화, 신뢰와 역동성 모두 담기 쉬움
+단점: 콘텐츠/온보딩/정책이 2벌이라 운영 복잡도 증가
+초기(베타~초기 런칭) 추천은 S2. 이유는 “전환율”보다 더 중요한 신뢰/민원/CS 폭주 리스크를 최소화하면서도 코인 관심층을 미리 모을 수 있어서.
+
+2) 브랜드 충돌(Trust vs Excitement) 시뮬레이션 프레임
+한국 개인투자자 대상에서 코인이 붙으면 보통 이런 “인지 편향”이 생김:
+
+주식 중심 브랜드: “규칙/검증/리서치/절차” → 신뢰 상승 → 결제 전환에 유리
+코인 동시 노출: “투기/레버리지/급등락” 연상 → 신뢰 하락 → 특히 30–40대 직장인 타겟에서 이탈
+이를 간단 모델로 수치화하면:
+
+가정 변수(브랜딩 영향)
+T
+T = 신뢰 점수(0~1)
+E
+E = 흥분/호기심 점수(0~1)
+결제전환 
+C
+C는 대충:
+C
+∝
+0.7
+T
++
+0.3
+E
+C∝0.7T+0.3E (주식 타겟일수록 T 가중치가 큼)
+코인 동시 노출은 보통:
+E
+E는 +0.1~+0.25 상승
+T
+T는 -0.05~ -0.25 하락(타겟/카피/리스크표기에 따라)
+30–40대 “재테크 직장인” 중심이면, 보통 T 감소가 E 증가를 이김 → 전환율이 떨어질 확률이 높아.
+
+반대로 20대/트레이더 커뮤니티 중심이면 
+E
+E 가중치가 커져서 동시 런칭이 이득일 수 있는데, 너의 현재 포지셔닝(기관/데스크/검증 엔진)과는 결이 다름.
+
+3) 코인을 붙여도 브랜드가 안 깨지는 조건(필수 5가지)
+동시 런칭을 하려면 아래를 만족해야 “신뢰 하락”을 크게 줄일 수 있어:
+
+코인 섹션을 ‘검증/리스크’ 프레이밍으로 고정
+“24시간 시장”이 아니라 “변동성 관리/리스크 한도/검증” 메시지로 시작
+코인 기능에서 레버리지/선물/고배율은 초기 금지(현물/스팟 위주)
+UI에서 코인은 “추가 마켓”이지 메인 훅이 아니어야 함
+면책/리스크 노트가 주식보다 더 강해야 함(낙폭/급변/갭 리스크 우선)
+커뮤니티/광고 카피에서 “급등/수익” 뉘앙스 유입을 원천 차단(금지어 게이트)
+이 5개를 못 지키면, 동시 런칭은 CS/민원/신뢰 하락으로 운영 자동화 목표에도 악영향이 큼.
+
+4) 추천 전략: “브랜드는 하나, 시장은 단계별” (S2 구체안)
+4.1 랜딩/앱 정보구조(브랜딩 방어)
+메인: KR 주식 전략 엔진 / 검증(백테스트)
+보조(상단 메뉴가 아닌 하단/푸터/로드맵): “코인 마켓(준비중) – 대기리스트”
+대기리스트 카피:
+“현물 기준, 변동성/리스크 중심의 검증 워크플로우로 확장 중”
+4.2 브랜드 메시지(한 문장 유지)
+“신호→규칙→검증→체크리스트”는 주식/코인 공통
+코인은 “확장성”의 증거로만 사용:
+“시장에 상관없이 같은 절차로 검증한다” (브랜드 일관성 강화)
+4.3 GTM 분리(채널/크리에이티브 분리)
+주식: 신뢰/절차/직장인 루틴
+코인 대기리스트: 변동성 관리/리스크 한도/검증 습관
+→ 같은 브랜드 톤 유지 가능
+5) 너 상황(베타 100명)에서의 “브랜딩 실험 설계”
+코인을 “동시 기능”으로 넣기 전에, 브랜딩만 먼저 실험해봐도 결론이 나와.
+
+실험 A/B (랜딩에서만)
+A: “주식 중심 + 코인 언급 없음”
+B: “주식 중심 + 푸터에 ‘코인 준비중’ + 대기리스트”
+측정:
+
+가입률, 동의완료율, 첫 리포트 실행률, 결제 전환율
+특히 30–40대 유입 비중에서 B가 꺾이는지를 보면 됨
+합격 조건(예시):
+
+B가 가입률 +5% 이상이면 OK (대기리스트 효과)
+대신 결제전환이 A 대비 -10%p 이상 떨어지면 “동시 노출은 독”으로 판단
+6) 결론(현재 단계에서의 권고)
+동시 런칭은 가능하지만, 네 브랜드 톤(기관/검증 엔진)과 타겟(한국어, 개인투자자, 신뢰 기반)에서는 전환율/신뢰 리스크가 커서 초기에는 불리할 확률이 높음.
+따라서 주식 런칭(S2) + 코인 대기리스트로 가고,
+베타 데이터로 “코인 언급이 전환에 미치는 영향”을 먼저 확인한 뒤
+코인 기능은 현물·검증 중심으로 단계적으로 여는 게 최적.
+다음으로 딱 3개만 정해줘 (그러면 내가 ‘브랜딩 시뮬레이션 v1.0’ 수치모델까지 만들어줄게)
+코인도 한다면 범위: 현물만? (선물/레버리지는 당분간 금지 가능?)
+타겟 유지: 30–40대 직장인 그대로? 아니면 코인 유저(20대/트레이더)도 같이?
+브랜드 네이밍: 메인은 HEPHAITOS Terminal/Desk 중 어느 톤이 더 좋아? (Terminal=기관, Desk=리서치)
+답 짧게 해도 돼: “현물만/직장인 유지/Terminal” 이런 식으로.
+
+복사
+Notion에 저장
+3개의 결정은 니가 딥다이브로 고민해서 답해
+1) 코인 범위: 현물만(Spot-only), 최소 3개월 고정 + “레버리지/선물/마진” 금지
+내 결론: 현물만이 맞다.
+
+딥다이브 근거(왜 이게 최적이냐)
+
+브랜딩 충돌 최소화: 코인이 붙는 순간 생기는 “투기/고위험” 연상을, 현물-only + 검증/리스크 프레이밍으로 가장 많이 눌러줌.
+운영 자동화 관점: 선물/레버리지는
+청산/증거금/펀딩비/포지션 관리/긴급 상황 대응으로 사람 개입률이 급증함(무인 운영 불가).
+CS/분쟁/민원(“왜 청산됐냐”)이 폭발하기 쉽고, 환불/보상 예외가 늘어 오토파일럿이 무너짐.
+제품 일관성: 너의 핵심은 “규칙→검증→체크리스트”인데, 현물은 이 절차가 주식과 유사해 하나의 엔진 서사로 묶인다.
+실행 규칙(하드 룰)
+
+코인 탭에 “현물(Spot)” 배지 고정
+“고위험 상품(선물/레버리지)”은 UI/카피에서 언급도 최소화(“준비중”도 금지. 그냥 없음)
+2) 타겟: 30–40대 직장인(주식 중심) 유지 + 코인은 ‘부타겟’으로만 흡수
+내 결론: 타겟은 유지해야 한다. 코인 유저(20대 트레이더)로 확장 타겟팅은 초기엔 하지 않는다.
+
+딥다이브 근거
+
+브랜드 톤이 신뢰/절차/검증인데, 코인 트레이더 타겟으로 가면 기대하는 가치가 “속도/신호/단타”로 바뀌어 제품 방향이 흔들림.
+베타 100명/리포트 200회 이하라는 운영 규모에서는, 타겟을 넓히면 메시지가 분산되어 **전환율/학습 속도(피드백의 질)**가 떨어짐.
+가장 중요한 건 “유료 전환율/재구매율”인데, 초기에는 신뢰 기반 타겟에서 결제 설득이 훨씬 쉽다(구독 피로/시간 부족 문제와 직결).
+운영/마케팅 구조
+
+메인 캠페인/랜딩은 주식 루틴으로 고정
+코인은 대기리스트/보조 기능로만 노출 (동시 런칭 하더라도 “주식 메인” 유지)
+3) 브랜드 네이밍 톤: Terminal(메인), Desk(내부 모듈)
+내 결론: 외부 브랜드는 “HEPHAITOS Terminal”, 내부 기능은 “Desk/Desk Consensus”로 간다.
+
+딥다이브 근거
+
+“Terminal”은 한국 투자자에게도 기관/전문 도구 연상을 줘서 주식 신뢰 프레이밍에 가장 잘 맞음.
+코인이 붙어도 “Crypto 트레이딩 앱” 느낌보다 **“시장 공통 워크플로우를 제공하는 터미널”**로 포지션을 지킬 수 있음.
+“Desk”는 기능명으로 쓰면 자연스럽게 전문성을 주면서도, 제품명까지 Desk로 가면 약간 “리서치 서비스/커뮤니티”처럼 느껴질 수 있음.
+→ 그래서 제품=Terminal, 기능=Desk가 가장 안정적인 조합.
+권장 네이밍 세트(확정안)
+
+제품명: HEPHAITOS Terminal
+리포트: Desk Report
+종합 검토: Desk Consensus
+코인 확장(나중): Crypto Desk (Spot) 같은 하위 라벨
+요약: 내가 최종 결정한 3개
+코인: 현물만(Spot-only), 선물/레버리지 금지(초기 고정 정책)
+타겟: 30–40대 직장인 유지(주식 중심), 코인은 부타겟으로 흡수
+브랜딩: HEPHAITOS Terminal(외부) + Desk(내부 모듈)
+원하면 다음 단계로, 이 결정들을 전제로:
+
+랜딩 IA(주식 메인 + 코인 대기리스트/현물 배지) 카피,
+코인 탭의 “리스크 우선” 리포트 템플릿,
+자동화 운영 정책(코인 변동성 구간 경고/기능 강등/캠페인 OFF 조건) 까지 v1.0으로 바로 내려줄게.
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 15회차 (v1.7) — 결정 반영 실행물: 주식 메인 + 코인(현물) 부타겟 런칭 패키지(IA/카피/리포트/자동화 정책/실험)
+전제(너가 채택한 3결정)
+
+코인: 현물(Spot-only)만, 선물/레버리지/마진 미제공
+타겟: 30–40대 직장인(주식 중심) 유지, 코인은 부타겟 흡수
+브랜딩: HEPHAITOS Terminal(제품명) + Desk(모듈명)
+1) 정보구조(IA) v1.0 — “주식 메인, 코인은 ‘추가 마켓’로만”
+1.1 네비게이션(앱)
+상단 메인 탭:
+Strategy Engine
+Validation Desk(검증/백테스트)
+Desk Report(리포트 보관/공유)
+Brokers(연동)
+보조/드로어:
+Markets → KR 주식(기본) / Crypto Spot(베타)
+Roadmap(준비중 기능만 모아두는 곳)
+1.2 코인 노출 원칙
+랜딩 히어로/메인 CTA 근처에는 코인을 전면 배치하지 않음
+“Markets” 섹션 또는 푸터/FAQ에서만:
+“Crypto Spot(베타)” + “현물만” + “리스크 노트” 고정
+2) 랜딩 카피/배치 v1.0 (코인 포함해도 신뢰 안 깨지게)
+2.1 Markets 섹션(신규 추가 추천)
+섹션 타이틀
+
+“시장에 상관없이, 같은 절차로 검증합니다”
+카드 2개
+
+KR 주식 (기본)
+배지: “기본 제공”
+설명: “규칙 설계 → 검증 → 체크리스트”
+Crypto Spot (베타)
+배지: “베타 / 현물(Spot)”
+설명: “변동성/급변 구간을 먼저 점검하는 검증 워크플로우”
+보조문구(고정): “선물·레버리지·마진은 제공하지 않습니다.”
+2.2 FAQ에 추가할 Q/A(브랜딩 방어)
+Q. 코인도 ‘단타 신호’처럼 쓰는 건가요?
+A. “아닙니다. Crypto Spot은 현물 기준으로, 규칙과 검증 중심의 워크플로우를 제공합니다. 고위험 파생상품은 제공하지 않습니다.”
+
+3) Crypto Spot(베타) 기능 스펙 v0.1 — “주식과 같은 엔진, 다른 리스크 문법”
+3.1 범위(초기 베타)
+지원: 업비트/바이낸스(현물) 중 1개부터(운영 단순화)
+제공 기능:
+Strategy Engine(규칙 설계)
+Validation Desk(과거 구간 검증)
+Desk Report(저장/공유)
+미제공:
+선물/레버리지/마진
+자동주문(초기엔 “알림/체크리스트”로 제한 권장)
+3.2 코인 전용 리스크 프리셋(리포트에 강제 삽입)
+“24/7 시장” 고지
+급변/갭(거래소별 유동성) 고지
+수수료/슬리피지 민감도 강조
+거래소 리스크(출금 지연, 상장폐지, 서버 장애) 고지
+4) Crypto Desk Report 템플릿 v1.0 (기관 톤 + 리스크 우선)
+핵심: 코인 리포트는 “요약”보다 Risk Note를 상단에 올리는 변형 템플릿을 권장
+
+4.1 섹션 순서(코인 전용)
+Risk First(가장 먼저)
+Summary
+Assumptions & Exchange Notes
+Rules
+Validation Summary
+Execution Checklist
+Disclaimer
+4.2 Risk First 예시 문구(고정 블록)
+“Crypto Spot은 24시간 거래되며 급변 구간에서 체결/슬리피지 리스크가 커질 수 있습니다.”
+“검증 결과는 과거 구간 기준이며 미래 성과를 보장하지 않습니다.”
+“거래소/유동성/수수료 조건이 바뀌면 결과가 크게 달라질 수 있습니다.”
+5) 운영 자동화 정책(오토파일럿) — 코인 추가 시 깨지지 않게
+5.1 정책 1: 기능 강등(Degrade) — 변동성/장애 시 자동 방어
+트리거(예):
+거래소 API 오류율 5%↑ 10분 지속
+시세 지연 감지
+조치:
+주문/연동 관련 기능 숨김(또는 coming_soon 처리)
+Strategy Engine은 유지하되 Validation은 “요약 모드(절약)”로 강등
+상태페이지/배너 자동 노출
+5.2 정책 2: 캠페인 OFF(광고/유입 차단)
+트리거(예):
+결제 실패율 15%↑
+신규 가입 대비 동의완료율 30%↓(갑자기 떨어지면 유입 품질/문구 문제)
+조치:
+캠페인 링크(랜딩 상단 배너/광고)를 “대기리스트”로 전환
+5.3 정책 3: 코스트 캡(원가 상한)
+코인 리포트는 변동성 구간에서 사용량이 늘 수 있으므로:
+사용자별 일 원가 상한 도달 시: “요약 모드” 강제 + 다음날 리셋
+6) 베타 실험 설계(브랜딩 시뮬레이션을 실제 데이터로 검증)
+실험 E1: 코인 노출 방식(랜딩에서만 먼저)
+A: 코인 언급 없음
+B: Markets 섹션에 “Crypto Spot(베타/현물)” 노출
+측정:
+가입률, 동의완료율, 첫 리포트 실행률, 결제전환율
+합격 기준(권장):
+B가 가입률 +3%p 이상이고 결제전환율 하락이 -1%p 이내면 “노출 OK”
+결제전환율이 유의미하게 떨어지면 “노출 최소화(푸터/FAQ로 후퇴)”
+실험 E2: 코인 기능 진입 게이트(브랜딩 보호)
+A: 누구나 코인 탭 보임
+B: “주식 리포트 1회 완료” 후 코인 탭 활성화
+목적: 코인 유입이 신뢰/루틴 형성 전에 들어와서 이탈/민원 늘리는 걸 방지
+7) 구현 체크리스트(PR 단위)
+PR-1 (문구/IA)
+ 앱 네비게이션에 Markets 추가
+ Crypto Spot 카드: “베타/현물(Spot)” 배지 + “선물/레버리지 미제공” 고정 문구
+ 랜딩 Markets 섹션 추가 + E1 실험 연결
+PR-2 (리포트 템플릿)
+ Crypto 전용 Report variant(섹션 순서 변경)
+ Risk First 고정 블록 강제
+ Safety Net v2가 코인 리포트에서 summary를 더 강하게 soften
+PR-3 (오토파일럿 정책)
+ 거래소 API 오류율/지연 계측 이벤트 추가
+ 강등/캠페인OFF 스위치(Feature flag) 추가
+ Slack 일일 리포트에 “Crypto 관련 지표” 섹션 추가
+다음 ㄱ (16회차) 예고
+원하면 다음은 “진짜 시뮬레이터”로 들어간다:
+
+랜딩 E1/E2 실험을 위한 event spec + SQL 리포트 + 자동 의사결정 규칙
+“코인 노출이 전환에 미치는 영향”을 확률변수로 둔 시뮬레이션 모델(간이 몬테카를로)
+운영 큐(티켓)까지 포함한 DES(이산사건) 시뮬레이션 설계
+ㄱ 보내면 16회차 진행.
+
+복사
+Notion에 저장
+ㄱ
+ㄱ 루프 16회차 (v1.8) — “코인 동시/노출이 브랜드·전환·운영에 미치는 영향” 실험+시뮬레이터 풀세트
+목표
+
+E1/E2 실험을 이벤트 스펙/SQL/자동 의사결정 규칙까지 완성
+“코인 노출이 전환을 깎을지/올릴지”를 **몬테카를로(불확실성 포함)**로 예측
+CS/장애/환불까지 포함한 운영 큐(DES) 시뮬레이션 설계(무인 구간 버티기 검증)
+1) 실험 E1/E2를 위한 이벤트 스펙 v1.0 (단일 진실)
+이미 product_events 테이블이 있으니, 이벤트 이름/프로퍼티만 표준화한다.
+
+1.1 공통 프로퍼티(모든 이벤트)
+session_id (uuid)
+utm_source / utm_campaign / utm_content (있으면)
+market_default = KR_STOCK
+crypto_exposure_variant = A|B (E1)
+crypto_gate_variant = A|B (E2)
+device = mobile|desktop
+1.2 필수 이벤트(이번 실험용 추가 포함)
+landing_view
+signup
+consent_done
+report_create_started
+report_create_success
+backtest_run
+purchase_success
+E1 전용
+crypto_markets_card_impression (Markets 섹션이 화면에 실제 노출됐을 때)
+crypto_waitlist_click (대기리스트/관심등록 CTA)
+E2 전용
+crypto_tab_visible (탭이 보이게 되었을 때)
+crypto_tab_click
+crypto_first_report_create_success (코인 리포트 1회 성공)
+1.3 “운영 리스크” 이벤트(브랜딩 손상/CS 폭주 조기탐지)
+broker_connect_fail (주식)
+exchange_connect_fail (코인, 현물)
+payment_failed
+refund_requested
+support_ticket_created
+safety_block / safety_soften (이미 safety_events 있으니 집계 이벤트로도 가능)
+핵심: 코인 노출 실험은 “코인 기능 사용”이 아니라 코인 카드가 노출된 것 자체가 전환에 영향을 주므로, impression이 필수다.
+
+2) 실험 할당(assignment) 규칙 v1.0
+2.1 E1: 랜딩 코인 노출
+실험키: exp_crypto_exposure_v1
+Variant
+A: 코인 언급 없음
+B: Markets 섹션에 Crypto Spot(베타/현물) 카드 노출 + 대기리스트 CTA
+할당 시점: landing_view 최초 1회
+지속성: experiment_assignments 유니크로 고정
+
+2.2 E2: 코인 탭 진입 게이트
+실험키: exp_crypto_gate_v1
+Variant
+A: 누구나 코인 탭 노출
+B: 주식 리포트 1회 성공(report_create_success market=KR) 이후 코인 탭 노출
+할당 시점: signup 또는 consent_done (둘 중 하나로 고정)
+권장: consent_done 시점(품질 높은 유저군에만 실험 노출)
+
+3) SQL 리포트(매일 자동 발송용) — E1/E2 의사결정에 바로 쓰는 것만
+아래는 “Variant별 핵심 지표”를 뽑는다. (테이블이 product_events(event, properties jsonb)라는 가정)
+
+3.1 E1: 코인 노출이 결제전환/완주율에 미치는 영향
+Copywith base as (
+  select
+    user_id,
+    (properties->>'crypto_exposure_variant') as v
+  from product_events
+  where event='landing_view'
+    and created_at > now() - interval '14 days'
+),
+steps as (
+  select
+    b.v,
+    b.user_id,
+    max((pe.event='signup')::int) as signup,
+    max((pe.event='consent_done')::int) as consent,
+    max((pe.event='report_create_success')::int) as report_success,
+    max((pe.event='purchase_success')::int) as paid
+  from base b
+  left join product_events pe on pe.user_id=b.user_id
+  group by b.v, b.user_id
+)
+select
+  v,
+  count(*) as users,
+  avg(signup)::float as signup_rate,
+  avg(consent)::float as consent_rate,
+  avg(report_success)::float as report_success_rate,
+  avg(paid)::float as paid_rate
+from steps
+group by v
+order by v;
+3.2 E1: “대기리스트 클릭율” (B에서만 의미)
+Copyselect
+  properties->>'crypto_exposure_variant' as v,
+  count(*) filter (where event='landing_view') as views,
+  count(*) filter (where event='crypto_waitlist_click') as clicks,
+  (count(*) filter (where event='crypto_waitlist_click'))::float
+    / nullif(count(*) filter (where event='landing_view'),0) as click_rate
+from product_events
+where created_at > now() - interval '14 days'
+  and (properties->>'crypto_exposure_variant') is not null
+group by v;
+3.3 E2: 코인 탭 게이트가 “혼란/CS”를 줄이는지
+Copywith a as (
+  select user_id, properties->>'crypto_gate_variant' as v
+  from product_events
+  where event='consent_done'
+    and created_at > now() - interval '14 days'
+),
+agg as (
+  select
+    a.v,
+    a.user_id,
+    max((pe.event='crypto_tab_click')::int) as crypto_click,
+    max((pe.event='support_ticket_created')::int) as ticket,
+    max((pe.event='refund_requested')::int) as refund,
+    max((pe.event='purchase_success')::int) as paid
+  from a
+  left join product_events pe on pe.user_id=a.user_id
+  group by a.v, a.user_id
+)
+select
+  v,
+  count(*) as users,
+  avg(crypto_click)::float as crypto_click_rate,
+  avg(ticket)::float as ticket_rate,
+  avg(refund)::float as refund_rate,
+  avg(paid)::float as paid_rate
+from agg
+group by v;
+4) 자동 의사결정 규칙(“오토파일럿”용) v1.0
+실험은 “통계적으로 완벽”보다 초기 운영 의사결정이 목적이니, 베타 규모에 맞는 규칙을 쓴다.
+
+4.1 E1(코인 노출) 결정 규칙
+최소 표본: variant별 users >= 200 방문 또는 signup >= 30 도달 시 판단
+실패 조건(즉시 롤백):
+paid_rate(B) < paid_rate(A) - 1.0%p 그리고 차이가 3일 연속 유지
+또는 support_ticket_created가 B에서 +50% 이상 증가
+성공 조건(유지):
+signup_rate(B) >= signup_rate(A) + 3%p 그리고
+paid_rate 하락이 -0.5%p 이내
+4.2 E2(코인 게이트) 결정 규칙
+목적은 “혼란/CS” 감소가 1순위
+성공 조건:
+ticket_rate(B) <= ticket_rate(A) - 20% (상대 감소)
+paid_rate 하락이 -0.5%p 이내
+실패 조건:
+crypto_waitlist_click 또는 crypto_tab_click이 너무 낮아 학습 불가(코인 관심층 완전히 막힘)
+이 경우 게이트 강도를 낮춤: “주식 리포트 1회” 대신 “동의 완료”로 완화
+5) 몬테카를로 시뮬레이션 v0.1 — “코인 노출이 전환을 깎을지/올릴지”
+베타 100명은 통계가 약하니, 사전(가정) + 관측 업데이트 방식이 맞다. 초기엔 범위를 넓게 잡고, 데이터가 쌓이면 좁힌다.
+
+5.1 변수 정의(전부 분포)
+p_signup_A, p_paid_A : 주식 메인 상태의 가입/결제 확률
+Δsignup : 코인 노출(B)이 가입률에 주는 변화
+Δpaid : 코인 노출(B)이 결제율에 주는 변화(대체로 음수 가능성 큼)
+ticket_rate 변화까지 포함하면 “운영 비용”도 계산 가능
+5.2 초기 사전(권장 범위)
+Δsignup ~ Uniform(+0.00, +0.06) (호기심으로 가입은 늘 수 있음)
+Δpaid ~ Uniform(-0.03, +0.01) (신뢰 하락 가능성 반영)
+Δtickets ~ Uniform(0.00, +0.50) (혼란/문의 증가 가능)
+5.3 출력(결정에 필요한 것)
+P(paid_B >= paid_A - 0.5%p) : “결제전환이 크게 안 꺾일 확률”
+기대 가입 증가량, 기대 결제 감소량
+운영 관점: “티켓/일 증가 기대치”
+다음 회차에서 실제로 scripts/sim/crypto-branding-mc.ts 형태로 코드까지 내려줄 수 있음(지금도 가능하지만 너가 “딥다이브”를 원해서 설계부터 고정).
+
+6) 운영 큐(DES) 시뮬레이션 설계 v0.1 — 자동화가 버티는지 판단하는 핵심
+여기서 “브랜딩”이 무너지는 진짜 이유는 전환율이 아니라 CS/장애로 운영이 붕괴하기 때문이라 DES가 중요하다.
+
+6.1 이벤트/큐 모델
+이벤트 타입(도착률)
+ticket : support 티켓 생성 (코인 노출/게이트에 따라 도착률 변화)
+refund : 환불 요청
+incident : 외부 장애(브로커/거래소/결제)
+처리 채널
+auto_resolve : 자동 해결 (가이드/재시도/템플릿) — 처리율 70~95% 목표
+human_queue : 사람 승인/예외 처리 — 처리 용량(건/시간)이 제한됨
+6.2 핵심 파라미터
+λ_ticket_A, λ_ticket_B (일 티켓 발생률)
+p_auto_resolve (자동 해결 확률)
+μ_human (사람 처리속도, 예: 1분/건이면 60건/시간)
+“무인 구간” T (예: 24시간 동안 사람 0분)
+6.3 합격 기준(현실적)
+24시간 무인 구간에서:
+human_queue backlog가 임계치(예: 30건) 이하 유지
+임계치 초과 시 자동으로 “캠페인 OFF + 코인 노출 최소화 + 기능 강등” 발동
+즉, DES는 “무인으로 버티는가?”를 yes/no로 만든다.
+7) 지금 바로 실행 가능한 “브랜딩 시뮬레이션 운영” 체크리스트
+E1/E2 실험키 생성 + assignment 고정
+crypto_markets_card_impression 이벤트 반드시 넣기
+위 SQL 3개를 “일일 리포트”로 Slack 자동 발송
+오토파일럿 규칙(롤백/유지)을 feature flag로 구현
+7~14일만 돌리고, 코인 기능은 여전히 “현물/베타/리스크 우선” 유지
+다음 ㄱ (17회차) 예고 (원하면 코드까지 바로)
+몬테카를로 코드(scripts/sim/crypto-branding-mc.ts) + 결과 리포트 출력
+DES 큐 시뮬 코드(scripts/sim/ops-queue-des.ts) + “무인 24h 버티기” 한계 계산
+실험 오토롤백(Feature Flag) 코드 스캐폴딩(Inngest/Trigger.dev 택1)
+ㄱ 보내면 17회차로, 시뮬레이터를 실제로 돌릴 수 있는 코드까지 내려줄게.## ㄱ 루프 17회차 (v1.9) — **실제로 돌리는 시뮬레이터 코드** 2종
+1) 코인 노출(B)이 전환/티켓에 미치는 영향 **몬테카를로**  
+2) “무인 24h 버티기” 가능 여부를 보는 **운영 큐(DES)**
+
+> 둘 다 “가정(분포)”을 입력으로 받고, 나중에 베타 데이터가 쌓이면 분포를 좁혀 업데이트하면 됨.
+
+---
+
+# 1) 코드 패키지 구조
+```
+scripts/sim/
+  README.md
+  crypto-branding-mc.ts
+  ops-queue-des.ts
+  lib/
+    stats.ts
+    rng.ts
+```
+
+실행:
+```bash
+npx tsx scripts/sim/crypto-branding-mc.ts
+npx tsx scripts/sim/ops-queue-des.ts
+```
+
+설치:
+```bash
+npm i -D tsx typescript
+```
+
+---
+
+# 2) 공용 RNG/통계 유틸
+
+## `scripts/sim/lib/rng.ts`
+```ts
+export class RNG {
+  // Mulberry32
+  private seed: number;
+  constructor(seed = 123456789) { this.seed = seed >>> 0; }
+  next() {
+    let t = this.seed += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  }
+  uniform(a: number, b: number) { return a + (b - a) * this.next(); }
+  bernoulli(p: number) { return this.next() < p; }
+  normal(mu: number, sigma: number) {
+    // Box-Muller
+    const u1 = Math.max(this.next(), 1e-12);
+    const u2 = this.next();
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+    return mu + sigma * z0;
+  }
+  clamp(x: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, x)); }
+}
+```
+
+## `scripts/sim/lib/stats.ts`
+```ts
+export function mean(xs: number[]) { return xs.reduce((a,b)=>a+b,0)/xs.length; }
+
+export function quantile(xs: number[], q: number) {
+  const a = [...xs].sort((x,y)=>x-y);
+  const pos = (a.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  if (a[base+1] === undefined) return a[base];
+  return a[base] + rest * (a[base+1] - a[base]);
+}
+
+export function pct(x: number) { return (100 * x).toFixed(2) + '%'; }
+```
+
+---
+
+# 3) 몬테카를로: 코인 노출이 “전환/티켓”에 미치는 영향
+
+## `scripts/sim/crypto-branding-mc.ts`
+```ts
+import { RNG } from './lib/rng';
+import { mean, quantile, pct } from './lib/stats';
+
+type Inputs = {
+  days: number;
+  dailyVisitors: number;     // 일 방문자
+  pSignup: number;           // 방문→가입
+  pConsent: number;          // 가입→동의완료
+  pPaidGivenConsent: number; // 동의완료→결제 (핵심)
+  pTicketGivenConsent: number; // 동의완료→티켓(문의/불만) 발생 확률
+
+  // 코인 노출(B) 효과를 분포로
+  deltaSignup: { lo: number; hi: number };      // +0~+0.06
+  deltaPaid: { lo: number; hi: number };        // -0.03~+0.01 (동의완료→결제에 영향)
+  deltaTicketMult: { lo: number; hi: number };  // 1.0~1.5 같은 배수 (티켓 증가 리스크)
+};
+
+function runOne(rng: RNG, inp: Inputs) {
+  // A(코인 노출 없음)
+  const A = simulateArm(rng, inp, { dSignup: 0, dPaid: 0, ticketMult: 1 });
+
+  // B(코인 노출)
+  const dSignup = rng.uniform(inp.deltaSignup.lo, inp.deltaSignup.hi);
+  const dPaid = rng.uniform(inp.deltaPaid.lo, inp.deltaPaid.hi);
+  const ticketMult = rng.uniform(inp.deltaTicketMult.lo, inp.deltaTicketMult.hi);
+
+  const B = simulateArm(rng, inp, { dSignup, dPaid, ticketMult });
+
+  // 비교 지표
+  const paidDiff = B.paidRate - A.paidRate;               // 절대 차이 (consent 대비)
+  const paidRateBNotDropTooMuch = (paidDiff >= -0.005);   // -0.5%p 이하 하락은 허용
+  const ticketsUp = (B.ticketCount - A.ticketCount);
+
+  return { A, B, dSignup, dPaid, ticketMult, paidDiff, paidRateBNotDropTooMuch, ticketsUp };
+}
+
+function simulateArm(rng: RNG, inp: Inputs, eff: { dSignup: number; dPaid: number; ticketMult: number }) {
+  const visitors = inp.dailyVisitors * inp.days;
+
+  const pSignup = clamp01(inp.pSignup + eff.dSignup);
+  // 코인 노출이 동의율 자체를 깎는 효과도 있을 수 있지만(신뢰 하락),
+  // 여기서는 결제율(dPaid)에 주로 반영하고, 동의율은 고정(보수적 단순화).
+  const pConsent = clamp01(inp.pConsent);
+
+  const pPaid = clamp01(inp.pPaidGivenConsent + eff.dPaid);
+  const pTicket = clamp01(inp.pTicketGivenConsent * eff.ticketMult);
+
+  let signup = 0, consent = 0, paid = 0, ticket = 0;
+
+  for (let i=0; i<visitors; i++) {
+    if (!rng.bernoulli(pSignup)) continue;
+    signup++;
+    if (!rng.bernoulli(pConsent)) continue;
+    consent++;
+    if (rng.bernoulli(pPaid)) paid++;
+    if (rng.bernoulli(pTicket)) ticket++;
+  }
+
+  const paidRate = consent > 0 ? paid / consent : 0;
+  return {
+    visitors, signup, consent, paid, ticketCount: ticket,
+    paidRate
+  };
+}
+
+function clamp01(x: number) { return Math.max(0, Math.min(1, x)); }
+
+(function main() {
+  const rng = new RNG(42);
+
+  // ===== 너 상황에 맞춘 기본값(조정 가능) =====
+  const inp: Inputs = {
+    days: 14,
+    dailyVisitors: 300,          // 베타 초기 유입(예시)
+    pSignup: 0.10,               // 10% 가입(예시)
+    pConsent: 0.80,              // 동의완료 80%(우리가 게이트 UX 갖췄다는 전제)
+    pPaidGivenConsent: 0.06,     // 동의 완료자 중 6% 결제(목표 5%+)
+    pTicketGivenConsent: 0.02,   // 동의 완료자 중 2%는 문의 발생(예시)
+
+    deltaSignup: { lo: 0.00, hi: 0.06 },
+    deltaPaid: { lo: -0.03, hi: 0.01 },
+    deltaTicketMult: { lo: 1.00, hi: 1.50 }
+  };
+
+  const N = 20000;
+  const prob: number[] = [];
+  const paidDiffs: number[] = [];
+  const ticketUps: number[] = [];
+  const signupGain: number[] = [];
+
+  for (let i=0; i<N; i++) {
+    const r = runOne(rng, inp);
+    prob.push(r.paidRateBNotDropTooMuch ? 1 : 0);
+    paidDiffs.push(r.paidDiff);
+    ticketUps.push(r.ticketsUp);
+    signupGain.push(r.B.signup - r.A.signup);
+  }
+
+  console.log('--- Crypto Exposure MC (E1) ---');
+  console.log('Horizon:', inp.days, 'days, dailyVisitors:', inp.dailyVisitors);
+  console.log('P(B paidRate >= A -0.5%p):', pct(mean(prob)));
+  console.log('PaidRate diff (B-A) p50:', (quantile(paidDiffs,0.5)*100).toFixed(2)+'%p',
+              'p10:', (quantile(paidDiffs,0.1)*100).toFixed(2)+'%p',
+              'p90:', (quantile(paidDiffs,0.9)*100).toFixed(2)+'%p');
+  console.log('Signup gain (B-A) p50:', quantile(signupGain,0.5).toFixed(0),
+              'p10:', quantile(signupGain,0.1).toFixed(0),
+              'p90:', quantile(signupGain,0.9).toFixed(0));
+  console.log('Ticket increase (B-A) p50:', quantile(ticketUps,0.5).toFixed(0),
+              'p90:', quantile(ticketUps,0.9).toFixed(0));
+})();
+```
+
+### 이 시뮬레이터가 주는 결론 해석(중요)
+- `P(B paidRate >= A -0.5%p)`가 낮으면 → 코인 노출은 **브랜딩 손상 확률이 높다** → E1에서 B 롤백
+- signupGain은 늘어도 paidDiff가 크게 음수면 → “호기심 유입”만 늘고 “신뢰 기반 결제”가 줄어드는 패턴
+
+---
+
+# 4) 운영 큐(DES): 무인 24h 버티기 시뮬레이터
+
+## `scripts/sim/ops-queue-des.ts`
+```ts
+import { RNG } from './lib/rng';
+import { mean, quantile } from './lib/stats';
+
+type Inputs = {
+  days: number;
+  // 하루 단위 유저 규모(동의 완료자 기준으로 환산해도 됨)
+  dailyConsentedUsers: number;
+
+  // 이벤트 발생률(유저 1명당)
+  pTicket: number;       // 문의 발생
+  pRefundReq: number;    // 환불 요청
+  pPaymentFail: number;  // 결제 실패(문의로 이어질 수 있음)
+
+  // 코인 노출 시 배수(브랜딩/혼란 영향)
+  ticketMult: number;
+  refundMult: number;
+
+  // 자동 처리 확률
+  pAutoResolveTicket: number;
+  pAutoResolveRefund: number;  // 규칙 환불 자동 승인 비율
+  pAutoResolvePaymentFail: number;
+
+  // 사람 처리 능력(분당 처리 건수) 및 근무시간
+  humanCapacityPerHour: number; // 예: 30건/시간(=2분/건)
+  humanHoursPerDay: number;     // 무인 0이면 0
+
+  // 무인 구간 임계치(백로그가 이 이상이면 “캠페인OFF/기능강등” 발동)
+  backlogThreshold: number;
+};
+
+type DayResult = {
+  day: number;
+  createdHuman: number;
+  resolvedHuman: number;
+  backlogEnd: number;
+  tripped: boolean; // 임계치 초과
+};
+
+function simulate(rng: RNG, inp: Inputs) {
+  let backlog = 0;
+  const days: DayResult[] = [];
+  let trippedCount = 0;
+
+  for (let d=1; d<=inp.days; d++) {
+    const users = inp.dailyConsentedUsers;
+
+    // 오늘 들어오는 사건 수(단순화: 베르누이 합)
+    let tickets = 0, refunds = 0, payfails = 0;
+    for (let i=0; i<users; i++) {
+      if (rng.bernoulli(clamp01(inp.pTicket * inp.ticketMult))) tickets++;
+      if (rng.bernoulli(clamp01(inp.pRefundReq * inp.refundMult))) refunds++;
+      if (rng.bernoulli(clamp01(inp.pPaymentFail))) payfails++;
+    }
+
+    // 자동 해결
+    const autoTickets = binom(rng, tickets, inp.pAutoResolveTicket);
+    const autoRefunds = binom(rng, refunds, inp.pAutoResolveRefund);
+    const autoPayfails = binom(rng, payfails, inp.pAutoResolvePaymentFail);
+
+    const humanIncoming =
+      (tickets - autoTickets) +
+      (refunds - autoRefunds) +
+      (payfails - autoPayfails);
+
+    backlog += humanIncoming;
+
+    // 사람 처리(근무시간 기반)
+    const humanCapacity = Math.floor(inp.humanCapacityPerHour * inp.humanHoursPerDay);
+    const resolved = Math.min(backlog, humanCapacity);
+    backlog -= resolved;
+
+    const tripped = backlog >= inp.backlogThreshold;
+    if (tripped) trippedCount++;
+
+    days.push({
+      day: d,
+      createdHuman: humanIncoming,
+      resolvedHuman: resolved,
+      backlogEnd: backlog,
+      tripped
+    });
+  }
+
+  return { days, trippedCount, backlogEnd: backlog };
+}
+
+function binom(rng: RNG, n: number, p: number) {
+  p = clamp01(p);
+  let x = 0;
+  for (let i=0; i<n; i++) if (rng.bernoulli(p)) x++;
+  return x;
+}
+function clamp01(x: number) { return Math.max(0, Math.min(1, x)); }
+
+(function main() {
+  const rng = new RNG(7);
+
+  // ===== 기본값(베타+주식 메인) =====
+  const base: Inputs = {
+    days: 14,
+    dailyConsentedUsers: 30,     // 베타 100명 중 일 동의완료 활성(예시)
+
+    pTicket: 0.03,               // 3%가 하루에 문의 1건 발생(예시)
+    pRefundReq: 0.005,           // 0.5% 환불요청
+    pPaymentFail: 0.01,          // 1% 결제 실패
+
+    ticketMult: 1.0,
+    refundMult: 1.0,
+
+    pAutoResolveTicket: 0.85,    // FAQ/가이드/재시도 자동화로 85% 자동 해결 목표
+    pAutoResolveRefund: 0.70,    // 명확한 규칙 환불 자동 승인 70%
+    pAutoResolvePaymentFail: 0.80,
+
+    humanCapacityPerHour: 30,    // 2분/건
+    humanHoursPerDay: 0,         // “무인 운영” 시뮬 (24h)
+    backlogThreshold: 20
+  };
+
+  // 코인 노출이 혼란을 올리는 케이스(보수적으로)
+  const withCryptoExposure = { ...base, ticketMult: 1.3, refundMult: 1.1 };
+
+  const N = 5000;
+  const trippedBase: number[] = [];
+  const trippedCrypto: number[] = [];
+  const backlogBase: number[] = [];
+  const backlogCrypto: number[] = [];
+
+  for (let i=0; i<N; i++) {
+    const r1 = simulate(rng, base);
+    trippedBase.push(r1.trippedCount);
+    backlogBase.push(r1.backlogEnd);
+
+    const r2 = simulate(rng, withCryptoExposure);
+    trippedCrypto.push(r2.trippedCount);
+    backlogCrypto.push(r2.backlogEnd);
+  }
+
+  const probTrip = (xs: number[]) => xs.filter(x => x > 0).length / xs.length;
+
+  console.log('--- Ops Queue DES (14d, humanHoursPerDay=0) ---');
+  console.log('Base:    P(trip any day)=', (100*probTrip(trippedBase)).toFixed(2)+'%',
+              'backlogEnd p50=', quantile(backlogBase,0.5).toFixed(0),
+              'p90=', quantile(backlogBase,0.9).toFixed(0));
+  console.log('Crypto+: P(trip any day)=', (100*probTrip(trippedCrypto)).toFixed(2)+'%',
+              'backlogEnd p50=', quantile(backlogCrypto,0.5).toFixed(0),
+              'p90=', quantile(backlogCrypto,0.9).toFixed(0));
+
+  console.log('\nTip: humanHoursPerDay를 0.5(30분)로 올리면 임계치 초과 확률이 급감하는지 확인 가능.');
+})();
+```
+
+### 이 DES가 주는 결론 해석
+- `P(trip any day)`가 높으면 “무인 24h”는 위험 → **캠페인 OFF / 코인 노출 최소화 / 자동 해결율 상승**이 필요
+- `humanHoursPerDay`를 0 → 0.5로 바꾸면 “사람 30분”이 어떤 효과인지 정량화됨  
+  (네가 원하는 자동화 목표치 설정에 직접 도움이 됨)
+
+---
+
+# 5) 너의 현재 상황에 맞춘 “추천 사용법”
+1) 먼저 `crypto-branding-mc.ts` 실행 → 코인 노출이 결제율을 깎을 위험이 얼마나 큰지 감 잡기  
+2) 그 다음 `ops-queue-des.ts`에서
+   - `humanHoursPerDay=0` vs `0.5` 비교  
+   - `ticketMult`를 1.0~1.5로 바꿔가며 “코인 노출이 운영을 무너뜨리는 지점” 찾기  
+3) 그 결과로 E1/E2의 **롤백 기준 숫자**를 확정(우리가 16회차에 만든 규칙을 수치로 보정)
+
+---
+
+# 6) 다음 ㄱ (18회차) 예고 — “실제 데이터로 분포 업데이트”
+다음은 시뮬레이터를 ‘가정’에서 ‘현실’로 바꾼다:
+- Supabase에서 지난 7/14일 이벤트를 뽑아와
+  - `pSignup`, `pConsent`, `pPaidGivenConsent`, `pTicketGivenConsent`를 **실측 추정**
+- 그 값을 시뮬레이터 입력으로 자동 반영하는 스크립트 추가
+- 결과를 Slack 일일 리포트로 자동 발송
+
+원하면 `ㄱ` 보내고, 가능한 경우(민감정보 없이) “현재 대략 방문/가입/동의/결제/티켓 건수”만 숫자로 주면 바로 실측 기반으로 튜닝해줄게.

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://claude.ai/schemas/claude-code-settings.json",
+  "version": "2.0",
+  "permissions": {
+    "allow": ["*"],
+    "deny": [],
+    "defaultMode": "bypassPermissions"
+  },
+  "project": {
+    "name": "HEPHAITOS",
+    "description": "Replit for Trading - 코딩 없이 자연어로 AI 트레이딩 봇을 만드는 플랫폼",
+    "paradigm": "Copy-Learn-Build",
+    "type": "next-app"
+  },
+
+  "context": {
+    "requiredFiles": [
+      "BUSINESS_CONSTITUTION.md",
+      "CLAUDE.md",
+      "DESIGN_SYSTEM.md"
+    ],
+    "optionalFiles": [
+      "BUSINESS_OVERVIEW.md",
+      "docs/HEPHAITOS_CORE_REFERENCES.md"
+    ]
+  },
+
+  "codeStyle": {
+    "language": "typescript",
+    "strictMode": true,
+    "formatter": "prettier",
+    "linter": "eslint"
+  },
+
+  "agents": {
+    "enabled": true,
+    "autoLoad": true,
+    "available": [
+      "trading-architect",
+      "strategy-builder",
+      "legal-guardian"
+    ]
+  },
+
+  "skills": {
+    "enabled": true,
+    "autoDiscover": true,
+    "available": [
+      "copy-learn-build",
+      "unified-broker-api",
+      "design-system",
+      "quant-2-0-risk-management",
+      "grok-style-real-time-monitoring",
+      "legal-compliance-system"
+    ]
+  },
+
+  "commands": {
+    "enabled": true,
+    "available": [
+      "strategy",
+      "backtest",
+      "broker",
+      "legal",
+      "build"
+    ]
+  },
+
+  "legalCompliance": {
+    "noInvestmentAdvice": true,
+    "disclaimerRequired": true,
+    "educationOnly": true,
+    "forbiddenPhrases": [
+      "수익 보장",
+      "확실한 수익",
+      "~하세요"
+    ],
+    "requiredDisclaimer": "본 서비스는 투자 교육 및 도구 제공 목적이며, 투자 조언이 아닙니다."
+  },
+
+  "techStack": {
+    "frontend": ["next.js", "typescript", "tailwind", "shadcn"],
+    "backend": ["supabase", "vercel-ai-sdk"],
+    "charts": ["tradingview", "recharts"],
+    "state": ["zustand", "tanstack-query"]
+  },
+
+  "paths": {
+    "components": "src/components",
+    "lib": "src/lib",
+    "api": "src/app/api",
+    "types": "src/types",
+    "hooks": "src/hooks",
+    "stores": "src/stores"
+  },
+
+  "designSystem": {
+    "theme": "dark-only",
+    "primary": "#5E6AD2",
+    "background": "#0D0D0F",
+    "profit": "#22C55E",
+    "loss": "#EF4444",
+    "glassEffect": "backdrop-blur-xl + rgba(255,255,255,0.03)"
+  }
+}

@@ -1,0 +1,52 @@
+name: Check AI Words
+
+on:
+  push:
+    branches: [main, develop, feat/**]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  check-ai-words:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for "AI" in user-facing files
+        run: |
+          # P0-6: 사용자 대면 파일에서 "AI" 단어 검사
+          # i18n, 컴포넌트, 페이지만 검사 (내부 라이브러리/테스트 제외)
+
+          echo "🔍 Checking for 'AI' words in user-facing files..."
+
+          FOUND=0
+
+          # Check i18n files
+          if grep -r '\bAI\b' src/i18n 2>/dev/null; then
+            echo "❌ Found 'AI' in i18n files"
+            FOUND=1
+          fi
+
+          # Check components
+          if grep -r '\bAI\b' src/components --exclude-dir=node_modules 2>/dev/null; then
+            echo "❌ Found 'AI' in components"
+            FOUND=1
+          fi
+
+          # Check app pages (excluding lib, hooks, tests)
+          if grep -r '\bAI\b' src/app --exclude-dir=node_modules 2>/dev/null; then
+            echo "❌ Found 'AI' in app pages"
+            FOUND=1
+          fi
+
+          if [ $FOUND -eq 1 ]; then
+            echo ""
+            echo "❌ P0-6 Compliance Failed: Found 'AI' words in user-facing files"
+            echo "Please replace with approved terminology:"
+            echo "  AI 전략 생성 → 전략 엔진"
+            echo "  AI 분석 → 리서치 요약"
+            echo "  AI 튜터 → 학습 가이드"
+            exit 1
+          else
+            echo "✅ P0-6 Compliance Passed: No 'AI' words in user-facing files"
+          fi

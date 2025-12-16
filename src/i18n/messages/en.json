@@ -1,0 +1,1833 @@
+{
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How it works",
+    "pricing": "Pricing",
+    "docs": "Docs",
+    "login": "Log in",
+    "getStarted": "Start Building"
+  },
+  "hero": {
+    "badge": "Now in Beta",
+    "headline1": "Build Trading Engines",
+    "headline2": "Without Code",
+    "subheadline": "Turn plain English into automated trading systems.",
+    "subheadline2": "Backtest in seconds. Deploy in minutes.",
+    "flow": "Prompt → Logic → Backtest → Deploy",
+    "cta": "Start Building",
+    "watchDemo": "Watch Demo",
+    "trust1": "Free forever",
+    "trust2": "Zero code",
+    "trust3": "3-min deploy",
+    "copy": {
+      "title": "Copy",
+      "desc1": "Clone portfolios from",
+      "desc2": "Pelosi, Buffett & legends"
+    },
+    "learn": {
+      "title": "Learn",
+      "desc1": "System decodes the logic",
+      "desc2": "behind every trade"
+    },
+    "build": {
+      "title": "Build",
+      "desc1": "Ship strategies in plain English",
+      "desc2": "Backtest → Deploy live"
+    },
+    "disclaimer": "Educational platform. Not investment advice."
+  },
+  "features": {
+    "label": "Platform",
+    "title": "Copy · Learn · Build",
+    "subtitle": "From zero to quant in weeks, not years.",
+    "subtitle2": "Clone → Understand → Ship",
+    "portfolioMirroring": {
+      "title": "Portfolio Cloning",
+      "desc": "One-click mirror portfolios from Congress members, hedge fund legends via SEC 13F filings.",
+      "highlight": "Real-time sync"
+    },
+    "aiCoach": {
+      "title": "Strategy Analyst",
+      "desc": "\"Why did they buy this?\" System reverse-engineers trade logic and explains the thesis. 1:1 sessions available.",
+      "highlight": "Live analysis"
+    },
+    "nlStrategies": {
+      "title": "Natural Language Engine",
+      "desc": "\"Buy when RSI < 30, sell when RSI > 70\" — one sentence compiles into production-ready trading logic.",
+      "highlight": "15-sec compile"
+    },
+    "visualBuilder": {
+      "title": "Visual Strategy Builder",
+      "desc": "Drag & drop modules to architect quant strategies. Zero Python. Zero complexity.",
+      "highlight": "No-code"
+    },
+    "backtesting": {
+      "title": "Instant Backtesting",
+      "desc": "Validate against historical data instantly. Win rate, MDD, Sharpe — every metric that matters.",
+      "highlight": "5-sec results"
+    },
+    "deployment": {
+      "title": "One-Click Deploy",
+      "desc": "Connect broker APIs. Deploy battle-tested strategies. Real money. Real automation.",
+      "highlight": "3-min setup"
+    },
+    "stats": {
+      "brokerSetup": "Broker connect",
+      "strategyBuild": "Strategy ship",
+      "codeRequired": "Code needed",
+      "toStart": "To start"
+    }
+  },
+  "howItWorks": {
+    "label": "User Stories",
+    "title1": "Before → After",
+    "title2": "Real Transformations",
+    "subtitle1": "See how retail investors",
+    "subtitle2": "built their own trading systems with HEPHAITOS.",
+    "personas": {
+      "minsu": {
+        "name": "Mike",
+        "age": "32",
+        "job": "Software Engineer",
+        "avatar": "👨‍💼",
+        "before": {
+          "emotion": "Frustrated",
+          "situation": "Followed YouTube stock picks blindly",
+          "pain": "-15% on \"hot tips\", no idea why I bought"
+        },
+        "after": {
+          "result": "Following others → Trading with my own rules",
+          "gain": "Now I can explain every position"
+        },
+        "journey": [
+          {
+            "step": "COPY",
+            "time": "DAY 1",
+            "action": "Cloned Buffett's portfolio",
+            "result": "Understood how legends allocate"
+          },
+          {
+            "step": "LEARN",
+            "time": "WEEK 2",
+            "action": "\"Why did Buffett buy Apple?\" Asked Coach",
+            "result": "Learned value investing fundamentals"
+          },
+          {
+            "step": "BUILD",
+            "time": "MONTH 1",
+            "action": "\"P/E under 15, dividend yield > 3%\" — typed",
+            "result": "Shipped my own value screener"
+          }
+        ]
+      },
+      "jihyun": {
+        "name": "Sarah",
+        "age": "26",
+        "job": "Product Manager",
+        "avatar": "👩‍💻",
+        "before": {
+          "emotion": "Scammed",
+          "situation": "Paid $300/mo for Discord signals",
+          "pain": "Followed calls, lost more than gained"
+        },
+        "after": {
+          "result": "$300/mo subscription → Free personal system",
+          "gain": "Zero dependency on signal groups"
+        },
+        "journey": [
+          {
+            "step": "COPY",
+            "time": "DAY 1",
+            "action": "Analyzed Pelosi's trades",
+            "result": "Mapped congressional trading patterns"
+          },
+          {
+            "step": "LEARN",
+            "time": "WEEK 1",
+            "action": "\"Why this timing?\" — Asked Coach",
+            "result": "Understood event-driven catalysts"
+          },
+          {
+            "step": "BUILD",
+            "time": "WEEK 3",
+            "action": "Built \"RSI < 30 + volume spike\" strategy",
+            "result": "Deployed automated alert system"
+          }
+        ]
+      },
+      "youngho": {
+        "name": "David",
+        "age": "45",
+        "job": "Entrepreneur",
+        "avatar": "👨‍🔧",
+        "before": {
+          "emotion": "Disappointed",
+          "situation": "Spent $3K on trading courses",
+          "pain": "Theory clicked, execution failed"
+        },
+        "after": {
+          "result": "Course knowledge → Running system",
+          "gain": "Finally executing, not just learning"
+        },
+        "journey": [
+          {
+            "step": "COPY",
+            "time": "DAY 1",
+            "action": "Referenced Ray Dalio's allocation",
+            "result": "Understood All-Weather architecture"
+          },
+          {
+            "step": "LEARN",
+            "time": "WEEK 1",
+            "action": "\"Why does diversification work?\" — Asked",
+            "result": "Internalized risk management"
+          },
+          {
+            "step": "BUILD",
+            "time": "WEEK 2",
+            "action": "Set \"quarterly rebalance, 20% per asset\"",
+            "result": "Auto-rebalancing system live"
+          }
+        ]
+      }
+    },
+    "stats": {
+      "dependency": "-100%",
+      "dependencyLabel": "Signal dependency",
+      "ideaToSystem": "~5 min",
+      "ideaToSystemLabel": "Idea → System",
+      "devCost": "$0",
+      "devCostLabel": "Dev cost"
+    },
+    "cta": {
+      "title": "Start building today",
+      "subtitle": "Copy → Learn → Build. Ship your own system step by step.",
+      "button": "Start Building Free"
+    },
+    "disclaimer1": "* Personas are illustrative. Individual results vary.",
+    "disclaimer2": "HEPHAITOS is an educational platform, not investment advice."
+  },
+  "pricing": {
+    "label": "Pricing",
+    "title1": "Compare the",
+    "title2": "real cost",
+    "subtitle1": "Courses. Signals. Quant dev. All expensive.",
+    "subtitle2": "HEPHAITOS gives you everything at",
+    "subtitle3": "1/10",
+    "subtitle4": "the price.",
+    "currentCosts": "What you're paying now",
+    "existingCosts": {
+      "courses": {
+        "category": "Trading Courses",
+        "cost": "$1K–3K",
+        "period": "one-time",
+        "pain": "Theory only, no tools",
+        "icon": "📚"
+      },
+      "signals": {
+        "category": "Signal Groups",
+        "cost": "$300–500",
+        "period": "/mo",
+        "pain": "Dependency, front-running",
+        "icon": "💬"
+      },
+      "quantDev": {
+        "category": "Quant Dev",
+        "cost": "$5K–20K",
+        "period": "one-time",
+        "pain": "Maintenance hell, rigid",
+        "icon": "💻"
+      },
+      "dataApi": {
+        "category": "Data + API",
+        "cost": "$100–300",
+        "period": "/mo",
+        "pain": "Requires coding",
+        "icon": "📊"
+      }
+    },
+    "comparison": {
+      "existingLabel": "Traditional stack",
+      "existingMonthly": "$400–800+",
+      "existingNote": "(courses + signals + data)",
+      "hephaitosLabel": "HEPHAITOS Pro",
+      "hephaitosMonthly": "$29",
+      "hephaitosNote": "(everything included)",
+      "savings": "Save up to 97%"
+    },
+    "plansLabel": "Plans",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "tagline": "Start building",
+        "period": "Forever free",
+        "features": [
+          "3 learning modules",
+          "10 backtests/month",
+          "Community access",
+          "Basic charting",
+          "Celebrity portfolio viewing"
+        ],
+        "limitations": [
+          "No live deployment",
+          "Limited strategy generation"
+        ],
+        "cta": "Start Free",
+        "painSolved": "Escape signal dependency"
+      },
+      "starter": {
+        "name": "Starter",
+        "tagline": "Ship your first strategy",
+        "period": "/mo",
+        "yearlyDiscount": "off",
+        "yearlyText": "/year",
+        "features": [
+          "Full learning content",
+          "100 backtests/month",
+          "Strategy templates",
+          "Email support",
+          "Certificate",
+          "50 strategy generations/month"
+        ],
+        "cta": "Start Starter",
+        "badge": "Most Popular",
+        "painSolved": "$300/mo signals → $9/month"
+      },
+      "pro": {
+        "name": "Pro",
+        "tagline": "Full trading stack",
+        "period": "/mo",
+        "features": [
+          "Everything in Starter",
+          "Unlimited FORGE",
+          "Real-time data",
+          "Advanced analytics",
+          "Unlimited strategy generation",
+          "Premium templates",
+          "Priority support",
+          "Live deployment (3 strategies)"
+        ],
+        "cta": "Start Pro",
+        "painSolved": "$5K quant dev → $300/year"
+      }
+    },
+    "team": {
+      "title": "Team",
+      "description": "For investment clubs, asset managers, and trading desks",
+      "features": ["5 seats", "Admin dashboard", "Shared strategies", "API access", "SLA"],
+      "price": "From $199/month",
+      "cta": "Contact Sales"
+    },
+    "trust": {
+      "trial": "14-day free trial",
+      "trialNote": "No credit card",
+      "cancel": "Cancel anytime",
+      "cancelNote": "No lock-in",
+      "refund": "Money-back guarantee",
+      "refundNote": "7-day full refund"
+    },
+    "disclaimer": {
+      "title": "Important",
+      "text1": "HEPHAITOS",
+      "text2": "does not provide investment advice",
+      "text3": ". All plans are educational tools. Investment decisions and outcomes are your responsibility. Always backtest."
+    },
+    "faq": {
+      "question": "Questions?",
+      "link": "View FAQ →"
+    }
+  },
+  "cta": {
+    "painTitle": "Sound familiar?",
+    "pains": [
+      "YouTube picks = negative returns",
+      "$300/mo signals, still losing",
+      "$3K courses, still panic selling",
+      "Quant trading? Can't code"
+    ],
+    "solutionTitle": "With HEPHAITOS...",
+    "solutions": [
+      "Your idea → System in 5 minutes",
+      "Plain English → Trading logic",
+      "Instant backtest → Live deploy",
+      "Clone proven strategies"
+    ],
+    "headline1": "Stop following.",
+    "headline2": "Start building.",
+    "subheadline1": "\"Buy when RSI below 30\" — this one sentence",
+    "subheadline2": "becomes your own trading engine.",
+    "button": "Start Building Free",
+    "demoButton": "Watch 30-sec Demo",
+    "trust": {
+      "noCard": "No credit card",
+      "trial": "14-day trial",
+      "cancelAnytime": "Cancel anytime"
+    },
+    "stats": {
+      "firstStrategy": "5 min",
+      "firstStrategyLabel": "First strategy",
+      "savings": "97%",
+      "savingsLabel": "Cost saved",
+      "coding": "0 lines",
+      "codingLabel": "Code needed"
+    },
+    "disclaimer": "HEPHAITOS is an educational platform, not investment advice. All decisions and outcomes are your responsibility. Past backtests ≠ future results."
+  },
+  "common": {
+    "language": "Language",
+    "english": "English",
+    "korean": "한국어",
+    "important": "Important",
+    "languageSwitcher": {
+      "switchTo": "Switch to Korean"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Log in to your account",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Log in",
+      "loading": "Logging in...",
+      "or": "or",
+      "googleLogin": "Continue with Google",
+      "githubLogin": "Continue with GitHub",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "error": "Login failed. Please try again."
+    },
+    "signup": {
+      "title": "Start building",
+      "subtitle": "Create your free account",
+      "name": "Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email",
+      "password": "Password",
+      "passwordPlaceholder": "8+ characters",
+      "confirmPassword": "Confirm password",
+      "confirmPlaceholder": "Re-enter password",
+      "terms1": "By signing up, you agree to our",
+      "terms": "Terms",
+      "and": "and",
+      "privacy": "Privacy Policy",
+      "submit": "Start Building Free",
+      "loading": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "login": "Log in",
+      "success": {
+        "title": "Check your email",
+        "message": "We sent a verification link to",
+        "button": "Go to login"
+      },
+      "errors": {
+        "passwordMismatch": "Passwords don't match",
+        "passwordTooShort": "Password must be at least 8 characters",
+        "generic": "Sign up failed. Please try again."
+      }
+    }
+  },
+  "footer": {
+    "riskDisclosure": {
+      "title": "Risk Disclosure",
+      "text1": "HEPHAITOS",
+      "text2": "does not provide investment advice",
+      "text3": ". This platform is for education and tools only. All investment decisions and outcomes are your responsibility. Past performance ≠ future results. Celebrity portfolio data is from public SEC 13F filings and may not reflect current holdings."
+    },
+    "tagline1": "Build Trading Engines",
+    "tagline2": "Without Code",
+    "systemStatus": "All systems operational",
+    "product": {
+      "title": "Product",
+      "features": "Features",
+      "pricing": "Pricing",
+      "roadmap": "Roadmap",
+      "changelog": "Changelog"
+    },
+    "learn": {
+      "title": "Learn",
+      "copyGuide": "Copy Guide",
+      "learnGuide": "Learn Guide",
+      "buildTutorial": "Build Tutorial",
+      "apiDocs": "API Docs"
+    },
+    "company": {
+      "title": "Company",
+      "about": "About",
+      "blog": "Blog",
+      "careers": "Careers",
+      "contact": "Contact"
+    },
+    "legal": {
+      "title": "Legal",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "riskDisclosure": "Risk Disclosure",
+      "disclaimer": "Disclaimer"
+    },
+    "compliance": {
+      "title": "Compliance",
+      "text": "HEPHAITOS does not provide investment advisory services. All content is for general educational purposes and does not constitute buy/sell recommendations."
+    },
+    "dataSources": {
+      "title": "Data Sources",
+      "celebrity": "Congressional Trade Data: Unusual Whales",
+      "market": "Market Data: Polygon.io, SEC EDGAR",
+      "note": "All data is from public sources and provided for educational purposes only."
+    },
+    "copyright": "© 2025 HEPHAITOS. All rights reserved.",
+    "businessInfo": {
+      "registration": "Delaware C-Corp",
+      "ceo": "CEO: John Doe",
+      "address": "San Francisco, CA"
+    },
+    "finalDisclaimer": "All backtests and metrics are based on historical data and do not guarantee future returns. Investing involves risk of loss. Consult professionals before making investment decisions. HEPHAITOS is not liable for user losses."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Stop following others' strategies blindly",
+    "myJourney": "My Journey",
+    "journeyPath": "Copy → Learn → Build",
+    "newUser": {
+      "title": "New here?",
+      "description": "Build your first strategy in 5 minutes. Start with plain English, no coding required.",
+      "cta": "Start Building Strategy"
+    },
+    "stages": {
+      "copy": {
+        "stage": "COPY",
+        "title": "Copy",
+        "description": "Reference portfolios from proven investors",
+        "cta": "View Celebrity Portfolios",
+        "painSolved": "Escape YouTube/signal dependency",
+        "features": ["Buffett, Pelosi 13F data", "Real-time portfolio changes", "Trade timing alerts"]
+      },
+      "learn": {
+        "stage": "LEARN",
+        "title": "Learn",
+        "description": "Ask coaches and mentors about investment principles",
+        "cta": "Ask Coach",
+        "painSolved": "Theory → Execution bridge",
+        "features": ["\"Why this stock?\" Q&A", "Live coaching sessions", "Personalized learning path"]
+      },
+      "build": {
+        "stage": "BUILD",
+        "title": "Build",
+        "description": "Build your own trading system in plain English",
+        "cta": "Build My Strategy",
+        "painSolved": "Quant strategies without code",
+        "features": ["Natural language → Logic conversion", "Instant backtesting", "Live deployment ready"]
+      }
+    },
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "celebMirroring": "Celebrity Mirroring",
+      "portCompare": "Portfolio Compare",
+      "liveCoaching": "Live Coaching",
+      "aiTutor": "Learning Guide",
+      "strategyBuilder": "Strategy Builder",
+      "backtest": "Backtest",
+      "portfolio": "Portfolio",
+      "tradeHistory": "Trade History",
+      "settings": "Settings",
+      "help": "Help",
+      "buildMyStrategy": "Build My Strategy",
+      "copyStage": "COPY - Follow",
+      "learnStage": "LEARN - Study",
+      "buildStage": "BUILD - Create",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar",
+      "home": "Home",
+      "mainNavigation": "Main navigation",
+      "mobileNavigation": "Mobile navigation"
+    },
+    "header": {
+      "search": "Search...",
+      "notifications": "Notifications",
+      "markAllRead": "Mark all read",
+      "buySignal": "Buy signal triggered",
+      "backtestComplete": "Backtest complete",
+      "justNow": "Just now",
+      "hourAgo": "1 hour ago"
+    },
+    "components": {
+      "marketOverview": {
+        "title": "Market Overview"
+      },
+      "activeStrategies": {
+        "title": "Active Strategies",
+        "viewAll": "View All",
+        "pause": "Pause",
+        "resume": "Resume",
+        "menu": "Menu",
+        "trades": "trades",
+        "demoStrategies": {
+          "momentum": "Momentum Breakout",
+          "rsi": "RSI Reversal",
+          "macd": "MACD Golden Cross"
+        }
+      },
+      "recentTrades": {
+        "title": "Recent Trades",
+        "viewAll": "View All",
+        "symbol": "Symbol",
+        "price": "Price",
+        "amount": "Amount",
+        "pnl": "P&L",
+        "strategy": "Strategy",
+        "pending": "Pending",
+        "emptyTitle": "No trades yet",
+        "emptyDesc": "Activate a strategy to see trade history here",
+        "strategies": {
+          "momentum": "Momentum",
+          "rsi": "RSI Reversal",
+          "macd": "MACD"
+        }
+      },
+      "portfolioOverview": {
+        "title": "Portfolio Overview",
+        "totalValue": "Total Value",
+        "todayPnl": "Today's P&L",
+        "totalReturn": "Total Return",
+        "winRate": "Win Rate",
+        "allocations": "Asset Allocations",
+        "chartStart": "Dec 1",
+        "chartEnd": "Dec 12"
+      },
+      "quickActions": {
+        "newStrategy": "New Strategy",
+        "aiGenerate": "Generate Strategy",
+        "backtest": "Backtest",
+        "connectExchange": "Connect Exchange"
+      }
+    },
+    "ui": {
+      "modal": {
+        "close": "Close modal"
+      }
+    },
+    "emptyState": {
+      "strategies": {
+        "title": "No strategies yet",
+        "description": "Create your first investment strategy",
+        "action": "Create First Strategy"
+      },
+      "backtests": {
+        "title": "No backtest results",
+        "description": "Create a strategy and run a backtest",
+        "action": "Run Backtest"
+      },
+      "portfolio": {
+        "title": "Portfolio is empty",
+        "description": "Add assets to build your portfolio",
+        "action": "Add Assets"
+      },
+      "notifications": {
+        "title": "No notifications",
+        "description": "New updates will appear here"
+      },
+      "search": {
+        "title": "No results for",
+        "description": "Try a different keyword",
+        "action": "Clear Search"
+      },
+      "celebrities": {
+        "title": "Not following any celebrities",
+        "description": "Follow investment celebrities to mirror their portfolios",
+        "action": "Explore Celebrities"
+      },
+      "coaching": {
+        "title": "No upcoming coaching",
+        "description": "Join a live coaching session",
+        "action": "Join Coaching"
+      },
+      "generic": {
+        "title": "No data",
+        "description": "Nothing to display yet"
+      },
+      "actionsLabel": "Available actions"
+    },
+    "disclaimer": {
+      "short": "This service is for investment education and tools only, not investment advice.",
+      "full": "This service is for investment education and tools only, not investment advice. All investment decisions and resulting gains or losses are the user's responsibility. Past performance does not guarantee future results.",
+      "legalTitle": "Legal Notice",
+      "legal": "※ This platform provides education and tools, not investment advice.\n※ All investment decisions and resulting gains/losses are your responsibility.\n※ Backtest results are based on historical data and do not guarantee future returns.",
+      "regulatory": "HEPHAITOS does not operate investment advisory or discretionary investment services.",
+      "dismissLabel": "Close disclaimer",
+      "inlineTitle": "Investment Notice",
+      "tradeWarning": "You are about to execute a trade with real funds. Be aware of potential loss of principal.",
+      "backtestWarning": "Backtest results are simulations based on historical data and do not guarantee future returns.",
+      "modalTitle": "Investment Notice",
+      "modalIntro": "Please confirm the following before using HEPHAITOS services.",
+      "modalPoints": [
+        "This service provides <strong class=\"text-white\">investment education and tools</strong>, not investment advice.",
+        "All investment decisions and resulting <strong class=\"text-white\">gains or losses are your responsibility</strong>.",
+        "Backtest results are based on historical data and <strong class=\"text-white\">do not guarantee future returns.</strong>",
+        "You may lose <strong class=\"text-red-400\">some or all</strong> of your principal."
+      ],
+      "modalFooter": "HEPHAITOS does not operate investment advisory or discretionary investment services and does not recommend buying or selling specific stocks.",
+      "acceptButton": "I understand and agree"
+    },
+    "loading": {
+      "loadingAria": "Loading",
+      "default": "Loading...",
+      "inline": "Loading",
+      "noData": "No data available"
+    },
+    "performanceChart": {
+      "title": "Performance Chart",
+      "currentValue": "Current Value",
+      "returnRate": "Return Rate"
+    },
+    "aiGeneration": {
+      "stages": {
+        "preparing": "Preparing Data",
+        "analyzing": "Analyzing",
+        "generating": "Generating Strategy",
+        "streaming": "Streaming Results"
+      },
+      "complete": "Strategy Generation Complete!",
+      "error": "Strategy Generation Failed",
+      "working": "System is working",
+      "checkResults": "Check your results",
+      "errorOccurred": "An error occurred",
+      "processing": "Processing...",
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "success": "Successfully completed",
+      "done": "Done",
+      "failed": "Failed"
+    },
+    "backtest": {
+      "title": "Backtesting",
+      "status": {
+        "idle": "Idle",
+        "loading": "Preparing",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "config": {
+        "initialCapital": "Initial Capital",
+        "symbol": "Symbol",
+        "timeframe": "Timeframe",
+        "stopLoss": "Stop Loss (%)"
+      },
+      "timeframes": {
+        "1m": "1 min",
+        "5m": "5 min",
+        "15m": "15 min",
+        "1h": "1 hour",
+        "4h": "4 hours",
+        "1d": "1 day"
+      },
+      "progress": {
+        "title": "Progress",
+        "bars": "bars",
+        "trades": "Trades"
+      },
+      "actions": {
+        "stop": "Stop",
+        "run": "Run"
+      },
+      "results": {
+        "summary": "Results Summary",
+        "totalReturn": "Total Return",
+        "sharpeRatio": "Sharpe Ratio",
+        "maxDrawdown": "Max Drawdown",
+        "winRate": "Win Rate"
+      },
+      "metrics": {
+        "title": "Performance Metrics",
+        "totalReturn": "Total Return",
+        "annualizedReturn": "Annualized Return",
+        "maxDrawdown": "Max Drawdown",
+        "volatility": "Volatility",
+        "sharpeRatio": "Sharpe Ratio",
+        "sortinoRatio": "Sortino Ratio",
+        "calmarRatio": "Calmar Ratio",
+        "profitFactor": "Profit Factor",
+        "totalTrades": "Total Trades",
+        "winRate": "Win Rate",
+        "avgWin": "Avg Win",
+        "avgLoss": "Avg Loss",
+        "maxConsecutiveWins": "Max Consecutive Wins",
+        "maxConsecutiveLosses": "Max Consecutive Losses",
+        "avgHoldingPeriod": "Avg Holding Period",
+        "expectancy": "Expectancy"
+      },
+      "duration": {
+        "days": "d",
+        "hours": "h",
+        "minutes": "m"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Manage your account and exchange connection settings.",
+      "profile": {
+        "title": "Profile Settings",
+        "name": "Name",
+        "namePlaceholder": "Enter your name",
+        "email": "Email",
+        "plan": "Current Plan",
+        "avatar": "Profile Picture",
+        "changeAvatar": "Change",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "saved": "Changes saved",
+        "error": "Failed to save"
+      },
+      "notifications": {
+        "title": "Notification Settings",
+        "tradeSignals": "Trade Signals",
+        "tradeSignalsDesc": "Get notified when trading signals are triggered",
+        "tradeExecution": "Trade Execution",
+        "tradeExecutionDesc": "Get notified when trades are executed",
+        "backtestComplete": "Backtest Complete",
+        "backtestCompleteDesc": "Get notified when backtests finish",
+        "priceAlerts": "Price Alerts",
+        "priceAlertsDesc": "Get notified on significant price movements",
+        "pushNotifications": "Push Notifications",
+        "pushNotificationsDesc": "Receive browser push notifications",
+        "emailNotifications": "Email Notifications",
+        "emailNotificationsDesc": "Receive notifications via email",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "exchange": {
+        "title": "Exchange Integration",
+        "subtitle": "Connect your exchange accounts for automated trading",
+        "connected": "Connected",
+        "notConnected": "Not Connected",
+        "connect": "Connect",
+        "disconnect": "Disconnect",
+        "apiKey": "API Key",
+        "apiSecret": "API Secret",
+        "apiKeyPlaceholder": "Enter your API key",
+        "apiSecretPlaceholder": "Enter your API secret",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "securityWarning": "Security Notice",
+        "securityWarningText": "API keys grant access to your trading account. Never share your API secret with anyone. Only use read-only or trade-only permissions as needed.",
+        "permissions": "Permissions",
+        "readOnly": "Read Only",
+        "trade": "Trade",
+        "withdraw": "Withdraw",
+        "lastSynced": "Last synced",
+        "testConnection": "Test Connection",
+        "connectionSuccess": "Connection successful",
+        "connectionFailed": "Connection failed",
+        "learnApiKeys": "Learn how to get API keys",
+        "exchanges": {
+          "binance": "Binance",
+          "upbit": "Upbit",
+          "bithumb": "Bithumb",
+          "coinbase": "Coinbase"
+        }
+      },
+      "tabs": {
+        "profile": "Profile",
+        "notifications": "Notifications",
+        "exchange": "Exchange",
+        "security": "Security",
+        "billing": "Billing"
+      }
+    },
+    "errors": {
+      "notFound": {
+        "title": "Page Not Found",
+        "description": "The page you requested does not exist or has been moved.",
+        "backHome": "Go Back Home"
+      },
+      "server": {
+        "title": "Server Error",
+        "description": "Please try again later.",
+        "retry": "Try Again"
+      },
+      "boundary": {
+        "title": "Something went wrong",
+        "description": "An unexpected error occurred. Please try again or go back home.",
+        "retry": "Try Again",
+        "home": "Home"
+      },
+      "types": {
+        "network": {
+          "title": "Network Error",
+          "description": "Please check your internet connection"
+        },
+        "timeout": {
+          "title": "Request Timeout",
+          "description": "Server response is delayed. Please try again later"
+        },
+        "auth": {
+          "title": "Authentication Error",
+          "description": "Login required or session expired"
+        },
+        "permission": {
+          "title": "Access Denied",
+          "description": "You don't have permission to use this feature"
+        },
+        "notFound": {
+          "title": "Not Found",
+          "description": "The requested resource could not be found"
+        },
+        "rateLimit": {
+          "title": "Too Many Requests",
+          "description": "Please try again later (1 minute)"
+        },
+        "aiError": {
+          "title": "Processing Error",
+          "description": "Failed to generate response. Please try again"
+        },
+        "validation": {
+          "title": "Validation Error",
+          "description": "Please check your input"
+        },
+        "server": {
+          "title": "Server Error",
+          "description": "A temporary error occurred. Please try again later"
+        },
+        "generic": {
+          "title": "Error",
+          "description": "Something went wrong. Please try again"
+        }
+      },
+      "actions": {
+        "retry": "Try Again",
+        "dismiss": "Dismiss"
+      }
+    },
+    "toast": {
+      "closeLabel": "Close notification",
+      "tradeAlert": {
+        "buy": "Buy Alert",
+        "sell": "Sell Alert"
+      }
+    },
+    "dataTable": {
+      "search": "Search...",
+      "noData": "No data available",
+      "showing": "Showing {start}-{end} of {total}",
+      "relative": {
+        "justNow": "Just now",
+        "minutesAgo": "{n} min ago",
+        "hoursAgo": "{n} hours ago",
+        "daysAgo": "{n} days ago"
+      }
+    },
+    "trading": {
+      "orderPlaced": {
+        "buy": "Buy order placed",
+        "sell": "Sell order placed"
+      },
+      "orderFilled": {
+        "buy": "Buy filled",
+        "sell": "Sell filled"
+      },
+      "orderCancelled": "Order cancelled",
+      "strategyStarted": "Strategy started",
+      "strategyStopped": "Strategy stopped",
+      "backtestComplete": "Backtest complete"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "offline": "Offline",
+      "markAllRead": "Mark all read",
+      "markAsRead": "Mark as read",
+      "delete": "Delete",
+      "clearAll": "Clear all",
+      "settings": "Settings",
+      "noNotifications": "No notifications",
+      "viewAction": "View →"
+    },
+    "payment": {
+      "title": "Enter Payment Info",
+      "close": "Close",
+      "planInfo": "{plan} Plan",
+      "billingCycle": {
+        "yearly": "Annual subscription",
+        "monthly": "Monthly subscription"
+      },
+      "discountApplied": "{discount}% discount applied",
+      "paymentAmount": "Payment Amount",
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "John Doe",
+        "email": "Email"
+      },
+      "validation": {
+        "nameRequired": "Please enter your name.",
+        "emailInvalid": "Please enter a valid email.",
+        "paymentError": "An error occurred during payment."
+      },
+      "security": {
+        "ssl": "SSL Encrypted",
+        "securePayment": "Secure Payment"
+      },
+      "submitButton": "Pay {price}",
+      "disclaimer": {
+        "terms": "By proceeding, you agree to HEPHAITOS Terms of Service.",
+        "refund": "7-day refund available | No investment advice provided."
+      }
+    },
+    "pricingTable": {
+      "title": "Choose the Right Plan",
+      "subtitle": "All plans include a 7-day free trial",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "enterprise": {
+        "title": "Enterprise Plan",
+        "subtitle": "Custom solutions for large teams",
+        "contact": "Contact Us"
+      },
+      "disclaimer": "HEPHAITOS is an investment education and tools platform. We do not provide investment advice. All investment decisions must be made at your own judgment and responsibility. Refund available within 7 days after payment."
+    },
+    "pricingCard": {
+      "recommended": "Recommended",
+      "currentPlan": "Current Plan",
+      "free": "Free",
+      "perMonth": "/mo",
+      "yearly": "Annual {price}",
+      "discount": "{discount}% OFF",
+      "limits": {
+        "backtest": "Backtests",
+        "liveStrategies": "Live Strategies",
+        "data": "Data",
+        "support": "Support",
+        "unlimited": "Unlimited",
+        "perMonth": "{count}/mo",
+        "count": "{count}",
+        "dataAccess": {
+          "basic": "Basic",
+          "realtime": "Real-time",
+          "premium": "Premium"
+        },
+        "supportLevel": {
+          "community": "Community",
+          "email": "Email",
+          "priority": "Priority"
+        }
+      },
+      "buttons": {
+        "currentlyUsing": "Currently Using",
+        "startFree": "Start Free",
+        "subscribe": "Subscribe"
+      }
+    },
+    "demo": {
+      "backToHome": "Home",
+      "title": "HEPHAITOS Demo",
+      "subtitle": "See how you can build your own trading strategy without coding.",
+      "videoPlaceholder": "Demo video coming soon",
+      "tryIt": {
+        "title": "Try it yourself",
+        "description": "Sign up for free and experience the Copy-Learn-Build journey.",
+        "cta": "Start for Free"
+      }
+    },
+    "copyTrading": {
+      "title": "Copy Trading",
+      "comingSoon": {
+        "subtitle": "Reference portfolios from verified investors.",
+        "title": "Copy Trading Coming Soon",
+        "description1": "Soon you'll be able to view and follow portfolios from famous investors",
+        "description2": "like Nancy Pelosi and Warren Buffett."
+      },
+      "features": {
+        "celebrityPortfolio": {
+          "title": "Celebrity Portfolios",
+          "desc": "View real-time portfolios from famous investors"
+        },
+        "oneClickMirror": {
+          "title": "One-Click Mirror",
+          "desc": "Clone any portfolio with a single click"
+        },
+        "realTimeAlerts": {
+          "title": "Real-Time Alerts",
+          "desc": "Get notified instantly when portfolios change"
+        }
+      }
+    },
+    "simulation": {
+      "title": "Portfolio Simulation",
+      "settings": {
+        "open": "Open settings",
+        "close": "Close"
+      },
+      "config": {
+        "initialCapital": "Initial Capital",
+        "timeframe": "Timeframe",
+        "rebalancing": "Rebalancing",
+        "feeRate": "Fee Rate (%)",
+        "dividendReinvest": "Reinvest Dividends"
+      },
+      "timeframes": {
+        "1M": "1 Month",
+        "3M": "3 Months",
+        "6M": "6 Months",
+        "1Y": "1 Year"
+      },
+      "rebalancing": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "quarterly": "Quarterly"
+      },
+      "status": {
+        "startPrompt": "Start the simulation",
+        "running": "Simulation running...",
+        "runningButton": "Running..."
+      },
+      "results": {
+        "totalReturn": "Total Return",
+        "finalAssets": "Final Assets",
+        "sharpeRatio": "Sharpe Ratio",
+        "alpha": "Alpha",
+        "volatility": "Volatility"
+      },
+      "controls": {
+        "speed": "Speed:",
+        "reset": "Reset",
+        "start": "Start Simulation"
+      },
+      "disclaimer": "This simulation is based on historical data and may differ from actual investment results. Not investment advice. All decisions are your responsibility.",
+      "legend": {
+        "portfolio": "Portfolio",
+        "benchmark": "Benchmark"
+      }
+    },
+    "aiAnalysis": {
+      "title": "Trade Analysis",
+      "status": {
+        "failed": "Analysis Failed",
+        "prompt": "System will analyze this trade",
+        "analyzing": "System is analyzing...",
+        "complete": "Analysis Complete",
+        "streaming": "Streaming..."
+      },
+      "actions": {
+        "start": "Start Analysis",
+        "cancel": "Cancel",
+        "copied": "Copied",
+        "copy": "Copy",
+        "retry": "Retry"
+      },
+      "disclaimer": "This analysis is for educational and informational purposes only. Not investment advice. All decisions are your responsibility.",
+      "badge": "Trade Analysis",
+      "button": "Trade Analysis"
+    },
+    "compare": {
+      "suggestion": {
+        "buy": "Buy",
+        "sell": "Sell",
+        "hold": "Hold"
+      },
+      "labels": {
+        "celeb": "Celeb",
+        "myPortfolio": "My Port",
+        "difference": "Diff"
+      },
+      "card": {
+        "composition": "Portfolio Composition",
+        "ytdReturn": "YTD Return",
+        "topHoldings": "Top 5 Holdings"
+      },
+      "sync": {
+        "synced": "Portfolio is synced",
+        "syncedDesc": "You're maintaining similar weights to the selected celebrity",
+        "suggestions": "Sync Suggestions",
+        "adjustments": "Adjustments to match celebrity portfolio",
+        "buyRecommend": "Buy Recommendation",
+        "sellRecommend": "Sell Recommendation",
+        "autoRebalance": "Auto Rebalance"
+      },
+      "page": {
+        "title": "Portfolio Comparison",
+        "subtitle": "Compare your portfolio with celebrity portfolios",
+        "selectInvestor": "Select investor to compare",
+        "celebrityPortfolio": "{name} Portfolio",
+        "myPortfolio": "My Portfolio",
+        "weightComparison": "Weight Comparison by Stock"
+      }
+    },
+    "strategyBuilder": {
+      "newStrategy": "New Strategy",
+      "cannotConnect": "Cannot create connection",
+      "toggleSidebar": "Toggle node sidebar",
+      "aiGenerate": "Generate Strategy",
+      "aiGenerateTitle": "Auto-generate strategy",
+      "strategyName": "Strategy name",
+      "strategyNamePlaceholder": "Enter strategy name",
+      "validate": "Validate",
+      "validateTitle": "Validate strategy",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Saved",
+      "error": "Error",
+      "pause": "Pause",
+      "run": "Run",
+      "undo": "Undo",
+      "undoTitle": "Undo (Ctrl+Z)",
+      "redo": "Redo",
+      "redoTitle": "Redo (Ctrl+Y)",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "export": "Export",
+      "exportTitle": "Export strategy (JSON)",
+      "import": "Import",
+      "importTitle": "Import strategy (JSON)",
+      "close": "Close",
+      "validationPassed": "Validation passed",
+      "validationFailed": "Validation failed",
+      "errors": "Errors",
+      "warnings": "Warnings",
+      "code": "Code",
+      "validationSuccess": "Strategy is correctly configured.",
+      "readyToRun": "Ready to run.",
+      "runStrategy": "Run Strategy"
+    },
+    "nodes": {
+      "trigger": {
+        "title": "Trigger",
+        "default": "Trigger",
+        "priceCross": "Price Cross",
+        "priceAbove": "Price Above",
+        "priceBelow": "Price Below",
+        "timeBased": "Time-based",
+        "volumeBased": "Volume-based"
+      },
+      "condition": {
+        "title": "Condition",
+        "default": "Condition Check",
+        "and": "AND Condition",
+        "or": "OR Condition"
+      },
+      "indicator": {
+        "title": "Indicator",
+        "default": "Indicator"
+      },
+      "action": {
+        "title": "Action",
+        "default": "Action",
+        "buy": "Buy",
+        "sell": "Sell",
+        "closePosition": "Close Position",
+        "sendAlert": "Send Alert",
+        "market": "Market",
+        "limit": "Limit"
+      },
+      "risk": {
+        "title": "Risk",
+        "default": "Risk Management",
+        "stopLoss": "Stop Loss",
+        "takeProfit": "Take Profit"
+      }
+    },
+    "nodeConfig": {
+      "title": "Node Settings",
+      "close": "Close settings panel",
+      "node": "Node",
+      "noSettings": "No settings available for this node type.",
+      "duplicate": "Duplicate Node",
+      "delete": "Delete Node",
+      "trigger": {
+        "type": "Trigger Type",
+        "priceCross": "Price Cross",
+        "priceAbove": "Price Above",
+        "priceBelow": "Price Below",
+        "timeBased": "Time-based",
+        "volumeBased": "Volume-based",
+        "symbol": "Symbol",
+        "conditionValue": "Condition Value"
+      },
+      "condition": {
+        "operator": "Operator",
+        "and": "AND (All conditions must be true)",
+        "or": "OR (Any condition must be true)",
+        "description": "Connect multiple conditions to create complex entry/exit signals."
+      },
+      "indicator": {
+        "type": "Indicator Type",
+        "sma": "SMA (Simple Moving Average)",
+        "ema": "EMA (Exponential Moving Average)",
+        "rsi": "RSI (Relative Strength Index)",
+        "bollinger": "Bollinger Bands",
+        "atr": "ATR (Average True Range)",
+        "period": "Period",
+        "source": "Price Source",
+        "close": "Close",
+        "open": "Open",
+        "high": "High",
+        "low": "Low"
+      },
+      "action": {
+        "type": "Action Type",
+        "buy": "Buy",
+        "sell": "Sell",
+        "closePosition": "Close Position",
+        "sendAlert": "Send Alert",
+        "orderType": "Order Type",
+        "market": "Market",
+        "limit": "Limit",
+        "quantity": "Quantity",
+        "quantityUnit": "Quantity Unit",
+        "fixed": "Fixed"
+      },
+      "risk": {
+        "stopLoss": "Stop Loss (%)",
+        "stopLossRatio": "Stop loss percentage",
+        "takeProfit": "Take Profit (%)",
+        "takeProfitRatio": "Take profit percentage",
+        "maxDrawdown": "Max Drawdown (%)",
+        "maxDrawdownRatio": "Maximum drawdown percentage",
+        "warning": "Risk management is automatically applied during trading."
+      }
+    },
+    "nodeSidebar": {
+      "title": "Add Nodes",
+      "subtitle": "Drag to canvas",
+      "categories": {
+        "triggers": "Triggers",
+        "indicators": "Indicators",
+        "conditions": "Conditions",
+        "actions": "Actions",
+        "risk": "Risk Management"
+      },
+      "nodes": {
+        "priceTrigger": "Price Trigger",
+        "priceTriggerDesc": "When price meets condition",
+        "timeTrigger": "Time Trigger",
+        "timeTriggerDesc": "Execute at specific time",
+        "volumeTrigger": "Volume Trigger",
+        "volumeTriggerDesc": "When volume condition met",
+        "rsi": "RSI",
+        "rsiDesc": "Relative Strength Index",
+        "macd": "MACD",
+        "macdDesc": "Moving Average Convergence Divergence",
+        "sma": "SMA",
+        "smaDesc": "Simple Moving Average",
+        "ema": "EMA",
+        "emaDesc": "Exponential Moving Average",
+        "bollinger": "Bollinger",
+        "bollingerDesc": "Bollinger Bands",
+        "atr": "ATR",
+        "atrDesc": "Average True Range",
+        "andCondition": "AND Condition",
+        "andConditionDesc": "All conditions must be met",
+        "orCondition": "OR Condition",
+        "orConditionDesc": "Any condition must be met",
+        "compareCondition": "Compare Condition",
+        "compareConditionDesc": "Value comparison",
+        "buyOrder": "Buy Order",
+        "buyOrderDesc": "Market/Limit buy",
+        "sellOrder": "Sell Order",
+        "sellOrderDesc": "Market/Limit sell",
+        "closePosition": "Close Position",
+        "closePositionDesc": "Close all positions",
+        "sendAlert": "Send Alert",
+        "sendAlertDesc": "Send notification",
+        "stopLoss": "Stop Loss",
+        "stopLossDesc": "Stop Loss setup",
+        "takeProfit": "Take Profit",
+        "takeProfitDesc": "Take Profit setup",
+        "trailingStop": "Trailing Stop",
+        "trailingStopDesc": "Trailing stop loss",
+        "maxLoss": "Max Loss",
+        "maxLossDesc": "Maximum allowed loss"
+      },
+      "tips": {
+        "title": "Tips",
+        "dragToCanvas": "Drag nodes to canvas",
+        "connectNodes": "Connect nodes by dragging handles",
+        "editSettings": "Click node to edit settings",
+        "deleteNode": "Press Delete to remove node"
+      }
+    },
+    "aiStrategy": {
+      "title": "Strategy Generator",
+      "description": "System generates your custom investment strategy",
+      "configCard": {
+        "title": "Strategy Configuration",
+        "description": "Select your preferences and system will generate the optimal strategy"
+      },
+      "config": {
+        "strategyName": "Strategy Name",
+        "strategyNamePlaceholder": "My custom strategy",
+        "riskLevel": "Risk Level",
+        "investmentGoal": "Investment Goal",
+        "timeHorizon": "Time Horizon",
+        "preferredSectors": "Preferred Sectors (optional)",
+        "maxPosition": "Max Position (%)",
+        "stopLoss": "Stop Loss (%)",
+        "takeProfit": "Take Profit (%)"
+      },
+      "riskLevels": {
+        "conservative": "Conservative",
+        "moderate": "Moderate",
+        "aggressive": "Aggressive"
+      },
+      "goals": {
+        "growth": { "label": "Growth", "desc": "Maximize capital growth" },
+        "income": { "label": "Income", "desc": "Stable dividend income" },
+        "balanced": { "label": "Balanced", "desc": "Balance growth and income" },
+        "preservation": { "label": "Preservation", "desc": "Minimize capital loss" }
+      },
+      "timeHorizons": {
+        "short": "Short (1-3 months)",
+        "medium": "Medium (3-12 months)",
+        "long": "Long (1+ year)"
+      },
+      "sectors": {
+        "tech": "Technology",
+        "finance": "Financials",
+        "healthcare": "Healthcare",
+        "consumer": "Consumer",
+        "energy": "Energy",
+        "industrial": "Industrials",
+        "materials": "Materials",
+        "utilities": "Utilities",
+        "realestate": "Real Estate",
+        "communication": "Communication"
+      },
+      "actions": {
+        "generate": "Generate Strategy",
+        "regenerate": "Regenerate",
+        "deploy": "Deploy Strategy",
+        "backtestDetail": "Backtest Details"
+      },
+      "results": {
+        "totalReturn": "Total Return",
+        "sharpeRatio": "Sharpe Ratio",
+        "maxDrawdown": "Max Drawdown",
+        "winRate": "Win Rate",
+        "totalTrades": "Total Trades"
+      },
+      "signals": {
+        "title": "Strategy Signals",
+        "entry": "Entry",
+        "exit": "Exit"
+      },
+      "aiInsights": "Strategy Insights",
+      "aiInsightsGenerated": "This strategy uses technical indicators to identify entry and exit points. RSI and MACD combination enters at oversold zones and exits at overbought zones, following a contrarian approach.",
+      "defaultStrategyName": "Momentum Strategy",
+      "strategyDescription": "{riskLevel} risk level strategy focused on {goal}",
+      "generation": {
+        "stages": {
+          "preparing": "Analyzing your settings...",
+          "analyzing": "Analyzing market data...",
+          "generating": "Generating optimal strategy...",
+          "backtesting": "Calculating backtest results..."
+        }
+      },
+      "toast": {
+        "success": { "title": "Strategy Generated", "message": "System has generated the optimal strategy" },
+        "cancelled": { "title": "Generation Cancelled", "message": "Strategy generation was cancelled" },
+        "deployed": { "title": "Strategy Deployed", "message": "Strategy has been successfully deployed" }
+      },
+      "emptyState": {
+        "title": "System will generate a strategy",
+        "description": "Configure settings and click generate"
+      },
+      "recentStrategies": {
+        "title": "Recently Generated Strategies",
+        "tradesCount": "{count} trades",
+        "items": {
+          "momentumSwing": "Momentum Swing",
+          "dividendGrowth": "Dividend Growth",
+          "techFocus": "Tech Sector Focus"
+        }
+      }
+    },
+    "history": {
+      "title": "Trade History",
+      "description": "View all your trade records",
+      "filter": "Filter",
+      "export": "Export",
+      "buy": "Buy",
+      "sell": "Sell",
+      "shares": "shares",
+      "summary": {
+        "totalTrades": "Total Trades",
+        "buyAmount": "Buy Amount",
+        "sellAmount": "Sell Amount"
+      },
+      "status": {
+        "filled": "Filled",
+        "partial": "Partial",
+        "cancelled": "Cancelled"
+      },
+      "filters": {
+        "all": "All",
+        "buy": "Buy",
+        "sell": "Sell"
+      },
+      "tradeList": "Trade List",
+      "tradeCount": "{count} trades",
+      "noTrades": "No trade history",
+      "time": {
+        "justNow": "Just now",
+        "hoursAgo": "{hours}h ago",
+        "daysAgo": "{days}d ago"
+      }
+    },
+    "portfolio": {
+      "title": "Portfolio",
+      "description": "View your asset holdings",
+      "refresh": "Refresh",
+      "shares": "shares",
+      "avgPrice": "Avg",
+      "currentPrice": "Current",
+      "stats": {
+        "totalAssets": "Total Assets",
+        "todayProfit": "Today's Profit",
+        "invested": "Invested",
+        "cash": "Cash",
+        "tenThousand": "0K"
+      },
+      "allocation": {
+        "title": "Asset Allocation",
+        "description": "Weight by symbol"
+      },
+      "holdings": {
+        "title": "Holdings",
+        "count": "{count} symbols"
+      }
+    },
+    "mirroring": {
+      "title": "Celebrity Mirroring",
+      "description": "Track and follow famous investors' portfolios",
+      "investorList": "Investor List",
+      "selectInvestor": "Select an investor",
+      "selectInvestorDesc": "View their portfolio and trade history",
+      "startMirroring": "Start Mirroring",
+      "holdings": "Holdings",
+      "buy": "Buy",
+      "sell": "Sell",
+      "types": {
+        "politician": "Politician",
+        "investor": "Investor",
+        "fund_manager": "Fund Manager",
+        "influencer": "Influencer"
+      },
+      "performance": {
+        "ytd": "YTD Return",
+        "oneMonth": "1 Month",
+        "threeMonth": "3 Months",
+        "oneYear": "1 Year"
+      },
+      "recentTrades": {
+        "title": "Recent Trades",
+        "empty": "No recent trades"
+      },
+      "modal": {
+        "title": "{name} Mirroring Setup",
+        "description": "Set investment amount and clone the portfolio",
+        "investmentAmount": "Investment Amount (KRW)",
+        "expectedPortfolio": "Expected Portfolio",
+        "shares": "shares",
+        "cancel": "Cancel"
+      },
+      "dataAttribution": "Congressional trade data provided by Unusual Whales | All data is based on SEC public filings and provided for educational purposes only."
+    },
+    "backtest": {
+      "title": "Backtest",
+      "description": "Validate and analyze strategy performance",
+      "aiSimulation": "Portfolio Simulation",
+      "closeSimulation": "Close Simulation",
+      "aiPortfolioSimulation": "Portfolio Simulation",
+      "defaultStrategy": "Default Strategy",
+      "portfolioSimulation": "Portfolio Simulation",
+      "tabs": {
+        "runner": "Run Backtest",
+        "history": "History",
+        "simulation": "Simulation"
+      },
+      "stats": {
+        "totalBacktests": "Total Backtests",
+        "runs": "{count} runs",
+        "avgReturn": "Avg Return",
+        "avgSharpe": "Avg Sharpe Ratio",
+        "lastRun": "Last Run",
+        "hoursAgo": "{hours}h ago"
+      },
+      "preview": {
+        "title": "Result Preview",
+        "strategy": "Strategy",
+        "totalReturn": "Total Return",
+        "sharpe": "Sharpe Ratio",
+        "maxDrawdown": "Max Drawdown",
+        "winRate": "Win Rate",
+        "selectResult": "Select a result",
+        "selectResultDesc": "Click on a backtest result in the History tab to view details"
+      },
+      "history": {
+        "title": "Backtest History",
+        "count": "{count} items",
+        "sharpe": "Sharpe",
+        "trades": "{count} trades",
+        "empty": "No backtest history yet",
+        "emptyDesc": "Test your strategies in the Run Backtest tab",
+        "newStrategy": "Create New Strategy",
+        "delete": "Delete history entry"
+      }
+    },
+    "strategies": {
+      "title": "My Strategies",
+      "description": "Manage your created strategies.",
+      "newStrategy": "New Strategy",
+      "createStrategy": "Create Strategy",
+      "empty": {
+        "title": "No strategies yet",
+        "description": "Create your first strategy in natural language.",
+        "example": "\"Buy when RSI < 30, sell when RSI > 70\""
+      }
+    },
+    "billing": {
+      "title": "Billing & Subscription",
+      "description": "Manage your subscription plan and payment information.",
+      "currentPlan": "Current Subscription",
+      "status": {
+        "active": "Active",
+        "pending": "Pending"
+      },
+      "nextPaymentDate": "Next Payment Date",
+      "daysRemaining": "{days} days remaining",
+      "paymentAmount": "Payment Amount",
+      "yearly": "Yearly",
+      "monthly": "Monthly",
+      "autoRenewal": "Auto Renewal",
+      "enabled": "Enabled",
+      "cardPayment": "Card Payment",
+      "changePlan": "Change Plan",
+      "hidePlans": "Hide Plans",
+      "cancelSubscription": "Cancel Subscription",
+      "confirmCancel": "Are you sure you want to cancel your subscription?",
+      "paymentHistory": "Payment History",
+      "plan": "Plan",
+      "completed": "Completed",
+      "notifications": {
+        "paymentSuccess": "Payment completed. Your subscription is now active.",
+        "paymentFailed": "Payment failed. Please try again.",
+        "downgradeScheduled": "Your plan will be downgraded to Free after the current period ends.",
+        "upgradedTo": "Upgraded to {plan} plan."
+      },
+      "errors": {
+        "paymentCreationFailed": "Payment creation failed",
+        "cancelFailed": "Failed to cancel subscription."
+      }
+    },
+    "coaching": {
+      "title": "Live Coaching",
+      "description": "Learn and ask questions with expert mentors in real-time",
+      "mentor": {
+        "online": "Online",
+        "perHour": "/hour",
+        "book": "Book"
+      },
+      "session": {
+        "minutes": " min",
+        "participants": "Participants",
+        "starts": "starts",
+        "join": "Join",
+        "reserve": "Reserve"
+      },
+      "filter": {
+        "all": "All",
+        "live": "Live",
+        "upcoming": "Upcoming"
+      },
+      "sections": {
+        "upcomingSessions": "Upcoming Sessions",
+        "popularMentors": "Popular Mentors",
+        "myLearning": "My Learning Progress"
+      },
+      "banner": {
+        "watching": "{count} watching"
+      },
+      "chat": {
+        "title": "Live Chat",
+        "syncing": "Syncing",
+        "screenSync": "Screen Sync",
+        "mentorBadge": "Mentor",
+        "questionBadge": "Question",
+        "placeholder": "Enter a message or question...",
+        "empty": {
+          "title": "Join a session",
+          "description": "Chat with mentors in real-time"
+        }
+      },
+      "screenShare": {
+        "title": "Screen Sync",
+        "chartSync": "Mentor chart sync",
+        "indicators": "Technical Indicators",
+        "mentorComment": "Mentor Comment",
+        "disclaimer": "Mentor analysis is for reference only and not investment advice."
+      },
+      "stats": {
+        "studyHours": "Study Hours",
+        "sessions": "Sessions Attended",
+        "questions": "Questions Asked",
+        "badges": "Badges Earned"
+      },
+      "units": {
+        "hours": "h",
+        "times": "",
+        "count": ""
+      }
+    },
+    "onboarding": {
+      "painPoints": {
+        "title": "Have you experienced these?",
+        "subtitle": "Select all that apply",
+        "selected": "Selected: {count} (select at least one)",
+        "items": {
+          "youtube": {
+            "label": "YouTube stock picks",
+            "pain": "Followed and lost money"
+          },
+          "readingRoom": {
+            "label": "Signal group subscription",
+            "pain": "$300/mo and still losing"
+          },
+          "paidCourse": {
+            "label": "Paid courses",
+            "pain": "$3K spent, still panic selling"
+          },
+          "quantCoding": {
+            "label": "DIY quant",
+            "pain": "Gave up, can't code"
+          },
+          "brokerAi": {
+            "label": "Broker automated services",
+            "pain": "Just picks, can't build my own"
+          },
+          "emotional": {
+            "label": "Emotional trading",
+            "pain": "No rules, impulse trades"
+          }
+        }
+      },
+      "welcome": {
+        "titleWithPain": "{count} problems, HEPHAITOS solves them",
+        "titleNoPain": "Welcome to HEPHAITOS",
+        "subtitle": "Stop being swayed by others' strategies",
+        "painBanner": {
+          "pain": "{count} Pain Points",
+          "solution": "Solved with Copy-Learn-Build"
+        },
+        "features": {
+          "copy": {
+            "stage": "COPY",
+            "title": "Follow",
+            "painSolved": "Escape YouTube/signal dependency",
+            "desc": "Reference portfolios from Buffett, Pelosi & legends"
+          },
+          "learn": {
+            "stage": "LEARN",
+            "title": "Learn",
+            "painSolved": "Theory → Execution bridge",
+            "desc": "Ask coaches and mentors \"Why this stock?\""
+          },
+          "build": {
+            "stage": "BUILD",
+            "title": "Build",
+            "painSolved": "Quant strategies without code",
+            "desc": "Plain English → Executable system"
+          }
+        },
+        "disclaimer": {
+          "required": "Required",
+          "text": "HEPHAITOS is an investment education and tools platform.",
+          "emphasis": "We do not provide investment advice",
+          "suffix": ", and all investment decisions are your responsibility."
+        }
+      },
+      "profile": {
+        "title": "Profile Setup",
+        "subtitle": "Enter your nickname for HEPHAITOS",
+        "nickname": "Nickname",
+        "nicknamePlaceholder": "e.g. TradeMaster",
+        "experience": "Investment Experience",
+        "experienceLevels": {
+          "beginner": "Beginner",
+          "beginnerDesc": "Less than 1 year",
+          "intermediate": "Intermediate",
+          "intermediateDesc": "1-3 years",
+          "advanced": "Advanced",
+          "advancedDesc": "3+ years"
+        }
+      },
+      "investmentStyle": {
+        "title": "Investment Style",
+        "subtitle": "Choose your investment style",
+        "styles": {
+          "conservative": {
+            "label": "Conservative",
+            "desc": "Capital preservation, low risk",
+            "recommended": "COPY-focused recommended"
+          },
+          "moderate": {
+            "label": "Moderate",
+            "desc": "Balanced returns and risk",
+            "recommended": "LEARN-focused recommended"
+          },
+          "aggressive": {
+            "label": "Aggressive",
+            "desc": "High returns, accepting risk",
+            "recommended": "BUILD-focused recommended"
+          }
+        }
+      },
+      "interests": {
+        "title": "Areas of Interest",
+        "subtitle": "Select investment areas you're interested in (multiple)",
+        "selected": "Selected: {count}",
+        "items": {
+          "tech": "Tech/IT",
+          "finance": "Finance",
+          "healthcare": "Healthcare",
+          "energy": "Energy",
+          "consumer": "Consumer",
+          "industrial": "Industrial",
+          "etf": "ETF",
+          "crypto": "Crypto"
+        }
+      },
+      "complete": {
+        "title": "Setup Complete!",
+        "subtitle": "{name}, start your journey",
+        "subtitleWithPain": "{name}, start your journey to solve {count} problems",
+        "recommendedStart": "Recommended Starting Point",
+        "recommendations": {
+          "conservative": "COPY → Start by referencing celebrity portfolios",
+          "aggressive": "BUILD → Start with Strategy Builder",
+          "moderate": "LEARN → Ask Learning Guide questions"
+        },
+        "summary": {
+          "experience": "Investment Experience",
+          "style": "Investment Style",
+          "interests": "Areas of Interest"
+        }
+      },
+      "navigation": {
+        "back": "Back",
+        "next": "Next",
+        "skip": "Skip",
+        "start": "Get Started",
+        "stepIndicator": "{current} / {total}"
+      },
+      "steps": {
+        "pain": "Pain Point",
+        "welcome": "Get Started",
+        "profile": "Profile",
+        "style": "Investment Style",
+        "interests": "Interests",
+        "complete": "Complete"
+      }
+    }
+  }
+}

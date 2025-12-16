@@ -1,0 +1,5 @@
+# Forbidden Wording Check (P0 Gate)
+bash scripts/forbidden-wording-check.sh
+
+# Run tests
+npm test
