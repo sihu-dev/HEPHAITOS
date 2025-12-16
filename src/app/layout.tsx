@@ -4,6 +4,7 @@ import '@/styles/globals.css'
 import { ToastProvider } from '@/components/ui/Toast'
 import { Toaster } from '@/components/ui/Toaster'
 import { I18nProvider } from '@/i18n/client'
+import { FeedbackWidget } from '@/components/feedback/FeedbackWidget'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -82,6 +83,7 @@ export default function RootLayout({
             <ToastProvider>
               {children}
               <Toaster />
+              <FeedbackWidget />
             </ToastProvider>
           </I18nProvider>
         </div>
