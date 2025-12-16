@@ -26,6 +26,11 @@
     "test:moa": "node scripts/test-moa.js",
     "test:moa:poc": "node scripts/test-moa.js poc",
     "test:moa:compare": "node scripts/test-moa.js compare",
+    "test:redis": "tsx scripts/test-redis.ts",
+    "audit:uxui": "bash scripts/start-uxui-audit.sh",
+    "audit:lighthouse": "lhci autorun --config=.lighthouserc.json",
+    "worker": "tsx watch src/lib/queue/backtest-worker.ts",
+    "worker:prod": "tsx src/lib/queue/backtest-worker.ts",
     "ci": "npm run lint && npm run test && npm run build"
   },
   "dependencies": {

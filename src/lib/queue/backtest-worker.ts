@@ -1,21 +1,45 @@
 // ============================================
 // Backtest Worker (BullMQ)
-// Loop 12: 백테스트 실행 Worker
+// Loop 11: 백테스트 실행 Worker + Realtime Progress
 // ============================================
 
 import { Worker, Job } from 'bullmq'
 import { Redis } from 'ioredis'
 import { createClient } from '@supabase/supabase-js'
+import type { BacktestJob } from '@/types/queue'
 import type { BacktestJobData, BacktestResult } from './backtest-queue'
 
 const redis = new Redis(process.env.UPSTASH_REDIS_URL!, {
   maxRetriesPerRequest: null,
+  enableReadyCheck: false,
 })
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+/**
+ * Realtime 진행률 브로드캐스트 (Loop 11)
+ */
+async function broadcastProgress(
+  jobId: string,
+  progress: number,
+  status: 'pending' | 'active' | 'completed' | 'failed',
+  message?: string
+) {
+  await supabaseAdmin
+    .from('backtest_jobs')
+    .upsert({
+      job_id: jobId,
+      progress,
+      status,
+      message,
+      updated_at: new Date().toISOString(),
+    }, {
+      onConflict: 'job_id'
+    })
+}
 
 /**
  * 크레딧 차감 (멱등성 보장)
@@ -93,27 +117,35 @@ export const backtestWorker = new Worker<BacktestJobData, BacktestResult>(
 
     console.log(`[Backtest Worker] Starting job ${jobId} for user ${userId}`)
 
-    // 진행 상황 업데이트
+    // 진행 상황 업데이트 + Realtime Broadcast
     await job.updateProgress(10)
+    await broadcastProgress(jobId, 10, 'active', '크레딧 차감 중...')
 
     // 1. 크레딧 차감 (멱등)
     try {
       await deductCredits(userId, credits, jobId)
       await job.updateProgress(20)
+      await broadcastProgress(jobId, 20, 'active', '데이터 로딩 중...')
     } catch (error) {
       console.error('[Backtest Worker] Credit deduction error:', error)
+      await broadcastProgress(jobId, 0, 'failed', `크레딧 차감 실패: ${(error as Error).message}`)
       throw error // 재시도
     }
 
     // 2. 백테스트 실행
     try {
       await job.updateProgress(30)
+      await broadcastProgress(jobId, 30, 'active', '백테스트 실행 중...')
+
       const result = await runBacktest(job.data)
+
       await job.updateProgress(80)
+      await broadcastProgress(jobId, 80, 'active', '결과 저장 중...')
 
       // 3. 결과 저장
       await saveBacktestResult(userId, strategyId, jobId, result)
       await job.updateProgress(100)
+      await broadcastProgress(jobId, 100, 'completed', '완료!')
 
       console.log(`[Backtest Worker] Job ${jobId} completed successfully`)
       return result
@@ -125,6 +157,8 @@ export const backtestWorker = new Worker<BacktestJobData, BacktestResult>(
         status: 'failed',
         result: { error: error instanceof Error ? error.message : 'Unknown error' },
       }).eq('job_id', jobId)
+
+      await broadcastProgress(jobId, 0, 'failed', `실행 실패: ${(error as Error).message}`)
 
       throw error
     }

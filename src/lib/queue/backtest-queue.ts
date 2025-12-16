@@ -1,20 +1,23 @@
 // ============================================
 // Backtest Job Queue (BullMQ)
-// Loop 12: 백테스트 비동기 처리
+// Loop 11: 백테스트 큐 시스템 (Priority + Realtime)
 // ============================================
 
-import { Queue, Worker, Job } from 'bullmq'
+import { Queue } from 'bullmq'
 import { Redis } from 'ioredis'
+import type { BacktestJob, BacktestJobResult } from '@/types/queue'
 
 /**
  * Redis 연결 (Upstash)
  */
 const redis = new Redis(process.env.UPSTASH_REDIS_URL!, {
   maxRetriesPerRequest: null, // BullMQ 요구사항
+  enableReadyCheck: false,
+  tls: process.env.NODE_ENV === 'production' ? {} : undefined,
 })
 
 /**
- * 백테스트 잡 데이터
+ * 백테스트 잡 데이터 (legacy compatibility)
  */
 export interface BacktestJobData {
   strategyId: string
@@ -42,34 +45,61 @@ export interface BacktestResult {
 }
 
 /**
- * Backtest Queue 생성
+ * Backtest Queue 생성 (Loop 11 upgraded)
  */
-export const backtestQueue = new Queue<BacktestJobData>('backtest-jobs', {
+export const backtestQueue = new Queue<BacktestJob, BacktestJobResult>('backtest-queue', {
   connection: redis,
   defaultJobOptions: {
     attempts: 3,
     backoff: {
       type: 'exponential',
-      delay: 5000,
+      delay: 2000, // 2초부터 시작
     },
     removeOnComplete: {
       count: 100, // 최근 100개만 보관
+      age: 86400, // 24시간
     },
     removeOnFail: {
-      count: 50, // 최근 50개 실패 보관
+      count: 200, // 최근 200개 실패 보관
+      age: 172800, // 48시간
     },
   },
 })
 
 /**
- * 백테스트 잡 추가
+ * 백테스트 잡 추가 (Loop 11: Priority 지원)
  */
-export async function addBacktestJob(data: BacktestJobData): Promise<string> {
+export async function addBacktestJob(
+  data: BacktestJob,
+  priority: number = 0
+): Promise<string> {
   const job = await backtestQueue.add('run-backtest', data, {
-    jobId: `backtest_${data.userId}_${Date.now()}`,
+    jobId: `backtest-${data.userId}-${Date.now()}`,
+    priority, // 높을수록 우선 (Pro=2, Basic=1, Free=0)
   })
 
   return job.id!
+}
+
+/**
+ * Legacy: 이전 인터페이스 지원
+ */
+export async function addLegacyBacktestJob(data: BacktestJobData): Promise<string> {
+  const jobData: BacktestJob = {
+    userId: data.userId,
+    strategyId: data.strategyId,
+    backtestParams: {
+      symbol: data.symbol,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      initialCapital: 100000,
+      commission: 0.001,
+      slippage: 0.0005,
+    },
+    priority: 0,
+    createdAt: Date.now(),
+  }
+  return addBacktestJob(jobData, 0)
 }
 
 /**
