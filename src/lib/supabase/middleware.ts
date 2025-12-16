@@ -61,8 +61,11 @@ export async function updateSession(request: NextRequest) {
     const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard')
     const isAuthRoute = request.nextUrl.pathname.startsWith('/auth')
 
-    if (isProtectedRoute && !user) {
-      // Redirect to login if not authenticated
+    // Allow dashboard access in development mode without auth
+    const isDev = process.env.NODE_ENV === 'development'
+
+    if (isProtectedRoute && !user && !isDev) {
+      // Redirect to login if not authenticated (production only)
       const redirectUrl = new URL('/auth/login', request.url)
       redirectUrl.searchParams.set('redirect', request.nextUrl.pathname)
       return NextResponse.redirect(redirectUrl)

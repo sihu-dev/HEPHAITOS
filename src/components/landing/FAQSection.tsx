@@ -1,11 +1,11 @@
 'use client'
 
 import { memo, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
 import { useI18n } from '@/i18n/client'
 
 // ============================================
-// FAQ Section - Accordion Style with i18n
+// HEPHAITOS FAQ Section
+// Supabase-inspired minimal design
 // ============================================
 
 interface FAQItem {
@@ -68,6 +68,21 @@ const faqs: FAQItem[] = [
   },
 ]
 
+const categoryColors: Record<string, string> = {
+  '법률': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  'Legal': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  '성능': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  'Performance': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  '기술': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  'Tech': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  '가격': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  'Pricing': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  '사용성': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  'Usability': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+  '리스크': 'bg-red-500/10 text-red-400 border-red-500/20',
+  'Risk': 'bg-red-500/10 text-red-400 border-red-500/20',
+}
+
 export const FAQSection = memo(function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
   const { locale } = useI18n()
@@ -78,14 +93,15 @@ export const FAQSection = memo(function FAQSection() {
   }
 
   return (
-    <section className="py-20 bg-[#0D0D0F]">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+    <section className="py-24 bg-[#0A0A0A]">
+      <div className="max-w-3xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+          <p className="text-sm text-amber-500 font-medium mb-3">FAQ</p>
+          <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
             {isKo ? '자주 묻는 질문' : 'Frequently Asked Questions'}
           </h2>
-          <p className="text-sm text-zinc-400 max-w-md mx-auto">
+          <p className="text-zinc-400">
             {isKo
               ? '궁금한 점이 있으신가요? 아래에서 답변을 확인하세요.'
               : 'Have questions? Find answers below.'}
@@ -96,101 +112,47 @@ export const FAQSection = memo(function FAQSection() {
         <div className="space-y-3">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index
+            const category = isKo ? faq.category : faq.categoryEn
 
             return (
               <div
                 key={index}
-                className="
-                  glass
-                  rounded-2xl
-                  border
-                  border-white/[0.06]
-                  hover:border-[#5E6AD2]/20
-                  transition-all
-                  duration-300
-                  overflow-hidden
-                "
+                className={`bg-zinc-900/50 border rounded-lg transition-colors ${
+                  isOpen ? 'border-amber-500/30' : 'border-zinc-800'
+                }`}
               >
                 {/* Question Button */}
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    justify-between
-                    p-6
-                    text-left
-                    group
-                    hover:bg-white/[0.02]
-                    transition-colors
-                  "
+                  className="w-full flex items-center justify-between p-5 text-left hover:bg-zinc-900/50 transition-colors"
                 >
                   <div className="flex-1 pr-4">
-                    {/* Category Badge */}
-                    <span className="
-                      inline-block
-                      px-2
-                      py-1
-                      mb-2
-                      rounded-full
-                      bg-[#5E6AD2]/10
-                      border
-                      border-[#5E6AD2]/20
-                      text-xs
-                      text-[#7C8AEA]
-                      font-semibold
-                    ">
-                      {isKo ? faq.category : faq.categoryEn}
+                    <span className={`inline-flex px-2 py-0.5 mb-2 rounded text-xs font-medium border ${
+                      categoryColors[category] || 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+                    }`}>
+                      {category}
                     </span>
-
-                    {/* Question */}
-                    <p className="
-                      text-base
-                      text-white
-                      font-bold
-                      group-hover:text-[#5E6AD2]
-                      transition-colors
-                    ">
+                    <p className={`text-sm font-medium transition-colors ${
+                      isOpen ? 'text-amber-400' : 'text-white'
+                    }`}>
                       {isKo ? faq.questionKo : faq.questionEn}
                     </p>
                   </div>
-
-                  {/* Chevron */}
-                  <ChevronDown
-                    className={`
-                      w-5
-                      h-5
-                      text-zinc-400
-                      group-hover:text-[#5E6AD2]
-                      transition-all
-                      duration-300
-                      ${isOpen ? 'rotate-180' : ''}
-                    `}
-                  />
+                  <span className={`text-zinc-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+                    ↓
+                  </span>
                 </button>
 
-                {/* Answer (Animated) */}
+                {/* Answer */}
                 <div
-                  className="
-                    overflow-hidden
-                    transition-all
-                    duration-300
-                    ease-in-out
-                  "
+                  className="overflow-hidden transition-all duration-300"
                   style={{
-                    maxHeight: isOpen ? '500px' : '0',
+                    maxHeight: isOpen ? '300px' : '0',
                     opacity: isOpen ? 1 : 0,
                   }}
                 >
-                  <div className="px-6 pb-6 pt-0">
-                    <div className="
-                      p-4
-                      rounded-xl
-                      bg-white/[0.02]
-                      border
-                      border-white/[0.04]
-                    ">
+                  <div className="px-5 pb-5">
+                    <div className="p-4 bg-zinc-900/30 border border-zinc-800/50 rounded-lg">
                       <p className="text-sm text-zinc-300 leading-relaxed">
                         {isKo ? faq.answerKo : faq.answerEn}
                       </p>
@@ -209,27 +171,8 @@ export const FAQSection = memo(function FAQSection() {
           </p>
           <a
             href="mailto:support@hephaitos.io"
-            className="
-              inline-flex
-              items-center
-              gap-2
-              px-6
-              py-3
-              glass
-              hover:glass-strong
-              rounded-xl
-              text-sm
-              text-zinc-300
-              hover:text-white
-              transition-all
-              border
-              border-white/[0.06]
-              hover:border-[#5E6AD2]/20
-            "
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm text-white transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
             {isKo ? '문의하기' : 'Contact Us'}
           </a>
         </div>

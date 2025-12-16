@@ -1,119 +1,51 @@
 'use client'
 
 import { memo } from 'react'
+import { useI18n } from '@/i18n/client'
 
 // ============================================
-// Trust Badge - Hero 바로 아래 배치
-// 개선: 아이콘 완전 제거, 텍스트 강조로 대체
+// Trust Badge - Supabase-minimal style
 // ============================================
 
 export const TrustBadge = memo(function TrustBadge() {
+  const { locale } = useI18n()
+  const isKo = locale === 'ko'
+
   return (
-    <section className="
-      py-8
-      bg-gradient-to-r
-      from-[#5E6AD2]/5
-      via-[#7C8AEA]/5
-      to-[#5E6AD2]/5
-      border-y
-      border-[#5E6AD2]/10
-      backdrop-blur-sm
-    ">
+    <section className="py-8 bg-zinc-900/50 border-y border-zinc-800">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         {/* Main badge */}
-        <div className="
-          flex
-          items-center
-          justify-center
-          gap-3
-          px-6
-          py-3
-          mx-auto
-          max-w-fit
-          rounded-full
-          bg-[#5E6AD2]/10
-          border
-          border-[#5E6AD2]/20
-          backdrop-blur-md
-        ">
+        <div className="flex items-center justify-center gap-3 px-6 py-3 mx-auto max-w-fit rounded-full bg-yellow-500/10 border border-yellow-500/20">
           {/* Pulse dot */}
-          <div className="relative flex h-3 w-3">
-            <span className="
-              animate-ping
-              absolute
-              inline-flex
-              h-full
-              w-full
-              rounded-full
-              bg-[#5E6AD2]
-              opacity-75
-            "></span>
-            <span className="
-              relative
-              inline-flex
-              rounded-full
-              h-3
-              w-3
-              bg-[#5E6AD2]
-            "></span>
-          </div>
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-500 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500" />
+          </span>
 
           {/* Text */}
           <div className="text-center">
-            <p className="text-sm text-white font-bold">
-              <span className="text-[#5E6AD2]">데이터 기반</span> 투자 교육 플랫폼
+            <p className="text-sm text-white font-medium">
+              <span className="text-yellow-400">{isKo ? '데이터 기반' : 'Data-Driven'}</span>{' '}
+              {isKo ? '투자 교육 플랫폼' : 'Investment Education Platform'}
             </p>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              코딩 없이 · 투명한 방식 · 교육 목적
-            </p>
-          </div>
-
-          {/* Pulse dot */}
-          <div className="relative flex h-3 w-3">
-            <span className="
-              animate-ping
-              absolute
-              inline-flex
-              h-full
-              w-full
-              rounded-full
-              bg-[#5E6AD2]
-              opacity-75
-            "></span>
-            <span className="
-              relative
-              inline-flex
-              rounded-full
-              h-3
-              w-3
-              bg-[#5E6AD2]
-            "></span>
           </div>
         </div>
 
-        {/* Trust indicators - 실제 가치 제안 */}
-        <div className="
-          flex
-          items-center
-          justify-center
-          gap-6
-          mt-4
-          text-xs
-          text-zinc-400
-        ">
+        {/* Trust indicators */}
+        <div className="flex items-center justify-center gap-6 mt-6 text-sm text-zinc-400">
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-[#5E6AD2]">0줄</span>
-            <span>코드</span>
+            <span className="text-xl font-semibold text-white">{isKo ? '0줄' : '0 lines'}</span>
+            <span>{isKo ? '코드' : 'code'}</span>
           </div>
-          <div className="w-px h-4 bg-zinc-700"></div>
+          <span className="w-1 h-1 rounded-full bg-zinc-700" />
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-[#5E6AD2]">3분</span>
-            <span>시작</span>
+            <span className="text-xl font-semibold text-white">{isKo ? '3분' : '3 min'}</span>
+            <span>{isKo ? '시작' : 'setup'}</span>
           </div>
-          <div className="w-px h-4 bg-zinc-700"></div>
+          <span className="w-1 h-1 rounded-full bg-zinc-700" />
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-[#5E6AD2]">무료</span>
-            <span>체험</span>
+            <span className="text-xl font-semibold text-white">{isKo ? '무료' : 'Free'}</span>
+            <span>{isKo ? '체험' : 'trial'}</span>
           </div>
         </div>
       </div>

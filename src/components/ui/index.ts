@@ -79,3 +79,15 @@ export {
   TradeWarning,
   BacktestWarning,
 } from './Disclaimer'
+
+// Cinematic Dashboard Components (v2.2)
+export { LiveIndicator } from './LiveIndicator'
+export { AnimatedValue } from './AnimatedValue'
+export { PriceDisplay } from './PriceDisplay'
+export { MetricCard } from './MetricCard'
+
+// Cinematic Layout Components (v2.3)
+export { PageHeader } from './PageHeader'
+export { SectionHeader } from './SectionHeader'
+export { FeatureCard } from './FeatureCard'
+export { StatCard } from './StatCard'

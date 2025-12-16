@@ -79,7 +79,7 @@ export const Footer = memo(function Footer() {
               {t('footer.tagline2')}
             </p>
             <div className="flex items-center gap-2 text-xs text-zinc-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
               {t('footer.systemStatus')}
             </div>
           </div>

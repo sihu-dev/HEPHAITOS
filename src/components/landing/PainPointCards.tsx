@@ -4,7 +4,7 @@ import { memo } from 'react'
 import { useI18n } from '@/i18n/client'
 
 // ============================================
-// Pain Point Cards - i18n 지원
+// Pain Point Cards - Supabase-minimal style
 // ============================================
 
 interface PainPoint {
@@ -13,12 +13,10 @@ interface PainPoint {
   problemEn: string
   solutionKo: string
   solutionEn: string
-  number: number
 }
 
 const painPoints: PainPoint[] = [
   {
-    number: 1,
     emoji: '⏰',
     problemKo: '퇴근하면 애들 봐야 하는데...',
     problemEn: 'No time after work with kids...',
@@ -26,7 +24,6 @@ const painPoints: PainPoint[] = [
     solutionEn: 'Done in 3 min. Build strategies during commute',
   },
   {
-    number: 2,
     emoji: '🤔',
     problemKo: 'AI가 주식? 진짜 믿을 수 있나요?',
     problemEn: 'AI for stocks? Can I really trust it?',
@@ -34,7 +31,6 @@ const painPoints: PainPoint[] = [
     solutionEn: 'All 4 expert opinions shown. Full transparency',
   },
   {
-    number: 3,
     emoji: '📉',
     problemKo: '손절 타이밍을 자꾸 놓쳐요...',
     problemEn: 'Keep missing stop-loss timing...',
@@ -42,7 +38,6 @@ const painPoints: PainPoint[] = [
     solutionEn: 'Alert: "Time to cut losses!"',
   },
   {
-    number: 4,
     emoji: '💸',
     problemKo: '투자 자문 월 50만원? 너무 비싸요',
     problemEn: '$500/mo for advice? Too expensive',
@@ -50,7 +45,6 @@ const painPoints: PainPoint[] = [
     solutionEn: 'Pay as you go. No subscription',
   },
   {
-    number: 5,
     emoji: '👥',
     problemKo: 'Nancy Pelosi 따라하고 싶어요',
     problemEn: 'Want to follow Nancy Pelosi',
@@ -64,103 +58,42 @@ export const PainPointCards = memo(function PainPointCards() {
   const isKo = locale === 'ko'
 
   return (
-    <section className="py-16 bg-[#0D0D0F]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+    <section className="py-24 bg-[#0A0A0A]">
+      <div className="max-w-5xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+          <p className="text-sm text-amber-500 font-medium mb-3">
+            {isKo ? '문제 해결' : 'Pain Points'}
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
             {isKo ? '바쁜 직장인의 고민을 ' : 'Solve busy professionals\' problems '}
-            <span className="text-gradient bg-gradient-to-r from-[#5E6AD2] to-[#7C8AEA] bg-clip-text text-transparent">
+            <span className="text-zinc-500">
               {isKo ? '3분으로 해결' : 'in 3 minutes'}
             </span>
           </h2>
-          <p className="text-sm text-zinc-400">
-            {isKo
-              ? '30-40대 재테크족 실제 Pain Point 기반'
-              : 'Based on real pain points of 30s-40s investors'}
-          </p>
         </div>
 
-        {/* Cards Grid */}
-        <div className="space-y-4">
-          {painPoints.map((point) => (
+        {/* Cards */}
+        <div className="space-y-3">
+          {painPoints.map((point, index) => (
             <div
-              key={point.number}
-              className="
-                group
-                p-6
-                glass
-                rounded-2xl
-                border
-                border-white/[0.06]
-                hover:border-[#5E6AD2]/30
-                transition-all
-                duration-300
-                hover:scale-[1.02]
-              "
+              key={index}
+              className="p-5 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors"
             >
               <div className="flex items-start gap-4">
-                {/* Number Badge + Emoji */}
-                <div className="flex-shrink-0">
-                  <div className="relative">
-                    {/* Number */}
-                    <div className="
-                      absolute
-                      -top-2
-                      -left-2
-                      w-6
-                      h-6
-                      rounded-full
-                      bg-[#5E6AD2]
-                      flex
-                      items-center
-                      justify-center
-                      text-xs
-                      font-bold
-                      text-white
-                      z-10
-                    ">
-                      {point.number}
-                    </div>
-                    {/* Emoji */}
-                    <div className="
-                      w-16
-                      h-16
-                      rounded-xl
-                      bg-[#5E6AD2]/10
-                      border
-                      border-[#5E6AD2]/20
-                      flex
-                      items-center
-                      justify-center
-                      text-3xl
-                      group-hover:scale-110
-                      transition-transform
-                    ">
-                      {point.emoji}
-                    </div>
-                  </div>
+                {/* Emoji */}
+                <div className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">
+                  {point.emoji}
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 min-w-0">
-                  {/* Problem */}
-                  <p className="text-base text-white font-semibold mb-3 leading-snug">
+                <div className="flex-1">
+                  <p className="text-sm text-white font-medium mb-2">
                     "{isKo ? point.problemKo : point.problemEn}"
                   </p>
-
-                  {/* Solution with arrow */}
-                  <div className="flex items-start gap-2">
-                    <span className="
-                      flex-shrink-0
-                      text-[#5E6AD2]
-                      text-lg
-                      font-bold
-                      mt-0.5
-                    ">
-                      →
-                    </span>
-                    <p className="text-sm text-zinc-300 leading-relaxed">
+                  <div className="flex items-center gap-2">
+                    <span className="text-amber-400">→</span>
+                    <p className="text-sm text-zinc-400">
                       {isKo ? point.solutionKo : point.solutionEn}
                     </p>
                   </div>
@@ -174,34 +107,12 @@ export const PainPointCards = memo(function PainPointCards() {
         <div className="mt-12 text-center">
           <a
             href="/auth/signup"
-            className="
-              inline-flex
-              items-center
-              gap-2
-              px-8
-              py-4
-              bg-[#5E6AD2]
-              hover:bg-[#7C8AEA]
-              text-white
-              rounded-xl
-              text-base
-              font-bold
-              transition-all
-              hover:scale-105
-            "
+            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium transition-colors"
           >
             <span>{isKo ? '50 크레딧 무료로 시작' : 'Start with 50 Free Credits'}</span>
-            <span className="
-              block
-              w-2
-              h-2
-              border-t-2
-              border-r-2
-              border-white
-              rotate-45
-            "></span>
+            <span>→</span>
           </a>
-          <p className="text-xs text-zinc-400 mt-4">
+          <p className="text-xs text-zinc-500 mt-4">
             {isKo
               ? '신용카드 등록 불필요 · 3분이면 첫 전략 완성'
               : 'No credit card required · First strategy in 3 min'}

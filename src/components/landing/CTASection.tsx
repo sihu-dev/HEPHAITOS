@@ -5,49 +5,53 @@ import Link from 'next/link'
 import { useI18n } from '@/i18n/client'
 
 // ============================================
-// Linear 2025 Design System
-// Pain Point based final CTA
-// "Escape this Pain" message
+// HEPHAITOS CTA Section
+// Supabase-inspired minimal design
 // ============================================
 
 export const CTASection = memo(function CTASection() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const isKo = locale === 'ko'
 
   const pains = t('cta.pains') as unknown as string[]
   const solutions = t('cta.solutions') as unknown as string[]
 
   return (
-    <section className="py-20 lg:py-32">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Pain → Solution Comparison Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+    <section className="py-24 bg-[#0A0A0A]">
+      <div className="max-w-4xl mx-auto px-6">
+        {/* Pain → Solution Comparison */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
           {/* Pain Side */}
-          <div className="p-6 border border-red-500/20 bg-red-500/5 rounded-lg">
+          <div className="p-6 bg-zinc-900/50 border border-red-500/20 rounded-lg">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl text-red-400">❌</span>
-              <h3 className="text-sm font-medium text-red-400">{t('cta.painTitle')}</h3>
+              <span className="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 text-sm">✕</span>
+              <h3 className="text-sm font-medium text-red-400">
+                {t('cta.painTitle')}
+              </h3>
             </div>
             <ul className="space-y-3">
               {Array.isArray(pains) && pains.map((pain: string) => (
                 <li key={pain} className="flex items-start gap-2">
-                  <span className="w-4 h-4 mt-0.5 flex-shrink-0 text-center text-red-400">•</span>
-                  <span className="text-sm text-red-300">{pain}</span>
+                  <span className="text-red-400/60 mt-0.5">–</span>
+                  <span className="text-sm text-zinc-400">{pain}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Solution Side */}
-          <div className="p-6 border border-[#5E6AD2]/20 bg-[#5E6AD2]/5 rounded-lg">
+          <div className="p-6 bg-zinc-900/50 border border-yellow-500/20 rounded-lg">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl text-[#5E6AD2]">✓</span>
-              <h3 className="text-sm font-medium text-[#5E6AD2]">{t('cta.solutionTitle')}</h3>
+              <span className="w-6 h-6 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-400 text-sm">✓</span>
+              <h3 className="text-sm font-medium text-yellow-400">
+                {t('cta.solutionTitle')}
+              </h3>
             </div>
             <ul className="space-y-3">
               {Array.isArray(solutions) && solutions.map((solution: string) => (
                 <li key={solution} className="flex items-start gap-2">
-                  <span className="text-[#5E6AD2] mt-0.5 flex-shrink-0">✓</span>
-                  <span className="text-sm text-[#5E6AD2]">{solution}</span>
+                  <span className="text-yellow-400/60 mt-0.5">+</span>
+                  <span className="text-sm text-zinc-400">{solution}</span>
                 </li>
               ))}
             </ul>
@@ -55,76 +59,71 @@ export const CTASection = memo(function CTASection() {
         </div>
 
         {/* Main CTA Box */}
-        <div className="p-8 glass-ultra rounded-lg bg-gradient-to-br from-[#5E6AD2]/10 to-[#7C8AEA]/5 text-center">
-          {/* Headline */}
-          <h2 className="text-3xl sm:text-4xl font-medium text-white mb-4">
+        <div className="p-8 md:p-12 bg-zinc-900/50 border border-zinc-800 rounded-lg text-center">
+          <p className="text-sm text-yellow-500 font-medium mb-3">
+            {isKo ? '지금 시작하세요' : 'Start Now'}
+          </p>
+
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white mb-4">
             {t('cta.headline1')}
             <br />
-            <span className="text-[#5E6AD2]">{t('cta.headline2')}</span>
+            <span className="text-zinc-500">{t('cta.headline2')}</span>
           </h2>
 
-          <p className="text-base text-zinc-400 mb-8 max-w-md mx-auto">
-            {t('cta.subheadline1')}
-            <br className="hidden sm:block" />
-            {t('cta.subheadline2')}
+          <p className="text-zinc-400 max-w-lg mx-auto mb-8">
+            {t('cta.subheadline1')} {t('cta.subheadline2')}
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <Link
               href="/auth/signup"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#5E6AD2] text-white rounded text-sm font-medium hover:bg-[#7C8AEA] glow-primary animate-pulse-glow transition-all"
+              className="w-full sm:w-auto px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg text-sm font-medium transition-colors"
             >
               {t('cta.button')}
-              <span className="inline-block w-2 h-2 border-t-2 border-r-2 border-white rotate-45"></span>
             </Link>
             <Link
               href="/demo"
-              className="inline-flex items-center gap-2 px-6 py-3 text-zinc-400 hover:text-white glass hover:glass-strong rounded text-sm transition-all"
+              className="w-full sm:w-auto px-8 py-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white rounded-lg text-sm font-medium transition-colors"
             >
               {t('cta.demoButton')}
             </Link>
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex flex-wrap justify-center gap-4 text-xs text-zinc-400">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[#5E6AD2]">✓</span>
-              <span>{t('cta.trust.noCard')}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[#5E6AD2]">✓</span>
-              <span>{t('cta.trust.trial')}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[#5E6AD2]">✓</span>
-              <span>{t('cta.trust.cancelAnytime')}</span>
-            </div>
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-zinc-500">
+            <span>{t('cta.trust.noCard')}</span>
+            <span className="w-1 h-1 rounded-full bg-zinc-700 self-center" />
+            <span>{t('cta.trust.trial')}</span>
+            <span className="w-1 h-1 rounded-full bg-zinc-700 self-center" />
+            <span>{t('cta.trust.cancelAnytime')}</span>
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mt-8">
-          <div className="p-4 glass rounded-lg text-center hover:glass-strong transition-all">
-            <p className="text-2xl font-medium text-white mb-1">{t('cta.stats.firstStrategy')}</p>
-            <p className="text-xs text-zinc-400">{t('cta.stats.firstStrategyLabel')}</p>
-          </div>
-          <div className="p-4 glass rounded-lg text-center hover:glass-strong transition-all">
-            <p className="text-2xl font-medium text-white mb-1">{t('cta.stats.savings')}</p>
-            <p className="text-xs text-zinc-400">{t('cta.stats.savingsLabel')}</p>
-          </div>
-          <div className="p-4 glass rounded-lg text-center hover:glass-strong transition-all">
-            <p className="text-2xl font-medium text-white mb-1">{t('cta.stats.coding')}</p>
-            <p className="text-xs text-zinc-400">{t('cta.stats.codingLabel')}</p>
-          </div>
+          {[
+            { value: isKo ? '5분' : '5 min', label: isKo ? '첫 전략 생성' : 'First Strategy' },
+            { value: isKo ? '₩400만+' : '$3K+', label: isKo ? '절약 비용' : 'Saved' },
+            { value: isKo ? '0줄' : '0 lines', label: isKo ? '코딩 필요' : 'Code Needed' },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="p-4 bg-zinc-900/30 border border-zinc-800/50 rounded-lg text-center"
+            >
+              <p className="text-xl font-semibold text-white mb-1">{stat.value}</p>
+              <p className="text-xs text-zinc-500">{stat.label}</p>
+            </div>
+          ))}
         </div>
 
-        {/* Final Disclaimer */}
-        <div className="mt-8 p-4 border border-amber-500/20 bg-amber-500/5 rounded-lg">
+        {/* Disclaimer */}
+        <div className="mt-8 p-4 border border-yellow-500/20 bg-yellow-500/5 rounded-lg">
           <div className="flex items-start gap-3">
-            <span className="text-xl text-amber-400 flex-shrink-0">⚠</span>
-            <p className="text-xs text-zinc-400 leading-relaxed">
-              <span className="text-amber-400">{t('common.important')}:</span> {t('cta.disclaimer')}
+            <span className="text-yellow-400">⚠</span>
+            <p className="text-sm text-zinc-400">
+              <span className="text-yellow-400 font-medium">{t('common.important')}:</span>{' '}
+              {t('cta.disclaimer')}
             </p>
           </div>
         </div>

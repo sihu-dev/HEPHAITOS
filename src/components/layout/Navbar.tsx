@@ -76,7 +76,7 @@ export function Navbar() {
               </Link>
               <Link
                 href="/auth/signup"
-                className="px-3 py-1.5 text-sm text-white bg-white/[0.08] hover:bg-white/[0.12] rounded transition-colors"
+                className="px-3 py-1.5 text-sm text-white bg-amber-600 hover:bg-amber-500 rounded transition-colors"
               >
                 {t('nav.getStarted')}
               </Link>
@@ -136,7 +136,7 @@ export function Navbar() {
               </Link>
               <Link
                 href="/auth/signup"
-                className="px-3 py-2 text-sm text-white bg-white/[0.08] hover:bg-white/[0.12] text-center rounded transition-colors"
+                className="px-3 py-2 text-sm text-white bg-amber-600 hover:bg-amber-500 text-center rounded transition-colors"
               >
                 {t('nav.getStarted')}
               </Link>

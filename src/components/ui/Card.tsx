@@ -5,31 +5,73 @@ import { clsx } from 'clsx'
 
 /**
  * HEPHAITOS Card Component
- * Linear 2025 flat design
+ * Cinematic Trading Terminal Design
  */
 
-type CardVariant = 'default' | 'elevated' | 'glass' | 'interactive' | 'primary'
+type CardVariant = 'default' | 'elevated' | 'glass' | 'interactive' | 'primary' | 'cinematic' | 'metric'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant
-  padding?: 'none' | 'sm' | 'md' | 'lg'
-  glow?: boolean // kept for backward compatibility, ignored
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
+  glow?: boolean
   hover?: boolean
 }
 
 const variantStyles: Record<CardVariant, string> = {
-  default: 'border border-white/[0.06]',
-  elevated: 'border border-white/[0.06]',
-  glass: 'border border-white/[0.06]',
-  interactive: 'border border-white/[0.06] cursor-pointer hover:bg-white/[0.02]',
-  primary: 'border border-white/[0.08]',
+  default: clsx(
+    'bg-white/[0.02]',
+    'border border-white/[0.06]'
+  ),
+  elevated: clsx(
+    'bg-[#141416]',
+    'border border-white/[0.08]',
+    'shadow-xl shadow-black/30'
+  ),
+  glass: clsx(
+    'bg-white/[0.03] backdrop-blur-xl',
+    'border border-white/[0.06]',
+    'shadow-lg shadow-black/20'
+  ),
+  interactive: clsx(
+    'bg-white/[0.02]',
+    'border border-white/[0.06]',
+    'cursor-pointer',
+    'transition-all duration-300',
+    'hover:bg-white/[0.04] hover:border-white/[0.12]',
+    'hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/30',
+    'active:translate-y-0 active:shadow-md'
+  ),
+  primary: clsx(
+    'bg-amber-500/[0.08] backdrop-blur-lg',
+    'border border-amber-500/20',
+    'shadow-lg shadow-amber-500/10'
+  ),
+  cinematic: 'card-cinematic',
+  metric: clsx(
+    'bg-gradient-to-br from-white/[0.03] to-transparent',
+    'backdrop-blur-lg',
+    'border border-white/[0.06]',
+    'shadow-lg shadow-black/20',
+    'relative overflow-hidden'
+  ),
 }
 
 const paddingStyles = {
   none: '',
-  sm: 'p-4',
-  md: 'p-5',
-  lg: 'p-6',
+  sm: 'p-3',
+  md: 'p-4',
+  lg: 'p-5',
+  xl: 'p-6',
+}
+
+const glowStyles: Record<CardVariant, string> = {
+  default: '',
+  elevated: 'shadow-xl shadow-black/40',
+  glass: 'shadow-xl shadow-black/30',
+  interactive: '',
+  primary: 'shadow-xl shadow-amber-500/30',
+  cinematic: '',
+  metric: 'shadow-xl shadow-black/30',
 }
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
@@ -38,6 +80,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       className,
       variant = 'default',
       padding = 'md',
+      glow = false,
       hover = false,
       children,
       ...props
@@ -48,11 +91,15 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={clsx(
-          'rounded-lg',
-          'transition-colors',
+          'rounded-xl',
+          'transition-all duration-300',
           variantStyles[variant],
           paddingStyles[padding],
-          hover && variant !== 'interactive' && 'hover:bg-white/[0.02]',
+          glow && glowStyles[variant],
+          hover && !['interactive', 'cinematic'].includes(variant) && clsx(
+            'hover:bg-white/[0.04] hover:border-white/[0.12]',
+            'hover:-translate-y-0.5 hover:shadow-lg'
+          ),
           className
         )}
         {...props}

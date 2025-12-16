@@ -1,97 +1,89 @@
 'use client'
 
-import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid'
+import { memo } from 'react'
 import { clsx } from 'clsx'
+import {
+  CurrencyDollarIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  ShieldExclamationIcon
+} from '@heroicons/react/24/outline'
+import { MetricCard } from '@/components/ui/MetricCard'
+import { useI18n } from '@/i18n/client'
 
 interface Metric {
   label: string
-  value: string
-  change?: number
-  changeLabel?: string
-  icon?: 'up' | 'down' | 'neutral'
+  value: number
+  change: number
+  changeLabel: string
+  format: 'currency' | 'percent' | 'number'
+  icon: React.ReactNode
+  variant: 'default' | 'profit' | 'loss' | 'primary'
 }
 
-export function PerformanceMetrics() {
-  // Mock data - replace with real data from API
+export const PerformanceMetrics = memo(function PerformanceMetrics() {
+  const { t } = useI18n()
+
+  // Demo data - replace with real data from API
   const metrics: Metric[] = [
     {
       label: "Today's P&L",
-      value: '$567.89',
+      value: 567.89,
       change: 4.82,
-      changeLabel: '+4.82%',
-      icon: 'up',
+      changeLabel: 'vs yesterday',
+      format: 'currency',
+      icon: <CurrencyDollarIcon className="w-5 h-5 text-emerald-400" />,
+      variant: 'profit',
     },
     {
       label: 'Win Rate',
-      value: '68%',
+      value: 68,
       change: 5,
-      changeLabel: '+5% vs last week',
-      icon: 'up',
+      changeLabel: 'vs last week',
+      format: 'percent',
+      icon: <ChartBarIcon className="w-5 h-5 text-[#5E6AD2]" />,
+      variant: 'primary',
     },
     {
       label: 'Sharpe Ratio',
-      value: '1.85',
+      value: 1.85,
       change: -2,
-      changeLabel: '-2% vs last month',
-      icon: 'down',
+      changeLabel: 'vs last month',
+      format: 'number',
+      icon: <ArrowTrendingUpIcon className="w-5 h-5 text-amber-400" />,
+      variant: 'default',
     },
     {
       label: 'Max Drawdown',
-      value: '-8.2%',
+      value: -8.2,
       change: 0,
-      changeLabel: 'No change',
-      icon: 'neutral',
+      changeLabel: 'no change',
+      format: 'percent',
+      icon: <ShieldExclamationIcon className="w-5 h-5 text-red-400" />,
+      variant: 'loss',
     },
   ]
 
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {metrics.map((metric, index) => (
         <div
-          key={index}
-          className="p-4 bg-[#141416] border border-white/[0.08] rounded-lg hover:border-white/[0.12] transition-all"
+          key={metric.label}
+          className="animate-fade-in"
+          style={{ animationDelay: `${index * 100}ms` }}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-              {metric.label}
-            </span>
-            {metric.icon !== 'neutral' && (
-              <div
-                className={clsx(
-                  'flex items-center gap-1 text-xs font-medium',
-                  metric.icon === 'up' ? 'text-emerald-400' : 'text-red-400'
-                )}
-              >
-                {metric.icon === 'up' ? (
-                  <ArrowUpIcon className="w-3 h-3" />
-                ) : (
-                  <ArrowDownIcon className="w-3 h-3" />
-                )}
-                {metric.changeLabel}
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-semibold text-white">
-              {metric.value}
-            </span>
-          </div>
-
-          {/* Mini Progress Bar or Chart */}
-          {metric.change !== undefined && metric.change !== 0 && (
-            <div className="mt-3 h-1 bg-white/[0.06] rounded-full overflow-hidden">
-              <div
-                className={clsx(
-                  'h-full rounded-full transition-all',
-                  metric.change > 0 ? 'bg-emerald-500' : 'bg-red-500'
-                )}
-                style={{ width: `${Math.min(Math.abs(metric.change) * 10, 100)}%` }}
-              />
-            </div>
-          )}
+          <MetricCard
+            label={metric.label}
+            value={metric.value}
+            change={metric.change}
+            changeLabel={metric.changeLabel}
+            format={metric.format}
+            icon={metric.icon}
+            variant={metric.variant}
+            size="sm"
+          />
         </div>
       ))}
     </div>
   )
-}
+})

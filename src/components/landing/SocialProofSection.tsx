@@ -4,9 +4,7 @@ import { memo } from 'react'
 import { useI18n } from '@/i18n/client'
 
 // ============================================
-// Social Proof Section - User Stories
-// 개선: 가짜 리뷰 제거, 데모용 스토리로 명시
-// i18n 지원 추가
+// Social Proof Section - Supabase-minimal style
 // ============================================
 
 interface UserStory {
@@ -24,7 +22,6 @@ interface UserStory {
   resultEn: string
 }
 
-// 데모용 사용자 스토리 (실제 리뷰 아님)
 const userStories: UserStory[] = [
   {
     avatarEmoji: '👨‍💼',
@@ -75,13 +72,16 @@ export const SocialProofSection = memo(function SocialProofSection() {
   const isKo = locale === 'ko'
 
   return (
-    <section className="py-16 bg-[#0D0D0F]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+    <section className="py-24 bg-[#0A0A0A]">
+      <div className="max-w-5xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+          <p className="text-sm text-amber-500 font-medium mb-3">
+            {isKo ? '사용 사례' : 'Use Cases'}
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
             {isKo ? '바쁜 ' : 'For Busy '}
-            <span className="text-gradient bg-gradient-to-r from-[#5E6AD2] to-[#7C8AEA] bg-clip-text text-transparent">
+            <span className="text-zinc-500">
               {isKo ? '30-40대' : '30s-40s'}
             </span>
             {isKo ? ' 직장인을 위한' : ' Professionals'}
@@ -94,105 +94,73 @@ export const SocialProofSection = memo(function SocialProofSection() {
         </div>
 
         {/* User Story Cards */}
-        <div className="space-y-4 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {userStories.map((story, index) => (
             <div
               key={index}
-              className="
-                p-6
-                glass
-                rounded-2xl
-                border
-                border-white/[0.06]
-                hover:border-[#5E6AD2]/20
-                transition-all
-                duration-300
-              "
+              className="p-5 bg-zinc-900/50 border border-zinc-800 rounded-lg"
             >
+              {/* Avatar + Info */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-xl">
+                  {story.avatarEmoji}
+                </div>
+                <div>
+                  <p className="text-sm text-white font-medium">
+                    {isKo ? story.nameKo : story.nameEn}
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    {story.ageRange} · {isKo ? story.roleKo : story.roleEn}
+                  </p>
+                </div>
+              </div>
+
               {/* Quote */}
-              <p className="text-lg text-white font-bold mb-4 leading-snug">
+              <p className="text-sm text-white font-medium mb-3">
                 "{isKo ? story.quoteKo : story.quoteEn}"
               </p>
 
-              {/* Profile */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  {/* Avatar Emoji */}
-                  <div className="
-                    w-12
-                    h-12
-                    rounded-full
-                    bg-gradient-to-br
-                    from-[#5E6AD2]
-                    to-[#7C8AEA]
-                    flex
-                    items-center
-                    justify-center
-                    text-2xl
-                  ">
-                    {story.avatarEmoji}
-                  </div>
-                  <div>
-                    <p className="text-sm text-white font-semibold">
-                      {isKo ? story.nameKo : story.nameEn}
-                    </p>
-                    <p className="text-xs text-zinc-400">
-                      {story.ageRange} · {isKo ? story.roleKo : story.roleEn}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              {/* Detail */}
+              <p className="text-xs text-zinc-400 mb-4">
+                {isKo ? story.detailKo : story.detailEn}
+              </p>
 
-              {/* Detail + Result */}
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                <p className="text-sm text-zinc-300 mb-2">
-                  {isKo ? story.detailKo : story.detailEn}
-                </p>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5E6AD2]/10 border border-[#5E6AD2]/20">
-                  <span className="text-sm font-bold text-[#5E6AD2]">
-                    ✓ {isKo ? story.resultKo : story.resultEn}
-                  </span>
-                </div>
-              </div>
+              {/* Result */}
+              <span className="inline-flex px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded text-xs text-amber-400 font-medium">
+                ✓ {isKo ? story.resultKo : story.resultEn}
+              </span>
             </div>
           ))}
         </div>
 
         {/* Demo Notice */}
-        <div className="mb-8 p-3 border border-zinc-700 bg-zinc-800/50 rounded-lg text-center">
-          <p className="text-xs text-zinc-500">
-            {isKo
-              ? '※ 위 스토리는 예상 사용 시나리오입니다. 실제 투자 결과를 보장하지 않습니다.'
-              : '※ These are example use cases. Actual investment results are not guaranteed.'}
+        <div className="p-3 border border-amber-500/20 bg-amber-500/5 rounded-lg text-center">
+          <p className="text-xs text-zinc-400">
+            ⚠ {isKo
+              ? '위 스토리는 예상 사용 시나리오입니다. 실제 투자 결과를 보장하지 않습니다.'
+              : 'These are example use cases. Actual investment results are not guaranteed.'}
           </p>
         </div>
 
         {/* Value Props */}
-        <div className="grid grid-cols-3 gap-4">
-          <div className="p-6 glass rounded-xl text-center">
-            <p className="text-3xl font-bold text-[#5E6AD2] mb-1">
-              {isKo ? '0줄' : '0 lines'}
-            </p>
-            <p className="text-xs text-zinc-400">
-              {isKo ? '코딩 불필요' : 'No coding'}
-            </p>
-          </div>
-          <div className="p-6 glass rounded-xl text-center">
-            <p className="text-3xl font-bold text-[#5E6AD2] mb-1">
-              {isKo ? '3분' : '3 min'}
-            </p>
-            <p className="text-xs text-zinc-400">
-              {isKo ? '시작 시간' : 'To start'}
-            </p>
-          </div>
-          <div className="p-6 glass rounded-xl text-center">
-            <p className="text-3xl font-bold text-[#5E6AD2] mb-1">
-              {isKo ? '무료' : 'Free'}
-            </p>
-            <p className="text-xs text-zinc-400">
-              {isKo ? '체험 가능' : 'To try'}
-            </p>
-          </div>
+        <div className="grid grid-cols-3 gap-4 mt-8">
+          {[
+            { valueKo: '0줄', valueEn: '0 lines', labelKo: '코딩 불필요', labelEn: 'No coding' },
+            { valueKo: '3분', valueEn: '3 min', labelKo: '시작 시간', labelEn: 'To start' },
+            { valueKo: '무료', valueEn: 'Free', labelKo: '체험 가능', labelEn: 'To try' },
+          ].map((item, index) => (
+            <div
+              key={index}
+              className="p-4 bg-zinc-900/30 border border-zinc-800/50 rounded-lg text-center"
+            >
+              <p className="text-2xl font-semibold text-white mb-1">
+                {isKo ? item.valueKo : item.valueEn}
+              </p>
+              <p className="text-xs text-zinc-500">
+                {isKo ? item.labelKo : item.labelEn}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

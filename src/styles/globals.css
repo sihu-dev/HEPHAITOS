@@ -596,6 +596,202 @@ a:hover {
 }
 
 /* ============================================
+   CINEMATIC TRADING TERMINAL EFFECTS
+   ============================================ */
+
+/* Live Status Indicator */
+@keyframes live-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes live-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.live-indicator {
+  position: relative;
+  width: 8px;
+  height: 8px;
+}
+
+.live-indicator::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--color-success);
+  animation: live-pulse 2s ease-in-out infinite;
+}
+
+.live-indicator::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 1px solid var(--color-success);
+  animation: live-ring 2s ease-out infinite;
+}
+
+/* Price Flash Animation */
+@keyframes price-flash-up {
+  0% { background-color: rgba(34, 197, 94, 0.3); }
+  100% { background-color: transparent; }
+}
+
+@keyframes price-flash-down {
+  0% { background-color: rgba(239, 68, 68, 0.3); }
+  100% { background-color: transparent; }
+}
+
+.price-flash-up {
+  animation: price-flash-up 0.5s ease-out;
+}
+
+.price-flash-down {
+  animation: price-flash-down 0.5s ease-out;
+}
+
+/* Cinematic Card Hover */
+.card-cinematic {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-cinematic::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(94, 106, 210, 0.05) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card-cinematic:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow:
+    0 20px 40px -15px rgba(0, 0, 0, 0.5),
+    0 0 30px -10px rgba(94, 106, 210, 0.2);
+}
+
+.card-cinematic:hover::before {
+  opacity: 1;
+}
+
+/* Metric Value Animation */
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-count-up {
+  animation: count-up 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stagger Animation */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* Shimmer Loading */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Data Grid Lines (Bloomberg-style) */
+.data-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Terminal Glow Effect */
+.terminal-glow {
+  text-shadow:
+    0 0 10px currentColor,
+    0 0 20px currentColor,
+    0 0 40px currentColor;
+}
+
+/* Profit/Loss Backgrounds */
+.bg-profit-subtle {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, transparent 100%);
+}
+
+.bg-loss-subtle {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, transparent 100%);
+}
+
+/* Chart Glow */
+.chart-glow-profit {
+  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.5));
+}
+
+.chart-glow-loss {
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5));
+}
+
+/* Tabular Numbers for Financial Data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ============================================
    LEGACY CLASS ALIASES (Backward Compatibility)
    ============================================ */
 

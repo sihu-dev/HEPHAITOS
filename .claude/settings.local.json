@@ -1,16 +1,19 @@
 {
   "$schema": "https://claude.ai/schemas/claude-code-settings.json",
-  "version": "2.0",
+  "version": "2.1",
   "permissions": {
     "allow": ["*"],
     "deny": [],
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "bypassPermissions",
+    "autoApprove": true
   },
   "project": {
     "name": "HEPHAITOS",
     "description": "Replit for Trading - 코딩 없이 자연어로 AI 트레이딩 봇을 만드는 플랫폼",
     "paradigm": "Copy-Learn-Build",
-    "type": "next-app"
+    "type": "next-app",
+    "framework": "next-15",
+    "runtime": "nodejs"
   },
 
   "context": {
@@ -22,19 +25,24 @@
     "optionalFiles": [
       "BUSINESS_OVERVIEW.md",
       "docs/HEPHAITOS_CORE_REFERENCES.md"
-    ]
+    ],
+    "autoRead": true,
+    "maxContextFiles": 10
   },
 
   "codeStyle": {
     "language": "typescript",
     "strictMode": true,
     "formatter": "prettier",
-    "linter": "eslint"
+    "linter": "eslint",
+    "importSort": true,
+    "useAbsoluteImports": true
   },
 
   "agents": {
     "enabled": true,
     "autoLoad": true,
+    "autoExecute": true,
     "available": [
       "trading-architect",
       "strategy-builder",
@@ -45,6 +53,7 @@
   "skills": {
     "enabled": true,
     "autoDiscover": true,
+    "autoActivate": true,
     "available": [
       "copy-learn-build",
       "unified-broker-api",
@@ -57,6 +66,7 @@
 
   "commands": {
     "enabled": true,
+    "autoComplete": true,
     "available": [
       "strategy",
       "backtest",
@@ -64,6 +74,22 @@
       "legal",
       "build"
     ]
+  },
+
+  "automation": {
+    "autoFix": true,
+    "autoFormat": true,
+    "autoLint": true,
+    "autoTest": false,
+    "autoBuild": false,
+    "autoCommit": false
+  },
+
+  "performance": {
+    "parallelTools": true,
+    "cacheResults": true,
+    "lazyLoad": true,
+    "maxConcurrentTasks": 5
   },
 
   "legalCompliance": {
@@ -79,10 +105,11 @@
   },
 
   "techStack": {
-    "frontend": ["next.js", "typescript", "tailwind", "shadcn"],
-    "backend": ["supabase", "vercel-ai-sdk"],
-    "charts": ["tradingview", "recharts"],
-    "state": ["zustand", "tanstack-query"]
+    "frontend": ["next.js@15", "typescript@5", "tailwindcss@3", "shadcn-ui"],
+    "backend": ["supabase", "vercel-ai-sdk@5"],
+    "charts": ["lightweight-charts@5", "recharts"],
+    "state": ["zustand@4", "tanstack-query@5"],
+    "testing": ["vitest", "playwright"]
   },
 
   "paths": {
@@ -91,7 +118,8 @@
     "api": "src/app/api",
     "types": "src/types",
     "hooks": "src/hooks",
-    "stores": "src/stores"
+    "stores": "src/stores",
+    "styles": "src/styles"
   },
 
   "designSystem": {
@@ -100,6 +128,23 @@
     "background": "#0D0D0F",
     "profit": "#22C55E",
     "loss": "#EF4444",
-    "glassEffect": "backdrop-blur-xl + rgba(255,255,255,0.03)"
+    "glassEffect": "backdrop-blur-xl + rgba(255,255,255,0.03)",
+    "fontFamily": "Inter",
+    "borderRadius": "lg"
+  },
+
+  "plugins": {
+    "enabled": [
+      "frontend-design",
+      "context7",
+      "playwright",
+      "feature-dev",
+      "pr-review-toolkit"
+    ],
+    "disabled": [
+      "spec-kit",
+      "hookify",
+      "browser-pilot"
+    ]
   }
 }
