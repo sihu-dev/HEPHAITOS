@@ -8,10 +8,10 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const strategyId = params.id;
+    const { id: strategyId } = await context.params;
     const supabase = await createServerSupabaseClient();
 
     // 1. 집계 성과 조회 (Materialized View)

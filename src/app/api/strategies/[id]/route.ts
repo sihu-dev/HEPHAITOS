@@ -12,10 +12,10 @@ export const dynamic = 'force-dynamic'
 // GET /api/strategies/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await context.params
 
     // Use shared mock data
     const strategy = findStrategyById(id)
@@ -56,10 +56,10 @@ export async function GET(
 // PUT /api/strategies/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await context.params
     const body = await request.json()
 
     // Validate input
@@ -108,10 +108,10 @@ export async function PUT(
 // DELETE /api/strategies/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await context.params
     const deleted = deleteStrategy(id)
 
     if (!deleted) {
@@ -148,10 +148,10 @@ export async function DELETE(
 // PATCH /api/strategies/[id] - For partial updates (e.g., status change)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await context.params
     const body = await request.json()
 
     // Validate status if provided

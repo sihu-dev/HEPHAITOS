@@ -19,6 +19,25 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  // Password strength calculation
+  const getPasswordStrength = (pwd: string): { score: number; label: string; color: string } => {
+    if (pwd.length === 0) return { score: 0, label: '', color: '' }
+
+    let score = 0
+    if (pwd.length >= 8) score++
+    if (pwd.length >= 12) score++
+    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++
+    if (/\d/.test(pwd)) score++
+    if (/[^a-zA-Z0-9]/.test(pwd)) score++
+
+    if (score <= 2) return { score: 1, label: isKo ? '약함' : 'Weak', color: 'bg-red-500' }
+    if (score <= 3) return { score: 2, label: isKo ? '보통' : 'Fair', color: 'bg-amber-500' }
+    if (score <= 4) return { score: 3, label: isKo ? '좋음' : 'Good', color: 'bg-emerald-500' }
+    return { score: 4, label: isKo ? '강력함' : 'Strong', color: 'bg-emerald-600' }
+  }
+
+  const passwordStrength = getPasswordStrength(password)
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -227,6 +246,35 @@ export default function SignUpPage() {
                     )}
                   </button>
                 </div>
+
+                {/* Password Strength Indicator */}
+                {password.length > 0 && (
+                  <div className="mt-2 space-y-1.5">
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4].map((level) => (
+                        <div
+                          key={level}
+                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                            level <= passwordStrength.score
+                              ? passwordStrength.color
+                              : 'bg-zinc-800'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    {passwordStrength.label && (
+                      <p className={`text-xs ${
+                        passwordStrength.score === 1
+                          ? 'text-red-400'
+                          : passwordStrength.score === 2
+                          ? 'text-amber-400'
+                          : 'text-emerald-400'
+                      }`}>
+                        {isKo ? '비밀번호 강도' : 'Password strength'}: {passwordStrength.label}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <button
