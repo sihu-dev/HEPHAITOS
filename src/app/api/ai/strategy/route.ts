@@ -2,15 +2,21 @@
 // Strategy Generator API Route
 // 데이터 기반 전략 생성 (Claude 연동)
 // Zod Validation + Error Handling 표준화 적용
+// GPT V1 피드백: Consent Gate + Circuit Breaker + Tiered Rate Limit 통합
 // ============================================
 
 import { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { createClaudeClient, TRADING_PROMPTS } from '@/lib/ai/claude-client'
 import { withApiMiddleware, createApiResponse, validateRequestBody } from '@/lib/api/middleware'
 import { aiStrategyConfigSchema } from '@/lib/validations/strategy'
 import { safeLogger } from '@/lib/utils/safe-logger'
 import { applySafetyNet } from '@/lib/safety/safety-net-v2'
 import { spendCredits, InsufficientCreditsError } from '@/lib/credits/spend-helper'
+import { checkUserConsent, createConsentRequiredResponse } from '@/lib/compliance/consent-gate'
+import { aiCircuit, withCircuitBreaker, createCircuitOpenResponse } from '@/lib/redis/circuit-breaker'
+import { aiTieredLimiter, createTieredRateLimitResponse, type UserTier } from '@/lib/redis/rate-limiter'
 
 export const dynamic = 'force-dynamic'
 
@@ -224,13 +230,70 @@ function generateStrategyMock(config: StrategyConfig): GeneratedStrategy {
  */
 export const POST = withApiMiddleware(
   async (request: NextRequest) => {
+    // 1. 사용자 인증
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      safeLogger.warn('[Strategy API] Unauthorized access attempt')
+      return createApiResponse(
+        { error: '로그인이 필요합니다.' },
+        { status: 401 }
+      )
+    }
+
+    const userId = user.id
+
+    // 2. Consent Gate (P0-4: 만 19세 + 면책 동의)
+    const consentResult = await checkUserConsent(userId, ['disclaimer', 'age_verification'])
+    if (!consentResult.hasConsent) {
+      safeLogger.warn('[Strategy API] Consent required', {
+        userId,
+        missingConsents: consentResult.missingConsents,
+      })
+      return createConsentRequiredResponse(consentResult.missingConsents)
+    }
+
+    // 3. Circuit Breaker (P0-3)
+    const circuitAllowed = await aiCircuit.isAllowed('claude-api')
+    if (!circuitAllowed) {
+      safeLogger.warn('[Strategy API] Circuit breaker open')
+      return createCircuitOpenResponse()
+    }
+
+    // 4. Tiered Rate Limit (P0-3: 일당 + 분당 제한)
+    // TODO: 사용자 tier 정보를 프로필에서 조회 (현재는 free로 기본 설정)
+    const userTier: UserTier = 'free'
+    const rateLimitResult = await aiTieredLimiter.check(userId, userTier)
+    if (!rateLimitResult.allowed) {
+      safeLogger.warn('[Strategy API] Rate limited', {
+        userId,
+        limitType: rateLimitResult.limitType,
+      })
+      return createTieredRateLimitResponse(rateLimitResult)
+    }
+
     const validation = await validateRequestBody(request, aiStrategyConfigSchema)
     if ('error' in validation) return validation.error
 
     const config = validation.data
-
-    // TODO: Get real user ID from session
-    const userId = 'demo-user'
 
     safeLogger.info('[Strategy API] Generating strategy', {
       userId,
@@ -282,9 +345,16 @@ export const POST = withApiMiddleware(
     if (USE_CLAUDE) {
       safeLogger.debug('[Strategy API] Using Claude')
       try {
-        strategy = await generateStrategyWithClaude(config)
+        // Circuit Breaker로 Claude 호출 감싸기
+        strategy = await withCircuitBreaker(aiCircuit, 'claude-api', async () => {
+          return generateStrategyWithClaude(config)
+        })
       } catch (claudeError) {
+        if (claudeError instanceof Error && claudeError.message === 'CIRCUIT_OPEN') {
+          return createCircuitOpenResponse()
+        }
         safeLogger.warn('[Strategy API] Claude failed, falling back to mock', { error: claudeError })
+        // Claude 실패 시 Circuit Breaker에 기록됨
         strategy = generateStrategyMock(config)
       }
     } else {
@@ -295,8 +365,6 @@ export const POST = withApiMiddleware(
 
     // P0-8: Safety Net v2 적용
     try {
-      const userId = 'demo-user' // TODO: 실제 사용자 ID 가져오기
-
       // 전략 이름 검사
       const nameCheck = await applySafetyNet({
         content: strategy.name,

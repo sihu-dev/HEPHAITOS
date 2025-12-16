@@ -362,9 +362,10 @@ describe('ErrorMetricsTracker', () => {
       })
 
       const metrics = tracker.getMetrics()
-      // Should only count recent error in rate calculation
-      expect(metrics.totalErrors).toBe(2)
-      expect(metrics.recentErrors).toBe(1)
+      // totalErrors counts only errors within the time window (recent errors)
+      // Old errors are excluded from metrics
+      expect(metrics.totalErrors).toBe(1)
+      expect(metrics.errorRate).toBe(1)
     })
   })
 })

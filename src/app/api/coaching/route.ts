@@ -3,9 +3,12 @@
 // 라이브 코칭 세션 및 멘토 관리
 // Zod Validation + Error Handling 표준화 적용
 // P-1 CRITICAL: 크레딧 소비 통합
+// GPT V1 피드백: 실제 사용자 인증 적용
 // ============================================
 
 import { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import {
   withApiMiddleware,
   createApiResponse,
@@ -206,13 +209,40 @@ export const GET = withApiMiddleware(
  */
 export const POST = withApiMiddleware(
   async (request: NextRequest) => {
+    // 사용자 인증
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return createApiResponse(
+        { error: '로그인이 필요합니다.' },
+        { status: 401 }
+      )
+    }
+
+    const userId = user.id
+
     const validation = await validateRequestBody(request, coachingActionSchema)
     if ('error' in validation) return validation.error
 
     const data = validation.data
-
-    // TODO: Get real user ID from session
-    const userId = data.userId || 'demo-user'
 
     if (data.action === 'join') {
       const { sessionId } = data

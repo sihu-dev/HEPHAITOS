@@ -6,6 +6,10 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
   testDir: './e2e',
+  testMatch: ['**/*.spec.ts'],
+
+  /* Include tests from tests/e2e as well */
+  testIgnore: ['**/node_modules/**'],
 
   /* Run tests in parallel */
   fullyParallel: true,

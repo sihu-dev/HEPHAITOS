@@ -8,13 +8,13 @@ export const MOA_PRICING = {
   draft: {
     credits: 5,
     label: '초안',
-    description: '1명 AI가 빠르게 초안 생성',
+    description: '빠른 초안 생성',
     features: ['기술적 분석가 1명', '기본 리스크 관리', '5분 이내 생성'],
   },
   refined: {
     credits: 10,
     label: '정제',
-    description: '2명 AI 전문가가 협업',
+    description: '2명 전문가 협업',
     features: [
       '기술적 분석가 + 리스크 관리자',
       '균형잡힌 전략',

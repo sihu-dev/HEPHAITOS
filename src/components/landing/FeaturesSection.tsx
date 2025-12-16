@@ -20,10 +20,10 @@ const features = [
     badgeColor: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
   },
   {
-    titleKo: 'AI 코칭',
-    titleEn: 'AI Coaching',
-    descKo: '투자 결정에 대해 AI 멘토와 대화하고, 실시간 피드백을 받으세요.',
-    descEn: 'Chat with AI mentor about your investment decisions and get real-time feedback.',
+    titleKo: '트레이딩 코치',
+    titleEn: 'Trading Coach',
+    descKo: '투자 결정에 대해 전문 멘토와 대화하고, 실시간 피드백을 받으세요.',
+    descEn: 'Chat with expert mentor about your investment decisions and get real-time feedback.',
     href: '/dashboard/coaching',
     badge: 'LEARN',
     badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -31,8 +31,8 @@ const features = [
   {
     titleKo: '전략 빌더',
     titleEn: 'Strategy Builder',
-    descKo: '자연어로 전략을 설명하면 AI가 자동매매 봇을 생성합니다.',
-    descEn: 'Describe your strategy in natural language, and AI creates an automated trading bot.',
+    descKo: '자연어로 전략을 설명하면 시스템이 자동매매 봇을 생성합니다.',
+    descEn: 'Describe your strategy in natural language, and the system creates an automated trading bot.',
     href: '/dashboard/ai-strategy',
     badge: 'BUILD',
     badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
@@ -43,7 +43,7 @@ const additionalFeatures = [
   { nameKo: '백테스팅', nameEn: 'Backtesting', descKo: '10년 데이터로 검증', descEn: '10 years of data' },
   { nameKo: '실시간 알림', nameEn: 'Real-time Alerts', descKo: '매매 신호 즉시 알림', descEn: 'Instant trade signals' },
   { nameKo: '증권사 연동', nameEn: 'Broker Integration', descKo: '3분 내 연동 완료', descEn: '3 min setup' },
-  { nameKo: '시장 리포트', nameEn: 'Market Reports', descKo: 'AI 분석 리포트', descEn: 'AI analysis reports' },
+  { nameKo: '시장 리포트', nameEn: 'Market Reports', descKo: '시장 분석 리포트', descEn: 'Market analysis reports' },
 ]
 
 export const FeaturesSection = memo(function FeaturesSection() {

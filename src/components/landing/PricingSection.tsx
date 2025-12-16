@@ -3,88 +3,103 @@
 import { memo } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/i18n/client'
+import { usePricing, type CreditPackage, type FeaturePricing } from '@/lib/pricing/usePricing'
 
 // ============================================
 // HEPHAITOS Pricing Section
-// Supabase-inspired minimal design
+// Supabase CMS 동적 가격 연동
 // ============================================
 
-interface CreditPackage {
-  id: string
-  name: string
-  nameKo: string
-  credits: number
-  bonus: number
-  priceKrw: number
-  priceUsd: number
-  highlight?: boolean
-  popular?: boolean
-}
-
-const creditPackages: CreditPackage[] = [
+// Fallback data (Supabase 연결 실패 시 사용)
+const FALLBACK_PACKAGES: CreditPackage[] = [
   {
-    id: 'starter',
+    packageId: 'starter',
     name: 'Starter',
     nameKo: '스타터',
     credits: 100,
-    bonus: 0,
+    bonusCredits: 0,
     priceKrw: 9900,
     priceUsd: 7.99,
+    isPopular: false,
+    isHighlighted: false,
+    displayOrder: 1,
+    totalCredits: 100,
+    perCreditKrw: 99,
+    perCreditUsd: 0.08,
   },
   {
-    id: 'basic',
+    packageId: 'basic',
     name: 'Basic',
     nameKo: '베이직',
     credits: 500,
-    bonus: 50,
+    bonusCredits: 50,
     priceKrw: 39000,
     priceUsd: 29.99,
-    popular: true,
+    isPopular: true,
+    isHighlighted: false,
+    displayOrder: 2,
+    totalCredits: 550,
+    perCreditKrw: 71,
+    perCreditUsd: 0.05,
   },
   {
-    id: 'pro',
+    packageId: 'pro',
     name: 'Pro',
     nameKo: '프로',
     credits: 1000,
-    bonus: 150,
+    bonusCredits: 150,
     priceKrw: 69000,
     priceUsd: 54.99,
-    highlight: true,
+    isPopular: false,
+    isHighlighted: true,
+    displayOrder: 3,
+    totalCredits: 1150,
+    perCreditKrw: 60,
+    perCreditUsd: 0.05,
   },
   {
-    id: 'enterprise',
+    packageId: 'enterprise',
     name: 'Enterprise',
     nameKo: '엔터프라이즈',
     credits: 5000,
-    bonus: 1000,
+    bonusCredits: 1000,
     priceKrw: 299000,
     priceUsd: 239.99,
+    isPopular: false,
+    isHighlighted: false,
+    displayOrder: 4,
+    totalCredits: 6000,
+    perCreditKrw: 50,
+    perCreditUsd: 0.04,
   },
 ]
 
-const creditCosts = [
-  { feature: 'Celebrity Mirroring', featureKo: '셀럽 포트폴리오 미러링', credits: 0 },
-  { feature: 'Learning Guide', featureKo: '학습 가이드 질문', credits: 1 },
-  { feature: 'Strategy Engine', featureKo: '전략 엔진', credits: 10 },
-  { feature: 'Backtest (1 Year)', featureKo: '백테스트 (1년)', credits: 3 },
-  { feature: 'Live Coaching', featureKo: '라이브 코칭 (30분)', credits: 20 },
-  { feature: 'Market Report', featureKo: '시장 리포트', credits: 3 },
+const FALLBACK_FEATURES: FeaturePricing[] = [
+  { featureId: 'celebrity_mirroring', featureName: 'Celebrity Mirroring', featureNameKo: '셀럽 포트폴리오 미러링', creditCost: 0, category: 'copy' },
+  { featureId: 'learning_guide', featureName: 'Learning Guide', featureNameKo: '학습 가이드 질문', creditCost: 1, category: 'learn' },
+  { featureId: 'strategy_engine', featureName: 'Strategy Engine', featureNameKo: '전략 엔진', creditCost: 10, category: 'build' },
+  { featureId: 'backtest_1year', featureName: 'Backtest (1 Year)', featureNameKo: '백테스트 (1년)', creditCost: 3, category: 'build' },
+  { featureId: 'live_coaching', featureName: 'Live Coaching', featureNameKo: '라이브 코칭 (30분)', creditCost: 20, category: 'learn' },
+  { featureId: 'market_report', featureName: 'Market Report', featureNameKo: '시장 리포트', creditCost: 3, category: 'other' },
 ]
 
 export const PricingSection = memo(function PricingSection() {
   const { locale } = useI18n()
   const isKo = locale === 'ko'
 
+  // Supabase에서 동적 가격 로드
+  const { packages: supabasePackages, features: supabaseFeatures, isLoading, error } = usePricing()
+
+  // Supabase 데이터 또는 fallback 사용
+  const packages = supabasePackages.length > 0 ? supabasePackages : FALLBACK_PACKAGES
+  const features = supabaseFeatures.length > 0 ? supabaseFeatures : FALLBACK_FEATURES
+
   const formatPrice = (krw: number, usd: number) => {
     return isKo ? `₩${krw.toLocaleString()}` : `$${usd}`
   }
 
   const getPerCreditPrice = (pkg: CreditPackage) => {
-    const totalCredits = pkg.credits + pkg.bonus
-    const perCredit = isKo
-      ? Math.round(pkg.priceKrw / totalCredits)
-      : (pkg.priceUsd / totalCredits).toFixed(2)
-    return isKo ? `₩${perCredit}` : `$${perCredit}`
+    return isKo ? `₩${pkg.perCreditKrw}` : `$${pkg.perCreditUsd.toFixed(2)}`
   }
 
   return (
@@ -111,19 +126,19 @@ export const PricingSection = memo(function PricingSection() {
             {isKo ? '기능별 크레딧 비용' : 'Credit Costs'}
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {creditCosts.map((cost) => (
+            {features.map((feature) => (
               <div
-                key={cost.feature}
+                key={feature.featureId}
                 className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-white">
-                    {isKo ? cost.featureKo : cost.feature}
+                    {isKo ? feature.featureNameKo : feature.featureName}
                   </span>
-                  <span className={`text-sm font-medium ${cost.credits === 0 ? 'text-yellow-400' : 'text-zinc-400'}`}>
-                    {cost.credits === 0
+                  <span className={`text-sm font-medium ${feature.creditCost === 0 ? 'text-yellow-400' : 'text-zinc-400'}`}>
+                    {feature.creditCost === 0
                       ? isKo ? '무료' : 'FREE'
-                      : `${cost.credits}C`}
+                      : `${feature.creditCost}C`}
                   </span>
                 </div>
               </div>
@@ -133,72 +148,84 @@ export const PricingSection = memo(function PricingSection() {
 
         {/* Credit Packages */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-          {creditPackages.map((pkg) => (
-            <div
-              key={pkg.id}
-              className={`relative p-6 rounded-lg border transition-colors ${
-                pkg.highlight
-                  ? 'bg-yellow-500/5 border-yellow-500/30'
-                  : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
-              }`}
-            >
-              {/* Popular Badge */}
-              {pkg.popular && (
-                <span className="absolute -top-2.5 left-4 px-2 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-300">
-                  {isKo ? '인기' : 'Popular'}
-                </span>
-              )}
-
-              {/* Highlight Badge */}
-              {pkg.highlight && (
-                <span className="absolute -top-2.5 left-4 px-2 py-0.5 bg-yellow-500 rounded text-xs text-white font-medium">
-                  {isKo ? '추천' : 'Best Value'}
-                </span>
-              )}
-
-              {/* Package Name */}
-              <h4 className="text-sm text-zinc-400 mb-2">
-                {isKo ? pkg.nameKo : pkg.name}
-              </h4>
-
-              {/* Credits */}
-              <div className="mb-4">
-                <span className="text-3xl font-semibold text-white">
-                  {pkg.credits.toLocaleString()}
-                </span>
-                <span className="text-sm text-zinc-500 ml-1">
-                  {isKo ? '크레딧' : 'credits'}
-                </span>
-                {pkg.bonus > 0 && (
-                  <span className="ml-2 px-1.5 py-0.5 bg-yellow-500/10 border border-yellow-500/20 rounded text-xs text-yellow-400">
-                    +{pkg.bonus}
-                  </span>
-                )}
+          {isLoading ? (
+            // Loading skeleton
+            [...Array(4)].map((_, i) => (
+              <div key={i} className="relative p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 animate-pulse">
+                <div className="h-4 bg-zinc-800 rounded w-16 mb-4" />
+                <div className="h-8 bg-zinc-800 rounded w-24 mb-4" />
+                <div className="h-6 bg-zinc-800 rounded w-20 mb-6" />
+                <div className="h-10 bg-zinc-800 rounded w-full" />
               </div>
-
-              {/* Price */}
-              <div className="mb-6">
-                <span className={`text-xl font-semibold ${pkg.highlight ? 'text-yellow-400' : 'text-white'}`}>
-                  {formatPrice(pkg.priceKrw, pkg.priceUsd)}
-                </span>
-                <p className="text-xs text-zinc-500 mt-1">
-                  {getPerCreditPrice(pkg)} / {isKo ? '크레딧' : 'credit'}
-                </p>
-              </div>
-
-              {/* CTA */}
-              <Link
-                href={`/auth/signup?package=${pkg.id}`}
-                className={`w-full flex items-center justify-center py-2.5 rounded-md text-sm font-medium transition-colors ${
-                  pkg.highlight
-                    ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
-                    : 'bg-zinc-800 hover:bg-zinc-700 text-white'
+            ))
+          ) : (
+            packages.map((pkg) => (
+              <div
+                key={pkg.packageId}
+                className={`relative p-6 rounded-lg border transition-colors ${
+                  pkg.isHighlighted
+                    ? 'bg-yellow-500/5 border-yellow-500/30'
+                    : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
                 }`}
               >
-                {isKo ? '구매하기' : 'Buy Now'}
-              </Link>
-            </div>
-          ))}
+                {/* Popular Badge */}
+                {pkg.isPopular && (
+                  <span className="absolute -top-2.5 left-4 px-2 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-300">
+                    {isKo ? '인기' : 'Popular'}
+                  </span>
+                )}
+
+                {/* Highlight Badge */}
+                {pkg.isHighlighted && (
+                  <span className="absolute -top-2.5 left-4 px-2 py-0.5 bg-yellow-500 rounded text-xs text-white font-medium">
+                    {isKo ? '추천' : 'Best Value'}
+                  </span>
+                )}
+
+                {/* Package Name */}
+                <h4 className="text-sm text-zinc-400 mb-2">
+                  {isKo ? pkg.nameKo : pkg.name}
+                </h4>
+
+                {/* Credits */}
+                <div className="mb-4">
+                  <span className="text-3xl font-semibold text-white">
+                    {pkg.credits.toLocaleString()}
+                  </span>
+                  <span className="text-sm text-zinc-500 ml-1">
+                    {isKo ? '크레딧' : 'credits'}
+                  </span>
+                  {pkg.bonusCredits > 0 && (
+                    <span className="ml-2 px-1.5 py-0.5 bg-yellow-500/10 border border-yellow-500/20 rounded text-xs text-yellow-400">
+                      +{pkg.bonusCredits}
+                    </span>
+                  )}
+                </div>
+
+                {/* Price */}
+                <div className="mb-6">
+                  <span className={`text-xl font-semibold ${pkg.isHighlighted ? 'text-yellow-400' : 'text-white'}`}>
+                    {formatPrice(pkg.priceKrw, pkg.priceUsd)}
+                  </span>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    {getPerCreditPrice(pkg)} / {isKo ? '크레딧' : 'credit'}
+                  </p>
+                </div>
+
+                {/* CTA */}
+                <Link
+                  href={`/auth/signup?package=${pkg.packageId}`}
+                  className={`w-full flex items-center justify-center py-2.5 rounded-md text-sm font-medium transition-colors ${
+                    pkg.isHighlighted
+                      ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
+                      : 'bg-zinc-800 hover:bg-zinc-700 text-white'
+                  }`}
+                >
+                  {isKo ? '구매하기' : 'Buy Now'}
+                </Link>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Free Signup Banner */}

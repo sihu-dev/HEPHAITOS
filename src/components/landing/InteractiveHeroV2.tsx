@@ -109,7 +109,7 @@ export function InteractiveHeroV2() {
           </h1>
 
           <p className="text-xl sm:text-2xl text-zinc-400 max-w-3xl mx-auto">
-            자연어로 설명하면, AI가 즉시 전략을 만들고 실행합니다
+            자연어로 설명하면, 시스템이 즉시 전략을 만들고 실행합니다
           </p>
         </motion.div>
 
@@ -207,7 +207,7 @@ export function InteractiveHeroV2() {
                     전략 실행 대기 중
                   </h3>
                   <p className="text-zinc-500 max-w-sm">
-                    좌측 버튼을 클릭하면 AI가 전략을 생성하고 백테스트 결과를
+                    좌측 버튼을 클릭하면 시스템이 전략을 생성하고 백테스트 결과를
                     실시간으로 보여줍니다
                   </p>
                 </div>

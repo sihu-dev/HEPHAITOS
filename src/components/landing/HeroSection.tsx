@@ -33,11 +33,11 @@ export const HeroSection = memo(function HeroSection() {
           {isKo ? (
             <>
               코딩 없이 만드는<br />
-              <span className="text-zinc-500">나만의 AI 트레이딩 봇</span>
+              <span className="text-zinc-500">나만의 자동매매 시스템</span>
             </>
           ) : (
             <>
-              Build AI Trading Bots<br />
+              Build Trading Systems<br />
               <span className="text-zinc-500">Without Writing Code</span>
             </>
           )}
@@ -46,8 +46,8 @@ export const HeroSection = memo(function HeroSection() {
         {/* Subheadline */}
         <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
           {isKo
-            ? '자연어로 전략을 설명하면, AI가 자동으로 트레이딩 봇을 생성합니다. 셀럽 포트폴리오 따라하기부터 나만의 전략 구축까지.'
-            : 'Describe your strategy in plain language, and AI builds your trading bot automatically. From copying celebrity portfolios to building your own strategies.'}
+            ? '자연어로 전략을 설명하면, 시스템이 자동으로 트레이딩 봇을 생성합니다. 셀럽 포트폴리오 따라하기부터 나만의 전략 구축까지.'
+            : 'Describe your strategy in plain language, and the system builds your trading bot automatically. From copying celebrity portfolios to building your own strategies.'}
         </p>
 
         {/* CTA Buttons */}

@@ -227,7 +227,7 @@ export function AIStrategyGenerator({
                 ref={inputRef}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="원하는 전략을 자연스럽게 설명하세요. AI가 실행 가능한 시스템으로 변환합니다."
+                placeholder="원하는 전략을 자연스럽게 설명하세요. 시스템이 실행 가능한 형태로 변환합니다."
                 className="w-full h-24 px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-lg text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-amber-500/30 resize-none"
                 disabled={isGenerating}
               />
@@ -282,7 +282,7 @@ export function AIStrategyGenerator({
                   <ArrowPathIcon className="w-5 h-5 text-amber-400" />
                 </motion.div>
                 <div>
-                  <p className="text-sm text-amber-400 font-medium">AI가 전략을 생성하고 있습니다...</p>
+                  <p className="text-sm text-amber-400 font-medium">전략을 생성하고 있습니다...</p>
                   <p className="text-xs text-amber-400/70 mt-0.5">자연어 → 노드 변환 중</p>
                 </div>
               </div>
@@ -347,7 +347,7 @@ export function AIStrategyGenerator({
               <div className="flex items-start gap-2">
                 <ExclamationTriangleIcon className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                 <p className="text-[10px] text-zinc-500 leading-relaxed">
-                  <span className="text-amber-400">중요:</span> AI가 생성한 전략은 참고용이며,
+                  <span className="text-amber-400">중요:</span> 자동 생성된 전략은 참고용이며,
                   실제 투자 전 반드시 백테스트와 검토가 필요합니다.
                   모든 투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다.
                 </p>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { XMarkIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useI18n } from '@/i18n/client'
+import { useFeatureFlags } from '@/lib/feature-flags/useFeatureFlags'
 import { clsx } from 'clsx'
 
 interface FeedbackData {
@@ -18,11 +19,11 @@ interface FeedbackData {
 export function FeedbackWidget() {
   const { locale } = useI18n()
   const isKo = locale === 'ko'
+  const { isEnabled, isLoading: flagsLoading } = useFeatureFlags()
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
   const [formData, setFormData] = useState<FeedbackData>({
     type: 'improvement',
     category: 'ux',
@@ -49,6 +50,11 @@ export function FeedbackWidget() {
       }, 300)
     }
   }, [isOpen])
+
+  // Feature flag 체크 - 비활성화 시 렌더링 안 함
+  if (!flagsLoading && !isEnabled('feedback-widget')) {
+    return null
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

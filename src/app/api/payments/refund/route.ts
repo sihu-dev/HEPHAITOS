@@ -2,10 +2,13 @@
 // Refund API Route
 // GPT V1 피드백 P0-9: 부분 사용 시 차등 환불
 // Zod Validation + Error Handling 표준화 적용
+// GPT V1 피드백: 실제 사용자 인증 적용
 // ============================================
 
 import { NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { withApiMiddleware, createApiResponse, validateRequestBody } from '@/lib/api/middleware'
 import { z } from 'zod'
 import { safeLogger } from '@/lib/utils/safe-logger'
@@ -14,6 +17,29 @@ const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+// 사용자 인증 헬퍼 함수
+async function getAuthenticatedUser() {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options)
+          })
+        },
+      },
+    }
+  )
+
+  return supabase.auth.getUser()
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -38,15 +64,23 @@ type RefundRequestInput = z.infer<typeof refundRequestSchema>
  */
 export const GET = withApiMiddleware(
   async (request: NextRequest) => {
+    // 사용자 인증
+    const { data: { user }, error: authError } = await getAuthenticatedUser()
+    if (authError || !user) {
+      return createApiResponse(
+        { error: '로그인이 필요합니다.' },
+        { status: 401 }
+      )
+    }
+
+    const userId = user.id
+
     const { searchParams } = new URL(request.url)
     const orderId = searchParams.get('orderId')
 
     if (!orderId) {
       return createApiResponse({ error: '주문 ID가 필요합니다' }, { status: 400 })
     }
-
-    // TODO: Get real user ID from session
-    const userId = 'demo-user'
 
     safeLogger.info('[Refund API] Calculating refund', { orderId, userId })
 
@@ -95,13 +129,21 @@ export const GET = withApiMiddleware(
  */
 export const POST = withApiMiddleware(
   async (request: NextRequest) => {
+    // 사용자 인증
+    const { data: { user }, error: authError } = await getAuthenticatedUser()
+    if (authError || !user) {
+      return createApiResponse(
+        { error: '로그인이 필요합니다.' },
+        { status: 401 }
+      )
+    }
+
+    const userId = user.id
+
     const validation = await validateRequestBody(request, refundRequestSchema)
     if ('error' in validation) return validation.error
 
     const { orderId, reason } = validation.data
-
-    // TODO: Get real user ID from session
-    const userId = 'demo-user'
 
     safeLogger.info('[Refund API] Creating refund request', { orderId, userId })
 

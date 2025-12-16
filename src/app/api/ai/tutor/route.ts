@@ -2,9 +2,12 @@
 // Tutor API
 // POST: 튜터 질문/답변
 // Zod Validation + Error Handling 표준화 적용
+// GPT V1 피드백: 실제 사용자 인증 적용
 // ============================================
 
 import { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { withApiMiddleware, createApiResponse, validateRequestBody } from '@/lib/api/middleware'
 import { tutorQuestionSchema } from '@/lib/validations/ai'
 import { safeLogger } from '@/lib/utils/safe-logger'
@@ -12,13 +15,40 @@ import { spendCredits, InsufficientCreditsError } from '@/lib/credits/spend-help
 
 export const POST = withApiMiddleware(
   async (request: NextRequest) => {
+    // 사용자 인증
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return createApiResponse(
+        { error: '로그인이 필요합니다.' },
+        { status: 401 }
+      )
+    }
+
+    const userId = user.id
+
     const validation = await validateRequestBody(request, tutorQuestionSchema)
     if ('error' in validation) return validation.error
 
     const { question, context } = validation.data
-
-    // TODO: Get real user ID from session
-    const userId = 'demo-user'
 
     safeLogger.info('[Tutor API] Processing question', {
       userId,

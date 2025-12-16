@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
+import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
 export interface AnalyticsEvent {
   event: string
@@ -11,6 +12,44 @@ export interface AnalyticsEvent {
 declare global {
   interface Window {
     va?: (event: string, properties?: Record<string, unknown>) => void
+    _hephaitosSessionId?: string
+  }
+}
+
+// 세션 ID 생성/재사용
+function getSessionId(): string {
+  if (typeof window === 'undefined') return ''
+
+  if (!window._hephaitosSessionId) {
+    window._hephaitosSessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+  }
+  return window._hephaitosSessionId
+}
+
+// Supabase에 이벤트 저장
+async function saveEventToSupabase(
+  event: string,
+  properties?: Record<string, unknown>
+): Promise<void> {
+  try {
+    const supabase = getSupabaseBrowserClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    await supabase.from('analytics_events').insert({
+      user_id: user?.id || null,
+      session_id: getSessionId(),
+      event_name: event,
+      event_type: event.includes('_') ? event.split('_')[0] : 'custom',
+      page_url: typeof window !== 'undefined' ? window.location.href : null,
+      referrer: typeof document !== 'undefined' ? document.referrer : null,
+      properties: properties || {},
+      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+    })
+  } catch (error) {
+    // 테이블이 없으면 조용히 실패 (마이그레이션 전)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Analytics] Supabase save skipped:', error)
+    }
   }
 }
 
@@ -20,22 +59,31 @@ export function useAnalytics() {
 
   // Track page views
   useEffect(() => {
+    const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '')
+
+    // Vercel Analytics
     if (typeof window !== 'undefined' && window.va) {
-      const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '')
       window.va('pageview', { url })
     }
+
+    // Supabase 저장
+    saveEventToSupabase('page_view', { url, path: pathname })
   }, [pathname, searchParams])
 
-  const track = (event: string, properties?: Record<string, unknown>) => {
+  const track = useCallback((event: string, properties?: Record<string, unknown>) => {
+    // Vercel Analytics
     if (typeof window !== 'undefined' && window.va) {
       window.va(event, properties)
     }
 
-    // Also log to console in development
+    // Supabase 저장
+    saveEventToSupabase(event, properties)
+
+    // Development 로그
     if (process.env.NODE_ENV === 'development') {
       console.log('[Analytics]', event, properties)
     }
-  }
+  }, [])
 
   return { track }
 }

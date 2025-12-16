@@ -1,11 +1,13 @@
 // ============================================
 // Toss Webhook Handler
 // Loop 14: 웹훅 이벤트 시스템
+// GPT V1 피드백: Dead Letter Queue + Retry 시스템
 // ============================================
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createHmac } from 'crypto'
+import { safeLogger } from '@/lib/utils/safe-logger'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -134,16 +136,56 @@ async function processWebhookEvent(eventId: string, payload: any): Promise<void>
 
     console.log(`[Toss Webhook] Event ${eventId} processed successfully`)
   } catch (error) {
-    console.error(`[Toss Webhook] Event ${eventId} processing failed:`, error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    safeLogger.error(`[Toss Webhook] Event ${eventId} processing failed`, { error: errorMessage })
 
-    await supabaseAdmin
-      .from('payment_webhook_events')
-      .update({
-        process_status: 'failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      })
-      .eq('event_id', eventId)
+    // 재시도 스케줄링 (exponential backoff, max 3회)
+    const { error: scheduleError } = await supabaseAdmin.rpc('schedule_webhook_retry', {
+      p_event_id: eventId,
+      p_error: errorMessage,
+    })
+
+    if (scheduleError) {
+      safeLogger.error('[Toss Webhook] Failed to schedule retry', { error: scheduleError })
+      // Fallback: 직접 업데이트
+      await supabaseAdmin
+        .from('payment_webhook_events')
+        .update({
+          process_status: 'failed',
+          error: errorMessage,
+        })
+        .eq('event_id', eventId)
+    }
 
     throw error
   }
+}
+
+/**
+ * 재시도 대상 웹훅 처리 (Cron Job용)
+ */
+export async function processRetryQueue(): Promise<{ processed: number; failed: number }> {
+  const { data: pendingRetries, error } = await supabaseAdmin.rpc('get_pending_webhook_retries', {
+    p_limit: 10,
+  })
+
+  if (error || !pendingRetries) {
+    safeLogger.error('[Toss Webhook] Failed to get pending retries', { error })
+    return { processed: 0, failed: 0 }
+  }
+
+  let processed = 0
+  let failed = 0
+
+  for (const event of pendingRetries) {
+    try {
+      await processWebhookEvent(event.event_id, event.payload)
+      processed++
+    } catch {
+      failed++
+    }
+  }
+
+  safeLogger.info('[Toss Webhook] Retry queue processed', { processed, failed })
+  return { processed, failed }
 }

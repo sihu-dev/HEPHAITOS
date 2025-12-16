@@ -3,7 +3,7 @@
 /**
  * MoA Strategy Generator Component
  *
- * 4명의 전문가 AI가 협업하여 전략을 생성하는 UI
+ * 4명의 전문가 엔진이 협업하여 전략을 생성하는 UI
  * - Progressive loading (각 Perspective 순차 표시)
  * - Glass morphism design
  * - 3-tier pricing (Draft / Refined / Comprehensive)
@@ -43,7 +43,7 @@ const TIER_CONFIG = {
     label: '초안',
     credits: 5,
     price: '₩355',
-    description: '1명 AI가 빠르게 초안 생성',
+    description: '빠른 초안 생성',
     color: 'bg-gray-500',
   },
   refined: {

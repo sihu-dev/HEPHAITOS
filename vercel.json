@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/webhook-retry",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/daily-summary",
+      "schedule": "0 0 * * *"
+    }
+  ],
+  "functions": {
+    "api/cron/webhook-retry.ts": {
+      "maxDuration": 60
+    },
+    "api/cron/daily-summary.ts": {
+      "maxDuration": 30
+    }
+  }
+}

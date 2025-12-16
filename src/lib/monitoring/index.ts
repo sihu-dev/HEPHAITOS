@@ -1,17 +1,6 @@
 // ============================================
-// Monitoring Module Export
+// Monitoring Module Index
+// GPT V1 피드백: 모니터링 통합 export
 // ============================================
 
-export {
-  initSentry,
-  captureError,
-  captureMessage,
-  setUser,
-  clearUser,
-  setTag,
-  setContext,
-  addBreadcrumb,
-  startTransaction,
-  isSentryEnabled,
-  flushSentry,
-} from './sentry'
+export * from './performance'

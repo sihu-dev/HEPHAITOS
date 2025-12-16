@@ -46,10 +46,10 @@ const painPoints: PainPoint[] = [
   },
   {
     emoji: '🤖',
-    problemKo: 'AI 전략? 코딩 몰라서 포기',
-    problemEn: 'AI strategy? Gave up, cant code',
-    solutionKo: 'AI가 감정 빼고 데이터로만 판단',
-    solutionEn: 'AI judges by data only, no emotion',
+    problemKo: '자동매매? 코딩 몰라서 포기',
+    problemEn: 'Automated trading? Gave up, cant code',
+    solutionKo: '시스템이 감정 빼고 데이터로만 판단',
+    solutionEn: 'System judges by data only, no emotion',
   },
 ]
 

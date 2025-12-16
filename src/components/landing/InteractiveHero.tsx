@@ -114,7 +114,7 @@ export function InteractiveHero() {
           </h1>
 
           <p className="text-xl md:text-2xl text-zinc-400 max-w-3xl mx-auto font-light">
-            자연어로 트레이딩 전략을 만들고, AI가 즉시 Python 코드로 변환합니다
+            자연어로 트레이딩 전략을 만들고, 시스템이 즉시 실행 코드로 변환합니다
           </p>
         </motion.div>
 

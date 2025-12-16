@@ -1,6 +1,7 @@
 // ============================================
 // Redis Rate Limiter
 // 프로덕션용 분산 Rate Limiting
+// GPT V1 피드백 P0-3: 일당 Rate Limit + Tier별 제한 추가
 // ============================================
 
 import { getRedisClient, isRedisConnected } from './client'
@@ -11,12 +12,28 @@ export interface RateLimitResult {
   remaining: number
   resetTime: number
   retryAfter?: number
+  limitType?: 'minute' | 'daily'
 }
 
 export interface RateLimitConfig {
   windowMs: number      // 시간 창 (밀리초)
   maxRequests: number   // 최대 요청 수
   keyPrefix?: string    // Redis 키 접두사
+}
+
+// Tier별 제한 설정
+export type UserTier = 'free' | 'basic' | 'pro' | 'premium'
+
+export interface TierLimits {
+  perMinute: number
+  perDay: number
+}
+
+export const TIER_LIMITS: Record<UserTier, TierLimits> = {
+  free: { perMinute: 10, perDay: 100 },
+  basic: { perMinute: 30, perDay: 500 },
+  pro: { perMinute: 60, perDay: 2000 },
+  premium: { perMinute: 100, perDay: 10000 },
 }
 
 /**
@@ -204,4 +221,141 @@ export async function getRateLimiterStatus(): Promise<{
     backend: isRedisConnected() ? 'redis' : 'memory',
     connected: isRedisConnected(),
   }
+}
+
+// ============================================
+// Tiered Rate Limiter (일당 + 분당 제한)
+// GPT V1 피드백 P0-3
+// ============================================
+
+/**
+ * Tier별 Rate Limiter - 분당 + 일당 제한 적용
+ */
+export class TieredRateLimiter {
+  private keyPrefix: string
+
+  constructor(keyPrefix: string = 'rl:tiered') {
+    this.keyPrefix = keyPrefix
+  }
+
+  private getKey(identifier: string, window: 'minute' | 'daily'): string {
+    if (window === 'daily') {
+      const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+      return `${this.keyPrefix}:${identifier}:day:${today}`
+    }
+    return `${this.keyPrefix}:${identifier}:minute`
+  }
+
+  /**
+   * 요청 허용 여부 확인 (분당 + 일당 모두 체크)
+   */
+  async check(identifier: string, tier: UserTier = 'free'): Promise<RateLimitResult> {
+    const redis = await getRedisClient()
+    const limits = TIER_LIMITS[tier]
+    const now = Date.now()
+
+    try {
+      // 1. 분당 제한 체크
+      const minuteKey = this.getKey(identifier, 'minute')
+      const minuteCount = await redis.incr(minuteKey)
+      if (minuteCount === 1) {
+        await redis.expire(minuteKey, 60)
+      }
+
+      if (minuteCount > limits.perMinute) {
+        const ttl = await redis.ttl(minuteKey)
+        return {
+          allowed: false,
+          remaining: 0,
+          resetTime: now + (ttl > 0 ? ttl * 1000 : 60000),
+          retryAfter: ttl > 0 ? ttl : 60,
+          limitType: 'minute',
+        }
+      }
+
+      // 2. 일당 제한 체크
+      const dailyKey = this.getKey(identifier, 'daily')
+      const dailyCount = await redis.incr(dailyKey)
+      if (dailyCount === 1) {
+        // 자정까지 남은 시간 계산 (UTC 기준)
+        const tomorrow = new Date()
+        tomorrow.setUTCHours(24, 0, 0, 0)
+        const secondsUntilMidnight = Math.ceil((tomorrow.getTime() - now) / 1000)
+        await redis.expire(dailyKey, secondsUntilMidnight)
+      }
+
+      if (dailyCount > limits.perDay) {
+        const ttl = await redis.ttl(dailyKey)
+        return {
+          allowed: false,
+          remaining: 0,
+          resetTime: now + (ttl > 0 ? ttl * 1000 : 86400000),
+          retryAfter: ttl > 0 ? ttl : 86400,
+          limitType: 'daily',
+        }
+      }
+
+      return {
+        allowed: true,
+        remaining: Math.min(limits.perMinute - minuteCount, limits.perDay - dailyCount),
+        resetTime: now + 60000,
+      }
+    } catch (error) {
+      safeLogger.error('[TieredRateLimiter] Redis error, allowing request', { error })
+      return {
+        allowed: true,
+        remaining: limits.perMinute - 1,
+        resetTime: now + 60000,
+      }
+    }
+  }
+
+  /**
+   * 현재 사용량 조회
+   */
+  async getUsage(identifier: string): Promise<{ minute: number; daily: number }> {
+    const redis = await getRedisClient()
+    const [minute, daily] = await Promise.all([
+      redis.get(this.getKey(identifier, 'minute')),
+      redis.get(this.getKey(identifier, 'daily')),
+    ])
+
+    return {
+      minute: minute ? parseInt(minute, 10) : 0,
+      daily: daily ? parseInt(daily, 10) : 0,
+    }
+  }
+}
+
+// Pre-configured Tiered Rate Limiters
+export const aiTieredLimiter = new TieredRateLimiter('rl:ai:tiered')
+export const strategyTieredLimiter = new TieredRateLimiter('rl:strategy:tiered')
+export const backtestTieredLimiter = new TieredRateLimiter('rl:backtest:tiered')
+
+/**
+ * Tiered Rate Limit 응답 생성
+ */
+export function createTieredRateLimitResponse(result: RateLimitResult): Response {
+  const message = result.limitType === 'daily'
+    ? '일일 사용량 한도에 도달했습니다. 내일 다시 시도해주세요.'
+    : '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.'
+
+  return new Response(
+    JSON.stringify({
+      success: false,
+      error: {
+        code: result.limitType === 'daily' ? 'DAILY_LIMIT_EXCEEDED' : 'RATE_LIMITED',
+        message,
+        retryAfter: result.retryAfter,
+        limitType: result.limitType,
+      },
+    }),
+    {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'Retry-After': String(result.retryAfter || 60),
+      },
+    }
+  )
 }
