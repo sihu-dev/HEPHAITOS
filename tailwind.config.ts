@@ -101,8 +101,8 @@ const config: Config = {
       
       // Typography
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'SF Mono', 'Consolas', 'monospace'],
+        sans: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['var(--font-ibm-plex-mono)', 'JetBrains Mono', 'SF Mono', 'Consolas', 'monospace'],
       },
       
       // Font Size

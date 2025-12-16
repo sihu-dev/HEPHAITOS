@@ -2,7 +2,7 @@
 
 import { AuroraBackground } from '@/components/layout/AuroraBackground'
 import { Navbar } from '@/components/layout/Navbar'
-import { HeroSection } from '@/components/landing/HeroSection'
+import { InteractiveHero } from '@/components/landing/InteractiveHero'
 import { TrustBadge } from '@/components/landing/TrustBadge'
 import { PainPointCards } from '@/components/landing/PainPointCards'
 import { FeaturesSection } from '@/components/landing/FeaturesSection'
@@ -19,12 +19,15 @@ export const dynamic = 'force-dynamic'
 
 export default function HomePage() {
   return (
-    <main className="relative">
+    <main className="relative bg-zinc-950">
       {/* Aurora Background Effect */}
       <AuroraBackground />
 
       <Navbar />
-      <HeroSection />
+
+      {/* Firebase Studio Style Interactive Hero */}
+      <InteractiveHero />
+
       <TrustBadge />
       <PainPointCards />
       <FeaturesSection />

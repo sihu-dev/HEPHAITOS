@@ -1,12 +1,17 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, IBM_Plex_Mono } from 'next/font/google'
 import '@/styles/globals.css'
 import { ToastProvider } from '@/components/ui/Toast'
 import { Toaster } from '@/components/ui/Toaster'
 import { I18nProvider } from '@/i18n/client'
 import { FeedbackWidget } from '@/components/feedback/FeedbackWidget'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-ibm-plex-mono',
+})
 
 // Force dynamic rendering for all pages to avoid SSR issues with framer-motion
 export const dynamic = 'force-dynamic'
@@ -62,7 +67,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" className="dark">
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${inter.variable} ${ibmPlexMono.variable} antialiased`}>
         {/* Skip to main content link for keyboard users */}
         <a
           href="#main-content"
