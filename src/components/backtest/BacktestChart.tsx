@@ -2,10 +2,25 @@
 
 import { memo, useMemo, useState, useCallback } from 'react'
 import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  ComposedChart,
+  Line,
+  ReferenceLine,
+  Cell,
+} from 'recharts'
+import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   ChartBarIcon,
   PresentationChartLineIcon,
+  CalendarIcon,
 } from '@heroicons/react/24/outline'
 import type { BacktestResult, BacktestTrade, PortfolioSnapshot } from '@/lib/backtest'
 
@@ -14,7 +29,7 @@ interface BacktestChartProps {
   className?: string
 }
 
-type ChartType = 'equity' | 'drawdown' | 'trades'
+type ChartType = 'equity' | 'drawdown' | 'trades' | 'monthly'
 
 export const BacktestChart = memo(function BacktestChart({ result, className = '' }: BacktestChartProps) {
   const [chartType, setChartType] = useState<ChartType>('equity')
@@ -50,14 +65,22 @@ export const BacktestChart = memo(function BacktestChart({ result, className = '
             icon={ChartBarIcon}
             label="거래"
           />
+          <ChartTypeButton
+            type="monthly"
+            current={chartType}
+            onClick={handleChartTypeChange}
+            icon={CalendarIcon}
+            label="월별"
+          />
         </div>
       </div>
 
       {/* Chart Area */}
       <div className="p-4">
-        {chartType === 'equity' && <EquityCurve snapshots={result.equityCurve} />}
+        {chartType === 'equity' && <EquityCurve snapshots={result.equityCurve} trades={result.trades} />}
         {chartType === 'drawdown' && <DrawdownChart snapshots={result.equityCurve} />}
         {chartType === 'trades' && <TradesChart trades={result.trades} />}
+        {chartType === 'monthly' && <MonthlyReturnsChart snapshots={result.equityCurve} />}
       </div>
     </div>
   )
@@ -94,45 +117,63 @@ const ChartTypeButton = memo(function ChartTypeButton({ type, current, onClick, 
   )
 })
 
-interface EquityCurveProps {
-  snapshots: PortfolioSnapshot[]
+// Custom Tooltip Component
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: Array<{ value: number; dataKey: string; color?: string }>
+  label?: string
+  formatter?: (value: number) => string
+  labelFormatter?: (label: string) => string
 }
 
-const EquityCurve = memo(function EquityCurve({ snapshots }: EquityCurveProps) {
+const CustomTooltip = memo(function CustomTooltip({
+  active,
+  payload,
+  label,
+  formatter = (v) => `$${v.toLocaleString()}`,
+  labelFormatter = (l) => l,
+}: CustomTooltipProps) {
+  if (!active || !payload?.length) return null
+
+  return (
+    <div className="bg-zinc-900/95 backdrop-blur border border-white/[0.08] rounded-lg px-3 py-2 shadow-xl">
+      <p className="text-xs text-zinc-400 mb-1">{labelFormatter(label || '')}</p>
+      {payload.map((entry, index) => (
+        <p key={index} className="text-sm font-medium" style={{ color: entry.color || '#fff' }}>
+          {formatter(entry.value)}
+        </p>
+      ))}
+    </div>
+  )
+})
+
+interface EquityCurveProps {
+  snapshots: PortfolioSnapshot[]
+  trades: BacktestTrade[]
+}
+
+const EquityCurve = memo(function EquityCurve({ snapshots, trades }: EquityCurveProps) {
   const chartData = useMemo(() => {
     if (snapshots.length === 0) return null
 
-    const values = snapshots.map(s => s.equity)
-    const min = Math.min(...values)
-    const max = Math.max(...values)
-    const range = max - min || 1
+    const data = snapshots.map((s, i) => ({
+      index: i,
+      date: new Date(s.timestamp).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
+      equity: s.equity,
+      benchmark: s.equity * (1 + (Math.random() - 0.5) * 0.02), // Mock benchmark for demo
+    }))
 
-    return {
-      values,
-      min,
-      max,
-      range,
-      points: values.map((v, i) => ({
-        x: (i / (values.length - 1)) * 100,
-        y: 100 - ((v - min) / range) * 100,
-      })),
-    }
+    const startValue = snapshots[0].equity
+    const endValue = snapshots[snapshots.length - 1].equity
+    const changePercent = ((endValue - startValue) / startValue) * 100
+    const isPositive = changePercent >= 0
+
+    return { data, startValue, endValue, changePercent, isPositive }
   }, [snapshots])
 
   if (!chartData) {
     return <EmptyChart message="데이터가 없습니다" />
   }
-
-  const pathD = chartData.points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
-    .join(' ')
-
-  const areaPathD = `${pathD} L ${chartData.points[chartData.points.length - 1].x} 100 L 0 100 Z`
-
-  const startValue = chartData.values[0]
-  const endValue = chartData.values[chartData.values.length - 1]
-  const changePercent = ((endValue - startValue) / startValue) * 100
-  const isPositive = changePercent >= 0
 
   return (
     <div className="space-y-4">
@@ -141,60 +182,75 @@ const EquityCurve = memo(function EquityCurve({ snapshots }: EquityCurveProps) {
         <div className="space-y-1">
           <span className="text-xs text-zinc-400">시작 자산</span>
           <p className="text-base font-medium text-white">
-            ${startValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            ${chartData.startValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
           </p>
         </div>
         <div className="text-right space-y-1">
           <span className="text-xs text-zinc-400">최종 자산</span>
-          <p className={`text-base font-medium ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
-            ${endValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-            <span className="text-sm ml-1">({isPositive ? '+' : ''}{changePercent.toFixed(2)}%)</span>
+          <p className={`text-base font-medium ${chartData.isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+            ${chartData.endValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            <span className="text-sm ml-1">
+              ({chartData.isPositive ? '+' : ''}{chartData.changePercent.toFixed(2)}%)
+            </span>
           </p>
         </div>
       </div>
 
-      {/* SVG Chart */}
-      <div className="relative h-40">
-        <svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          className="w-full h-full"
-        >
-          {/* Grid lines */}
-          {[0, 25, 50, 75, 100].map(y => (
-            <line
-              key={y}
-              x1="0"
-              y1={y}
-              x2="100"
-              y2={y}
-              stroke="rgba(255,255,255,0.04)"
-              strokeWidth="0.5"
+      {/* Recharts Area Chart */}
+      <div className="h-48">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor={chartData.isPositive ? '#34d399' : '#f87171'}
+                  stopOpacity={0.3}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={chartData.isPositive ? '#34d399' : '#f87171'}
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
+            <XAxis
+              dataKey="date"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#71717a', fontSize: 10 }}
+              interval="preserveStartEnd"
             />
-          ))}
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#71717a', fontSize: 10 }}
+              tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+              domain={['dataMin - 1000', 'dataMax + 1000']}
+            />
+            <Tooltip
+              content={<CustomTooltip formatter={(v) => `$${v.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} />}
+            />
+            <Area
+              type="monotone"
+              dataKey="equity"
+              stroke={chartData.isPositive ? '#34d399' : '#f87171'}
+              strokeWidth={2}
+              fill="url(#equityGradient)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
 
-          {/* Area fill */}
-          <path
-            d={areaPathD}
-            fill={isPositive ? 'rgba(52, 211, 153, 0.08)' : 'rgba(248, 113, 113, 0.08)'}
-          />
-
-          {/* Line */}
-          <path
-            d={pathD}
-            fill="none"
-            stroke={isPositive ? '#34d399' : '#f87171'}
-            strokeWidth="0.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-
-        {/* Y-axis labels */}
-        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] text-zinc-400">
-          <span>${(chartData.max / 1000).toFixed(0)}k</span>
-          <span>${(chartData.min / 1000).toFixed(0)}k</span>
-        </div>
+      {/* Trade count indicator */}
+      <div className="flex items-center gap-2 text-xs text-zinc-400">
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+          총 {trades.length}건의 거래
+        </span>
+        <span>•</span>
+        <span className="text-emerald-400">{trades.filter(t => t.pnl > 0).length} 승</span>
+        <span className="text-red-400">{trades.filter(t => t.pnl <= 0).length} 패</span>
       </div>
     </div>
   )
@@ -209,34 +265,25 @@ const DrawdownChart = memo(function DrawdownChart({ snapshots }: DrawdownChartPr
     if (snapshots.length === 0) return null
 
     let runningMax = 0
-    const drawdowns = snapshots.map(s => {
+    const data = snapshots.map((s, i) => {
       runningMax = Math.max(runningMax, s.equity)
-      return (s.equity - runningMax) / runningMax
+      const drawdown = ((s.equity - runningMax) / runningMax) * 100
+      return {
+        index: i,
+        date: new Date(s.timestamp).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
+        drawdown,
+      }
     })
 
-    const minDrawdown = Math.min(...drawdowns)
-    const maxDrawdown = Math.abs(minDrawdown)
+    const maxDrawdown = Math.min(...data.map(d => d.drawdown))
+    const currentDrawdown = data[data.length - 1].drawdown
 
-    return {
-      drawdowns,
-      minDrawdown,
-      maxDrawdown,
-      points: drawdowns.map((d, i) => ({
-        x: (i / (drawdowns.length - 1)) * 100,
-        y: Math.abs(d) / (maxDrawdown || 0.01) * 100,
-      })),
-    }
+    return { data, maxDrawdown, currentDrawdown }
   }, [snapshots])
 
   if (!chartData) {
     return <EmptyChart message="데이터가 없습니다" />
   }
-
-  const pathD = chartData.points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
-    .join(' ')
-
-  const areaPathD = `M 0 0 ${pathD} L 100 0 Z`
 
   return (
     <div className="space-y-4">
@@ -245,59 +292,68 @@ const DrawdownChart = memo(function DrawdownChart({ snapshots }: DrawdownChartPr
         <div className="space-y-1">
           <span className="text-xs text-zinc-400">최대 낙폭</span>
           <p className="text-base font-medium text-red-400">
-            {(chartData.maxDrawdown * 100).toFixed(2)}%
+            {chartData.maxDrawdown.toFixed(2)}%
           </p>
         </div>
         <div className="text-right space-y-1">
           <span className="text-xs text-zinc-400">현재 낙폭</span>
           <p className="text-base font-medium text-zinc-400">
-            {(Math.abs(chartData.drawdowns[chartData.drawdowns.length - 1]) * 100).toFixed(2)}%
+            {chartData.currentDrawdown.toFixed(2)}%
           </p>
         </div>
       </div>
 
-      {/* SVG Chart */}
-      <div className="relative h-40">
-        <svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          className="w-full h-full"
-        >
-          {/* Grid lines */}
-          {[0, 25, 50, 75, 100].map(y => (
-            <line
-              key={y}
-              x1="0"
-              y1={y}
-              x2="100"
-              y2={y}
-              stroke="rgba(255,255,255,0.04)"
-              strokeWidth="0.5"
+      {/* Recharts Area Chart */}
+      <div className="h-48">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="drawdownGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f87171" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#f87171" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <XAxis
+              dataKey="date"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#71717a', fontSize: 10 }}
+              interval="preserveStartEnd"
             />
-          ))}
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#71717a', fontSize: 10 }}
+              tickFormatter={(v) => `${v.toFixed(0)}%`}
+              domain={['dataMin - 5', 0]}
+            />
+            <Tooltip
+              content={<CustomTooltip formatter={(v) => `${v.toFixed(2)}%`} />}
+            />
+            <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3" />
+            <Area
+              type="monotone"
+              dataKey="drawdown"
+              stroke="#f87171"
+              strokeWidth={2}
+              fill="url(#drawdownGradient)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
 
-          {/* Area fill */}
-          <path
-            d={areaPathD}
-            fill="rgba(248, 113, 113, 0.1)"
-          />
-
-          {/* Line */}
-          <path
-            d={pathD}
-            fill="none"
-            stroke="#f87171"
-            strokeWidth="0.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-
-        {/* Y-axis labels */}
-        <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-[10px] text-zinc-400">
-          <span>0%</span>
-          <span>{(chartData.maxDrawdown * 100).toFixed(0)}%</span>
-        </div>
+      {/* Drawdown distribution */}
+      <div className="grid grid-cols-4 gap-2">
+        {[5, 10, 15, 20].map(threshold => {
+          const periods = chartData.data.filter(d => d.drawdown <= -threshold).length
+          const percent = (periods / chartData.data.length * 100).toFixed(1)
+          return (
+            <div key={threshold} className="text-center">
+              <p className="text-xs text-zinc-500">&gt;{threshold}% 낙폭</p>
+              <p className="text-sm font-medium text-zinc-400">{percent}%</p>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -311,17 +367,19 @@ const TradesChart = memo(function TradesChart({ trades }: TradesChartProps) {
   const chartData = useMemo(() => {
     if (trades.length === 0) return null
 
-    const pnls = trades.map(t => t.pnl)
-    const maxPnl = Math.max(...pnls.map(Math.abs))
+    const data = trades.slice(-50).map((t, i) => ({
+      index: i,
+      pnl: t.pnl,
+      isPositive: t.pnl >= 0,
+    }))
 
-    return {
-      trades,
-      pnls,
-      maxPnl: maxPnl || 1,
-      wins: trades.filter(t => t.pnl > 0).length,
-      losses: trades.filter(t => t.pnl <= 0).length,
-      totalPnl: pnls.reduce((sum, p) => sum + p, 0),
-    }
+    const wins = trades.filter(t => t.pnl > 0).length
+    const losses = trades.filter(t => t.pnl <= 0).length
+    const totalPnl = trades.reduce((sum, t) => sum + t.pnl, 0)
+    const avgWin = wins > 0 ? trades.filter(t => t.pnl > 0).reduce((s, t) => s + t.pnl, 0) / wins : 0
+    const avgLoss = losses > 0 ? trades.filter(t => t.pnl <= 0).reduce((s, t) => s + t.pnl, 0) / losses : 0
+
+    return { data, wins, losses, totalPnl, avgWin, avgLoss }
   }, [trades])
 
   if (!chartData) {
@@ -331,7 +389,7 @@ const TradesChart = memo(function TradesChart({ trades }: TradesChartProps) {
   return (
     <div className="space-y-4">
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         <div className="space-y-1">
           <span className="text-xs text-zinc-400">승리</span>
           <p className="text-base font-medium text-emerald-400">{chartData.wins}</p>
@@ -341,41 +399,191 @@ const TradesChart = memo(function TradesChart({ trades }: TradesChartProps) {
           <p className="text-base font-medium text-red-400">{chartData.losses}</p>
         </div>
         <div className="space-y-1">
-          <span className="text-xs text-zinc-400">총 손익</span>
-          <p className={`text-base font-medium ${chartData.totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-            ${chartData.totalPnl.toFixed(2)}
+          <span className="text-xs text-zinc-400">평균 수익</span>
+          <p className="text-sm font-medium text-emerald-400">${chartData.avgWin.toFixed(2)}</p>
+        </div>
+        <div className="space-y-1">
+          <span className="text-xs text-zinc-400">평균 손실</span>
+          <p className="text-sm font-medium text-red-400">${chartData.avgLoss.toFixed(2)}</p>
+        </div>
+      </div>
+
+      {/* Recharts Bar Chart */}
+      <div className="h-40">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <XAxis
+              dataKey="index"
+              axisLine={false}
+              tickLine={false}
+              tick={false}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#71717a', fontSize: 10 }}
+              tickFormatter={(v) => `$${v}`}
+            />
+            <Tooltip
+              content={<CustomTooltip formatter={(v) => `$${v.toFixed(2)}`} />}
+            />
+            <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
+            <Bar dataKey="pnl" radius={[2, 2, 0, 0]}>
+              {chartData.data.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.isPositive ? '#34d399' : '#f87171'}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-zinc-400">
+          최근 {Math.min(50, trades.length)}개 거래 손익
+        </p>
+        <p className={`text-sm font-medium ${chartData.totalPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+          총 손익: ${chartData.totalPnl.toFixed(2)}
+        </p>
+      </div>
+    </div>
+  )
+})
+
+interface MonthlyReturnsChartProps {
+  snapshots: PortfolioSnapshot[]
+}
+
+const MonthlyReturnsChart = memo(function MonthlyReturnsChart({ snapshots }: MonthlyReturnsChartProps) {
+  const chartData = useMemo(() => {
+    if (snapshots.length === 0) return null
+
+    // Group by month
+    const monthlyData: Record<string, { start: number; end: number }> = {}
+
+    snapshots.forEach(s => {
+      const date = new Date(s.timestamp)
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+
+      if (!monthlyData[key]) {
+        monthlyData[key] = { start: s.equity, end: s.equity }
+      } else {
+        monthlyData[key].end = s.equity
+      }
+    })
+
+    const data = Object.entries(monthlyData)
+      .map(([month, values]) => ({
+        month,
+        return: ((values.end - values.start) / values.start) * 100,
+      }))
+      .slice(-12) // Last 12 months
+
+    const positiveMonths = data.filter(d => d.return > 0).length
+    const negativeMonths = data.filter(d => d.return <= 0).length
+    const avgReturn = data.reduce((s, d) => s + d.return, 0) / data.length
+
+    return { data, positiveMonths, negativeMonths, avgReturn }
+  }, [snapshots])
+
+  if (!chartData) {
+    return <EmptyChart message="월별 데이터가 없습니다" />
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Summary */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <span className="text-xs text-zinc-400">수익 월</span>
+          <p className="text-base font-medium text-emerald-400">{chartData.positiveMonths}개월</p>
+        </div>
+        <div className="space-y-1">
+          <span className="text-xs text-zinc-400">손실 월</span>
+          <p className="text-base font-medium text-red-400">{chartData.negativeMonths}개월</p>
+        </div>
+        <div className="text-right space-y-1">
+          <span className="text-xs text-zinc-400">평균 월 수익</span>
+          <p className={`text-base font-medium ${chartData.avgReturn >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            {chartData.avgReturn >= 0 ? '+' : ''}{chartData.avgReturn.toFixed(2)}%
           </p>
         </div>
       </div>
 
-      {/* Bar Chart */}
-      <div className="h-40 flex items-end gap-px">
-        {chartData.pnls.slice(-50).map((pnl, i) => {
-          const height = (Math.abs(pnl) / chartData.maxPnl) * 100
-          const isPositive = pnl >= 0
-
-          return (
-            <div
-              key={i}
-              className={`flex-1 min-w-[2px] rounded-t ${isPositive ? 'bg-emerald-500' : 'bg-red-500'}`}
-              style={{ height: `${height}%` }}
+      {/* Monthly Returns Bar Chart */}
+      <div className="h-40">
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart data={chartData.data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+            <XAxis
+              dataKey="month"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#71717a', fontSize: 10 }}
+              tickFormatter={(v) => v.split('-')[1] + '월'}
             />
-          )
-        })}
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#71717a', fontSize: 10 }}
+              tickFormatter={(v) => `${v}%`}
+            />
+            <Tooltip
+              content={<CustomTooltip formatter={(v) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`} />}
+            />
+            <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
+            <Bar dataKey="return" radius={[4, 4, 0, 0]}>
+              {chartData.data.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.return >= 0 ? '#34d399' : '#f87171'}
+                />
+              ))}
+            </Bar>
+            <Line
+              type="monotone"
+              dataKey="return"
+              stroke="#5E6AD2"
+              strokeWidth={2}
+              dot={false}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
       </div>
 
-      <p className="text-xs text-zinc-400 text-center">
-        최근 {Math.min(50, chartData.trades.length)}개 거래 손익
-      </p>
+      {/* Monthly Returns Heatmap */}
+      <div className="space-y-2">
+        <span className="text-xs text-zinc-400">월별 수익률 분포</span>
+        <div className="grid grid-cols-6 gap-1">
+          {chartData.data.map((d, i) => {
+            const intensity = Math.min(Math.abs(d.return) / 10, 1) // Normalize to max 10%
+            const bgColor = d.return >= 0
+              ? `rgba(52, 211, 153, ${0.2 + intensity * 0.6})`
+              : `rgba(248, 113, 113, ${0.2 + intensity * 0.6})`
+
+            return (
+              <div
+                key={i}
+                className="aspect-square rounded flex items-center justify-center text-[10px] font-medium text-white"
+                style={{ backgroundColor: bgColor }}
+                title={`${d.month}: ${d.return.toFixed(2)}%`}
+              >
+                {d.return.toFixed(0)}%
+              </div>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 })
 
 const EmptyChart = memo(function EmptyChart({ message }: { message: string }) {
   return (
-    <div className="h-40 flex items-center justify-center">
+    <div className="h-48 flex items-center justify-center">
       <div className="text-center">
-        <PresentationChartLineIcon className="w-6 h-6 text-zinc-400 mx-auto mb-2" />
+        <PresentationChartLineIcon className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
         <p className="text-sm text-zinc-400">{message}</p>
       </div>
     </div>
