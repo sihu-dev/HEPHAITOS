@@ -20,6 +20,7 @@ import {
   ArrowsRightLeftIcon,
   AcademicCapIcon,
   BeakerIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline'
 import { useI18n } from '@/i18n/client'
 
@@ -73,6 +74,14 @@ const mainNavItemsConfig = [
     href: '/dashboard/strategy-builder',
     stage: 'BUILD',
     stageColor: 'amber',
+  },
+  {
+    icon: ChatBubbleLeftRightIcon,
+    labelKey: 'aiAgent',
+    href: '/dashboard/agent',
+    stage: 'BUILD',
+    stageColor: 'violet',
+    badge: 'NEW',
   },
   {
     icon: BeakerIcon,
