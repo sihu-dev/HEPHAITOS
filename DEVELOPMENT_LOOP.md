@@ -364,6 +364,33 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v1.9.0 (2025-12-17) - Loop 16 (전략 성과 네트워크 효과)
+- ✅ Loop 16: 전략 성과 네트워크 효과 시스템
+  - strategy_performance_aggregates 테이블 (익명화 집계)
+    - strategy_hash, market_condition, timeframe별 집계
+    - avg_return, win_rate, sharpe_ratio, max_drawdown
+    - confidence_score, sample_size_tier
+  - strategy_executions 테이블 (개별 실행 기록)
+  - market_conditions 테이블 (시장 조건 스냅샷)
+  - strategy_tags 테이블 (전략 태그)
+  - generate_strategy_hash() - 프롬프트 익명화
+  - aggregate_strategy_performance() - 집계 RPC
+  - get_popular_strategies() - 인기 전략 조회
+  - compare_strategy_performance() - 전략 비교
+  - get_best_strategies_by_condition() - 시장별 최적 전략
+  - strategy_insights, strategy_type_performance 뷰
+  - /api/insights/strategies API
+    - popular: 인기 전략 Top N
+    - by_condition: 시장 조건별 최적 전략
+    - compare: 전략 성과 비교
+    - insights: 전체 인사이트
+    - type_performance: 타입별 성과
+  - StrategyInsights 컴포넌트
+    - 시장 조건별 카드 (bull/bear/sideways/volatile)
+    - 인기 전략 Top 10 테이블
+    - 전략 타입별 성과 그리드
+    - 면책조항 표시
+
 ### v1.8.0 (2025-12-17) - Loop 15 (비용 대시보드)
 - ✅ Loop 15: 비용 대시보드 시스템
   - api_cost_logs 테이블 (API 비용 로그)
@@ -508,14 +535,14 @@ function trackTechDebt(debt: TechDebt) {
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
 P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
-P2: ░░░░░░░░░░░░░░░░░░░░ 0%
+P2: ██░░░░░░░░░░░░░░░░░░ 10% (Loop 16 완료)
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
+ㄱ      → Loop 17: UnifiedBroker 예외처리 강화
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
-ㄱ P2   → Loop 16: 전략 성과 네트워크 효과
-ㄱ 브로커 → Loop 17: UnifiedBroker 예외처리 강화
+ㄱ 상태  → Loop 18: Status Page 구축
 ```
 
 ### 우선순위 자동 조정 규칙
