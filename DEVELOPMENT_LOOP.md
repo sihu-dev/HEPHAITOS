@@ -114,9 +114,9 @@ const canLaunchBeta = Object.values(P0_GATE).every(v => v === true)
 ```typescript
 const P1_GATE = {
   production_deployed: false,
-  slack_webhook_active: false,
-  beta_codes_generated: false,
-  retention_tracking: false,
+  slack_webhook_active: true,    // ✅ Loop 7
+  beta_codes_generated: true,    // ✅ Loop 9
+  retention_tracking: true,      // ✅ Loop 10
   cost_dashboard: false,
 }
 ```
@@ -364,6 +364,17 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v1.3.0 (2025-12-17) - Loop 10 (리텐션 추적)
+- ✅ Loop 10: D1/D7 리텐션 추적 시스템
+  - user_cohorts 테이블 (가입일 기준 코호트)
+  - user_daily_activity 테이블 (일별 활동)
+  - calculate_retention_metrics() RPC 함수
+  - get_retention_curve() RPC 함수
+  - analytics_events 트리거 자동 기록
+  - /api/admin/analytics/retention API
+  - RetentionDashboard 컴포넌트 (KPI + 커브 + 코호트)
+  - 목표: D1 > 40%, D7 > 20%
+
 ### v1.2.0 (2025-12-17) - Loop 7-9 (플러그인 풀가동)
 - ✅ Loop 7: Slack Webhook 연동
   - 4가지 알림 타입 구현 완료 (DLQ, Circuit, Daily, Urgent)
@@ -416,13 +427,13 @@ function trackTechDebt(debt: TechDebt) {
 ### 현재 상태
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
-P1: ████████████░░░░░░░░ 60% (Loop 6-9 완료)
+P1: ████████████████░░░░ 70% (Loop 6-10 완료)
 P2: ░░░░░░░░░░░░░░░░░░░░ 0%
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 10: D1/D7 리텐션 추적 시스템
+ㄱ      → Loop 11: ARPPU 코호트 분석
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
 ㄱ 퍼널  → Loop 12: 전환율 퍼널 분석
 ```
