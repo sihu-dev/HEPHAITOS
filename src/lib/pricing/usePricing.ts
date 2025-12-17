@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 
 export interface CreditPackage {
   packageId: string
@@ -37,8 +37,18 @@ export function usePricing() {
 
   useEffect(() => {
     const fetchPricing = async () => {
+      // Skip fetching if Supabase is not configured
+      if (!isSupabaseConfigured) {
+        setIsLoading(false)
+        return
+      }
+
       try {
         const supabase = getSupabaseBrowserClient()
+        if (!supabase) {
+          setIsLoading(false)
+          return
+        }
 
         // Fetch credit packages
         const { data: packagesData, error: packagesError } = await supabase

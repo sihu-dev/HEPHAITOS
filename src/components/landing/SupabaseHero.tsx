@@ -223,6 +223,9 @@ export function SupabaseHero() {
       {/* ========== PRODUCT GRID - P0 FIX: Large Cards Layout ========== */}
       <div className="py-16">
         <div className="max-w-[1200px] mx-auto px-6">
+          {/* Accessibility: Section heading for proper heading hierarchy (h1 → h2 → h3) */}
+          <h2 className="sr-only">Products and Features</h2>
+
           {/* Top row: 3 large cards - Supabase style with preview image */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             {PRODUCTS.slice(0, 3).map((product, index) => (

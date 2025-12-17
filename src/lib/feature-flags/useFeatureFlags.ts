@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 
 export interface FeatureFlag {
   key: string
@@ -69,8 +69,18 @@ export function useFeatureFlags() {
 
   useEffect(() => {
     const fetchFlags = async () => {
+      // Skip fetching if Supabase is not configured, use defaults
+      if (!isSupabaseConfigured) {
+        setIsLoading(false)
+        return
+      }
+
       try {
         const supabase = getSupabaseBrowserClient()
+        if (!supabase) {
+          setIsLoading(false)
+          return
+        }
 
         // Try to fetch from Supabase (if feature_flags table exists)
         const { data, error } = await supabase
