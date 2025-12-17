@@ -364,6 +364,69 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v2.5.0 (2025-12-17) - Loop 23 (해외 주식 연동 - Alpaca)
+- ✅ Loop 23: 해외 주식 연동 (Alpaca API)
+  - alpaca-client.ts - Alpaca API 클라이언트 (~600 lines)
+    - AlpacaConfig 인터페이스 (apiKey, apiSecret, isPaper)
+    - Paper Trading / Live Trading 지원
+    - 계좌 조회: getAccount()
+    - 포지션 관리: getPositions(), getPosition()
+    - 주문 관리: getOrders(), getOrder(), submitOrder()
+    - 매수/매도: buy(), sell(), cancelOrder(), cancelAllOrders()
+    - 시장 데이터: getSnapshot(), getSnapshots(), getBars()
+    - 실시간 데이터: getLatestTrade(), getLatestQuote()
+    - 자산 검색: getAsset(), searchAssets()
+    - 마켓 정보: getClock(), getCalendar()
+    - 고급 주문 타입: limit, stop, stop_limit, trailing_stop
+    - Time in Force: day, gtc, opg, cls, ioc, fok
+  - /api/stocks/us API 라우트
+    - GET (Public):
+      - type=snapshot: 주식 스냅샷 (현재가 + 호가 + 일별)
+      - type=quote: 최신 호가
+      - type=trade: 최신 체결
+      - type=bars: 봉 데이터 (1Min~1Month)
+      - type=clock: 마켓 상태
+      - type=calendar: 마켓 캘린더
+      - type=asset: 자산 정보
+      - type=search: 종목 검색
+      - type=popular: 인기 종목 15개 + 스냅샷
+    - POST (Authenticated):
+      - action=account: 계좌 정보
+      - action=positions: 전체 포지션
+      - action=position: 특정 종목 포지션
+      - action=orders: 주문 목록
+      - action=order: 특정 주문 조회
+      - action=buy: 매수 주문
+      - action=sell: 매도 주문
+      - action=submit_order: 고급 주문
+      - action=cancel: 주문 취소
+      - action=cancel_all: 전체 주문 취소
+  - DB 마이그레이션 (20251217_us_stocks.sql)
+    - us_stock_master 테이블: 미국 종목 마스터
+      - 50개 주요 종목 초기 데이터 (AAPL, MSFT, GOOGL, ...)
+      - 섹터: Technology, Financial, Healthcare, Energy, Consumer, Industrial, Communication
+      - 속성: tradable, marginable, shortable, fractionable
+    - us_stock_daily_prices 테이블: 일별 가격 (OHLCV + VWAP)
+    - us_stock_minute_prices 테이블: 분봉 가격 (TTL 7일)
+    - us_market_sessions 테이블: 마켓 세션 정보
+    - exchange_rates 테이블: 환율 정보 (USD/KRW)
+    - alpaca_orders_extended 테이블: Alpaca 주문 확장
+      - 고급 주문 옵션 (stop, trail, extended_hours)
+      - 상태 추적 (submitted, filled, expired, canceled, failed)
+    - us_stock_dividends 테이블: 배당 정보
+    - calculate_us_portfolio_value() RPC: 포트폴리오 가치 계산 (USD/KRW)
+    - us_sector_performance 뷰: 섹터별 성과
+    - RLS 정책 적용
+  - USStockWidget 컴포넌트
+    - Popular 탭: 인기 종목 15개 + 실시간 가격
+    - Search 탭: 종목 검색 + 상세 정보
+    - Market 탭: 마켓 시간, 섹터 성과, 거래소 정보
+    - MarketStatusBadge: 마켓 개장/폐장 상태
+    - StockRow: 종목 행 (심볼, 이름, 가격, 변동)
+    - StockDetailCard: 종목 상세 + 호가 + 일별 통계
+    - SectorOverview: 섹터별 성과 그리드
+    - 면책조항 (FINRA/SIPC)
+
 ### v2.4.0 (2025-12-17) - Loop 22 (한국 주식 데이터 연동)
 - ✅ Loop 22: 한국 주식 데이터 연동 (KIS API)
   - kis-client.ts - KIS API 클라이언트 (~500 lines)
@@ -728,13 +791,13 @@ function trackTechDebt(debt: TechDebt) {
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
 P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
-P2: █████████████░░░░░░░ 65% (Loop 16-22 완료)
+P2: ███████████████░░░░░ 75% (Loop 16-23 완료)
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 23: 해외 주식 연동 (Alpaca)
-ㄱ 가격  → Loop 24: 성과 기반 가격 실험
+ㄱ      → Loop 24: 성과 기반 가격 실험
+ㄱ 투자  → Loop 25: 시리즈 A 준비 자료
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
 ```
 
