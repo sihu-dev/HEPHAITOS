@@ -227,6 +227,63 @@ export const EXTERNAL_API_LIMITS = {
 
 ---
 
+## 대체 소스 전략 (Fallback)
+
+### Unusual Whales 대체 옵션
+
+| 대체 소스 | 데이터 | 비용 | 라이선스 |
+|----------|--------|------|---------|
+| **SEC EDGAR** (Primary Fallback) | 13F 공시 | 무료 | Public Domain ✅ |
+| **OpenInsider** | 내부자 거래 | 무료 | 웹 스크래핑 주의 |
+| **Capitol Trades** | 의회 거래 | $49/월 | 검토 필요 |
+
+### Quiver 대체 옵션
+
+| 대체 소스 | 데이터 | 비용 | 라이선스 |
+|----------|--------|------|---------|
+| **SEC EDGAR** | 공시 데이터 | 무료 | Public Domain ✅ |
+| **Alpha Vantage** | 펀더멘털 | $49/월 | 상업적 이용 가능 |
+| **Financial Modeling Prep** | 대안 데이터 | $29/월 | 상업적 이용 가능 |
+
+### Fallback 구현 전략
+
+```typescript
+// src/lib/data/data-source-fallback.ts
+export async function getCongressTrades(params: TradeParams) {
+  try {
+    // Primary: Unusual Whales
+    return await unusualWhalesClient.getCongressTrades(params);
+  } catch (error) {
+    // Fallback: SEC EDGAR
+    console.warn('Unusual Whales unavailable, using SEC EDGAR');
+    return await secEdgarClient.get13FFilings(params);
+  }
+}
+```
+
+---
+
+## P0 게이트 완료 조건
+
+### 옵션 A: 현재 소스 유지 (법무 승인 필요)
+- [ ] Unusual Whales ToS 법무 검토 완료
+- [ ] Quiver ToS 법무 검토 완료
+- [ ] Attribution 표시 전체 적용
+- [ ] 계약서 서명 완료
+
+### 옵션 B: 대체 소스로 전환 (즉시 가능)
+- [x] SEC EDGAR만 사용 (Public Domain)
+- [x] Attribution 불필요
+- [ ] Fallback 코드 구현
+- [ ] UI에서 유료 데이터 소스 제거
+
+### 권장: 옵션 B (베타 런칭) → 옵션 A (정식 런칭)
+
+베타 기간에는 SEC EDGAR (무료, 법적 리스크 0)만 사용하고,
+정식 런칭 전에 유료 API 라이선스 확보
+
+---
+
 ## 담당자
 
 | 역할 | 담당 | 연락처 |
@@ -234,6 +291,15 @@ export const EXTERNAL_API_LIMITS = {
 | 기술 검토 | 개발팀 | dev@hephaitos.io |
 | 법무 검토 | 법무팀 | legal@hephaitos.io |
 | 계약 관리 | 경영지원 | admin@hephaitos.io |
+
+---
+
+## CHANGELOG
+
+### 2025-12-17
+- 대체 소스 전략 (Fallback) 섹션 추가
+- P0 게이트 완료 조건 명확화
+- 권장: 베타는 SEC EDGAR만 사용
 
 ---
 
