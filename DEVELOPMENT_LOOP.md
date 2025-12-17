@@ -364,6 +364,36 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v2.0.0 (2025-12-17) - Loop 17 + 18 (병렬)
+- ✅ Loop 17: UnifiedBroker v2 예외처리 강화
+  - BrokerError 타입 시스템 (25+ 에러 코드)
+  - 재시도 로직 (exponential backoff + jitter)
+  - Circuit Breaker (closed/open/half_open)
+  - Graceful Degradation (primary + fallback)
+  - Health Check API
+  - Order validation
+  - Partial fill 처리
+  - src/lib/broker/unified-broker-v2.ts
+
+- ✅ Loop 18: Status Page 시스템
+  - status_services 테이블 (10개 서비스 정의)
+  - status_checks 테이블 (상태 체크 기록)
+  - status_incidents 테이블 (인시던트 관리)
+  - status_incident_updates 테이블 (타임라인)
+  - status_maintenance 테이블 (유지보수 일정)
+  - status_subscribers 테이블 (알림 구독)
+  - get_system_status() RPC (전체 상태)
+  - record_service_status() RPC (상태 기록)
+  - calculate_uptime() RPC (가동률 계산)
+  - update_incident() RPC (인시던트 업데이트)
+  - /api/status API (Public)
+  - StatusPage 컴포넌트
+    - Overall status banner
+    - Active incidents timeline
+    - Upcoming maintenance
+    - Services by category
+    - 90-day uptime history
+
 ### v1.9.0 (2025-12-17) - Loop 16 (전략 성과 네트워크 효과)
 - ✅ Loop 16: 전략 성과 네트워크 효과 시스템
   - strategy_performance_aggregates 테이블 (익명화 집계)
@@ -535,14 +565,14 @@ function trackTechDebt(debt: TechDebt) {
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
 P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
-P2: ██░░░░░░░░░░░░░░░░░░ 10% (Loop 16 완료)
+P2: ██████░░░░░░░░░░░░░░ 30% (Loop 16-18 완료)
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 17: UnifiedBroker 예외처리 강화
+ㄱ      → Loop 19: 데이터 Fallback 설계
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
-ㄱ 상태  → Loop 18: Status Page 구축
+ㄱ 마켓  → Loop 20: 전략 마켓플레이스 v1
 ```
 
 ### 우선순위 자동 조정 규칙
