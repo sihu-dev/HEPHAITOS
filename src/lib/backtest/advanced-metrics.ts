@@ -209,17 +209,21 @@ export class AdvancedMetricsCalculator {
   /**
    * Recovery Factor - Net Profit / Max Drawdown
    * Higher is better. Shows how well strategy recovers from drawdowns.
+   * Returns 0 for losing strategies (netProfit <= 0)
    */
   private calculateRecoveryFactor(): number {
     const finalEquity = this.equityCurve[this.equityCurve.length - 1]?.equity || 0
     const netProfit = finalEquity - this.initialCapital
+
+    // Return 0 for losing strategies
+    if (netProfit <= 0) return 0
 
     let maxDrawdown = 0
     for (const snapshot of this.equityCurve) {
       maxDrawdown = Math.max(maxDrawdown, snapshot.drawdown)
     }
 
-    return maxDrawdown > 0 ? netProfit / maxDrawdown : netProfit > 0 ? Infinity : 0
+    return maxDrawdown > 0 ? netProfit / maxDrawdown : Infinity
   }
 
   /**

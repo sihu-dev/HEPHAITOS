@@ -44,14 +44,15 @@ describe('Button', () => {
   })
 
   it('should apply size classes correctly', () => {
+    // Updated to match WCAG-compliant button sizes
     const { rerender } = render(<Button size="sm">Small</Button>)
-    expect(screen.getByRole('button')).toHaveClass('h-7')
+    expect(screen.getByRole('button')).toHaveClass('h-9') // 36px compact
 
     rerender(<Button size="md">Medium</Button>)
-    expect(screen.getByRole('button')).toHaveClass('h-8')
+    expect(screen.getByRole('button')).toHaveClass('h-11') // 44px WCAG minimum
 
     rerender(<Button size="lg">Large</Button>)
-    expect(screen.getByRole('button')).toHaveClass('h-10')
+    expect(screen.getByRole('button')).toHaveClass('h-12') // 48px recommended
   })
 
   it('should show loading state', () => {
