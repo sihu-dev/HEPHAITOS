@@ -364,6 +364,72 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v2.7.0 (2025-12-17) - Loop 25 (시리즈 A 준비 자료) ★ P2 완료!
+- ✅ Loop 25: 시리즈 A 준비 자료 시스템
+  - DB 마이그레이션 (20251217_investor_metrics.sql)
+    - investor_metrics_snapshots 테이블: 투자자용 핵심 지표
+      - User: total_users, mau, wau, dau
+      - Growth: new_users_mtd, mom_growth, churn_rate
+      - Retention: d1, d7, d30
+      - Revenue: mrr, arr, revenue_mtd
+      - Unit Economics: arpu, arppu, ltv, cac, ltv_cac_ratio
+      - Conversion: free_to_paid, trial_conversion
+      - Product: strategies_created, trades_executed, trading_volume
+      - AI: queries_mtd, cost_mtd
+      - Market: TAM, SAM, SOM
+    - funding_rounds 테이블: 펀딩 라운드 관리
+      - 라운드: Pre-Seed, Seed, Series A, etc.
+      - 밸류에이션: pre/post money
+      - Use of Funds JSON
+    - investors 테이블: 투자자 CRM
+      - 타입: vc, angel, corporate, accelerator
+      - 관계 상태: cold, warm, hot, term_sheet, committed, passed
+      - 체크 사이즈, 연락처
+    - investor_meetings 테이블: 미팅 로그
+      - 타입: intro, pitch, dd, partner_meeting, term_sheet, closing
+      - agenda, notes, outcome, action_items
+    - kpi_targets 테이블: KPI 목표 관리
+      - 카테고리: growth, revenue, retention, product, efficiency
+      - 기간: monthly, quarterly, yearly
+      - 목표 vs 실제, 달성률
+    - competitor_analysis 테이블: 경쟁사 분석
+      - SWOT, key features, advantages
+      - 펀딩 정보, 시장 점유율 추정
+    - calculate_investor_metrics() RPC: 지표 자동 계산
+    - get_investor_dashboard_data() RPC: 대시보드 데이터
+    - fundraising_pipeline 뷰: 파이프라인 확률
+    - 초기 데이터: Series A 라운드, KPI 목표 9개, 경쟁사 3개
+  - /api/investor API 라우트
+    - GET:
+      - type=dashboard: 투자자 대시보드 (RPC)
+      - type=metrics: 최신 지표 스냅샷
+      - type=metrics_history: 지표 히스토리
+      - type=funding_rounds: 펀딩 라운드
+      - type=investors: 투자자 목록
+      - type=pipeline: 파이프라인 뷰
+      - type=meetings: 미팅 로그
+      - type=kpi_targets: KPI 목표
+      - type=competitors: 경쟁사 분석
+      - type=pitch_deck_data: 피치 덱용 종합 데이터
+    - POST:
+      - refresh_metrics: 지표 새로고침
+      - add/update_investor: 투자자 관리
+      - update_relationship_status: 관계 상태 업데이트
+      - add_meeting: 미팅 추가
+      - update_kpi: KPI 실적 업데이트
+      - add_competitor: 경쟁사 추가
+  - InvestorDashboard 컴포넌트
+    - Overview 탭: 핵심 지표 6개 + Market Size + Funding Round + Pipeline Summary
+    - Metrics 탭: 전체 지표 그리드 (15개)
+    - Pipeline 탭: 투자자 파이프라인 관리
+    - KPIs 탭: 카테고리별 KPI 목표 추적
+    - Competition 탭: 경쟁사 분석 카드
+    - MarketSizeChart: TAM/SAM/SOM 시각화
+    - FundingRoundCard: 펀딩 라운드 진행률
+    - InvestorPipelineCard: 투자자 상태 카드
+    - KPICard: KPI 달성률 표시
+    - CompetitorCard: 경쟁사 분석
+
 ### v2.6.0 (2025-12-17) - Loop 24 (성과 기반 가격 실험)
 - ✅ Loop 24: 성과 기반 가격 실험 시스템
   - DB 마이그레이션 (20251217_pricing_experiments.sql)
@@ -848,13 +914,13 @@ function trackTechDebt(debt: TechDebt) {
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
 P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
-P2: █████████████████░░░ 85% (Loop 16-24 완료)
+P2: ████████████████████ 100% (Loop 16-25 완료) ★★ P2 완료! ★★
 ```
 
-### 다음 ㄱ 예상 작업
+### 🎉 모든 루프 완료!
 ```
-ㄱ      → Loop 25: 시리즈 A 준비 자료
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
+ㄱ 검증  → 최종 테스트 및 검증
 ```
 
 ### 우선순위 자동 조정 규칙
