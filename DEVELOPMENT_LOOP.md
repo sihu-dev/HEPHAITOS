@@ -364,6 +364,32 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v1.8.0 (2025-12-17) - Loop 15 (비용 대시보드)
+- ✅ Loop 15: 비용 대시보드 시스템
+  - api_cost_logs 테이블 (API 비용 로그)
+    - provider, model, feature별 추적
+    - input/output 토큰 및 비용 계산
+    - latency, success 메트릭
+  - daily_cost_summary 테이블 (일별 집계)
+  - cost_budgets 테이블 (월별 예산)
+  - cost_alerts 테이블 (비용 알림)
+  - api_pricing 테이블 (API 가격 설정)
+    - Anthropic (claude-3-opus/sonnet/haiku)
+    - OpenAI (gpt-4-turbo/4o)
+    - External APIs (월정액)
+  - log_api_cost() RPC (비용 로그 기록)
+  - aggregate_daily_costs() RPC (일별 집계)
+  - get_cost_summary() RPC (비용 요약)
+  - check_cost_budgets() RPC (예산 체크 + 알림)
+  - /api/admin/costs API
+  - CostDashboard 컴포넌트
+    - KPI (총비용/일평균/AI/External)
+    - Overview (트렌드 + 예산 상태)
+    - Providers (프로바이더별 비용)
+    - Features (기능별 비용)
+    - Logs (상세 로그)
+    - Budgets (예산 + 알림 기록)
+
 ### v1.7.0 (2025-12-17) - Loop 14 (환불 정책 고도화)
 - ✅ Loop 14: 환불 정책 고도화 시스템
   - refund_policy_rules 테이블 (11개 환불 규칙)
@@ -481,15 +507,15 @@ function trackTechDebt(debt: TechDebt) {
 ### 현재 상태
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
-P1: ████████████████████ 100% (Loop 6-14 완료)
+P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
 P2: ░░░░░░░░░░░░░░░░░░░░ 0%
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 15: 비용 대시보드 (Grafana)
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
 ㄱ P2   → Loop 16: 전략 성과 네트워크 효과
+ㄱ 브로커 → Loop 17: UnifiedBroker 예외처리 강화
 ```
 
 ### 우선순위 자동 조정 규칙
