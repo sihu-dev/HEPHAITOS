@@ -9,6 +9,12 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import { WSManager, WSConfig, WSConnectionState, createWSManager } from '@/lib/websocket/ws-manager'
 import type { WSMessage, WSSubscription, WSEventType, Ticker } from '@/lib/exchange/types'
 import { useExchangeStore } from '@/stores'
+import {
+  getTickerStreamName,
+  formatSubscribeMessage,
+  formatUnsubscribeMessage,
+  parseBinanceMessage,
+} from '@/lib/websocket/binance-adapter'
 
 // ============================================
 // Types
@@ -130,6 +136,7 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
 // ============================================
 // Hook: useTickerStream
 // Subscribe to ticker updates for symbols
+// Uses direct Binance WebSocket with proper protocol
 // ============================================
 
 interface UseTickerStreamOptions {
@@ -148,99 +155,134 @@ export function useTickerStream(options: UseTickerStreamOptions): UseTickerStrea
   const { symbols, wsUrl = 'wss://stream.binance.com:9443/ws' } = options
 
   const { tickers, updateTicker } = useExchangeStore()
+  const [isConnected, setIsConnected] = useState(false)
+  const wsRef = useRef<WebSocket | null>(null)
   const subscribedRef = useRef<Set<string>>(new Set())
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const reconnectAttemptsRef = useRef(0)
+  const maxReconnectAttempts = 5
 
-  const ws = useWebSocket({
-    url: wsUrl,
-    autoConnect: true,
-  })
+  // Connect to WebSocket
+  const connect = useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return
 
-  // Subscribe to symbols
+    try {
+      wsRef.current = new WebSocket(wsUrl)
+
+      wsRef.current.onopen = () => {
+        console.log('[BinanceWS] Connected')
+        setIsConnected(true)
+        reconnectAttemptsRef.current = 0
+
+        // Resubscribe to existing symbols
+        if (subscribedRef.current.size > 0) {
+          const streams = Array.from(subscribedRef.current).map(s => getTickerStreamName(s))
+          const message = formatSubscribeMessage(streams)
+          wsRef.current?.send(message)
+        }
+      }
+
+      wsRef.current.onmessage = (event) => {
+        const message = parseBinanceMessage(event.data)
+        if (message && message.type === 'ticker') {
+          const tickerData = message.data as Ticker
+          updateTicker(tickerData.symbol, tickerData)
+        }
+      }
+
+      wsRef.current.onclose = () => {
+        console.log('[BinanceWS] Disconnected')
+        setIsConnected(false)
+
+        // Auto-reconnect with exponential backoff
+        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000)
+          reconnectTimeoutRef.current = setTimeout(() => {
+            reconnectAttemptsRef.current++
+            connect()
+          }, delay)
+        }
+      }
+
+      wsRef.current.onerror = (error) => {
+        console.error('[BinanceWS] Error:', error)
+      }
+    } catch (error) {
+      console.error('[BinanceWS] Connection failed:', error)
+    }
+  }, [wsUrl, updateTicker])
+
+  // Disconnect from WebSocket
+  const disconnect = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+      reconnectTimeoutRef.current = null
+    }
+    if (wsRef.current) {
+      wsRef.current.close(1000, 'Client disconnect')
+      wsRef.current = null
+    }
+    setIsConnected(false)
+  }, [])
+
+  // Subscribe to a symbol
+  const subscribeSymbol = useCallback((symbol: string) => {
+    const upperSymbol = symbol.toUpperCase()
+    if (subscribedRef.current.has(upperSymbol)) return
+
+    subscribedRef.current.add(upperSymbol)
+
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      const message = formatSubscribeMessage([getTickerStreamName(upperSymbol)])
+      wsRef.current.send(message)
+    }
+  }, [])
+
+  // Unsubscribe from a symbol
+  const unsubscribeSymbol = useCallback((symbol: string) => {
+    const upperSymbol = symbol.toUpperCase()
+    if (!subscribedRef.current.has(upperSymbol)) return
+
+    subscribedRef.current.delete(upperSymbol)
+
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      const message = formatUnsubscribeMessage([getTickerStreamName(upperSymbol)])
+      wsRef.current.send(message)
+    }
+  }, [])
+
+  // Initial connection
   useEffect(() => {
-    if (!ws.isConnected) return
+    if (symbols.length > 0) {
+      connect()
+    }
+    return () => disconnect()
+  }, [connect, disconnect, symbols.length])
 
-    // Capture ref at effect start for cleanup
-    const subscribed = subscribedRef.current
+  // Handle symbol changes
+  useEffect(() => {
+    if (!isConnected) return
+
+    const currentSymbols = new Set(symbols.map(s => s.toUpperCase()))
 
     // Subscribe to new symbols
-    for (const symbol of symbols) {
-      if (!subscribed.has(symbol)) {
-        ws.subscribe({ type: 'ticker', symbol: symbol.toLowerCase() })
-        subscribed.add(symbol)
+    for (const symbol of currentSymbols) {
+      if (!subscribedRef.current.has(symbol)) {
+        subscribeSymbol(symbol)
       }
     }
 
     // Unsubscribe from removed symbols
-    const toRemove: string[] = []
-    for (const symbol of subscribed) {
-      if (!symbols.includes(symbol)) {
-        ws.unsubscribe({ type: 'ticker', symbol: symbol.toLowerCase() })
-        toRemove.push(symbol)
+    for (const symbol of subscribedRef.current) {
+      if (!currentSymbols.has(symbol)) {
+        unsubscribeSymbol(symbol)
       }
     }
-    toRemove.forEach((s) => subscribed.delete(s))
-
-    // Cleanup on unmount
-    return () => {
-      subscribed.forEach((symbol) => {
-        ws.unsubscribe({ type: 'ticker', symbol: symbol.toLowerCase() })
-      })
-      subscribed.clear()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [symbols, ws.isConnected, ws.subscribe, ws.unsubscribe])
-
-  // Handle ticker updates
-  useEffect(() => {
-    const unsubscribe = ws.onMessage('ticker', (data) => {
-      const tickerData = data as Partial<Ticker> & { s?: string }
-      const symbol = tickerData.symbol || tickerData.s
-
-      if (symbol) {
-        const ticker: Ticker = {
-          symbol,
-          lastPrice: tickerData.lastPrice || 0,
-          bidPrice: tickerData.bidPrice || 0,
-          askPrice: tickerData.askPrice || 0,
-          high24h: tickerData.high24h || 0,
-          low24h: tickerData.low24h || 0,
-          volume24h: tickerData.volume24h || 0,
-          quoteVolume24h: tickerData.quoteVolume24h || 0,
-          change24h: tickerData.change24h || 0,
-          changePercent24h: tickerData.changePercent24h || 0,
-          timestamp: Date.now(),
-        }
-        updateTicker(symbol, ticker)
-      }
-    })
-
-    return unsubscribe
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ws.onMessage, updateTicker])
-
-  const subscribeSymbol = useCallback(
-    (symbol: string) => {
-      if (ws.isConnected && !subscribedRef.current.has(symbol)) {
-        ws.subscribe({ type: 'ticker', symbol: symbol.toLowerCase() })
-        subscribedRef.current.add(symbol)
-      }
-    },
-    [ws]
-  )
-
-  const unsubscribeSymbol = useCallback(
-    (symbol: string) => {
-      if (ws.isConnected && subscribedRef.current.has(symbol)) {
-        ws.unsubscribe({ type: 'ticker', symbol: symbol.toLowerCase() })
-        subscribedRef.current.delete(symbol)
-      }
-    },
-    [ws]
-  )
+  }, [symbols, isConnected, subscribeSymbol, unsubscribeSymbol])
 
   return {
     tickers,
-    isConnected: ws.isConnected,
+    isConnected,
     subscribe: subscribeSymbol,
     unsubscribe: unsubscribeSymbol,
   }

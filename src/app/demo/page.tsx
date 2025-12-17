@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeftIcon,
@@ -105,17 +105,52 @@ function StrategyDemo() {
 }
 
 function MarketTicker() {
-  const tickers = [
+  const [tickers, setTickers] = useState([
     { symbol: 'BTC', price: 97245.50, change: 2.34 },
     { symbol: 'ETH', price: 3842.20, change: -0.82 },
     { symbol: 'SOL', price: 224.85, change: 5.67 },
-  ]
+  ])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch real market data
+  useEffect(() => {
+    async function fetchMarketData() {
+      try {
+        const response = await fetch('/api/market?symbols=BTC,ETH,SOL')
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success && result.data) {
+            setTickers(result.data.map((d: { symbol: string; price: number; change24h: number }) => ({
+              symbol: d.symbol,
+              price: d.price,
+              change: d.change24h,
+            })))
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch market data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchMarketData()
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchMarketData, 60000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="border border-white/[0.06] rounded-xl p-6 bg-zinc-900/30">
       <h3 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
         <ChartBarIcon className="w-4 h-4 text-[#5E6AD2]" />
         Live Market Preview
+        {!isLoading && (
+          <span className="ml-auto flex items-center gap-1 text-[10px] text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Live
+          </span>
+        )}
       </h3>
       <div className="space-y-3">
         {tickers.map((ticker) => (
@@ -125,13 +160,13 @@ function MarketTicker() {
               <span className="text-xs text-zinc-500 ml-2">/USDT</span>
             </div>
             <div className="text-right">
-              <p className="text-sm font-mono text-white">${ticker.price.toLocaleString()}</p>
+              <p className="text-sm font-mono text-white">${ticker.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
               <p className={clsx(
                 'text-xs font-medium flex items-center justify-end gap-1',
                 ticker.change >= 0 ? 'text-emerald-400' : 'text-red-400'
               )}>
                 {ticker.change >= 0 ? <ArrowTrendingUpIcon className="w-3 h-3" /> : <ArrowTrendingDownIcon className="w-3 h-3" />}
-                {ticker.change >= 0 ? '+' : ''}{ticker.change}%
+                {ticker.change >= 0 ? '+' : ''}{ticker.change.toFixed(2)}%
               </p>
             </div>
           </div>
