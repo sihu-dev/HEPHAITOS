@@ -364,6 +364,63 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v2.4.0 (2025-12-17) - Loop 22 (한국 주식 데이터 연동)
+- ✅ Loop 22: 한국 주식 데이터 연동 (KIS API)
+  - kis-client.ts - KIS API 클라이언트 (~500 lines)
+    - KISConfig 인터페이스 (appKey, appSecret, accountNo, isPaper)
+    - OAuth2 토큰 관리 (자동 갱신)
+    - 실시간 시세: getStockPrice(), getStockQuote()
+    - 지수 조회: getMarketIndex() (KOSPI, KOSDAQ, KOSPI200)
+    - 종목 검색: searchStocks()
+    - 계좌 조회: getBalance(), getHoldings()
+    - 주문 실행: buy(), sell(), cancelOrder(), getOrderStatus()
+    - 에러 핸들링 및 로깅
+  - /api/stocks/kr API 라우트
+    - GET (Public):
+      - type=price: 주식 현재가
+      - type=quote: 호가 조회
+      - type=index: 지수 조회
+      - type=indices: 주요 지수 일괄 (KOSPI, KOSDAQ, KOSPI200)
+      - type=search: 종목 검색
+      - type=popular: 인기 종목 10개 + 실시간 가격
+    - POST (Authenticated):
+      - action=balance: 계좌 잔고
+      - action=holdings: 보유 종목
+      - action=buy: 매수 주문
+      - action=sell: 매도 주문
+      - action=cancel: 주문 취소
+      - action=order_status: 주문 상태 조회
+  - DB 마이그레이션 (20251217_korean_stocks.sql)
+    - broker_credentials 테이블: 증권사 인증 정보
+      - 지원: kis, kiwoom, alpaca, interactive_brokers
+      - 토큰 캐시, 모의투자 여부, 기본 계좌 설정
+    - order_logs 테이블: 주문 로그
+      - 주문 정보 (symbol, side, quantity, price, order_type)
+      - 주문 결과 (order_id, status, filled_quantity, filled_price)
+      - 전략 연결 (strategy_id, execution_id)
+    - portfolio_snapshots 테이블: 포트폴리오 스냅샷
+      - 계좌 요약 (total_assets, profit_loss, profit_loss_rate)
+      - 보유 종목 JSON
+    - stock_watchlist 테이블: 관심 종목
+      - 알림 설정 (price_above, price_below, change_percent)
+      - 태그 및 메모
+    - kr_stock_master 테이블: 한국 종목 마스터
+      - 25개 주요 종목 초기 데이터 (삼성전자, SK하이닉스, ...)
+      - 시장 (KOSPI, KOSDAQ, KONEX), 섹터, 산업
+    - kr_stock_daily_prices 테이블: 일별 가격 히스토리
+    - stock_price_alerts 테이블: 가격 알림
+    - calculate_portfolio_performance() RPC: 포트폴리오 성과 계산
+    - add_to_watchlist() RPC: 관심 종목 추가
+    - RLS 정책 (본인 데이터만 접근)
+  - KoreanStockWidget 컴포넌트
+    - Indices 탭: KOSPI, KOSDAQ, KOSPI200 실시간 지수
+    - Popular 탭: 인기 종목 10개 목록 + 가격/등락률
+    - Search 탭: 종목 검색 + 호가 상세
+    - IndexCard: 지수 카드 (현재가, 변동, 변동률)
+    - StockRow: 종목 행 (심볼, 이름, 가격, 변동)
+    - StockDetailCard: 종목 상세 + 호가 표시
+    - 면책조항 표시
+
 ### v2.3.0 (2025-12-17) - Loop 21 (멘토 코칭 정식 런칭)
 - ✅ Loop 21: 멘토 코칭 정식 런칭
   - mentor_profiles 테이블 (멘토 프로필)
@@ -671,13 +728,13 @@ function trackTechDebt(debt: TechDebt) {
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
 P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
-P2: ████████████░░░░░░░░ 60% (Loop 16-21 완료)
+P2: █████████████░░░░░░░ 65% (Loop 16-22 완료)
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 22: 한국 주식 데이터 연동
-ㄱ 해외  → Loop 23: 해외 주식 연동 (Alpaca)
+ㄱ      → Loop 23: 해외 주식 연동 (Alpaca)
+ㄱ 가격  → Loop 24: 성과 기반 가격 실험
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
 ```
 
