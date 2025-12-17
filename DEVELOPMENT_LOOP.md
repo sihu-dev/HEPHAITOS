@@ -364,6 +364,18 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v1.4.0 (2025-12-17) - Loop 11 (ARPPU 분석)
+- ✅ Loop 11: ARPPU 코호트 분석 시스템
+  - user_revenue_summary 테이블 (사용자별 매출 요약)
+  - calculate_arppu_by_cohort() RPC 함수
+  - get_arppu_summary() RPC 함수
+  - payment_orders 트리거 자동 업데이트
+  - daily_revenue_summary 뷰
+  - package_sales_summary 뷰
+  - /api/admin/analytics/arppu API
+  - ARPPUDashboard 컴포넌트 (KPI + 코호트 + 트렌드)
+  - 지표: ARPPU, ARPU, Conversion Rate
+
 ### v1.3.0 (2025-12-17) - Loop 10 (리텐션 추적)
 - ✅ Loop 10: D1/D7 리텐션 추적 시스템
   - user_cohorts 테이블 (가입일 기준 코호트)
@@ -427,15 +439,15 @@ function trackTechDebt(debt: TechDebt) {
 ### 현재 상태
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
-P1: ████████████████░░░░ 70% (Loop 6-10 완료)
+P1: ██████████████████░░ 80% (Loop 6-11 완료)
 P2: ░░░░░░░░░░░░░░░░░░░░ 0%
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 11: ARPPU 코호트 분석
+ㄱ      → Loop 12: 전환율 퍼널 분석
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
-ㄱ 퍼널  → Loop 12: 전환율 퍼널 분석
+ㄱ 안전  → Loop 13: Safety Net v2 (soften)
 ```
 
 ### 우선순위 자동 조정 규칙
