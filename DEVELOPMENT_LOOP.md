@@ -364,6 +364,47 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v2.2.0 (2025-12-17) - Loop 20 (전략 마켓플레이스)
+- ✅ Loop 20: 전략 마켓플레이스 v1
+  - strategy_listings 테이블 (전략 리스팅)
+    - 카테고리: momentum, value, dividend, growth, swing, daytrading, options, crypto
+    - 위험도: low, medium, high, extreme
+    - 타임프레임: scalping, intraday, swing, position, long_term
+    - 가격 정책: free, one_time, subscription, performance_based
+    - 검증 메트릭: return, win_rate, sharpe, max_drawdown
+  - strategy_purchases 테이블 (구매 기록)
+    - 일회성/구독 구매 지원
+    - 크레딧 기반 결제
+  - strategy_reviews 테이블 (리뷰 시스템)
+    - 1-5점 평점
+    - 구매 검증 표시
+  - creator_profiles 테이블 (크리에이터 프로필)
+    - 검증 상태 (identity, professional, influencer)
+    - 수익 분배 설정 (70/30)
+    - 소셜 링크
+  - creator_followers 테이블 (팔로우)
+  - strategy_bookmarks 테이블 (북마크)
+  - creator_earnings 테이블 (수익 정산)
+  - RPC 함수
+    - purchase_strategy(): 전략 구매 + 크레딧 차감 + 수익 분배
+    - create_strategy_listing(): 리스팅 생성 + 크리에이터 프로필 자동 생성
+    - create_strategy_review(): 리뷰 작성 + 평점 자동 계산
+    - get_popular_listings(): 인기 전략 조회
+  - 뷰
+    - marketplace_stats: 전체 통계
+    - category_stats: 카테고리별 통계
+    - creator_leaderboard: 크리에이터 랭킹
+  - /api/marketplace API
+    - GET: listings, listing, reviews, categories, stats, leaderboard, creator, featured, search
+    - POST: create_listing, purchase, review, bookmark, follow, update_listing, update_profile
+  - StrategyMarketplace 컴포넌트
+    - Browse: 카테고리별 전략 탐색
+    - Featured: 추천 전략
+    - Creators: 인기 크리에이터 리더보드
+    - 검색 + 필터 + 정렬
+    - 전략 상세 모달 (구매, 북마크, 공유)
+    - 면책조항 표시
+
 ### v2.1.0 (2025-12-17) - Loop 19 (데이터 Fallback)
 - ✅ Loop 19: 데이터 Fallback 설계
   - DataFallbackManager 클래스
@@ -592,13 +633,13 @@ function trackTechDebt(debt: TechDebt) {
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
 P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
-P2: ████████░░░░░░░░░░░░ 40% (Loop 16-19 완료)
+P2: ██████████░░░░░░░░░░ 50% (Loop 16-20 완료)
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 20: 전략 마켓플레이스 v1
-ㄱ 멘토  → Loop 21: 멘토 코칭 정식 런칭
+ㄱ      → Loop 21: 멘토 코칭 정식 런칭
+ㄱ 한국  → Loop 22: 한국 주식 데이터 연동
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
 ```
 
