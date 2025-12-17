@@ -5,6 +5,7 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { DisclaimerBanner } from '@/components/ui/Disclaimer'
 import { KeyboardShortcuts } from '@/components/dashboard/KeyboardShortcuts'
 import { ShortcutsModal } from '@/components/ui/ShortcutsModal'
+import { CommandPalette } from '@/components/ui/CommandPalette'
 
 const Sidebar = dynamic(() => import('@/components/dashboard/Sidebar').then(m => m.Sidebar), { ssr: false })
 const DashboardHeader = dynamic(() => import('@/components/dashboard/DashboardHeader').then(m => m.DashboardHeader), { ssr: false })
@@ -30,6 +31,7 @@ export default function DashboardLayout({
         </div>
       </div>
       {/* Global Modals */}
+      <CommandPalette />
       <ShortcutsModal />
     </KeyboardShortcuts>
   )
