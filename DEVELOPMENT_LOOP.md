@@ -364,6 +364,19 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v1.2.0 (2025-12-17) - Loop 7-9 (플러그인 풀가동)
+- ✅ Loop 7: Slack Webhook 연동
+  - 4가지 알림 타입 구현 완료 (DLQ, Circuit, Daily, Urgent)
+  - 테스트 가이드 문서화
+- ✅ Loop 8: GitHub Secrets 가이드
+  - CI/CD용 5개 Secrets 정의
+  - 설정 방법 문서화
+- ✅ Loop 9: 베타 초대코드 시스템
+  - beta_invite_codes 테이블 + RPC 함수
+  - 100개 초대코드 자동 생성
+  - 특별 캠페인 코드 3개 (influencer, early_bird, partner)
+  - InviteCodeInput 컴포넌트
+
 ### v1.1.0 (2025-12-17) - Loop 5-6
 - ✅ Loop 5: 데이터 ToS 검토 문서 업데이트
   - 대체 소스 전략 (Fallback) 추가
@@ -403,15 +416,15 @@ function trackTechDebt(debt: TechDebt) {
 ### 현재 상태
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
-P1: ████░░░░░░░░░░░░░░░░ 20% (Loop 6 진행중)
+P1: ████████████░░░░░░░░ 60% (Loop 6-9 완료)
 P2: ░░░░░░░░░░░░░░░░░░░░ 0%
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ     → Loop 7: Slack Webhook 연동 테스트
-ㄱ 배포 → Loop 6 완료: vercel --prod 실행
-ㄱ GTM → Loop 9: 베타 초대코드 100개 생성
+ㄱ      → Loop 10: D1/D7 리텐션 추적 시스템
+ㄱ 배포  → vercel --prod 실행 (Production 배포)
+ㄱ 퍼널  → Loop 12: 전환율 퍼널 분석
 ```
 
 ### 우선순위 자동 조정 규칙
