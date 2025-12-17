@@ -1,9 +1,7 @@
 'use client'
 
-import { AuroraBackground } from '@/components/layout/AuroraBackground'
 import { Navbar } from '@/components/layout/Navbar'
-import { InteractiveHeroV2 } from '@/components/landing/InteractiveHeroV2'
-import { TrustBadge } from '@/components/landing/TrustBadge'
+import { SupabaseHero } from '@/components/landing/SupabaseHero'
 import { PainPointCards } from '@/components/landing/PainPointCards'
 import { FeaturesSection } from '@/components/landing/FeaturesSection'
 import { HowItWorksSection } from '@/components/landing/HowItWorksSection'
@@ -20,15 +18,11 @@ export const dynamic = 'force-dynamic'
 export default function HomePage() {
   return (
     <main className="relative bg-[#0D0D0F]">
-      {/* Aurora Background Effect */}
-      <AuroraBackground />
-
       <Navbar />
 
-      {/* Firebase Studio Style Interactive Hero */}
-      <InteractiveHeroV2 />
+      {/* Supabase Style Hero - Centered, Bold, Minimal */}
+      <SupabaseHero />
 
-      <TrustBadge />
       <PainPointCards />
       <FeaturesSection />
       <HowItWorksSection />

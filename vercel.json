@@ -5,10 +5,5 @@
       "path": "/api/cron/daily-summary",
       "schedule": "0 0 * * *"
     }
-  ],
-  "functions": {
-    "api/cron/daily-summary.ts": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
