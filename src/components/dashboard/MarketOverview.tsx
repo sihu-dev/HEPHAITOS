@@ -1,11 +1,12 @@
 'use client'
 
-import { memo, useState, useEffect, useRef } from 'react'
+import { memo, useState, useEffect, useRef, useMemo } from 'react'
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/24/outline'
 import { useI18n } from '@/i18n/client'
 import { clsx } from 'clsx'
 import { LiveIndicator } from '@/components/ui/LiveIndicator'
 import { PriceDisplay } from '@/components/ui/PriceDisplay'
+import { useTickerStream } from '@/hooks/use-websocket'
 
 interface MarketData {
   symbol: string
@@ -13,6 +14,16 @@ interface MarketData {
   price: number
   change: number
   icon?: string
+}
+
+// Binance trading pair symbols
+const MARKET_SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT']
+
+const MARKET_NAMES: Record<string, { name: string; displaySymbol: string }> = {
+  BTCUSDT: { name: 'Bitcoin', displaySymbol: 'BTC' },
+  ETHUSDT: { name: 'Ethereum', displaySymbol: 'ETH' },
+  SOLUSDT: { name: 'Solana', displaySymbol: 'SOL' },
+  XRPUSDT: { name: 'Ripple', displaySymbol: 'XRP' },
 }
 
 const initialMarkets: MarketData[] = [
@@ -87,11 +98,41 @@ const MarketRow = memo(function MarketRow({
 
 export const MarketOverview = memo(function MarketOverview() {
   const { t } = useI18n()
-  const [markets, setMarkets] = useState(initialMarkets)
-  const [isVisible, setIsVisible] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
-  // Intersection Observer: Start polling only when visible
+  // Use real WebSocket ticker stream from Binance
+  const { tickers, isConnected } = useTickerStream({
+    symbols: isVisible ? MARKET_SYMBOLS : [], // Only subscribe when visible
+  })
+
+  // Transform WebSocket tickers to MarketData format
+  const markets = useMemo<MarketData[]>(() => {
+    return MARKET_SYMBOLS.map(symbol => {
+      const ticker = tickers[symbol]
+      const info = MARKET_NAMES[symbol]
+
+      if (ticker) {
+        return {
+          symbol: info.displaySymbol,
+          name: info.name,
+          price: ticker.lastPrice,
+          change: ticker.changePercent24h,
+        }
+      }
+
+      // Fallback to initial data if ticker not yet received
+      const initial = initialMarkets.find(m => m.symbol === info.displaySymbol)
+      return initial || {
+        symbol: info.displaySymbol,
+        name: info.name,
+        price: 0,
+        change: 0,
+      }
+    })
+  }, [tickers])
+
+  // Intersection Observer: Start WebSocket subscription only when visible
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -107,25 +148,15 @@ export const MarketOverview = memo(function MarketOverview() {
     return () => observer.disconnect()
   }, [])
 
-  // Simulate real-time price updates (only when visible)
-  useEffect(() => {
-    if (!isVisible) return
-
-    const interval = setInterval(() => {
-      setMarkets(prev => prev.map(market => ({
-        ...market,
-        price: market.price * (1 + (Math.random() - 0.5) * 0.002),
-        change: market.change + (Math.random() - 0.5) * 0.1,
-      })))
-    }, 8000) // Increased from 5s to 8s
-    return () => clearInterval(interval)
-  }, [isVisible])
-
   return (
     <div ref={containerRef} className="card-cinematic p-4">
-      {/* Header - Live indicator only (title provided by parent) */}
+      {/* Header - Live indicator shows WebSocket connection status */}
       <div className="flex items-center justify-end mb-4">
-        <LiveIndicator status="live" size="sm" label="Live" />
+        <LiveIndicator
+          status={isConnected ? 'live' : 'connecting'}
+          size="sm"
+          label={isConnected ? 'Live' : 'Connecting...'}
+        />
       </div>
 
       {/* Market List */}

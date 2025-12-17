@@ -14,6 +14,7 @@ import { DisclaimerInline } from '@/components/ui/Disclaimer'
 import { LiveIndicator } from '@/components/ui/LiveIndicator'
 import { useI18n } from '@/i18n/client'
 import { clsx } from 'clsx'
+import { useRealtimePortfolio } from '@/lib/realtime/useRealtimePortfolio'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,13 +43,8 @@ const RecentActivity = dynamicImport(
 export default function DashboardProPage() {
   const { t } = useI18n()
 
-  // Demo data - replace with real data from Supabase
-  const mockPortfolio = {
-    totalValue: 12345.67,
-    change: 567.89,
-    changePercent: 4.82,
-    sparklineData: [100, 102, 98, 105, 110, 108, 115, 120, 118, 125, 130, 128, 135, 140, 138],
-  }
+  // Real-time portfolio data from Supabase Realtime
+  const { portfolio, isConnected, isLoading } = useRealtimePortfolio()
 
   const quickActions = [
     {
@@ -96,7 +92,10 @@ export default function DashboardProPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-              <LiveIndicator status="live" label="Live" />
+              <LiveIndicator
+                status={isLoading ? 'connecting' : isConnected ? 'live' : 'offline'}
+                label={isLoading ? 'Loading...' : isConnected ? 'Live' : 'Demo'}
+              />
             </div>
             <p className="text-sm text-zinc-500 mt-1">
               Real-time portfolio monitoring and strategy management
@@ -104,16 +103,16 @@ export default function DashboardProPage() {
           </div>
         </div>
 
-        {/* Hero Section - Portfolio Value */}
+        {/* Hero Section - Portfolio Value (Real-time) */}
         <div
           className="card-cinematic p-8 animate-fade-in"
           style={{ animationDelay: '100ms' }}
         >
           <PortfolioHero
-            totalValue={mockPortfolio.totalValue}
-            change={mockPortfolio.change}
-            changePercent={mockPortfolio.changePercent}
-            sparklineData={mockPortfolio.sparklineData}
+            totalValue={portfolio.totalValue}
+            change={portfolio.change}
+            changePercent={portfolio.changePercent}
+            sparklineData={portfolio.sparklineData}
           />
         </div>
 

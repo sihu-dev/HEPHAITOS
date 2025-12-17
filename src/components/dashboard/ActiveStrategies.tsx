@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useState, useEffect, useRef } from 'react'
+import { memo, useState, useEffect, useRef, useMemo } from 'react'
 import {
   PlayIcon,
   PauseIcon,
@@ -14,6 +14,7 @@ import { useI18n } from '@/i18n/client'
 import { clsx } from 'clsx'
 import { AnimatedValue } from '@/components/ui/AnimatedValue'
 import { LiveIndicator } from '@/components/ui/LiveIndicator'
+import { useRealtimeStrategies } from '@/lib/realtime/useRealtimeStrategies'
 
 interface Strategy {
   id: string
@@ -151,13 +152,13 @@ interface ActiveStrategiesProps {
 export const ActiveStrategies = memo(function ActiveStrategies({ showEmpty = false }: ActiveStrategiesProps) {
   const router = useRouter()
   const { t } = useI18n()
-  const [strategies, setStrategies] = useState<Strategy[]>([])
-  const [isVisible, setIsVisible] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
-  useEffect(() => {
-    // Build strategies with translated names
-    const data: Strategy[] = showEmpty ? [] : demoStrategiesData.map(s => ({
+  // Build initial strategies with translated names
+  const initialStrategies = useMemo<Strategy[]>(() => {
+    if (showEmpty) return []
+    return demoStrategiesData.map(s => ({
       id: s.id,
       name: t(`dashboard.components.activeStrategies.demoStrategies.${s.nameKey}`) as string,
       status: s.status,
@@ -166,10 +167,15 @@ export const ActiveStrategies = memo(function ActiveStrategies({ showEmpty = fal
       winRate: s.winRate,
       riskLevel: s.riskLevel,
     }))
-    setStrategies(data)
   }, [showEmpty, t])
 
-  // Intersection Observer: Start polling only when visible
+  // Use Supabase Realtime for strategy updates
+  const { strategies: realtimeStrategies, isConnected } = useRealtimeStrategies(initialStrategies)
+
+  // Use realtime data if connected, otherwise use initial data
+  const strategies = isConnected ? realtimeStrategies : initialStrategies
+
+  // Intersection Observer: Track visibility for performance
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -184,25 +190,6 @@ export const ActiveStrategies = memo(function ActiveStrategies({ showEmpty = fal
 
     return () => observer.disconnect()
   }, [])
-
-  // Simulate real-time P&L updates (only when visible)
-  useEffect(() => {
-    if (strategies.length === 0 || !isVisible) return
-
-    const interval = setInterval(() => {
-      setStrategies(prev => prev.map(s => ({
-        ...s,
-        pnl: s.status === 'running'
-          ? s.pnl + (Math.random() - 0.45) * 0.5
-          : s.pnl,
-        trades: s.status === 'running' && Math.random() > 0.8
-          ? s.trades + 1
-          : s.trades,
-      })))
-    }, 8000) // Increased from 5s to 8s
-
-    return () => clearInterval(interval)
-  }, [strategies.length, isVisible])
 
   if (strategies.length === 0) {
     return <EmptyStrategies onCreate={() => router.push('/dashboard/ai-strategy')} />
