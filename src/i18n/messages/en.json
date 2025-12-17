@@ -1424,9 +1424,17 @@
         }
       },
       "toast": {
-        "success": { "title": "Strategy Generated", "message": "System has generated the optimal strategy" },
+        "success": { "title": "Strategy Generated", "message": "System has generated the optimal strategy", "messageClaude": "Claude AI has generated a customized strategy" },
         "cancelled": { "title": "Generation Cancelled", "message": "Strategy generation was cancelled" },
-        "deployed": { "title": "Strategy Deployed", "message": "Strategy has been successfully deployed" }
+        "deployed": { "title": "Strategy Deployed", "message": "Strategy has been successfully deployed" },
+        "error": { "title": "Generation Failed", "message": "An error occurred while generating the strategy" }
+      },
+      "errors": {
+        "unauthorized": "Please login to continue",
+        "insufficientCredits": "Insufficient credits. Please recharge and try again.",
+        "rateLimited": "Too many requests. Please try again later.",
+        "generic": "An error occurred while generating the strategy",
+        "noStrategy": "Failed to receive strategy data"
       },
       "emptyState": {
         "title": "System will generate a strategy",

@@ -1424,9 +1424,17 @@
         }
       },
       "toast": {
-        "success": { "title": "전략 생성 완료", "message": "시스템이 최적의 전략을 생성했습니다" },
+        "success": { "title": "전략 생성 완료", "message": "시스템이 최적의 전략을 생성했습니다", "messageClaude": "Claude AI가 맞춤형 전략을 생성했습니다" },
         "cancelled": { "title": "생성 취소됨", "message": "전략 생성이 취소되었습니다" },
-        "deployed": { "title": "전략 배포", "message": "전략이 성공적으로 배포되었습니다" }
+        "deployed": { "title": "전략 배포", "message": "전략이 성공적으로 배포되었습니다" },
+        "error": { "title": "생성 실패", "message": "전략 생성 중 오류가 발생했습니다" }
+      },
+      "errors": {
+        "unauthorized": "로그인이 필요합니다",
+        "insufficientCredits": "크레딧이 부족합니다. 충전 후 다시 시도해주세요.",
+        "rateLimited": "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+        "generic": "전략 생성 중 오류가 발생했습니다",
+        "noStrategy": "전략 데이터를 받지 못했습니다"
       },
       "emptyState": {
         "title": "시스템이 전략을 생성합니다",

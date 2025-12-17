@@ -360,83 +360,79 @@ export default function AIStrategyPage() {
     setGenerationStatus('preparing')
     setGenerationStage(t('dashboard.aiStrategy.generation.stages.preparing') as string)
     setGenerationProgress(0)
-    await new Promise((resolve) => setTimeout(resolve, 800))
 
-    // Stage 2: Analyzing
-    setGenerationStatus('analyzing')
-    setGenerationStage(t('dashboard.aiStrategy.generation.stages.analyzing') as string)
-    setGenerationProgress(25)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      // Stage 2: Analyzing
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      setGenerationStatus('analyzing')
+      setGenerationStage(t('dashboard.aiStrategy.generation.stages.analyzing') as string)
+      setGenerationProgress(25)
 
-    // Stage 3: Generating
-    setGenerationStatus('generating')
-    setGenerationStage(t('dashboard.aiStrategy.generation.stages.generating') as string)
-    setGenerationProgress(50)
-    await new Promise((resolve) => setTimeout(resolve, 1200))
+      // Stage 3: Generating - Call API
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      setGenerationStatus('generating')
+      setGenerationStage(t('dashboard.aiStrategy.generation.stages.generating') as string)
+      setGenerationProgress(50)
 
-    // Stage 4: Streaming
-    setGenerationStatus('streaming')
-    setGenerationStage(t('dashboard.aiStrategy.generation.stages.backtesting') as string)
-    setGenerationProgress(75)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Complete
-    setGenerationProgress(100)
-    setGenerationStatus('complete')
-
-    const riskLabel = t(`dashboard.aiStrategy.riskLevels.${config.riskLevel}`) as string
-    const goalLabel = t(`dashboard.aiStrategy.goals.${config.investmentGoal}.label`) as string
-
-    const mockStrategy: GeneratedStrategy = {
-      id: `strategy_${Date.now()}`,
-      name: config.name || (t('dashboard.aiStrategy.defaultStrategyName') as string),
-      description: (t('dashboard.aiStrategy.strategyDescription') as string)
-        .replace('{riskLevel}', riskLabel)
-        .replace('{goal}', goalLabel),
-      signals: [
-        {
-          type: 'entry',
-          indicator: 'RSI(14)',
-          condition: '<',
-          value: '30',
+      const response = await fetch('/api/ai/strategy', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          type: 'entry',
-          indicator: 'MACD',
-          condition: 'Golden Cross',
-          value: 'Signal',
-        },
-        {
-          type: 'exit',
-          indicator: 'RSI(14)',
-          condition: '>',
-          value: '70',
-        },
-        {
-          type: 'exit',
-          indicator: 'Stop Loss',
-          condition: '-',
-          value: `${config.stopLossPercent}%`,
-        },
-      ],
-      backtestResult: {
-        totalReturn: config.riskLevel === 'aggressive' ? 45.2 : config.riskLevel === 'conservative' ? 12.8 : 28.5,
-        sharpeRatio: config.riskLevel === 'aggressive' ? 1.2 : config.riskLevel === 'conservative' ? 1.8 : 1.5,
-        maxDrawdown: config.riskLevel === 'aggressive' ? -25.3 : config.riskLevel === 'conservative' ? -8.5 : -15.2,
-        winRate: config.riskLevel === 'aggressive' ? 52 : config.riskLevel === 'conservative' ? 68 : 58,
-        totalTrades: config.riskLevel === 'aggressive' ? 124 : config.riskLevel === 'conservative' ? 45 : 78,
-      },
-      aiInsights: t('dashboard.aiStrategy.aiInsightsGenerated') as string,
+        body: JSON.stringify(config),
+      })
+
+      const result = await response.json()
+
+      // Stage 4: Processing response
+      setGenerationStatus('streaming')
+      setGenerationStage(t('dashboard.aiStrategy.generation.stages.backtesting') as string)
+      setGenerationProgress(75)
+
+      if (!response.ok) {
+        // Handle specific error cases
+        if (response.status === 401) {
+          throw new Error(t('dashboard.aiStrategy.errors.unauthorized') as string)
+        }
+        if (response.status === 402) {
+          throw new Error(t('dashboard.aiStrategy.errors.insufficientCredits') as string)
+        }
+        if (response.status === 429) {
+          throw new Error(t('dashboard.aiStrategy.errors.rateLimited') as string)
+        }
+        throw new Error(result.error || t('dashboard.aiStrategy.errors.generic') as string)
+      }
+
+      // Complete
+      setGenerationProgress(100)
+      setGenerationStatus('complete')
+
+      const strategy = result.strategy || result.data?.strategy
+      if (strategy) {
+        setGeneratedStrategy(strategy)
+        success(
+          t('dashboard.aiStrategy.toast.success.title') as string,
+          result.usedClaude
+            ? (t('dashboard.aiStrategy.toast.success.messageClaude') as string)
+            : (t('dashboard.aiStrategy.toast.success.message') as string)
+        )
+      } else {
+        throw new Error(t('dashboard.aiStrategy.errors.noStrategy') as string)
+      }
+    } catch (error) {
+      console.error('[AIStrategy] Generation failed:', error)
+      setGenerationStatus('error')
+      showError(
+        t('dashboard.aiStrategy.toast.error.title') as string,
+        error instanceof Error ? error.message : (t('dashboard.aiStrategy.errors.generic') as string)
+      )
+    } finally {
+      setIsGenerating(false)
+      // Reset status after a delay
+      setTimeout(() => {
+        setGenerationStatus('idle')
+      }, 2000)
     }
-
-    setGeneratedStrategy(mockStrategy)
-    setIsGenerating(false)
-    success(t('dashboard.aiStrategy.toast.success.title') as string, t('dashboard.aiStrategy.toast.success.message') as string)
-
-    // Reset status after a delay
-    setTimeout(() => {
-      setGenerationStatus('idle')
-    }, 2000)
   }
 
   const handleCancel = () => {
