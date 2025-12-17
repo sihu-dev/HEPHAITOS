@@ -364,6 +364,33 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v2.1.0 (2025-12-17) - Loop 19 (데이터 Fallback)
+- ✅ Loop 19: 데이터 Fallback 설계
+  - DataFallbackManager 클래스
+    - 소스 우선순위 기반 자동 전환
+    - 실패 카운트 및 쿨다운 관리
+    - 레이트 리밋 트래킹
+    - 인메모리 캐시 (TTL 기반)
+    - executeWithFallback() 패턴
+  - 데이터 소스 어댑터
+    - unusual_whales: 의원 거래
+    - quiver: 대안 데이터
+    - sec_edgar: SEC 공시 (무료)
+    - openinsider: 내부자 거래 (무료)
+    - finnhub: 실시간 시세
+    - alpha_vantage: 주가 데이터
+    - yahoo_finance: 비공식 API
+  - Fallback 규칙
+    - congress_trades: UW → Quiver → SEC
+    - insider_trades: UW → OpenInsider → SEC
+    - stock_quote: Finnhub → AV → Yahoo
+  - DB 테이블
+    - data_sources (소스 정의)
+    - data_source_logs (요청 로그)
+    - data_cache (캐시)
+    - data_fallback_rules (규칙)
+  - /api/data API
+
 ### v2.0.0 (2025-12-17) - Loop 17 + 18 (병렬)
 - ✅ Loop 17: UnifiedBroker v2 예외처리 강화
   - BrokerError 타입 시스템 (25+ 에러 코드)
@@ -565,14 +592,14 @@ function trackTechDebt(debt: TechDebt) {
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
 P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
-P2: ██████░░░░░░░░░░░░░░ 30% (Loop 16-18 완료)
+P2: ████████░░░░░░░░░░░░ 40% (Loop 16-19 완료)
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 19: 데이터 Fallback 설계
+ㄱ      → Loop 20: 전략 마켓플레이스 v1
+ㄱ 멘토  → Loop 21: 멘토 코칭 정식 런칭
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
-ㄱ 마켓  → Loop 20: 전략 마켓플레이스 v1
 ```
 
 ### 우선순위 자동 조정 규칙
