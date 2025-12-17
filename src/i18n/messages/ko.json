@@ -1188,7 +1188,22 @@
       "code": "코드",
       "validationSuccess": "전략이 올바르게 구성되었습니다.",
       "readyToRun": "실행할 준비가 되었습니다.",
-      "runStrategy": "전략 실행"
+      "runStrategy": "전략 실행",
+      "toast": {
+        "started": {
+          "title": "전략 실행 시작",
+          "message": "전략이 실행되기 시작했습니다",
+          "notification": "전략 실행이 시작되었습니다"
+        },
+        "stopped": {
+          "title": "전략 실행 중지",
+          "message": "전략 실행이 중지되었습니다"
+        },
+        "validationFailed": {
+          "title": "검증 실패",
+          "message": "전략을 먼저 검증해주세요"
+        }
+      }
     },
     "nodes": {
       "trigger": {

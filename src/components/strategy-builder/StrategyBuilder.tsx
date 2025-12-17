@@ -52,6 +52,8 @@ import { NodeConfigPanel } from './NodeConfigPanel'
 
 // Custom Hooks
 import { useStrategyPersistence, useUndoRedo } from '@/hooks'
+import { useToast } from '@/components/ui/Toast'
+import { useNotifications } from '@/hooks/use-notifications'
 
 // Strategy Validation
 import {
@@ -170,6 +172,8 @@ function StrategyBuilderInner() {
   // Custom hooks
   const { isSaving, error: saveError, saveStrategy, loadStrategy } = useStrategyPersistence()
   const { canUndo, canRedo, undo, redo, takeSnapshot, clear: clearHistory } = useUndoRedo(initialNodes, initialEdges)
+  const toast = useToast()
+  const { notify } = useNotifications()
 
   // ReactFlow instance for zoom controls
   const reactFlowInstance = useReactFlow()
@@ -359,11 +363,35 @@ function StrategyBuilderInner() {
     // Validate before running
     if (!validationResult?.isValid) {
       setShowValidation(true)
+      toast.error(
+        t('dashboard.strategyBuilder.toast.validationFailed.title') as string,
+        t('dashboard.strategyBuilder.toast.validationFailed.message') as string
+      )
       return
     }
-    setIsRunning((prev) => !prev)
-    // TODO: Start/Stop strategy execution
-  }, [validationResult])
+
+    const newRunningState = !isRunning
+    setIsRunning(newRunningState)
+
+    if (newRunningState) {
+      // Strategy started
+      toast.success(
+        t('dashboard.strategyBuilder.toast.started.title') as string,
+        t('dashboard.strategyBuilder.toast.started.message') as string
+      )
+      // Send strategy signal notification
+      notify('strategy_signal', strategyName, t('dashboard.strategyBuilder.toast.started.notification') as string, {
+        priority: 'normal',
+        actionUrl: '/dashboard/strategies',
+      })
+    } else {
+      // Strategy stopped
+      toast.info(
+        t('dashboard.strategyBuilder.toast.stopped.title') as string,
+        t('dashboard.strategyBuilder.toast.stopped.message') as string
+      )
+    }
+  }, [validationResult, isRunning, strategyName, toast, notify, t])
 
   // Validate strategy and show results
   const handleValidate = useCallback(() => {

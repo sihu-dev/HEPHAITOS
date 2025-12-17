@@ -1188,7 +1188,22 @@
       "code": "Code",
       "validationSuccess": "Strategy is correctly configured.",
       "readyToRun": "Ready to run.",
-      "runStrategy": "Run Strategy"
+      "runStrategy": "Run Strategy",
+      "toast": {
+        "started": {
+          "title": "Strategy Started",
+          "message": "Strategy has started running",
+          "notification": "Strategy execution has started"
+        },
+        "stopped": {
+          "title": "Strategy Stopped",
+          "message": "Strategy execution has been stopped"
+        },
+        "validationFailed": {
+          "title": "Validation Failed",
+          "message": "Please validate your strategy first"
+        }
+      }
     },
     "nodes": {
       "trigger": {
