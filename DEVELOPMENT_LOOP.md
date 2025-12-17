@@ -364,6 +364,44 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v2.3.0 (2025-12-17) - Loop 21 (멘토 코칭 정식 런칭)
+- ✅ Loop 21: 멘토 코칭 정식 런칭
+  - mentor_profiles 테이블 (멘토 프로필)
+    - 전문 분야: stocks, options, crypto, forex, futures, quant, technical, fundamental, risk, psychology
+    - 검증 상태: pending, verified, rejected
+    - 가용 시간 설정 (요일, 시작/종료 시간)
+    - 수익 분배: 멘토 80%, 플랫폼 20%
+  - mentor_availability 테이블 (가용 슬롯)
+  - coaching_sessions 테이블 (세션 예약)
+    - 세션 타입: one_on_one, group, review, strategy
+    - 상태: scheduled, confirmed, in_progress, completed, cancelled, no_show
+    - 화상 미팅 URL 및 Provider
+  - session_notes 테이블 (세션 노트)
+  - coaching_reviews 테이블 (리뷰)
+    - 종합 평점 + 세부 평점 (knowledge, communication, helpfulness)
+    - 하이라이트 태그
+  - mentor_earnings 테이블 (수익 정산)
+    - 7일 후 정산 가능
+  - RPC 함수
+    - book_coaching_session(): 세션 예약 + 크레딧 차감
+    - complete_coaching_session(): 완료 처리 + 수익 분배
+    - cancel_coaching_session(): 취소 + 환불 (24시간 전 100%, 12시간 전 50%)
+    - create_coaching_review(): 리뷰 작성 + 평점 업데이트
+    - generate_mentor_availability(): 가용 슬롯 자동 생성
+    - get_popular_mentors(): 인기 멘토 조회
+  - 뷰
+    - mentor_dashboard_stats: 멘토 대시보드 통계
+    - coaching_platform_stats: 플랫폼 전체 통계
+  - /api/coaching API 확장
+    - GET: mentors, mentor, availability, session, my_sessions, mentor_dashboard, platform_stats, reviews, specialties
+    - POST: book_session, cancel_session, complete_session, start_session, create_review, add_note, generate_availability, update_profile, apply_mentor
+  - MentorCoaching 컴포넌트
+    - Browse: 전문 분야별 멘토 탐색
+    - My Sessions: 예약된 세션 목록
+    - Become Mentor: 멘토 신청 폼
+    - MentorDetailModal: 멘토 상세 + 예약
+    - 면책조항 표시
+
 ### v2.2.0 (2025-12-17) - Loop 20 (전략 마켓플레이스)
 - ✅ Loop 20: 전략 마켓플레이스 v1
   - strategy_listings 테이블 (전략 리스팅)
@@ -633,13 +671,13 @@ function trackTechDebt(debt: TechDebt) {
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
 P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
-P2: ██████████░░░░░░░░░░ 50% (Loop 16-20 완료)
+P2: ████████████░░░░░░░░ 60% (Loop 16-21 완료)
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 21: 멘토 코칭 정식 런칭
-ㄱ 한국  → Loop 22: 한국 주식 데이터 연동
+ㄱ      → Loop 22: 한국 주식 데이터 연동
+ㄱ 해외  → Loop 23: 해외 주식 연동 (Alpaca)
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
 ```
 
