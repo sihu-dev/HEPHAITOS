@@ -6,6 +6,7 @@ import { DisclaimerBanner } from '@/components/ui/Disclaimer'
 import { KeyboardShortcuts } from '@/components/dashboard/KeyboardShortcuts'
 import { ShortcutsModal } from '@/components/ui/ShortcutsModal'
 import { CommandPalette } from '@/components/ui/CommandPalette'
+import { NotificationToast } from '@/components/notifications/NotificationToast'
 
 const Sidebar = dynamic(() => import('@/components/dashboard/Sidebar').then(m => m.Sidebar), { ssr: false })
 const DashboardHeader = dynamic(() => import('@/components/dashboard/DashboardHeader').then(m => m.DashboardHeader), { ssr: false })
@@ -33,6 +34,8 @@ export default function DashboardLayout({
       {/* Global Modals */}
       <CommandPalette />
       <ShortcutsModal />
+      {/* Toast Notifications */}
+      <NotificationToast position="top-right" maxToasts={3} />
     </KeyboardShortcuts>
   )
 }
