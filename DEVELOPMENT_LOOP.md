@@ -364,6 +364,63 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v2.6.0 (2025-12-17) - Loop 24 (성과 기반 가격 실험)
+- ✅ Loop 24: 성과 기반 가격 실험 시스템
+  - DB 마이그레이션 (20251217_pricing_experiments.sql)
+    - pricing_experiments 테이블: 실험 정의
+      - 상태: draft, running, paused, completed, cancelled
+      - 목표 샘플 크기, 신뢰 수준, 최소 감지 효과
+      - 주요/보조 지표 설정
+    - experiment_variants 테이블: 실험 변형 (A/B 그룹)
+      - 가격 모델: fixed, tiered, usage_based, performance, hybrid
+      - 트래픽 배분 (%)
+      - 가격 설정 JSON (pricing_config)
+    - experiment_assignments 테이블: 사용자 실험 배정
+      - 사용자 세그먼트, 채널, 디바이스 추적
+    - experiment_conversions 테이블: 전환 기록
+      - 매출, 크레딧, 사용자 수익, 플랫폼 수수료
+    - performance_pricing_accounts 테이블: 성과 기반 가격 계정
+      - 수수료율 (기본 20%)
+      - 최소 수익 기준
+      - 정산 주기 (weekly/biweekly/monthly)
+      - 누적 성과 및 수수료 추적
+    - performance_settlements 테이블: 정산 내역
+    - experiment_results 뷰: 실험 결과 집계
+    - assign_user_to_experiment() RPC: 사용자 배정 (랜덤 트래픽 분배)
+    - record_experiment_conversion() RPC: 전환 기록
+    - calculate_performance_fee() RPC: 성과 기반 수수료 계산
+    - calculate_statistical_significance() RPC: 통계적 유의성 (Z-test)
+    - get_experiment_summary() RPC: 실험 요약
+    - 3개 샘플 실험 데이터 (성과 vs 고정, 앵커링, 할인 vs 보너스)
+  - /api/experiments API 라우트
+    - GET:
+      - type=list: 실험 목록
+      - type=experiment: 실험 상세
+      - type=results: 실험 결과
+      - type=summary: 실험 요약 (RPC)
+      - type=my_assignment: 내 실험 배정
+      - type=performance_account: 성과 기반 계정
+      - type=settlements: 정산 내역
+      - type=stats: 전체 통계
+    - POST:
+      - create_experiment: 실험 생성
+      - add_variant: 변형 추가
+      - start/pause/complete_experiment: 상태 변경
+      - assign_user: 사용자 배정
+      - record_conversion: 전환 기록
+      - enable/disable_performance_pricing: 성과 기반 가격 활성화
+      - calculate_fee: 수수료 계산
+  - PricingExperiments 컴포넌트
+    - Overview 탭: 통계 카드 6개 + 실행 중 실험
+    - Experiments 탭: 전체 실험 목록 + 결과 확장
+      - ExperimentCard: 가설, 변형, 전환율, 리프트 표시
+      - Start/Pause/Complete 액션
+      - Statistical Significance 표시
+    - Performance 탭: 성과 기반 가격 설정
+      - 수수료율, 최소 수익 기준 설정
+      - 수수료 시뮬레이션
+    - Settings 탭: 기본 설정
+
 ### v2.5.0 (2025-12-17) - Loop 23 (해외 주식 연동 - Alpaca)
 - ✅ Loop 23: 해외 주식 연동 (Alpaca API)
   - alpaca-client.ts - Alpaca API 클라이언트 (~600 lines)
@@ -791,13 +848,12 @@ function trackTechDebt(debt: TechDebt) {
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
 P1: ████████████████████ 100% (Loop 6-15 완료) ★ P1 완료!
-P2: ███████████████░░░░░ 75% (Loop 16-23 완료)
+P2: █████████████████░░░ 85% (Loop 16-24 완료)
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 24: 성과 기반 가격 실험
-ㄱ 투자  → Loop 25: 시리즈 A 준비 자료
+ㄱ      → Loop 25: 시리즈 A 준비 자료
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
 ```
 
