@@ -364,6 +364,17 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v1.5.0 (2025-12-17) - Loop 12 (퍼널 분석)
+- ✅ Loop 12: 전환율 퍼널 분석 시스템
+  - funnel_stages 테이블 (퍼널 단계 정의)
+  - user_funnel_progress 테이블 (사용자별 퍼널 진행)
+  - calculate_funnel_metrics() RPC 함수
+  - get_funnel_by_cohort() RPC 함수
+  - analytics_events/payment_orders 트리거 자동 업데이트
+  - /api/admin/analytics/funnel API
+  - FunnelDashboard 컴포넌트 (퍼널 시각화 + 코호트 + 인사이트)
+  - 단계: signup → first_activity → first_purchase → repeat_purchase
+
 ### v1.4.0 (2025-12-17) - Loop 11 (ARPPU 분석)
 - ✅ Loop 11: ARPPU 코호트 분석 시스템
   - user_revenue_summary 테이블 (사용자별 매출 요약)
@@ -439,15 +450,15 @@ function trackTechDebt(debt: TechDebt) {
 ### 현재 상태
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
-P1: ██████████████████░░ 80% (Loop 6-11 완료)
+P1: ███████████████████░ 90% (Loop 6-12 완료)
 P2: ░░░░░░░░░░░░░░░░░░░░ 0%
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 12: 전환율 퍼널 분석
+ㄱ      → Loop 13: Safety Net v2 (soften)
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
-ㄱ 안전  → Loop 13: Safety Net v2 (soften)
+ㄱ 환불  → Loop 14: 환불 정책 고도화
 ```
 
 ### 우선순위 자동 조정 규칙
