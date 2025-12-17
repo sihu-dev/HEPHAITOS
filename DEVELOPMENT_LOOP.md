@@ -364,6 +364,18 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v1.6.0 (2025-12-17) - Loop 13 (Safety Net v2 강화)
+- ✅ Loop 13: Safety Net v2 (soften logic) 강화
+  - config.ts: 엄격도 설정 (strict/moderate/lenient)
+  - softener-v2.ts: 향상된 규칙 기반 완화
+    - IMPERATIVE_TO_DESCRIPTIVE: 권유형 → 설명형
+    - GUARANTEE_TO_POSSIBILITY: 보장 → 가능성
+    - EXTREME_TO_NEUTRAL: 극단 → 중립
+  - /api/admin/safety: 모니터링 API
+  - SafetyDashboard: 통계 + 정책 + 테스트 UI
+  - 하이브리드 완화 (규칙 + LLM)
+  - 신뢰도 기반 재시도 로직
+
 ### v1.5.0 (2025-12-17) - Loop 12 (퍼널 분석)
 - ✅ Loop 12: 전환율 퍼널 분석 시스템
   - funnel_stages 테이블 (퍼널 단계 정의)
@@ -450,15 +462,15 @@ function trackTechDebt(debt: TechDebt) {
 ### 현재 상태
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
-P1: ███████████████████░ 90% (Loop 6-12 완료)
+P1: ███████████████████░ 95% (Loop 6-13 완료)
 P2: ░░░░░░░░░░░░░░░░░░░░ 0%
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 13: Safety Net v2 (soften)
+ㄱ      → Loop 14: 환불 정책 고도화
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
-ㄱ 환불  → Loop 14: 환불 정책 고도화
+ㄱ 비용  → Loop 15: 비용 대시보드 (Grafana)
 ```
 
 ### 우선순위 자동 조정 규칙
