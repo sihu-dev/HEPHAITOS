@@ -1,9 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, memo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts'
+import {
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  ChartPieIcon,
+  ArrowPathIcon,
+  ArrowsRightLeftIcon,
+  BanknotesIcon,
+  ScaleIcon,
+  ShieldCheckIcon,
+  ChartBarIcon,
+  ClockIcon,
+  SparklesIcon,
+} from '@heroicons/react/24/outline'
 import { clsx } from 'clsx'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
 import { DisclaimerInline } from '@/components/ui/Disclaimer'
 import { useI18n } from '@/i18n/client'
 
@@ -12,8 +35,6 @@ export const dynamic = 'force-dynamic'
 // ============================================
 // Types
 // ============================================
-
-type TranslateFunction = (key: string) => string | string[] | Record<string, unknown>
 
 interface Holding {
   symbol: string
@@ -25,6 +46,8 @@ interface Holding {
   profit: number
   profitPercent: number
   weight: number
+  sector: string
+  color: string
 }
 
 interface PortfolioStats {
@@ -35,162 +58,312 @@ interface PortfolioStats {
   todayProfitPercent: number
   cash: number
   invested: number
+  sharpeRatio: number
+  volatility: number
+  beta: number
 }
 
-// ============================================
-// Icons
-// ============================================
-
-const TrendingUpIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-  </svg>
-)
-
-const TrendingDownIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-  </svg>
-)
-
-const PieChartIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-  </svg>
-)
-
-const RefreshIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-  </svg>
-)
+interface Transaction {
+  id: string
+  type: 'buy' | 'sell'
+  symbol: string
+  quantity: number
+  price: number
+  date: Date
+}
 
 // ============================================
 // Mock Data
 // ============================================
 
+const COLORS = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EC4899', '#6366F1']
+
 const MOCK_HOLDINGS: Holding[] = [
-  { symbol: 'AAPL', name: 'Apple Inc.', quantity: 50, avgPrice: 165, currentPrice: 178, value: 8900, profit: 650, profitPercent: 7.88, weight: 22.3 },
-  { symbol: 'MSFT', name: 'Microsoft', quantity: 20, avgPrice: 380, currentPrice: 410, value: 8200, profit: 600, profitPercent: 7.89, weight: 20.5 },
-  { symbol: 'GOOGL', name: 'Alphabet', quantity: 40, avgPrice: 135, currentPrice: 142, value: 5680, profit: 280, profitPercent: 5.19, weight: 14.2 },
-  { symbol: 'TSLA', name: 'Tesla', quantity: 25, avgPrice: 220, currentPrice: 250, value: 6250, profit: 750, profitPercent: 13.64, weight: 15.6 },
-  { symbol: 'AMZN', name: 'Amazon', quantity: 30, avgPrice: 170, currentPrice: 185, value: 5550, profit: 450, profitPercent: 8.82, weight: 13.9 },
-  { symbol: 'META', name: 'Meta Platforms', quantity: 10, avgPrice: 480, currentPrice: 520, value: 5200, profit: 400, profitPercent: 8.33, weight: 13.0 },
+  { symbol: 'BTC', name: 'Bitcoin', quantity: 0.5, avgPrice: 42000, currentPrice: 97000, value: 48500, profit: 27500, profitPercent: 130.95, weight: 35.2, sector: 'Crypto', color: COLORS[0] },
+  { symbol: 'ETH', name: 'Ethereum', quantity: 5, avgPrice: 2200, currentPrice: 3850, value: 19250, profit: 8250, profitPercent: 75.00, weight: 14.0, sector: 'Crypto', color: COLORS[1] },
+  { symbol: 'AAPL', name: 'Apple Inc.', quantity: 50, avgPrice: 165, currentPrice: 178, value: 8900, profit: 650, profitPercent: 7.88, weight: 6.5, sector: 'Tech', color: COLORS[2] },
+  { symbol: 'MSFT', name: 'Microsoft', quantity: 20, avgPrice: 380, currentPrice: 410, value: 8200, profit: 600, profitPercent: 7.89, weight: 6.0, sector: 'Tech', color: COLORS[3] },
+  { symbol: 'SOL', name: 'Solana', quantity: 100, avgPrice: 80, currentPrice: 225, value: 22500, profit: 14500, profitPercent: 181.25, weight: 16.3, sector: 'Crypto', color: COLORS[4] },
+  { symbol: 'NVDA', name: 'NVIDIA', quantity: 15, avgPrice: 450, currentPrice: 520, value: 7800, profit: 1050, profitPercent: 15.56, weight: 5.7, sector: 'Tech', color: COLORS[5] },
 ]
 
 const MOCK_STATS: PortfolioStats = {
-  totalValue: 39780000,
-  totalProfit: 3130000,
-  totalProfitPercent: 8.54,
-  todayProfit: 425000,
-  todayProfitPercent: 1.08,
-  cash: 5220000,
-  invested: 34560000,
+  totalValue: 137850,
+  totalProfit: 52550,
+  totalProfitPercent: 61.62,
+  todayProfit: 4250,
+  todayProfitPercent: 3.18,
+  cash: 22150,
+  invested: 115700,
+  sharpeRatio: 2.34,
+  volatility: 18.5,
+  beta: 1.15,
 }
+
+const MOCK_HISTORY = Array.from({ length: 30 }, (_, i) => ({
+  date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
+  value: 100000 + Math.random() * 40000 + i * 1000,
+}))
+
+const MOCK_TRANSACTIONS: Transaction[] = [
+  { id: '1', type: 'buy', symbol: 'BTC', quantity: 0.1, price: 95000, date: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+  { id: '2', type: 'sell', symbol: 'ETH', quantity: 1, price: 3800, date: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+  { id: '3', type: 'buy', symbol: 'SOL', quantity: 20, price: 220, date: new Date(Date.now() - 48 * 60 * 60 * 1000) },
+]
 
 // ============================================
 // Components
 // ============================================
 
-function StatCard({ label, value, change, isPositive }: { label: string; value: string; change?: string; isPositive?: boolean; }) {
+const StatCard = memo(function StatCard({
+  label,
+  value,
+  change,
+  isPositive,
+  icon: Icon,
+  iconColor = 'text-zinc-500',
+}: {
+  label: string
+  value: string
+  change?: string
+  isPositive?: boolean
+  icon?: React.ComponentType<{ className?: string }>
+  iconColor?: string
+}) {
   return (
-    <div className="p-4 rounded-lg border border-white/[0.06]">
-      <p className="text-xs text-zinc-400 mb-1">{label}</p>
-      <p className="text-[18px] text-white font-medium">{value}</p>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] transition-colors"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs text-zinc-400">{label}</p>
+        {Icon && <Icon className={clsx('w-4 h-4', iconColor)} />}
+      </div>
+      <p className="text-xl font-semibold text-white">{value}</p>
       {change && (
         <div className={clsx(
           'flex items-center gap-1 mt-1',
           isPositive ? 'text-emerald-400' : 'text-red-400'
         )}>
-          {isPositive ? <TrendingUpIcon /> : <TrendingDownIcon />}
-          <span className="text-xs">{change}</span>
+          {isPositive ? <ArrowTrendingUpIcon className="w-3.5 h-3.5" /> : <ArrowTrendingDownIcon className="w-3.5 h-3.5" />}
+          <span className="text-xs font-medium">{change}</span>
         </div>
       )}
-    </div>
+    </motion.div>
   )
-}
+})
 
-function HoldingRow({ holding, t }: { holding: Holding; t: TranslateFunction }) {
-  const isPositive = holding.profit >= 0
+const EquityChart = memo(function EquityChart({ data }: { data: typeof MOCK_HISTORY }) {
+  const isPositive = data[data.length - 1].value > data[0].value
 
   return (
-    <div className="flex items-center justify-between p-4 border-b border-white/[0.06] last:border-0 hover:bg-white/[0.02] transition-colors">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center">
-          <span className="text-xs text-white font-medium">{holding.symbol.slice(0, 2)}</span>
-        </div>
-        <div>
-          <p className="text-sm text-white font-medium">{holding.symbol}</p>
-          <p className="text-xs text-zinc-400">{holding.name}</p>
-        </div>
-      </div>
-
-      <div className="text-center">
-        <p className="text-sm text-white">{holding.quantity} {t('dashboard.portfolio.shares') as string}</p>
-        <p className="text-xs text-zinc-400">{t('dashboard.portfolio.avgPrice') as string} ${holding.avgPrice}</p>
-      </div>
-
-      <div className="text-center">
-        <p className="text-sm text-white">${holding.currentPrice}</p>
-        <p className="text-xs text-zinc-400">{t('dashboard.portfolio.currentPrice') as string}</p>
-      </div>
-
-      <div className="text-right">
-        <p className="text-sm text-white">${holding.value.toLocaleString()}</p>
-        <p className={clsx(
-          'text-xs',
-          isPositive ? 'text-emerald-400' : 'text-red-400'
-        )}>
-          {isPositive ? '+' : ''}{holding.profitPercent.toFixed(2)}%
-        </p>
-      </div>
-
-      <div className="w-16">
-        <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-          <div
-            className="h-full rounded-full bg-blue-500"
-            style={{ width: `${holding.weight}%` }}
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+          <defs>
+            <linearGradient id="portfolioGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={isPositive ? '#34d399' : '#f87171'} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={isPositive ? '#34d399' : '#f87171'} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <XAxis
+            dataKey="date"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: '#71717a', fontSize: 10 }}
+            interval="preserveStartEnd"
           />
-        </div>
-        <p className="text-[10px] text-zinc-500 text-center mt-1">{holding.weight}%</p>
-      </div>
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: '#71717a', fontSize: 10 }}
+            tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: 'rgba(24, 24, 27, 0.95)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '8px',
+              fontSize: '12px',
+            }}
+            formatter={(value: number) => [`$${value.toLocaleString()}`, '자산']}
+          />
+          <Area
+            type="monotone"
+            dataKey="value"
+            stroke={isPositive ? '#34d399' : '#f87171'}
+            strokeWidth={2}
+            fill="url(#portfolioGradient)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   )
-}
+})
 
-function AllocationChart({ holdings }: { holdings: Holding[] }) {
-  const colors = ['#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#6366F1']
+const AllocationPieChart = memo(function AllocationPieChart({ holdings }: { holdings: Holding[] }) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
   return (
     <div className="flex items-center gap-6">
-      {/* Simple bar representation */}
-      <div className="flex-1 h-4 rounded-full overflow-hidden flex">
+      <div className="w-40 h-40">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={holdings}
+              cx="50%"
+              cy="50%"
+              innerRadius={45}
+              outerRadius={70}
+              paddingAngle={2}
+              dataKey="weight"
+              onMouseEnter={(_, index) => setActiveIndex(index)}
+              onMouseLeave={() => setActiveIndex(null)}
+            >
+              {holdings.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.color}
+                  opacity={activeIndex === null || activeIndex === index ? 1 : 0.5}
+                  style={{ transition: 'opacity 0.2s' }}
+                />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="flex-1 grid grid-cols-2 gap-2">
         {holdings.map((h, i) => (
           <div
             key={h.symbol}
-            className="h-full"
-            style={{ width: `${h.weight}%`, backgroundColor: colors[i % colors.length] }}
-          />
-        ))}
-      </div>
-
-      {/* Legend */}
-      <div className="grid grid-cols-2 gap-2">
-        {holdings.slice(0, 6).map((h, i) => (
-          <div key={h.symbol} className="flex items-center gap-2">
-            <div
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: colors[i % colors.length] }}
-            />
-            <span className="text-xs text-zinc-400">{h.symbol}</span>
-            <span className="text-xs text-zinc-400">{h.weight}%</span>
+            className={clsx(
+              'flex items-center gap-2 p-2 rounded-lg transition-colors cursor-pointer',
+              activeIndex === i ? 'bg-white/[0.06]' : 'hover:bg-white/[0.04]'
+            )}
+            onMouseEnter={() => setActiveIndex(i)}
+            onMouseLeave={() => setActiveIndex(null)}
+          >
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: h.color }} />
+            <span className="text-xs text-white font-medium">{h.symbol}</span>
+            <span className="text-xs text-zinc-400 ml-auto">{h.weight.toFixed(1)}%</span>
           </div>
         ))}
       </div>
     </div>
   )
-}
+})
+
+const HoldingCard = memo(function HoldingCard({ holding }: { holding: Holding }) {
+  const isPositive = holding.profit >= 0
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01 }}
+      className="p-4 bg-white/[0.02] border border-white/[0.06] rounded-xl hover:border-white/[0.12] transition-all cursor-pointer"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+            style={{ backgroundColor: `${holding.color}20`, borderColor: `${holding.color}40`, borderWidth: 1 }}
+          >
+            {holding.symbol.slice(0, 2)}
+          </div>
+          <div>
+            <p className="text-sm font-medium text-white">{holding.symbol}</p>
+            <p className="text-xs text-zinc-500">{holding.name}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-sm font-medium text-white">${holding.value.toLocaleString()}</p>
+          <p className={clsx('text-xs font-medium', isPositive ? 'text-emerald-400' : 'text-red-400')}>
+            {isPositive ? '+' : ''}{holding.profitPercent.toFixed(2)}%
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-zinc-500">{holding.quantity} @ ${holding.avgPrice.toLocaleString()}</span>
+        <span className="text-zinc-400">{holding.sector}</span>
+      </div>
+
+      <div className="mt-3 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${holding.weight}%`, backgroundColor: holding.color }}
+        />
+      </div>
+    </motion.div>
+  )
+})
+
+const TransactionItem = memo(function TransactionItem({ tx }: { tx: Transaction }) {
+  const isBuy = tx.type === 'buy'
+  const timeAgo = Math.floor((Date.now() - tx.date.getTime()) / (1000 * 60 * 60))
+
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-white/[0.04] last:border-0">
+      <div className="flex items-center gap-3">
+        <div className={clsx(
+          'w-8 h-8 rounded-lg flex items-center justify-center',
+          isBuy ? 'bg-emerald-500/20' : 'bg-red-500/20'
+        )}>
+          {isBuy ? (
+            <ArrowTrendingUpIcon className="w-4 h-4 text-emerald-400" />
+          ) : (
+            <ArrowTrendingDownIcon className="w-4 h-4 text-red-400" />
+          )}
+        </div>
+        <div>
+          <p className="text-sm text-white">
+            <span className={isBuy ? 'text-emerald-400' : 'text-red-400'}>{isBuy ? '매수' : '매도'}</span>
+            {' '}{tx.symbol}
+          </p>
+          <p className="text-xs text-zinc-500">{tx.quantity}개 @ ${tx.price.toLocaleString()}</p>
+        </div>
+      </div>
+      <div className="text-right">
+        <p className="text-sm text-white">${(tx.quantity * tx.price).toLocaleString()}</p>
+        <p className="text-xs text-zinc-500">{timeAgo}시간 전</p>
+      </div>
+    </div>
+  )
+})
+
+const PerformanceMetric = memo(function PerformanceMetric({
+  label,
+  value,
+  description,
+  status,
+}: {
+  label: string
+  value: string
+  description: string
+  status: 'good' | 'warning' | 'neutral'
+}) {
+  const statusColors = {
+    good: 'text-emerald-400 bg-emerald-500/10',
+    warning: 'text-amber-400 bg-amber-500/10',
+    neutral: 'text-zinc-400 bg-white/[0.06]',
+  }
+
+  return (
+    <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs text-zinc-400">{label}</span>
+        <span className={clsx('text-xs px-2 py-0.5 rounded', statusColors[status])}>
+          {status === 'good' ? '양호' : status === 'warning' ? '주의' : '보통'}
+        </span>
+      </div>
+      <p className="text-lg font-semibold text-white">{value}</p>
+      <p className="text-xs text-zinc-500 mt-1">{description}</p>
+    </div>
+  )
+})
 
 // ============================================
 // Main Page
@@ -200,78 +373,247 @@ export default function PortfolioPage() {
   const { t } = useI18n()
   const [holdings] = useState<Holding[]>(MOCK_HOLDINGS)
   const [stats] = useState<PortfolioStats>(MOCK_STATS)
+  const [activeTab, setActiveTab] = useState<'holdings' | 'performance' | 'history'>('holdings')
+
+  const sectorData = useMemo(() => {
+    const sectors: Record<string, number> = {}
+    holdings.forEach(h => {
+      sectors[h.sector] = (sectors[h.sector] || 0) + h.weight
+    })
+    return Object.entries(sectors).map(([name, value]) => ({ name, value }))
+  }, [holdings])
+
+  const tabs = [
+    { id: 'holdings', label: '보유 자산', icon: ChartPieIcon },
+    { id: 'performance', label: '성과 분석', icon: ChartBarIcon },
+    { id: 'history', label: '거래 내역', icon: ClockIcon },
+  ]
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-base font-medium text-white flex items-center gap-2">
-            <PieChartIcon />
-            {t('dashboard.portfolio.title') as string}
+            <ChartPieIcon className="w-5 h-5 text-violet-400" />
+            포트폴리오
           </h1>
-          <p className="text-sm text-zinc-400 mt-0.5">
-            {t('dashboard.portfolio.description') as string}
-          </p>
+          <p className="text-sm text-zinc-400 mt-0.5">자산 현황 및 성과 분석</p>
         </div>
-        <Button variant="secondary" size="sm" leftIcon={<RefreshIcon />}>
-          {t('dashboard.portfolio.refresh') as string}
-        </Button>
+        <button
+          type="button"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
+        >
+          <ArrowPathIcon className="w-4 h-4" />
+          새로고침
+        </button>
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-white/[0.06]" />
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Stats Overview */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          label={t('dashboard.portfolio.stats.totalAssets') as string}
-          value={`₩${(stats.totalValue / 10000).toFixed(0)}${t('dashboard.portfolio.stats.tenThousand') as string}`}
+          label="총 자산"
+          value={`$${stats.totalValue.toLocaleString()}`}
           change={`+${stats.totalProfitPercent.toFixed(2)}%`}
           isPositive={stats.totalProfit >= 0}
+          icon={BanknotesIcon}
+          iconColor="text-emerald-400"
         />
         <StatCard
-          label={t('dashboard.portfolio.stats.todayProfit') as string}
-          value={`₩${(stats.todayProfit / 10000).toFixed(0)}${t('dashboard.portfolio.stats.tenThousand') as string}`}
+          label="오늘 수익"
+          value={`$${stats.todayProfit.toLocaleString()}`}
           change={`${stats.todayProfitPercent >= 0 ? '+' : ''}${stats.todayProfitPercent.toFixed(2)}%`}
           isPositive={stats.todayProfit >= 0}
+          icon={ArrowTrendingUpIcon}
+          iconColor={stats.todayProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}
         />
         <StatCard
-          label={t('dashboard.portfolio.stats.invested') as string}
-          value={`₩${(stats.invested / 10000).toFixed(0)}${t('dashboard.portfolio.stats.tenThousand') as string}`}
+          label="투자금"
+          value={`$${stats.invested.toLocaleString()}`}
+          icon={ArrowsRightLeftIcon}
+          iconColor="text-blue-400"
         />
         <StatCard
-          label={t('dashboard.portfolio.stats.cash') as string}
-          value={`₩${(stats.cash / 10000).toFixed(0)}${t('dashboard.portfolio.stats.tenThousand') as string}`}
+          label="현금"
+          value={`$${stats.cash.toLocaleString()}`}
+          icon={ScaleIcon}
+          iconColor="text-amber-400"
         />
       </div>
 
-      {/* Allocation */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('dashboard.portfolio.allocation.title') as string}</CardTitle>
-          <CardDescription>{t('dashboard.portfolio.allocation.description') as string}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <AllocationChart holdings={holdings} />
-        </CardContent>
-      </Card>
+      {/* Equity Chart */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06]"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-sm font-medium text-white">자산 추이</h2>
+            <p className="text-xs text-zinc-500">최근 30일</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {['1W', '1M', '3M', '1Y'].map(period => (
+              <button
+                key={period}
+                type="button"
+                className={clsx(
+                  'px-2.5 py-1 text-xs rounded transition-colors',
+                  period === '1M' ? 'bg-white/[0.08] text-white' : 'text-zinc-500 hover:text-white'
+                )}
+              >
+                {period}
+              </button>
+            ))}
+          </div>
+        </div>
+        <EquityChart data={MOCK_HISTORY} />
+      </motion.div>
 
-      {/* Holdings Table */}
-      <Card padding="none">
-        <div className="p-4 border-b border-white/[0.06]">
-          <h2 className="text-sm text-white font-medium">{t('dashboard.portfolio.holdings.title') as string}</h2>
-          <p className="text-xs text-zinc-400">{(t('dashboard.portfolio.holdings.count') as string).replace('{count}', String(holdings.length))}</p>
-        </div>
-        <div>
-          {holdings.map((holding) => (
-            <HoldingRow key={holding.symbol} holding={holding} t={t} />
-          ))}
-        </div>
-      </Card>
+      {/* Tab Navigation */}
+      <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-lg w-fit">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id as typeof activeTab)}
+            className={clsx(
+              'flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg transition-all',
+              activeTab === tab.id
+                ? 'bg-white/[0.08] text-white'
+                : 'text-zinc-500 hover:text-zinc-300'
+            )}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <AnimatePresence mode="wait">
+        {activeTab === 'holdings' && (
+          <motion.div
+            key="holdings"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="grid lg:grid-cols-3 gap-6"
+          >
+            {/* Holdings Grid */}
+            <div className="lg:col-span-2 grid sm:grid-cols-2 gap-4">
+              {holdings.map(holding => (
+                <HoldingCard key={holding.symbol} holding={holding} />
+              ))}
+            </div>
+
+            {/* Allocation */}
+            <div className="space-y-4">
+              <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                <h3 className="text-sm font-medium text-white mb-4">자산 배분</h3>
+                <AllocationPieChart holdings={holdings} />
+              </div>
+
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                <h3 className="text-sm font-medium text-white mb-3">섹터 분포</h3>
+                <div className="space-y-2">
+                  {sectorData.map(sector => (
+                    <div key={sector.name} className="flex items-center justify-between">
+                      <span className="text-xs text-zinc-400">{sector.name}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 h-1.5 rounded-full bg-white/[0.06]">
+                          <div
+                            className="h-full rounded-full bg-violet-500"
+                            style={{ width: `${sector.value}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-white w-12 text-right">{sector.value.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'performance' && (
+          <motion.div
+            key="performance"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            <PerformanceMetric
+              label="샤프 비율"
+              value={stats.sharpeRatio.toFixed(2)}
+              description="위험 대비 수익률 지표"
+              status={stats.sharpeRatio > 2 ? 'good' : stats.sharpeRatio > 1 ? 'neutral' : 'warning'}
+            />
+            <PerformanceMetric
+              label="변동성"
+              value={`${stats.volatility.toFixed(1)}%`}
+              description="연환산 표준편차"
+              status={stats.volatility < 15 ? 'good' : stats.volatility < 25 ? 'neutral' : 'warning'}
+            />
+            <PerformanceMetric
+              label="베타"
+              value={stats.beta.toFixed(2)}
+              description="시장 대비 민감도"
+              status={stats.beta < 1 ? 'good' : stats.beta < 1.5 ? 'neutral' : 'warning'}
+            />
+            <PerformanceMetric
+              label="총 수익"
+              value={`$${stats.totalProfit.toLocaleString()}`}
+              description="전체 기간 누적 수익"
+              status={stats.totalProfit > 0 ? 'good' : 'warning'}
+            />
+            <PerformanceMetric
+              label="수익률"
+              value={`+${stats.totalProfitPercent.toFixed(2)}%`}
+              description="투자금 대비 수익"
+              status={stats.totalProfitPercent > 20 ? 'good' : stats.totalProfitPercent > 0 ? 'neutral' : 'warning'}
+            />
+            <div className="p-4 rounded-xl bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <SparklesIcon className="w-4 h-4 text-violet-400" />
+                <span className="text-xs text-violet-400">AI 분석</span>
+              </div>
+              <p className="text-sm text-white mb-1">포트폴리오 건강도</p>
+              <p className="text-xs text-zinc-400">
+                현재 포트폴리오는 양호한 샤프 비율을 보이고 있으며,
+                크립토 자산 비중이 높아 변동성이 다소 큽니다.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'history' && (
+          <motion.div
+            key="history"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06]"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-white">최근 거래</h3>
+              <button type="button" className="text-xs text-violet-400 hover:text-violet-300">
+                전체 보기
+              </button>
+            </div>
+            <div>
+              {MOCK_TRANSACTIONS.map(tx => (
+                <TransactionItem key={tx.id} tx={tx} />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Disclaimer */}
-      <DisclaimerInline className="mt-6" />
+      <DisclaimerInline />
     </div>
   )
 }
