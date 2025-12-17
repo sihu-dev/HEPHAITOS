@@ -364,6 +364,25 @@ function trackTechDebt(debt: TechDebt) {
 
 ## 6. CHANGELOG (누적)
 
+### v1.7.0 (2025-12-17) - Loop 14 (환불 정책 고도화)
+- ✅ Loop 14: 환불 정책 고도화 시스템
+  - refund_policy_rules 테이블 (11개 환불 규칙)
+    - instant_unused: 7일 이내 미사용 → 100% 환불
+    - week_low/medium/high_usage: 7일 이내 사용률별 90/70/50%
+    - month_low/medium/high_usage: 30일 이내 사용률별 80/50/30%
+    - over_month_low/medium: 30일 초과 50/30%
+    - special_case: 관리자 판단
+    - no_refund: 환불 불가
+  - refund_abuse_records 테이블 (어뷰징 기록)
+  - calculate_refund_v2() RPC 함수
+    - 사용률, 기간, 정책 기반 환불액 계산
+    - 어뷰징 점수 자동 계산 (반복 환불 패턴)
+  - create_refund_request() RPC 함수
+    - 자동 승인/대기 상태 결정
+  - refund_stats_v2, refund_by_policy, refund_abuse_candidates 뷰
+  - /api/admin/refunds API (목록/통계/정책/어뷰징 조회)
+  - RefundDashboard 컴포넌트 (요청 처리 + 통계 + 정책 + 어뷰징)
+
 ### v1.6.0 (2025-12-17) - Loop 13 (Safety Net v2 강화)
 - ✅ Loop 13: Safety Net v2 (soften logic) 강화
   - config.ts: 엄격도 설정 (strict/moderate/lenient)
@@ -462,15 +481,15 @@ function trackTechDebt(debt: TechDebt) {
 ### 현재 상태
 ```
 P0: ████████████████████ 100% (Loop 1-5 완료)
-P1: ███████████████████░ 95% (Loop 6-13 완료)
+P1: ████████████████████ 100% (Loop 6-14 완료)
 P2: ░░░░░░░░░░░░░░░░░░░░ 0%
 ```
 
 ### 다음 ㄱ 예상 작업
 ```
-ㄱ      → Loop 14: 환불 정책 고도화
+ㄱ      → Loop 15: 비용 대시보드 (Grafana)
 ㄱ 배포  → vercel --prod 실행 (Production 배포)
-ㄱ 비용  → Loop 15: 비용 대시보드 (Grafana)
+ㄱ P2   → Loop 16: 전략 성과 네트워크 효과
 ```
 
 ### 우선순위 자동 조정 규칙
