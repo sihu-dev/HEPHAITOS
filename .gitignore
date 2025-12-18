@@ -19,6 +19,11 @@ coverage/
 .env.test.local
 .env.production.local
 
+# MCP Settings (Contains API Keys)
+.mcp.json
+*.local.md
+.claude/settings.local.json
+
 # Debug
 npm-debug.log*
 yarn-debug.log*
