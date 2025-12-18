@@ -28,6 +28,7 @@ export type RateLimitCategory =
   | 'ai'
   | 'backtest'
   | 'strategy'
+  | 'write'
 
 export interface RateLimitOptions {
   category?: RateLimitCategory
@@ -47,6 +48,7 @@ const rateLimiters: Record<RateLimitCategory, RedisRateLimiter> = {
   ai: aiRateLimiter,
   backtest: backtestRateLimiter,
   strategy: strategyRateLimiter,
+  write: apiRateLimiter, // Use api limiter for write operations
 }
 
 // ============================================
@@ -113,9 +115,9 @@ function createRateLimitErrorResponse(result: RateLimitResult): NextResponse {
  * ```
  */
 export function withRateLimit<T extends NextRequest>(
-  handler: (request: T, context?: unknown) => Promise<NextResponse>,
+  handler: (request: T, context?: unknown) => Promise<NextResponse | Response>,
   options: RateLimitOptions = {}
-): (request: T, context?: unknown) => Promise<NextResponse> {
+): (request: T, context?: unknown) => Promise<NextResponse | Response> {
   const {
     category = 'api',
     customLimiter,
@@ -125,7 +127,7 @@ export function withRateLimit<T extends NextRequest>(
 
   const limiter = customLimiter || rateLimiters[category]
 
-  return async (request: T, context?: unknown): Promise<NextResponse> => {
+  return async (request: T, context?: unknown): Promise<NextResponse | Response> => {
     // Skip check if provided and returns true
     if (skipCheck && skipCheck(request)) {
       return handler(request, context)
@@ -152,7 +154,7 @@ export function withRateLimit<T extends NextRequest>(
       // Execute handler
       const response = await handler(request, context)
 
-      // Add rate limit headers to successful response
+      // Add rate limit headers to successful response (only for NextResponse)
       // Get limit from limiter config
       const limit = category === 'api' ? 100 :
                     category === 'exchange' ? 30 :
@@ -161,7 +163,11 @@ export function withRateLimit<T extends NextRequest>(
                     category === 'backtest' ? 10 :
                     category === 'strategy' ? 50 : 100
 
-      return setRateLimitHeaders(response, result, limit)
+      // Only add headers if response is NextResponse
+      if (response instanceof NextResponse) {
+        return setRateLimitHeaders(response, result, limit)
+      }
+      return response
     } catch (error) {
       safeLogger.error('[RateLimit] Error checking rate limit', { error, category })
       // Fail-open: 에러 시 요청 허용

@@ -10,6 +10,7 @@ import { z } from 'zod'
 
 export const tradesQuerySchema = z.object({
   userId: z.string().optional(),
+  strategyId: z.string().optional(),
   symbol: z.string().optional(),
   status: z.enum(['pending', 'executed', 'cancelled', 'failed']).optional(),
   page: z.coerce.number().int().min(1).default(1),
@@ -30,6 +31,9 @@ export const createTradeSchema = z.object({
   quantity: z.number().positive('수량은 양수여야 합니다'),
   price: z.number().positive('가격은 양수여야 합니다').optional(),
   orderType: z.enum(['market', 'limit']).default('market'),
+  // Additional fields for compatibility
+  type: z.enum(['market', 'limit']).optional(),
+  amount: z.number().positive().optional(),
 })
 
 // ============================================

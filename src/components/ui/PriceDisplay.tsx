@@ -63,6 +63,7 @@ export function PriceDisplay({
       const timer = setTimeout(() => setFlash(null), 500)
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [price, prevPrice])
 
   const isPositive = change >= 0

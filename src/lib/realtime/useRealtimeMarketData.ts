@@ -25,6 +25,7 @@ export function useRealtimeMarketData(initialMarkets: MarketData[]) {
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient()
+    if (!supabase) return
 
     // Subscribe to market_data channel
     const marketChannel = supabase

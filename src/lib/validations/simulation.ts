@@ -43,6 +43,7 @@ export const createSimulationTradeSchema = z.object({
   side: z.enum(['buy', 'sell']),
   quantity: z.number().positive('quantity must be positive'),
   price: z.number().positive('price must be positive').optional(),
+  reason: z.string().optional(),
 })
 
 // Alias for backwards compatibility

@@ -218,7 +218,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
     const Redis = (await import('ioredis')).default
     const client = new Redis(config.url, {
       maxRetriesPerRequest: 3,
-      retryDelayOnFailover: 100,
+      retryStrategy: (times: number) => Math.min(times * 100, 3000),
       lazyConnect: true,
     })
 

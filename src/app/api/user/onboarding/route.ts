@@ -79,9 +79,9 @@ export const POST = withApiMiddleware(
     // Map validation data to service layer format
     const onboardingData = {
       nickname: validation.data.investmentExperience, // Adjust mapping as needed
-      investmentStyle: validation.data.riskTolerance,
+      investmentStyle: validation.data.riskProfile,
       experience: validation.data.investmentExperience,
-      interests: validation.data.preferredAssets,
+      interests: validation.data.preferredSectors,
       painPoints: [],
     }
 

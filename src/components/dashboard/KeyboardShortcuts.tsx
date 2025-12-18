@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useKeyBindings } from '@/hooks/use-keyboard'
+
+type KeyModifier = 'ctrl' | 'alt' | 'shift' | 'meta'
 
 // ============================================
 // Dashboard Global Keyboard Shortcuts
@@ -58,7 +59,7 @@ export function KeyboardShortcuts({ children }: KeyboardShortcutsProps) {
     // Cmd/Ctrl+K for search (handled separately with modifier)
     {
       key: 'k',
-      modifiers: ['ctrl'] as const,
+      modifiers: ['ctrl'] as KeyModifier[],
       handler: () => {
         // Dispatch custom event for command palette
         window.dispatchEvent(new CustomEvent('open-command-palette'))
@@ -76,7 +77,7 @@ export function KeyboardShortcuts({ children }: KeyboardShortcutsProps) {
     // ? for help/shortcuts modal
     {
       key: '?',
-      modifiers: ['shift'] as const,
+      modifiers: ['shift'] as KeyModifier[],
       handler: () => {
         window.dispatchEvent(new CustomEvent('open-shortcuts-help'))
       },

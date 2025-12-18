@@ -48,9 +48,12 @@ export interface ApiHandlerOptions {
  */
 export function createApiResponse<T>(
   data: T,
-  status: number = 200,
-  headers?: Record<string, string>
+  options?: { status?: number; headers?: Record<string, string> } | number
 ): NextResponse<ApiResponse<T>> {
+  // Handle both object form { status: 200 } and plain number 200
+  const status = typeof options === 'number' ? options : (options?.status ?? 200)
+  const headers = typeof options === 'object' && options !== null ? options.headers : undefined
+
   return NextResponse.json(
     {
       success: true,
@@ -243,10 +246,10 @@ export function handleApiError(
  * ```
  */
 export function withErrorHandler<T extends NextRequest>(
-  handler: (request: T, context?: unknown) => Promise<NextResponse>,
+  handler: (request: T, context?: unknown) => Promise<NextResponse | Response>,
   options: ApiHandlerOptions = {}
-): (request: T, context?: unknown) => Promise<NextResponse> {
-  return async (request: T, context?: unknown): Promise<NextResponse> => {
+): (request: T, context?: unknown) => Promise<NextResponse | Response> {
+  return async (request: T, context?: unknown): Promise<NextResponse | Response> => {
     try {
       return await handler(request, context)
     } catch (error) {
@@ -287,12 +290,12 @@ import { withRateLimit, type RateLimitOptions } from './rate-limit'
  * ```
  */
 export function withApiMiddleware<T extends NextRequest>(
-  handler: (request: T, context?: unknown) => Promise<NextResponse>,
+  handler: (request: T, context?: unknown) => Promise<NextResponse | Response>,
   options: {
     rateLimit?: RateLimitOptions
     errorHandler?: ApiHandlerOptions
   } = {}
-): (request: T, context?: unknown) => Promise<NextResponse> {
+): (request: T, context?: unknown) => Promise<NextResponse | Response> {
   // Rate Limit 적용
   let wrappedHandler = handler
   if (options.rateLimit !== undefined) {

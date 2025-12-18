@@ -5,7 +5,8 @@
 // Loop 21: 멘토 코칭 정식 런칭
 // ============================================
 
-import { useState, useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
+import Image from 'next/image'
 import {
   User,
   Star,
@@ -124,11 +125,7 @@ export default function MentorCoaching() {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  useEffect(() => {
-    loadData()
-  }, [selectedSpecialty])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
       const url = selectedSpecialty
@@ -145,7 +142,11 @@ export default function MentorCoaching() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedSpecialty])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const loadMySessions = async () => {
     try {
@@ -363,9 +364,9 @@ function MentorCard({
     >
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center overflow-hidden">
           {mentor.avatar_url ? (
-            <img src={mentor.avatar_url} alt="" className="w-full h-full rounded-full" />
+            <Image src={mentor.avatar_url} alt="" width={48} height={48} className="w-full h-full object-cover" />
           ) : (
             <User className="w-6 h-6" />
           )}
@@ -505,11 +506,7 @@ function MentorDetailModal({
   const [booking, setBooking] = useState(false)
   const [topic, setTopic] = useState('')
 
-  useEffect(() => {
-    loadAvailability()
-  }, [mentor.user_id])
-
-  const loadAvailability = async () => {
+  const loadAvailability = useCallback(async () => {
     try {
       const response = await fetch(`/api/coaching?type=availability&mentorId=${mentor.user_id}`)
       if (response.ok) {
@@ -519,7 +516,11 @@ function MentorDetailModal({
     } catch (error) {
       console.error('Failed to load availability:', error)
     }
-  }
+  }, [mentor.user_id])
+
+  useEffect(() => {
+    loadAvailability()
+  }, [loadAvailability])
 
   const handleBook = async () => {
     if (!selectedSlot) return
@@ -557,9 +558,9 @@ function MentorDetailModal({
       <div className="bg-[#1A1A1F] rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-white/10">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center overflow-hidden">
               {mentor.avatar_url ? (
-                <img src={mentor.avatar_url} alt="" className="w-full h-full rounded-full" />
+                <Image src={mentor.avatar_url} alt="" width={64} height={64} className="w-full h-full object-cover" />
               ) : (
                 <User className="w-8 h-8" />
               )}

@@ -11,6 +11,8 @@ import {
   ColorType,
   CrosshairMode,
   LineStyle,
+  LineSeries,
+  HistogramSeries,
   type IChartApi,
   type Time,
 } from 'lightweight-charts'
@@ -100,8 +102,8 @@ const RSIChart = memo(function RSIChart({
     const times = data.map((d) => d.time)
     const rsiValues = calculateRSI(closes, period)
 
-    // Add RSI line
-    const rsiSeries = chart.addLineSeries({
+    // Add RSI line (v5 API)
+    const rsiSeries = chart.addSeries(LineSeries, {
       color: chartTheme.rsi.line,
       lineWidth: 2,
       priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
@@ -216,8 +218,8 @@ const MACDChart = memo(function MACDChart({
     const times = data.map((d) => d.time)
     const macdResult = calculateMACD(closes, 12, 26, 9)
 
-    // Add histogram
-    const histogramSeries = chart.addHistogramSeries({
+    // Add histogram (v5 API)
+    const histogramSeries = chart.addSeries(HistogramSeries, {
       priceFormat: { type: 'price', precision: 4, minMove: 0.0001 },
     })
 
@@ -233,8 +235,8 @@ const MACDChart = memo(function MACDChart({
 
     histogramSeries.setData(histogramData)
 
-    // Add MACD line
-    const macdSeries = chart.addLineSeries({
+    // Add MACD line (v5 API)
+    const macdSeries = chart.addSeries(LineSeries, {
       color: chartTheme.macd.line,
       lineWidth: 2,
       priceFormat: { type: 'price', precision: 4, minMove: 0.0001 },
@@ -246,8 +248,8 @@ const MACDChart = memo(function MACDChart({
 
     macdSeries.setData(macdData)
 
-    // Add signal line
-    const signalSeries = chart.addLineSeries({
+    // Add signal line (v5 API)
+    const signalSeries = chart.addSeries(LineSeries, {
       color: chartTheme.macd.signal,
       lineWidth: 2,
       priceFormat: { type: 'price', precision: 4, minMove: 0.0001 },

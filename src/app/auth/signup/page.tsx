@@ -51,6 +51,10 @@ export default function SignUpPage() {
 
     try {
       const supabase = getSupabaseBrowserClient()
+      if (!supabase) {
+        setError(isKo ? '인증 서비스를 사용할 수 없습니다' : 'Authentication service unavailable')
+        return
+      }
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -76,6 +80,10 @@ export default function SignUpPage() {
   const handleOAuthLogin = async (provider: 'google' | 'github') => {
     try {
       const supabase = getSupabaseBrowserClient()
+      if (!supabase) {
+        setError(isKo ? '인증 서비스를 사용할 수 없습니다' : 'Authentication service unavailable')
+        return
+      }
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {

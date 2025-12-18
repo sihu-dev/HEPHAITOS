@@ -40,10 +40,15 @@ describe('Strategies [id] API', () => {
     vi.clearAllMocks()
   })
 
+  // Helper to create context with Promise-based params (Next.js 16)
+  const createContext = (id: string) => ({
+    params: Promise.resolve({ id })
+  })
+
   describe('GET /api/strategies/[id]', () => {
     it('should return a strategy by id', async () => {
       const request = new NextRequest('http://localhost:3000/api/strategies/1')
-      const response = await GET(request, { params: { id: '1' } })
+      const response = await GET(request, createContext('1'))
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -54,7 +59,7 @@ describe('Strategies [id] API', () => {
 
     it('should return 404 for non-existent strategy', async () => {
       const request = new NextRequest('http://localhost:3000/api/strategies/non-existent')
-      const response = await GET(request, { params: { id: 'non-existent' } })
+      const response = await GET(request, createContext('non-existent'))
       const data = await response.json()
 
       expect(response.status).toBe(404)
@@ -79,7 +84,7 @@ describe('Strategies [id] API', () => {
         headers: { 'Content-Type': 'application/json' },
       })
 
-      const response = await PUT(request, { params: { id: 'test-id-123' } })
+      const response = await PUT(request, createContext('test-id-123'))
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -99,7 +104,7 @@ describe('Strategies [id] API', () => {
         headers: { 'Content-Type': 'application/json' },
       })
 
-      const response = await PUT(request, { params: { id: 'test-id-123' } })
+      const response = await PUT(request, createContext('test-id-123'))
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -117,7 +122,7 @@ describe('Strategies [id] API', () => {
         headers: { 'Content-Type': 'application/json' },
       })
 
-      const response = await PUT(request, { params: { id: 'test-id-123' } })
+      const response = await PUT(request, createContext('test-id-123'))
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -131,7 +136,7 @@ describe('Strategies [id] API', () => {
         headers: { 'Content-Type': 'application/json' },
       })
 
-      const response = await PUT(request, { params: { id: 'non-existent' } })
+      const response = await PUT(request, createContext('non-existent'))
       const data = await response.json()
 
       expect(response.status).toBe(404)
@@ -148,7 +153,7 @@ describe('Strategies [id] API', () => {
         method: 'DELETE',
       })
 
-      const response = await DELETE(request, { params: { id: 'test-id-123' } })
+      const response = await DELETE(request, createContext('test-id-123'))
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -158,7 +163,7 @@ describe('Strategies [id] API', () => {
       // Verify it's actually deleted
       const findResponse = await GET(
         new NextRequest('http://localhost:3000/api/strategies/test-id-123'),
-        { params: { id: 'test-id-123' } }
+        createContext('test-id-123')
       )
       expect(findResponse.status).toBe(404)
     })
@@ -168,7 +173,7 @@ describe('Strategies [id] API', () => {
         method: 'DELETE',
       })
 
-      const response = await DELETE(request, { params: { id: 'non-existent' } })
+      const response = await DELETE(request, createContext('non-existent'))
       const data = await response.json()
 
       expect(response.status).toBe(404)
@@ -187,7 +192,7 @@ describe('Strategies [id] API', () => {
         headers: { 'Content-Type': 'application/json' },
       })
 
-      const response = await PATCH(request, { params: { id: 'test-id-123' } })
+      const response = await PATCH(request, createContext('test-id-123'))
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -205,7 +210,7 @@ describe('Strategies [id] API', () => {
         headers: { 'Content-Type': 'application/json' },
       })
 
-      const response = await PATCH(request, { params: { id: 'test-id-123' } })
+      const response = await PATCH(request, createContext('test-id-123'))
       const data = await response.json()
 
       expect(response.status).toBe(400)
@@ -226,7 +231,7 @@ describe('Strategies [id] API', () => {
           headers: { 'Content-Type': 'application/json' },
         })
 
-        const response = await PATCH(request, { params: { id: `test-${status}` } })
+        const response = await PATCH(request, createContext(`test-${status}`))
         const data = await response.json()
 
         expect(response.status).toBe(200)
@@ -241,7 +246,7 @@ describe('Strategies [id] API', () => {
         headers: { 'Content-Type': 'application/json' },
       })
 
-      const response = await PATCH(request, { params: { id: 'non-existent' } })
+      const response = await PATCH(request, createContext('non-existent'))
       const data = await response.json()
 
       expect(response.status).toBe(404)

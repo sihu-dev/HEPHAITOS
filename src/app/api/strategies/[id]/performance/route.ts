@@ -15,11 +15,22 @@ export async function GET(
     const supabase = await createServerSupabaseClient();
 
     // 1. 집계 성과 조회 (Materialized View)
-    const { data: aggregate, error: aggError } = await supabase
-      .rpc('get_strategy_performance', {
-        p_strategy_id: strategyId,
-      })
-      .single();
+    interface StrategyPerformanceData {
+      strategy_id: string
+      strategy_name: string
+      backtest_count: number
+      avg_return: number
+      avg_sharpe: number
+      avg_cagr: number
+      rank_sharpe: number
+      rank_cagr: number
+      last_backtest_at: string
+    }
+    const { data: aggregate, error: aggError } = await (supabase as unknown as {
+      rpc: (fn: string, params: Record<string, unknown>) => { single: () => Promise<{ data: StrategyPerformanceData | null; error: Error | null }> }
+    }).rpc('get_strategy_performance', {
+      p_strategy_id: strategyId,
+    }).single();
 
     if (aggError) {
       console.error('[Strategy Performance] Aggregate error:', aggError);

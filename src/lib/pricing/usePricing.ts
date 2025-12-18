@@ -3,6 +3,33 @@
 import { useEffect, useState } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 
+// Database row types for type safety
+interface PricingDisplayRow {
+  package_id: string
+  name: string
+  name_ko: string
+  credits: number
+  bonus_credits: number
+  price_krw: number
+  price_usd: number
+  is_popular: boolean
+  is_highlighted: boolean
+  display_order: number
+  total_credits: number
+  per_credit_krw: number
+  per_credit_usd: number
+}
+
+interface FeaturePricingRow {
+  feature_id: string
+  feature_name: string
+  feature_name_ko: string
+  credit_cost: number
+  category: 'copy' | 'learn' | 'build' | 'other'
+  description?: string
+  description_ko?: string
+}
+
 export interface CreditPackage {
   packageId: string
   name: string
@@ -71,9 +98,10 @@ export function usePricing() {
           throw featuresError
         }
 
-        // Map to camelCase
+        // Map to camelCase with explicit typing
+        const packages = (packagesData as PricingDisplayRow[] | null) || []
         setPackages(
-          (packagesData || []).map((pkg) => ({
+          packages.map((pkg) => ({
             packageId: pkg.package_id,
             name: pkg.name,
             nameKo: pkg.name_ko,
@@ -90,8 +118,9 @@ export function usePricing() {
           }))
         )
 
+        const features = (featuresData as FeaturePricingRow[] | null) || []
         setFeatures(
-          (featuresData || []).map((feature) => ({
+          features.map((feature) => ({
             featureId: feature.feature_id,
             featureName: feature.feature_name,
             featureNameKo: feature.feature_name_ko,

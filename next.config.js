@@ -1,4 +1,10 @@
 /** @type {import('next').NextConfig} */
+
+// Bundle Analyzer (Cycle 3 - Performance Optimization)
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 const nextConfig = {
   reactStrictMode: true,
   // Compiler optimizations
@@ -97,4 +103,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+module.exports = withBundleAnalyzer(nextConfig)

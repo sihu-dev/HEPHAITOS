@@ -252,7 +252,9 @@ function DataTableInner<TData>({
 // Export with memo
 // ============================================
 
-export const DataTable = memo(DataTableInner) as typeof DataTableInner
+export const DataTable = memo(DataTableInner) as typeof DataTableInner & {
+  displayName: string
+}
 
 DataTable.displayName = 'DataTable'
 

@@ -319,12 +319,11 @@ export class MoAEngine {
         { role: 'system', content: config.systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      maxTokens: 600,
     });
 
     return {
       text: result.text,
-      tokensUsed: result.usage.totalTokens,
+      tokensUsed: result.usage?.totalTokens ?? 0,
     };
   }
 
@@ -407,12 +406,11 @@ OUTPUT FORMAT (Korean):
 **면책조항**: 본 전략은 교육 목적이며 투자 조언이 아닙니다. 모든 투자 결정은 본인의 책임입니다.`,
         },
       ],
-      maxTokens: 1200,
     });
 
     return {
       text: result.text,
-      tokensUsed: result.usage.totalTokens,
+      tokensUsed: result.usage?.totalTokens ?? 0,
     };
   }
 

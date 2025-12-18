@@ -248,7 +248,10 @@ export async function getStrategiesClient(options?: {
   }
 
   const supabase = getSupabaseBrowserClient()
-  
+  if (!supabase) {
+    return mockStrategies
+  }
+
   let query = (supabase as any)
     .from('strategies')
     .select('*')
@@ -281,7 +284,11 @@ export function subscribeToStrategies(
   }
 
   const supabase = getSupabaseBrowserClient()
-  
+  if (!supabase) {
+    callback(mockStrategies.filter(s => s.userId === userId))
+    return () => {}
+  }
+
   const channel = supabase
     .channel('strategies-changes')
     .on(

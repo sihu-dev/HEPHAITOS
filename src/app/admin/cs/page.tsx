@@ -5,8 +5,8 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useCallback, useEffect, useState } from 'react';
+import { getSupabaseBrowserClient } from '@/lib/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
 
@@ -40,19 +40,15 @@ export default function AdminCSPage() {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'all'>('pending');
 
-  const supabase = createClient();
-
-  // 초기 데이터 로드
-  useEffect(() => {
-    fetchInitialData();
-    setupRealtimeSubscription();
-  }, []);
+  const supabase = getSupabaseBrowserClient();
 
   // 초기 데이터 가져오기
-  const fetchInitialData = async () => {
+  const fetchInitialData = useCallback(async () => {
+    if (!supabase) return;
+
     try {
-      // 대기 중인 요청
-      const { data: pending } = await supabase.rpc('get_pending_refunds', {
+      // 대기 중인 요청 - Use type assertion for custom RPC
+      const { data: pending } = await (supabase as unknown as { rpc: (fn: string, params: Record<string, unknown>) => Promise<{ data: RefundRequest[] | null }> }).rpc('get_pending_refunds', {
         p_limit: 50,
       });
 
@@ -74,15 +70,15 @@ export default function AdminCSPage() {
 
       if (all) {
         setAllRequests(
-          all.map((r: any) => ({
+          (all as unknown as Array<RefundRequest & { users?: { email: string } }>).map((r) => ({
             ...r,
             user_email: r.users?.email || 'N/A',
           }))
         );
       }
 
-      // 통계
-      const { data: statsData } = await supabase.rpc('get_refund_stats');
+      // 통계 - Use type assertion for custom RPC
+      const { data: statsData } = await (supabase as unknown as { rpc: (fn: string) => Promise<{ data: RefundStats[] | null }> }).rpc('get_refund_stats');
       if (statsData && statsData.length > 0) {
         setStats(statsData[0]);
       }
@@ -91,10 +87,12 @@ export default function AdminCSPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
   // Realtime 구독
-  const setupRealtimeSubscription = () => {
+  const setupRealtimeSubscription = useCallback(() => {
+    if (!supabase) return () => {};
+
     const channel = supabase
       .channel('admin-refund-requests')
       .on(
@@ -114,16 +112,26 @@ export default function AdminCSPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  };
+  }, [supabase, fetchInitialData]);
+
+  // 초기 데이터 로드
+  useEffect(() => {
+    if (!supabase) return;
+    fetchInitialData();
+    const cleanup = setupRealtimeSubscription();
+    return cleanup;
+  }, [supabase, fetchInitialData, setupRealtimeSubscription]);
 
   // 환불 승인
   const handleApprove = async (requestId: string) => {
+    if (!supabase) return;
     if (!confirm('환불 요청을 승인하시겠습니까?')) return;
 
     setProcessingId(requestId);
 
     try {
-      const { data, error } = await supabase.rpc('update_refund_status', {
+      // Use type assertion for custom RPC
+      const { error } = await (supabase as unknown as { rpc: (fn: string, params: Record<string, unknown>) => Promise<{ error: Error | null }> }).rpc('update_refund_status', {
         p_request_id: requestId,
         p_status: 'approved',
         p_admin_note: '관리자 승인',
@@ -148,13 +156,15 @@ export default function AdminCSPage() {
 
   // 환불 거절
   const handleReject = async (requestId: string) => {
+    if (!supabase) return;
     const reason = prompt('거절 사유를 입력하세요:');
     if (!reason) return;
 
     setProcessingId(requestId);
 
     try {
-      const { data, error } = await supabase.rpc('update_refund_status', {
+      // Use type assertion for custom RPC
+      const { error } = await (supabase as unknown as { rpc: (fn: string, params: Record<string, unknown>) => Promise<{ error: Error | null }> }).rpc('update_refund_status', {
         p_request_id: requestId,
         p_status: 'rejected',
         p_admin_note: reason,

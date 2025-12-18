@@ -103,6 +103,65 @@ type ExecutorCallback = (event: ExecutorEvent) => void
 // Trade Executor Class
 // ============================================
 
+/**
+ * 실시간 트레이딩 실행 엔진
+ *
+ * @description
+ * 트레이딩 전략을 실시간으로 실행하고 주문을 관리하는 핵심 엔진입니다.
+ * UnifiedBroker를 통해 여러 증권사/거래소를 지원하며, 법률 준수 검사와 리스크 관리를 자동으로 적용합니다.
+ *
+ * @features
+ * - **7개 증권사/거래소 지원**: KIS, 키움, Alpaca, Binance, Upbit 등
+ * - **실시간 모니터링**: 1초 간격 시세 업데이트
+ * - **자동 리스크 관리**: 손절/익절, 포지션 사이즈 제한
+ * - **법률 준수**: 투자 조언 금지 자동 검증
+ * - **Paper Trading**: 실제 거래 없이 시뮬레이션
+ *
+ * @example
+ * ```typescript
+ * // 실시간 트레이딩 엔진 생성
+ * const executor = new TradeExecutor({
+ *   userId: 'user_123',
+ *   brokerId: 'KIS',
+ *   strategy: myStrategy,
+ *   exchange: kisExchange,
+ *   symbol: 'AAPL',
+ *   maxPositionSize: 10,  // 포트폴리오의 10%까지
+ *   enableLive: true,      // 실제 거래 활성화
+ *   paperTrading: false,   // Paper Trading 비활성화
+ *   riskConfig: {
+ *     stopLossPercent: 5,
+ *     takeProfitPercent: 10,
+ *   },
+ * });
+ *
+ * // 주문 실행 이벤트 구독
+ * executor.on('order_filled', (event) => {
+ *   console.log('주문 체결:', event.order);
+ * });
+ *
+ * // 엔진 시작
+ * await executor.start();
+ *
+ * // 매수 시그널 처리
+ * await executor.handleSignal({
+ *   type: 'buy',
+ *   price: 150.50,
+ *   quantity: 10,
+ *   timestamp: Date.now(),
+ * });
+ * ```
+ *
+ * @important
+ * - **실제 거래 주의**: enableLive=true 시 실제 자금이 거래됩니다
+ * - **손실 위험**: 트레이딩은 원금 손실 위험이 있습니다
+ * - **법률 준수**: 이 도구는 투자 조언이 아닙니다
+ * - **테스트 필수**: 실전 전 Paper Trading으로 충분히 테스트하세요
+ *
+ * @see {@link ExecutorConfig} 실행 엔진 설정
+ * @see {@link ExecutorState} 실행 엔진 상태
+ * @see {@link UnifiedBroker} 통합 증권사 인터페이스
+ */
 export class TradeExecutor {
   private config: ExecutorConfig
   private state: ExecutorState
@@ -113,6 +172,37 @@ export class TradeExecutor {
   // 🆕 2026: Race condition protection for position management
   private positionLock: Promise<void> = Promise.resolve()
 
+  /**
+   * TradeExecutor 생성자
+   *
+   * @param config - 실행 엔진 설정
+   * @param config.userId - 사용자 ID
+   * @param config.brokerId - 증권사/거래소 ID ('KIS' | 'KIWOOM' | 'ALPACA' | 'BINANCE' | 'UPBIT')
+   * @param config.strategy - 실행할 트레이딩 전략
+   * @param config.exchange - 거래소 인터페이스
+   * @param config.symbol - 거래 심볼 (예: 'AAPL', 'BTC/USD')
+   * @param config.maxPositionSize - 최대 포지션 크기 (포트폴리오의 %)
+   * @param config.enableLive - 실제 거래 활성화 (true=실전, false=비활성)
+   * @param config.paperTrading - Paper Trading 모드 (true=시뮬레이션)
+   * @param config.riskConfig - 리스크 관리 설정 (손절/익절 등)
+   * @param config.userProfile - 사용자 리스크 프로필
+   *
+   * @throws {Error} 잘못된 설정이 제공된 경우
+   *
+   * @example
+   * ```typescript
+   * const executor = new TradeExecutor({
+   *   userId: 'user_123',
+   *   brokerId: 'KIS',
+   *   strategy: myStrategy,
+   *   exchange: kisExchange,
+   *   symbol: 'AAPL',
+   *   maxPositionSize: 10,
+   *   enableLive: false,     // 안전을 위해 먼저 비활성화
+   *   paperTrading: true,    // Paper Trading으로 테스트
+   * });
+   * ```
+   */
   constructor(config: ExecutorConfig) {
     this.config = config
     this.state = {
@@ -132,7 +222,49 @@ export class TradeExecutor {
   // ============================================
 
   /**
-   * Start the executor (Enhanced 2026: Legal Compliance + Risk Profiler + Structured Logging)
+   * 트레이딩 엔진 시작 - 실시간 모니터링 및 주문 실행 준비
+   *
+   * @description
+   * 실시간 트레이딩 엔진을 시작하고 시장 데이터 구독을 초기화합니다.
+   * 법률 준수 검사, 리스크 프로파일링, 계좌 잔고 확인을 자동으로 수행합니다.
+   *
+   * @returns {Promise<void>} 엔진 시작 완료
+   *
+   * @throws {Error} 잘못된 설정 또는 법률 위반 전략
+   * @throws {Error} 계좌 잔고 부족
+   * @throws {Error} 증권사 연결 실패
+   *
+   * @example
+   * ```typescript
+   * const executor = new TradeExecutor({
+   *   userId: 'user_123',
+   *   brokerId: 'KIS',
+   *   strategy: myStrategy,
+   *   exchange: kisExchange,
+   *   symbol: 'AAPL',
+   *   maxPositionSize: 10,
+   *   enableLive: true,
+   * });
+   *
+   * try {
+   *   await executor.start();
+   *   console.log('트레이딩 엔진 시작 완료');
+   * } catch (error) {
+   *   if (error.message.includes('법률')) {
+   *     console.error('법률 준수 위반:', error.message);
+   *   } else if (error.message.includes('잔고')) {
+   *     console.error('잔고 부족:', error.message);
+   *   }
+   * }
+   * ```
+   *
+   * @important
+   * - **실전 거래 주의**: enableLive=true인 경우 실제 자금으로 거래됩니다
+   * - **법률 준수**: 투자 조언 표현이 포함된 전략은 실행이 차단됩니다
+   * - **리스크 관리**: 사용자 리스크 프로필에 따라 포지션 크기가 자동 조정됩니다
+   *
+   * @fires executor#started - 엔진 시작 이벤트
+   * @fires executor#error - 오류 발생 이벤트
    */
   async start(): Promise<void> {
     if (this.state.status === 'running') {
@@ -809,7 +941,7 @@ export class TradeExecutor {
         level: 'critical',
         component: 'TradeExecutor',
         message: executorError.message,
-        data: { code, ...errorData }
+        data: { ...errorData, errorCode: code }
       })
     } else {
       // 🆕 Structured warning logging
@@ -825,7 +957,7 @@ export class TradeExecutor {
         level: 'error',
         component: 'TradeExecutor',
         message: executorError.message,
-        data: { code, ...errorData }
+        data: { ...errorData, errorCode: code }
       })
     }
 

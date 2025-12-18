@@ -133,14 +133,17 @@ export class CircuitBreaker {
       await redis.expire(this.getKey(identifier, 'failures'), ttlSecs)
 
       // 마지막 실패 시간 기록
-      await redis.set(this.getKey(identifier, 'lastFailure'), now.toString(), { ex: ttlSecs })
+      await redis.set(this.getKey(identifier, 'lastFailure'), now.toString(), 'EX', ttlSecs)
 
       // threshold 도달 시 회로 오픈
       if (failures >= this.config.failureThreshold) {
         const openUntil = now + this.config.cooldownMs
-        await redis.set(this.getKey(identifier, 'openUntil'), openUntil.toString(), {
-          ex: Math.ceil(this.config.cooldownMs / 1000) + 60,
-        })
+        await redis.set(
+          this.getKey(identifier, 'openUntil'),
+          openUntil.toString(),
+          'EX',
+          Math.ceil(this.config.cooldownMs / 1000) + 60
+        )
 
         safeLogger.warn('[CircuitBreaker] Circuit opened', {
           identifier,

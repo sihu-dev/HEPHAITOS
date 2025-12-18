@@ -98,11 +98,16 @@ export async function POST(req: Request) {
     const jobId = await addBacktestJob({
       strategyId,
       userId,
-      timeframe,
-      startDate,
-      endDate,
-      symbol: symbol || 'AAPL',
-      credits: BACKTEST_COST,
+      backtestParams: {
+        symbol: symbol || 'AAPL',
+        startDate,
+        endDate,
+        initialCapital: 100000,
+        commission: 0.001,
+        slippage: 0.0005,
+      },
+      priority: 0,
+      createdAt: Date.now(),
     })
 
     // 5. DB에 잡 기록

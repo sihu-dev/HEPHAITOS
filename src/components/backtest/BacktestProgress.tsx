@@ -25,6 +25,11 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
   const supabase = createClient();
 
   useEffect(() => {
+    if (!supabase) {
+      onError?.('Supabase 연결을 사용할 수 없습니다');
+      return;
+    }
+
     let channel: RealtimeChannel;
     let pollInterval: NodeJS.Timeout;
 

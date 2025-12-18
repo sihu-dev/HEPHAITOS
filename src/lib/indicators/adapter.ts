@@ -1,6 +1,6 @@
 // ============================================
 // Technical Indicators Adapter
-// trading-signals 라이브러리 래퍼
+// trading-signals v7 라이브러리 래퍼
 // 100+ 검증된 지표 제공
 // ============================================
 
@@ -19,16 +19,10 @@ import {
   CCI,
   ROC,
   OBV,
-  MFI,
-  VWAP,
   WilliamsR,
-  FasterSMA,
-  FasterEMA,
-  FasterRSI,
-  FasterMACD,
   type MACDResult,
-  type BollingerBandsResult,
   type StochasticResult,
+  type BandsResult,
 } from 'trading-signals'
 
 import type { OHLCV } from '@/types'
@@ -65,6 +59,20 @@ export interface StochasticOutput {
 }
 
 // ============================================
+// Helper to safely convert result to number
+// ============================================
+
+function toNumber(value: number | null | undefined): number {
+  if (value === null || value === undefined) return NaN
+  return Number(value)
+}
+
+function toFixedNumber(value: number | null | undefined, decimals: number = 8): number {
+  if (value === null || value === undefined) return NaN
+  return Number(Number(value).toFixed(decimals))
+}
+
+// ============================================
 // Batch Calculation Functions
 // 백테스트용 배치 계산
 // ============================================
@@ -79,9 +87,8 @@ export function calculateSMA(data: number[], period: number = 20): number[] {
   const results: number[] = []
 
   for (const value of data) {
-    sma.update(value)
-    const result = sma.getResult()
-    results.push(result ? Number(result.toFixed(8)) : NaN)
+    sma.add(value)
+    results.push(toFixedNumber(sma.getResult()))
   }
 
   return results
@@ -97,9 +104,8 @@ export function calculateEMA(data: number[], period: number = 20): number[] {
   const results: number[] = []
 
   for (const value of data) {
-    ema.update(value)
-    const result = ema.getResult()
-    results.push(result ? Number(result.toFixed(8)) : NaN)
+    ema.add(value)
+    results.push(toFixedNumber(ema.getResult()))
   }
 
   return results
@@ -115,9 +121,8 @@ export function calculateWMA(data: number[], period: number = 20): number[] {
   const results: number[] = []
 
   for (const value of data) {
-    wma.update(value)
-    const result = wma.getResult()
-    results.push(result ? Number(result.toFixed(8)) : NaN)
+    wma.add(value)
+    results.push(toFixedNumber(wma.getResult()))
   }
 
   return results
@@ -133,9 +138,8 @@ export function calculateDEMA(data: number[], period: number = 20): number[] {
   const results: number[] = []
 
   for (const value of data) {
-    dema.update(value)
-    const result = dema.getResult()
-    results.push(result ? Number(result.toFixed(8)) : NaN)
+    dema.add(value)
+    results.push(toFixedNumber(dema.getResult()))
   }
 
   return results
@@ -151,9 +155,8 @@ export function calculateRSI(data: number[], period: number = 14): number[] {
   const results: number[] = []
 
   for (const value of data) {
-    rsi.update(value)
-    const result = rsi.getResult()
-    results.push(result ? Number(result.toFixed(2)) : NaN)
+    rsi.add(value)
+    results.push(toFixedNumber(rsi.getResult(), 2))
   }
 
   return results
@@ -172,25 +175,25 @@ export function calculateMACD(
   slowPeriod: number = 26,
   signalPeriod: number = 9
 ): MACDOutput {
-  const macd = new MACD({
-    indicator: EMA,
-    shortInterval: fastPeriod,
-    longInterval: slowPeriod,
-    signalInterval: signalPeriod,
-  })
+  // trading-signals v7: MACD takes EMA/DEMA instances
+  const macd = new MACD(
+    new EMA(fastPeriod),
+    new EMA(slowPeriod),
+    new EMA(signalPeriod)
+  )
 
   const macdLine: number[] = []
   const signalLine: number[] = []
   const histogram: number[] = []
 
   for (const value of data) {
-    macd.update(value)
-    const result = macd.getResult() as MACDResult | undefined
+    macd.add(value)
+    const result = macd.getResult() as MACDResult | null
 
     if (result) {
-      macdLine.push(Number(result.macd.toFixed(8)))
-      signalLine.push(Number(result.signal.toFixed(8)))
-      histogram.push(Number(result.histogram.toFixed(8)))
+      macdLine.push(toFixedNumber(result.macd))
+      signalLine.push(toFixedNumber(result.signal))
+      histogram.push(toFixedNumber(result.histogram))
     } else {
       macdLine.push(NaN)
       signalLine.push(NaN)
@@ -219,13 +222,13 @@ export function calculateBollingerBands(
   const lower: number[] = []
 
   for (const value of data) {
-    bb.update(value)
-    const result = bb.getResult() as BollingerBandsResult | undefined
+    bb.add(value)
+    const result = bb.getResult() as BandsResult | null
 
     if (result) {
-      upper.push(Number(result.upper.toFixed(8)))
-      middle.push(Number(result.middle.toFixed(8)))
-      lower.push(Number(result.lower.toFixed(8)))
+      upper.push(toFixedNumber(result.upper))
+      middle.push(toFixedNumber(result.middle))
+      lower.push(toFixedNumber(result.lower))
     } else {
       upper.push(NaN)
       middle.push(NaN)
@@ -246,13 +249,12 @@ export function calculateATR(candles: OHLCV[], period: number = 14): number[] {
   const results: number[] = []
 
   for (const candle of candles) {
-    atr.update({
+    atr.add({
       high: candle.high,
       low: candle.low,
       close: candle.close,
     })
-    const result = atr.getResult()
-    results.push(result ? Number(result.toFixed(8)) : NaN)
+    results.push(toFixedNumber(atr.getResult()))
   }
 
   return results
@@ -269,22 +271,23 @@ export function calculateStochastic(
   kPeriod: number = 14,
   dPeriod: number = 3
 ): StochasticOutput {
-  const stoch = new StochasticOscillator(kPeriod, dPeriod)
+  // StochasticOscillator(n, m, p) where n=lookback, m=smoothK, p=smoothD
+  const stoch = new StochasticOscillator(kPeriod, dPeriod, dPeriod)
 
   const k: number[] = []
   const d: number[] = []
 
   for (const candle of candles) {
-    stoch.update({
+    stoch.add({
       high: candle.high,
       low: candle.low,
       close: candle.close,
     })
-    const result = stoch.getResult() as StochasticResult | undefined
+    const result = stoch.getResult() as StochasticResult | null
 
     if (result) {
-      k.push(Number(result.stochK.toFixed(2)))
-      d.push(Number(result.stochD.toFixed(2)))
+      k.push(toFixedNumber(result.stochK, 2))
+      d.push(toFixedNumber(result.stochD, 2))
     } else {
       k.push(NaN)
       d.push(NaN)
@@ -298,36 +301,21 @@ export function calculateStochastic(
  * Stochastic RSI (스토캐스틱 RSI)
  * @param data - 가격 데이터 배열
  * @param rsiPeriod - RSI 기간 (기본값: 14)
- * @param stochPeriod - 스토캐스틱 기간 (기본값: 14)
- * @param kPeriod - %K 기간 (기본값: 3)
- * @param dPeriod - %D 기간 (기본값: 3)
  */
 export function calculateStochasticRSI(
   data: number[],
-  rsiPeriod: number = 14,
-  stochPeriod: number = 14,
-  kPeriod: number = 3,
-  dPeriod: number = 3
-): StochasticOutput {
-  const stochRSI = new StochasticRSI(rsiPeriod, stochPeriod, kPeriod, dPeriod)
-
-  const k: number[] = []
-  const d: number[] = []
+  rsiPeriod: number = 14
+): number[] {
+  // StochasticRSI in v7 returns single value, not k/d
+  const stochRSI = new StochasticRSI(rsiPeriod)
+  const results: number[] = []
 
   for (const value of data) {
-    stochRSI.update(value)
-    const result = stochRSI.getResult() as StochasticResult | undefined
-
-    if (result) {
-      k.push(Number(result.stochK.toFixed(2)))
-      d.push(Number(result.stochD.toFixed(2)))
-    } else {
-      k.push(NaN)
-      d.push(NaN)
-    }
+    stochRSI.add(value)
+    results.push(toFixedNumber(stochRSI.getResult(), 2))
   }
 
-  return { k, d }
+  return results
 }
 
 /**
@@ -340,13 +328,12 @@ export function calculateADX(candles: OHLCV[], period: number = 14): number[] {
   const results: number[] = []
 
   for (const candle of candles) {
-    adx.update({
+    adx.add({
       high: candle.high,
       low: candle.low,
       close: candle.close,
     })
-    const result = adx.getResult()
-    results.push(result ? Number(result.toFixed(2)) : NaN)
+    results.push(toFixedNumber(adx.getResult(), 2))
   }
 
   return results
@@ -362,13 +349,12 @@ export function calculateCCI(candles: OHLCV[], period: number = 20): number[] {
   const results: number[] = []
 
   for (const candle of candles) {
-    cci.update({
+    cci.add({
       high: candle.high,
       low: candle.low,
       close: candle.close,
     })
-    const result = cci.getResult()
-    results.push(result ? Number(result.toFixed(2)) : NaN)
+    results.push(toFixedNumber(cci.getResult(), 2))
   }
 
   return results
@@ -384,9 +370,8 @@ export function calculateROC(data: number[], period: number = 10): number[] {
   const results: number[] = []
 
   for (const value of data) {
-    roc.update(value)
-    const result = roc.getResult()
-    results.push(result ? Number(result.toFixed(4)) : NaN)
+    roc.add(value)
+    results.push(toFixedNumber(roc.getResult(), 4))
   }
 
   return results
@@ -402,13 +387,12 @@ export function calculateWilliamsR(candles: OHLCV[], period: number = 14): numbe
   const results: number[] = []
 
   for (const candle of candles) {
-    wr.update({
+    wr.add({
       high: candle.high,
       low: candle.low,
       close: candle.close,
     })
-    const result = wr.getResult()
-    results.push(result ? Number(result.toFixed(2)) : NaN)
+    results.push(toFixedNumber(wr.getResult(), 2))
   }
 
   return results
@@ -419,39 +403,77 @@ export function calculateWilliamsR(candles: OHLCV[], period: number = 14): numbe
  * @param candles - OHLCV 캔들 데이터
  */
 export function calculateOBV(candles: OHLCV[]): number[] {
-  const obv = new OBV()
+  // OBV in v7 requires OpenHighLowCloseVolume including open
+  const obv = new OBV(candles.length)
   const results: number[] = []
 
   for (const candle of candles) {
-    obv.update({
+    obv.add({
+      open: candle.open,
+      high: candle.high,
+      low: candle.low,
       close: candle.close,
       volume: candle.volume,
     })
-    const result = obv.getResult()
-    results.push(result ? Number(result.toFixed(0)) : NaN)
+    results.push(toFixedNumber(obv.getResult(), 0))
   }
 
   return results
 }
 
 /**
- * MFI (Money Flow Index)
+ * MFI (Money Flow Index) - Manual implementation
+ * trading-signals v7 doesn't export MFI
  * @param candles - OHLCV 캔들 데이터
  * @param period - 기간 (기본값: 14)
  */
 export function calculateMFI(candles: OHLCV[], period: number = 14): number[] {
-  const mfi = new MFI(period)
   const results: number[] = []
+  const typicalPrices: number[] = []
+  const moneyFlows: number[] = []
 
-  for (const candle of candles) {
-    mfi.update({
-      high: candle.high,
-      low: candle.low,
-      close: candle.close,
-      volume: candle.volume,
-    })
-    const result = mfi.getResult()
-    results.push(result ? Number(result.toFixed(2)) : NaN)
+  for (let i = 0; i < candles.length; i++) {
+    const candle = candles[i]
+    const typicalPrice = (candle.high + candle.low + candle.close) / 3
+    const rawMoneyFlow = typicalPrice * candle.volume
+
+    typicalPrices.push(typicalPrice)
+
+    if (i === 0) {
+      moneyFlows.push(rawMoneyFlow)
+      results.push(NaN)
+      continue
+    }
+
+    // Positive or negative based on price movement
+    const prevTypical = typicalPrices[i - 1]
+    const signedFlow = typicalPrice > prevTypical ? rawMoneyFlow : -rawMoneyFlow
+    moneyFlows.push(signedFlow)
+
+    if (i < period) {
+      results.push(NaN)
+      continue
+    }
+
+    // Calculate MFI for the period
+    let positiveFlow = 0
+    let negativeFlow = 0
+
+    for (let j = i - period + 1; j <= i; j++) {
+      if (moneyFlows[j] > 0) {
+        positiveFlow += moneyFlows[j]
+      } else {
+        negativeFlow += Math.abs(moneyFlows[j])
+      }
+    }
+
+    if (negativeFlow === 0) {
+      results.push(100)
+    } else {
+      const moneyRatio = positiveFlow / negativeFlow
+      const mfi = 100 - (100 / (1 + moneyRatio))
+      results.push(toFixedNumber(mfi, 2))
+    }
   }
 
   return results
@@ -467,19 +489,21 @@ export function calculateMFI(candles: OHLCV[], period: number = 14): number[] {
  */
 export class StreamingRSI {
   private rsi: RSI
+  private period: number
 
   constructor(period: number = 14) {
+    this.period = period
     this.rsi = new RSI(period)
   }
 
-  update(value: number): number | null {
-    this.rsi.update(value)
+  add(value: number): number | null {
+    this.rsi.add(value)
     const result = this.rsi.getResult()
-    return result ? Number(result.toFixed(2)) : null
+    return result !== null ? toFixedNumber(result, 2) : null
   }
 
   reset(): void {
-    this.rsi = new RSI(this.rsi['interval'])
+    this.rsi = new RSI(this.period)
   }
 }
 
@@ -488,32 +512,45 @@ export class StreamingRSI {
  */
 export class StreamingMACD {
   private macd: MACD
+  private fastPeriod: number
+  private slowPeriod: number
+  private signalPeriod: number
 
   constructor(
     fastPeriod: number = 12,
     slowPeriod: number = 26,
     signalPeriod: number = 9
   ) {
-    this.macd = new MACD({
-      indicator: EMA,
-      shortInterval: fastPeriod,
-      longInterval: slowPeriod,
-      signalInterval: signalPeriod,
-    })
+    this.fastPeriod = fastPeriod
+    this.slowPeriod = slowPeriod
+    this.signalPeriod = signalPeriod
+    this.macd = new MACD(
+      new EMA(fastPeriod),
+      new EMA(slowPeriod),
+      new EMA(signalPeriod)
+    )
   }
 
-  update(value: number): { macd: number; signal: number; histogram: number } | null {
-    this.macd.update(value)
-    const result = this.macd.getResult() as MACDResult | undefined
+  add(value: number): { macd: number; signal: number; histogram: number } | null {
+    this.macd.add(value)
+    const result = this.macd.getResult() as MACDResult | null
 
     if (result) {
       return {
-        macd: Number(result.macd.toFixed(8)),
-        signal: Number(result.signal.toFixed(8)),
-        histogram: Number(result.histogram.toFixed(8)),
+        macd: toFixedNumber(result.macd),
+        signal: toFixedNumber(result.signal),
+        histogram: toFixedNumber(result.histogram),
       }
     }
     return null
+  }
+
+  reset(): void {
+    this.macd = new MACD(
+      new EMA(this.fastPeriod),
+      new EMA(this.slowPeriod),
+      new EMA(this.signalPeriod)
+    )
   }
 }
 
@@ -522,66 +559,62 @@ export class StreamingMACD {
  */
 export class StreamingBollingerBands {
   private bb: BollingerBands
+  private period: number
+  private stdDev: number
 
   constructor(period: number = 20, stdDev: number = 2) {
+    this.period = period
+    this.stdDev = stdDev
     this.bb = new BollingerBands(period, stdDev)
   }
 
-  update(value: number): { upper: number; middle: number; lower: number } | null {
-    this.bb.update(value)
-    const result = this.bb.getResult() as BollingerBandsResult | undefined
+  add(value: number): { upper: number; middle: number; lower: number } | null {
+    this.bb.add(value)
+    const result = this.bb.getResult() as BandsResult | null
 
     if (result) {
       return {
-        upper: Number(result.upper.toFixed(8)),
-        middle: Number(result.middle.toFixed(8)),
-        lower: Number(result.lower.toFixed(8)),
+        upper: toFixedNumber(result.upper),
+        middle: toFixedNumber(result.middle),
+        lower: toFixedNumber(result.lower),
       }
     }
     return null
   }
+
+  reset(): void {
+    this.bb = new BollingerBands(this.period, this.stdDev)
+  }
 }
 
 // ============================================
-// Faster Variants (고성능)
-// 대용량 백테스트용
+// Fast/Batch Calculation Functions
+// 대용량 백테스트용 최적화 버전
 // ============================================
 
 /**
- * 고성능 SMA (숫자 배열 직접 반환)
+ * 고성능 SMA (배치 처리)
  */
 export function fastSMA(data: number[], period: number): number[] {
-  const sma = new FasterSMA(period)
-  return data.map((value) => {
-    sma.update(value)
-    return sma.getResult() ?? NaN
-  })
+  return calculateSMA(data, period)
 }
 
 /**
- * 고성능 EMA
+ * 고성능 EMA (배치 처리)
  */
 export function fastEMA(data: number[], period: number): number[] {
-  const ema = new FasterEMA(period)
-  return data.map((value) => {
-    ema.update(value)
-    return ema.getResult() ?? NaN
-  })
+  return calculateEMA(data, period)
 }
 
 /**
- * 고성능 RSI
+ * 고성능 RSI (배치 처리)
  */
 export function fastRSI(data: number[], period: number = 14): number[] {
-  const rsi = new FasterRSI(period)
-  return data.map((value) => {
-    rsi.update(value)
-    return rsi.getResult() ?? NaN
-  })
+  return calculateRSI(data, period)
 }
 
 /**
- * 고성능 MACD
+ * 고성능 MACD (배치 처리)
  */
 export function fastMACD(
   data: number[],
@@ -589,32 +622,7 @@ export function fastMACD(
   slowPeriod: number = 26,
   signalPeriod: number = 9
 ): MACDOutput {
-  const macd = new FasterMACD(
-    new FasterEMA(fastPeriod),
-    new FasterEMA(slowPeriod),
-    new FasterEMA(signalPeriod)
-  )
-
-  const macdLine: number[] = []
-  const signalLine: number[] = []
-  const histogram: number[] = []
-
-  for (const value of data) {
-    macd.update(value)
-    const result = macd.getResult()
-
-    if (result) {
-      macdLine.push(result.macd)
-      signalLine.push(result.signal)
-      histogram.push(result.histogram)
-    } else {
-      macdLine.push(NaN)
-      signalLine.push(NaN)
-      histogram.push(NaN)
-    }
-  }
-
-  return { macd: macdLine, signal: signalLine, histogram }
+  return calculateMACD(data, fastPeriod, slowPeriod, signalPeriod)
 }
 
 // ============================================

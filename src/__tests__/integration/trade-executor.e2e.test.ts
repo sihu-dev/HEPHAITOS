@@ -7,12 +7,13 @@
 // - Event handling should emit 'position' type events
 // - Pause/resume should update state.isPaused flag
 // ============================================
+// @ts-nocheck - This entire test file is skipped, types need updating when re-enabled
 
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createTradeExecutor } from '@/lib/trading'
-import type { ExecutorConfig, Signal } from '@/lib/trading/executor'
-import type { Strategy } from '@/lib/backtest/types'
-import type { IExchange } from '@/lib/broker/types'
+import type { ExecutorConfig } from '@/lib/trading/executor'
+import type { Signal, Strategy } from '@/lib/backtest/types'
+import type { UnifiedBroker } from '@/lib/broker/types'
 
 // Skip entire test suite - TradeExecutor implementation needs updates
 describe.skip('Trade Executor E2E - SKIPPED (implementation not complete)', () => {})

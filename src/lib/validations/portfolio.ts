@@ -11,6 +11,7 @@ import { z } from 'zod'
 export const portfolioQuerySchema = z.object({
   userId: z.string().optional(),
   timeframe: z.enum(['1D', '1W', '1M', '3M', '1Y', 'ALL']).default('1M'),
+  includeHistory: z.enum(['true', 'false']).transform(v => v === 'true').optional(),
 })
 
 // ============================================

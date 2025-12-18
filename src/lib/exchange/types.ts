@@ -113,7 +113,7 @@ export interface OrderBook {
 }
 
 // WebSocket Types
-export type WSEventType = 'ticker' | 'orderbook' | 'trade' | 'kline' | 'order' | 'balance'
+export type WSEventType = 'ticker' | 'orderbook' | 'trade' | 'kline' | 'order' | 'balance' | 'unknown'
 
 export interface WSMessage {
   type: WSEventType

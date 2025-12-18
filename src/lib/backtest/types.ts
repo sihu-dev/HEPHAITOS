@@ -4,6 +4,9 @@
 
 import type { OHLCV, Strategy } from '@/types'
 
+// Re-export for convenience
+export type { OHLCV, Strategy }
+
 // ============================================
 // Core Types
 // ============================================

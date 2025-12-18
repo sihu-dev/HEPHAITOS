@@ -93,7 +93,8 @@ export function CommandPalette() {
           command.name.toLowerCase().includes(query.toLowerCase())
         )
 
-  const handleSelect = (command: Command) => {
+  const handleSelect = (command: Command | null) => {
+    if (!command) return
     setIsOpen(false)
     setQuery('')
     command.action()

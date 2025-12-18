@@ -27,8 +27,8 @@ export const POST = withApiMiddleware(
 
     const trade =
       side === 'buy'
-        ? simulationAccountManager.buy(accountId, { symbol, side, quantity, price, reason })
-        : simulationAccountManager.sell(accountId, { symbol, side, quantity, price, reason })
+        ? simulationAccountManager.buy(accountId, { symbol, side, quantity, price: price ?? 0, reason })
+        : simulationAccountManager.sell(accountId, { symbol, side, quantity, price: price ?? 0, reason })
 
     if (!trade) {
       safeLogger.warn('[Simulation Trade API] Trade failed', {

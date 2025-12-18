@@ -32,6 +32,35 @@ import { calculateAdvancedMetrics, type AdvancedMetrics } from './advanced-metri
 // Backtest Engine Class
 // ============================================
 
+/**
+ * 백테스팅 엔진 - 트레이딩 전략의 과거 성과를 시뮬레이션
+ *
+ * @description
+ * 과거 시장 데이터를 기반으로 트레이딩 전략의 성과를 테스트합니다.
+ * 실제 거래 비용(커미션, 슬리피지)과 리스크 관리를 반영하여 정확한 시뮬레이션을 제공합니다.
+ *
+ * @example
+ * ```typescript
+ * const engine = new BacktestEngine({
+ *   strategy: myStrategy,
+ *   symbol: 'BTC/USD',
+ *   startDate: Date.parse('2024-01-01'),
+ *   endDate: Date.parse('2024-12-31'),
+ *   initialCapital: 100000,
+ *   commission: 0.001,  // 0.1%
+ *   slippage: 0.0005,   // 0.05%
+ * });
+ *
+ * const result = await engine.run(ohlcvData);
+ * console.log(`총 수익률: ${result.metrics.totalReturn}%`);
+ * console.log(`샤프 비율: ${result.metrics.sharpeRatio}`);
+ * ```
+ *
+ * @important
+ * - 과거 성과는 미래 수익을 보장하지 않습니다
+ * - 실제 거래 시 추가 비용(세금, 슬리피지 변동 등)이 발생할 수 있습니다
+ * - 백테스트 결과는 교육 및 연구 목적으로만 사용하세요
+ */
 export class BacktestEngine {
   private config: BacktestConfig
   private data: OHLCV[] = []
@@ -51,6 +80,37 @@ export class BacktestEngine {
   // 🆕 2026 Enhancement: Risk Profiler
   private userProfile?: UserRiskProfile
 
+  /**
+   * 백테스팅 엔진 생성자
+   *
+   * @param config - 백테스팅 설정
+   * @param config.strategy - 테스트할 트레이딩 전략
+   * @param config.symbol - 거래 심볼 (예: 'BTC/USD', 'AAPL')
+   * @param config.startDate - 백테스트 시작 시간 (Unix timestamp ms)
+   * @param config.endDate - 백테스트 종료 시간 (Unix timestamp ms)
+   * @param config.initialCapital - 초기 자본금 (기본: 100,000)
+   * @param config.commission - 거래 수수료율 (기본: 0.001 = 0.1%)
+   * @param config.slippage - 슬리피지율 (기본: 0.0005 = 0.05%)
+   * @param config.leverage - 레버리지 배수 (기본: 1 = 레버리지 없음)
+   * @param config.marginMode - 마진 모드 ('isolated' | 'cross', 기본: 'isolated')
+   * @param userProfile - 사용자 리스크 프로필 (선택사항)
+   *
+   * @throws {Error} 잘못된 설정이 제공된 경우
+   *
+   * @example
+   * ```typescript
+   * const engine = new BacktestEngine(
+   *   {
+   *     strategy: myStrategy,
+   *     symbol: 'BTC/USD',
+   *     startDate: 1704067200000, // 2024-01-01
+   *     endDate: 1735689600000,   // 2024-12-31
+   *     initialCapital: 100000,
+   *   },
+   *   { level: 'aggressive' }  // 공격적인 투자 성향
+   * );
+   * ```
+   */
   constructor(config: BacktestConfig, userProfile?: UserRiskProfile) {
     this.config = {
       leverage: 1,
@@ -170,7 +230,57 @@ export class BacktestEngine {
   }
 
   /**
-   * Run backtest (Enhanced 2026: Legal Compliance + Structured Logging)
+   * 백테스트 실행 - 전략 시뮬레이션 및 성과 분석
+   *
+   * @description
+   * 설정된 기간 동안 트레이딩 전략을 시뮬레이션하고 상세한 성과 지표를 계산합니다.
+   * 법률 준수 검사, 리스크 프로파일링, 고급 메트릭을 자동으로 적용합니다.
+   *
+   * @returns {Promise<BacktestResult>} 백테스트 결과
+   * @returns {BacktestResult.metrics} 성과 지표 (수익률, 샤프 비율, MDD 등)
+   * @returns {BacktestResult.trades} 실행된 거래 목록
+   * @returns {BacktestResult.equityCurve} 자산 변화 곡선
+   * @returns {BacktestResult.legalCompliance} 법률 준수 평가 결과
+   * @returns {BacktestResult.advancedMetrics} 고급 성과 지표 (2026 추가)
+   *
+   * @throws {Error} 데이터가 없거나 잘못된 전략인 경우
+   *
+   * @example
+   * ```typescript
+   * const engine = new BacktestEngine({
+   *   strategy: myStrategy,
+   *   symbol: 'BTC/USD',
+   *   startDate: Date.parse('2024-01-01'),
+   *   endDate: Date.parse('2024-12-31'),
+   *   initialCapital: 100000,
+   * });
+   *
+   * // OHLCV 데이터 로드
+   * await engine.loadData(ohlcvData);
+   *
+   * // 백테스트 실행
+   * const result = await engine.run();
+   *
+   * // 결과 확인
+   * console.log('총 수익률:', result.metrics.totalReturn, '%');
+   * console.log('샤프 비율:', result.metrics.sharpeRatio);
+   * console.log('최대 낙폭:', result.metrics.maxDrawdown, '%');
+   * console.log('총 거래 수:', result.trades.length);
+   *
+   * // 법률 준수 경고 확인
+   * if (result.legalCompliance.warnings.length > 0) {
+   *   console.warn('법률 준수 경고:', result.legalCompliance.warnings);
+   * }
+   * ```
+   *
+   * @important
+   * - 과거 성과는 미래 수익을 보장하지 않습니다
+   * - 백테스트 결과는 교육 및 연구 목적으로만 사용하세요
+   * - 실제 거래 시 추가적인 리스크와 비용이 발생할 수 있습니다
+   *
+   * @see {@link BacktestResult} 백테스트 결과 타입
+   * @see {@link BacktestMetrics} 성과 지표 타입
+   * @see {@link LegalCompliance} 법률 준수 검사
    */
   async run(): Promise<BacktestResult> {
     const startTime = Date.now()

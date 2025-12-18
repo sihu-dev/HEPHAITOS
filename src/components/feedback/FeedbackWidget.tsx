@@ -63,6 +63,10 @@ export function FeedbackWidget() {
 
     try {
       const supabase = getSupabaseBrowserClient()
+      if (!supabase) {
+        setError(isKo ? '서비스를 사용할 수 없습니다' : 'Service unavailable')
+        return
+      }
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser()
@@ -93,7 +97,7 @@ export function FeedbackWidget() {
         description: formData.description,
         browser_info: browserInfo,
         device_info: deviceInfo,
-      })
+      } as any)
 
       if (insertError) {
         throw insertError

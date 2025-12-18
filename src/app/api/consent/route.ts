@@ -21,7 +21,7 @@ const recordConsentSchema = z.object({
   consentType: z.enum(['disclaimer', 'age_verification', 'marketing', 'data_processing']),
   agreed: z.boolean(),
   birthDate: z.string().optional(),  // YYYY-MM-DD
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 })
 
 /**

@@ -1,3 +1,4 @@
+// @ts-nocheck - Deno Edge Function with Deno-specific imports
 /**
  * Auto Refund Handler (Supabase Edge Function)
  * Loop 13: CS/환불 자동화

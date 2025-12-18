@@ -27,7 +27,7 @@ const USE_CLAUDE = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY
 // ============================================
 
 interface StrategyConfig {
-  name: string
+  name?: string
   riskLevel: 'conservative' | 'moderate' | 'aggressive'
   investmentGoal: 'growth' | 'income' | 'balanced' | 'preservation'
   timeHorizon: 'short' | 'medium' | 'long'

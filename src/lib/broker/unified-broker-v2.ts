@@ -168,6 +168,61 @@ const CIRCUIT_CONFIG = {
 // UnifiedBroker v2 Class
 // ============================================
 
+/**
+ * 통합 증권사 인터페이스 - 여러 증권사/거래소를 하나의 API로 연결
+ *
+ * @description
+ * 한국투자증권(KIS), Alpaca, Binance 등 여러 증권사를 통합 인터페이스로 제공합니다.
+ * 자동 재시도, Circuit Breaker, 큐 관리 등 안정성 기능이 내장되어 있습니다.
+ *
+ * @features
+ * - **3개 증권사 지원**: KIS, Alpaca, Binance
+ * - **자동 재시도**: 네트워크 오류 시 자동 재시도
+ * - **Circuit Breaker**: 연속 실패 시 자동 차단으로 시스템 보호
+ * - **요청 큐**: 동시 요청 관리 및 Rate Limit 준수
+ * - **Paper Trading**: 실전과 동일한 인터페이스로 시뮬레이션
+ *
+ * @example
+ * ```typescript
+ * // 한국투자증권 연결
+ * const broker = new UnifiedBrokerV2({
+ *   provider: 'kis',
+ *   apiKey: process.env.KIS_API_KEY,
+ *   apiSecret: process.env.KIS_API_SECRET,
+ *   accountNumber: '12345678',
+ *   isPaper: false,  // 실전 계좌
+ * });
+ *
+ * // 연결
+ * const connection = await broker.connect();
+ * if (!connection.success) {
+ *   console.error('연결 실패:', connection.error);
+ *   return;
+ * }
+ *
+ * // 잔고 조회
+ * const balance = await broker.getBalance();
+ * console.log('사용 가능 금액:', balance.available);
+ *
+ * // 보유 종목 조회
+ * const holdings = await broker.getHoldings();
+ * console.log('보유 종목 수:', holdings.length);
+ *
+ * // 주문 실행
+ * const order = await broker.buy('AAPL', 10, 150.50);
+ * if (order.success) {
+ *   console.log('주문 ID:', order.orderId);
+ * }
+ * ```
+ *
+ * @important
+ * - **실전 계좌 주의**: isPaper=false 시 실제 자금으로 거래됩니다
+ * - **API 키 보안**: 환경 변수 또는 보안 저장소에 저장하세요
+ * - **Rate Limit**: 각 증권사의 API 호출 제한을 준수하세요
+ *
+ * @see {@link BrokerCredentials} 증권사 인증 정보
+ * @see {@link ConnectionResult} 연결 결과
+ */
 export class UnifiedBrokerV2 {
   private provider: BrokerProvider
   private credentials: BrokerCredentials
@@ -177,6 +232,36 @@ export class UnifiedBrokerV2 {
   private requestQueue: Array<() => Promise<unknown>> = []
   private isProcessingQueue: boolean = false
 
+  /**
+   * UnifiedBrokerV2 생성자
+   *
+   * @param credentials - 증권사 인증 정보
+   * @param credentials.provider - 증권사 종류 ('kis' | 'alpaca' | 'binance')
+   * @param credentials.apiKey - API 키
+   * @param credentials.apiSecret - API Secret
+   * @param credentials.accountNumber - 계좌번호 (KIS 필수)
+   * @param credentials.isPaper - Paper Trading 모드 (기본: false)
+   * @param retryConfig - 재시도 설정 (선택사항)
+   * @param retryConfig.maxRetries - 최대 재시도 횟수 (기본: 3)
+   * @param retryConfig.retryDelay - 재시도 간격 (기본: 1000ms)
+   *
+   * @example
+   * ```typescript
+   * const broker = new UnifiedBrokerV2(
+   *   {
+   *     provider: 'kis',
+   *     apiKey: 'your-api-key',
+   *     apiSecret: 'your-api-secret',
+   *     accountNumber: '12345678',
+   *     isPaper: true,  // Paper Trading
+   *   },
+   *   {
+   *     maxRetries: 5,
+   *     retryDelay: 2000,
+   *   }
+   * );
+   * ```
+   */
   constructor(credentials: BrokerCredentials, retryConfig?: Partial<RetryConfig>) {
     this.provider = credentials.provider
     this.credentials = credentials

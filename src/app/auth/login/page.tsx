@@ -25,6 +25,10 @@ export default function LoginPage() {
 
     try {
       const supabase = getSupabaseBrowserClient()
+      if (!supabase) {
+        setError('인증 서비스를 사용할 수 없습니다')
+        return
+      }
       const { error } = await supabase.auth.signInWithPassword({ email, password })
 
       if (error) {
@@ -44,6 +48,10 @@ export default function LoginPage() {
   const handleOAuthLogin = async (provider: 'google' | 'github') => {
     try {
       const supabase = getSupabaseBrowserClient()
+      if (!supabase) {
+        setError('인증 서비스를 사용할 수 없습니다')
+        return
+      }
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {

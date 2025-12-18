@@ -113,7 +113,7 @@ interface DisclaimerModalProps extends DisclaimerProps {
 
 export function DisclaimerModal({ isOpen, onAccept, className }: DisclaimerModalProps) {
   const { t } = useI18n()
-  const modalPoints = t('dashboard.disclaimer.modalPoints') as string[]
+  const modalPoints = t('dashboard.disclaimer.modalPoints') as unknown as string[]
 
   if (!isOpen) return null
 

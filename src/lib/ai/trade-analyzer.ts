@@ -257,18 +257,24 @@ ${userPortfolio.map((h) => `- ${h.symbol}: ${((h.currentValue / userTotal) * 100
       const response = await callClaude(prompt, { maxTokens: 1024 })
       const parsed = this.parseJSON(response)
 
+      // Type-safe extraction
+      const parsedOverlapScore = typeof parsed.overlapScore === 'number' ? parsed.overlapScore : overlapScore
+      const parsedAiAnalysis = typeof parsed.aiAnalysis === 'string' ? parsed.aiAnalysis : '포트폴리오 비교 분석을 수행했습니다.'
+      const defaultChanges = deviations
+        .filter((d) => d.priority !== 'low')
+        .map((d) => ({
+          symbol: d.symbol,
+          action: d.action as 'buy' | 'sell',
+          targetWeight: d.celebrityWeight,
+          reasoning: `${d.action === 'buy' ? '비중 증가' : '비중 감소'} 권장`,
+        }))
+      const parsedChanges = Array.isArray(parsed.suggestedChanges) ? parsed.suggestedChanges as typeof defaultChanges : defaultChanges
+
       return {
-        overlapScore: parsed.overlapScore || overlapScore,
+        overlapScore: parsedOverlapScore,
         deviations,
-        aiAnalysis: parsed.aiAnalysis || '포트폴리오 비교 분석을 수행했습니다.',
-        suggestedChanges: parsed.suggestedChanges || deviations
-          .filter((d) => d.priority !== 'low')
-          .map((d) => ({
-            symbol: d.symbol,
-            action: d.action as 'buy' | 'sell',
-            targetWeight: d.celebrityWeight,
-            reasoning: `${d.action === 'buy' ? '비중 증가' : '비중 감소'} 권장`,
-          })),
+        aiAnalysis: parsedAiAnalysis,
+        suggestedChanges: parsedChanges,
       }
     } catch (error) {
       safeLogger.error('[TradeAnalyzer] Portfolio analysis failed', { error })
@@ -366,15 +372,27 @@ ${marketData?.upcomingEvents?.length ? `다가오는 이벤트: ${marketData.upc
   private parseAnalysisResult(response: string): TradeAnalysisResult {
     const parsed = this.parseJSON(response)
 
+    // Type-safe extraction helpers
+    const getString = (value: unknown, fallback: string): string =>
+      typeof value === 'string' ? value : fallback
+    const getNumber = (value: unknown, fallback: number): number =>
+      typeof value === 'number' ? value : fallback
+    const getStringArray = (value: unknown, fallback: string[]): string[] =>
+      Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : fallback
+    const getRecommendation = (value: unknown): 'follow' | 'observe' | 'avoid' => {
+      if (value === 'follow' || value === 'observe' || value === 'avoid') return value
+      return 'observe'
+    }
+
     return {
-      summary: parsed.summary || '분석 요약 없음',
-      background: parsed.background || '배경 정보 없음',
-      reasoning: parsed.reasoning || '추론 정보 없음',
-      risks: parsed.risks || ['정보 없음'],
-      recommendation: parsed.recommendation || 'observe',
-      confidence: parsed.confidence || 50,
-      relatedNews: parsed.relatedNews,
-      historicalPattern: parsed.historicalPattern,
+      summary: getString(parsed.summary, '분석 요약 없음'),
+      background: getString(parsed.background, '배경 정보 없음'),
+      reasoning: getString(parsed.reasoning, '추론 정보 없음'),
+      risks: getStringArray(parsed.risks, ['정보 없음']),
+      recommendation: getRecommendation(parsed.recommendation),
+      confidence: getNumber(parsed.confidence, 50),
+      relatedNews: Array.isArray(parsed.relatedNews) ? parsed.relatedNews.filter((v): v is string => typeof v === 'string') : undefined,
+      historicalPattern: typeof parsed.historicalPattern === 'string' ? parsed.historicalPattern : undefined,
     }
   }
 

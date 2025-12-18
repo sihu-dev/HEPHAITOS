@@ -11,6 +11,9 @@ import {
   ColorType,
   CrosshairMode,
   LineStyle,
+  CandlestickSeries,
+  HistogramSeries,
+  LineSeries,
   type IChartApi,
   type ISeriesApi,
   type CandlestickData,
@@ -72,6 +75,7 @@ const chartTheme = {
   indicatorColors: {
     sma: '#f59e0b',
     ema: '#8b5cf6',
+    bollinger: '#8b5cf6',
     rsi: '#06b6d4',
     macdLine: '#3b82f6',
     macdSignal: '#f97316',
@@ -216,8 +220,8 @@ export const TradingChart = memo(function TradingChart({
 
     chartRef.current = chart
 
-    // Add candlestick series
-    const candleSeries = chart.addCandlestickSeries({
+    // Add candlestick series (v5 API)
+    const candleSeries = chart.addSeries(CandlestickSeries, {
       upColor: chartTheme.upColor,
       downColor: chartTheme.downColor,
       borderUpColor: chartTheme.upColor,
@@ -227,9 +231,9 @@ export const TradingChart = memo(function TradingChart({
     })
     candleSeriesRef.current = candleSeries
 
-    // Add volume series
+    // Add volume series (v5 API)
     if (showVolume) {
-      const volumeSeries = chart.addHistogramSeries({
+      const volumeSeries = chart.addSeries(HistogramSeries, {
         priceFormat: { type: 'volume' },
         priceScaleId: 'volume',
       })
@@ -329,7 +333,7 @@ export const TradingChart = memo(function TradingChart({
         case 'bollinger':
           const bb = calculateBollingerBands(closes, overlay.period)
           // Add three lines for Bollinger Bands
-          const upperSeries = chartRef.current!.addLineSeries({
+          const upperSeries = chartRef.current!.addSeries(LineSeries, {
             color: chartTheme.indicatorColors.bollingerUpper,
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
@@ -337,14 +341,14 @@ export const TradingChart = memo(function TradingChart({
           upperSeries.setData(convertToLineData(times, bb.upper))
           overlaySeriesRef.current.push(upperSeries)
 
-          const middleSeries = chartRef.current!.addLineSeries({
+          const middleSeries = chartRef.current!.addSeries(LineSeries, {
             color: chartTheme.indicatorColors.bollingerMiddle,
             lineWidth: 1,
           })
           middleSeries.setData(convertToLineData(times, bb.middle))
           overlaySeriesRef.current.push(middleSeries)
 
-          const lowerSeries = chartRef.current!.addLineSeries({
+          const lowerSeries = chartRef.current!.addSeries(LineSeries, {
             color: chartTheme.indicatorColors.bollingerLower,
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
@@ -355,7 +359,7 @@ export const TradingChart = memo(function TradingChart({
       }
 
       if (values.length > 0) {
-        const lineSeries = chartRef.current!.addLineSeries({
+        const lineSeries = chartRef.current!.addSeries(LineSeries, {
           color,
           lineWidth: 2,
           crosshairMarkerVisible: false,

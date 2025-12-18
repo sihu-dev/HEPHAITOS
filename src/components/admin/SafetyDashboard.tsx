@@ -422,7 +422,7 @@ export function SafetyDashboard() {
                 Test Soften
               </Button>
 
-              {testResult && (
+              {testResult !== null && (
                 <div className="mt-4 p-4 bg-white/5 rounded-lg">
                   <h4 className="text-sm font-medium mb-2">Result:</h4>
                   <pre className="text-xs overflow-auto max-h-64">

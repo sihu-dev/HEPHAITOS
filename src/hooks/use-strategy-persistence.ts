@@ -42,6 +42,26 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
 
     try {
       const supabase = getSupabaseBrowserClient()
+      if (!supabase) {
+        // Fallback to localStorage when Supabase is not available
+        const localStrategies = JSON.parse(localStorage.getItem('hephaitos_strategies') || '[]')
+        const strategyId = params.id || `local_${Date.now()}`
+        const strategyData = {
+          id: strategyId,
+          name: params.name,
+          description: params.description || '',
+          graph: params.graph,
+          updatedAt: new Date().toISOString(),
+        }
+        const existingIndex = localStrategies.findIndex((s: { id: string }) => s.id === strategyId)
+        if (existingIndex >= 0) {
+          localStrategies[existingIndex] = strategyData
+        } else {
+          localStrategies.push(strategyData)
+        }
+        localStorage.setItem('hephaitos_strategies', JSON.stringify(localStrategies))
+        return strategyId
+      }
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -132,6 +152,10 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
       }
 
       const supabase = getSupabaseBrowserClient()
+      if (!supabase) {
+        setError('서비스를 사용할 수 없습니다')
+        return null
+      }
       const { data, error: fetchError } = await supabase
         .from('strategies')
         .select('graph')
@@ -155,9 +179,6 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
     setError(null)
 
     try {
-      const supabase = getSupabaseBrowserClient()
-      const { data: { user } } = await supabase.auth.getUser()
-
       // Get local strategies
       const localStrategies = JSON.parse(localStorage.getItem('hephaitos_strategies') || '[]')
         .map((s: { id: string; name: string; updatedAt: string }) => ({
@@ -165,6 +186,12 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
           name: s.name,
           updatedAt: s.updatedAt,
         }))
+
+      const supabase = getSupabaseBrowserClient()
+      if (!supabase) {
+        return localStrategies
+      }
+      const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
         return localStrategies

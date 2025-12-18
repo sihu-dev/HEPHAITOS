@@ -17,6 +17,8 @@ export const generateReportSchema = z.object({
   mentorId: z.string().optional(),
   focusSectors: z.array(z.string()).optional(),
   timeframe: z.enum(['daily', 'weekly', 'monthly']).default('daily'),
+  customPrompt: z.string().optional(),
+  minConfidence: z.number().min(0).max(1).optional(),
 })
 
 // ============================================
@@ -24,16 +26,19 @@ export const generateReportSchema = z.object({
 // ============================================
 
 export const tradeAnalysisSchema = z.object({
-  trades: z.array(
-    z.object({
-      symbol: z.string(),
-      side: z.enum(['buy', 'sell']),
-      quantity: z.number().positive(),
-      price: z.number().positive(),
-      timestamp: z.string().or(z.number()),
-    })
-  ),
-  userId: z.string().optional(),
+  celebrity: z.string(),
+  ticker: z.string(),
+  company: z.string(),
+  action: z.enum(['buy', 'sell']),
+  amount: z.string(),
+  date: z.string(),
+  currentPrice: z.number().optional(),
+  recentNews: z.array(z.string()).optional(),
+  portfolioContext: z.object({
+    previousHoldings: z.number().optional(),
+    newHoldings: z.number().optional(),
+    portfolioWeight: z.number().optional(),
+  }).optional(),
 })
 
 // ============================================

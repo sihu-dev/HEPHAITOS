@@ -30,28 +30,29 @@ export async function GET(req: NextRequest) {
 
     const supabase = await createServerSupabaseClient();
 
+    // Leaderboard entry type
+    interface LeaderboardEntry {
+      strategy_id: string;
+      strategy_name: string;
+      creator_id: string;
+      backtest_count: number;
+      avg_return: number;
+      avg_sharpe: number;
+      avg_cagr: number;
+      avg_mdd: number;
+      rank_sharpe: number;
+      rank_cagr: number;
+      last_backtest_at: string;
+    }
+
     // 1. Materialized View에서 데이터 조회
-    const { data, error, count } = await supabase
-      .rpc('get_leaderboard', {
-        p_sort_by: sortBy,
-        p_limit: limit,
-        p_offset: offset,
-      })
-      .returns<
-        Array<{
-          strategy_id: string;
-          strategy_name: string;
-          creator_id: string;
-          backtest_count: number;
-          avg_return: number;
-          avg_sharpe: number;
-          avg_cagr: number;
-          avg_mdd: number;
-          rank_sharpe: number;
-          rank_cagr: number;
-          last_backtest_at: string;
-        }>
-      >();
+    const { data, error, count } = await (supabase as unknown as {
+      rpc: (fn: string, params: Record<string, unknown>) => { returns: <T>() => Promise<{ data: T | null; error: Error | null; count?: number }> }
+    }).rpc('get_leaderboard', {
+      p_sort_by: sortBy,
+      p_limit: limit,
+      p_offset: offset,
+    }).returns<LeaderboardEntry[]>();
 
     if (error) {
       console.error('[Leaderboard] Query error:', error);
@@ -68,7 +69,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 2. 최소 백테스트 필터링
-    const filtered = data?.filter((s) => s.backtest_count >= minBacktests) || [];
+    const filtered = data?.filter((s: LeaderboardEntry) => s.backtest_count >= minBacktests) || [];
 
     // 3. 전체 개수 조회
     const { count: totalCount } = await supabase
@@ -80,7 +81,7 @@ export async function GET(req: NextRequest) {
       {
         success: true,
         data: {
-          strategies: filtered.map((s, index) => ({
+          strategies: filtered.map((s: LeaderboardEntry, index: number) => ({
             rank: offset + index + 1,
             strategyId: s.strategy_id,
             strategyName: s.strategy_name,

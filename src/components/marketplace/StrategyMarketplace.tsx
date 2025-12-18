@@ -5,7 +5,8 @@
 // Loop 20: 전략 마켓플레이스 v1
 // ============================================
 
-import { useState, useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
+import Image from 'next/image'
 import {
   TrendingUp,
   Star,
@@ -137,11 +138,7 @@ export default function StrategyMarketplace() {
   const [selectedListing, setSelectedListing] = useState<StrategyListing | null>(null)
 
   // 데이터 로드
-  useEffect(() => {
-    loadData()
-  }, [activeCategory, sortBy])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true)
     try {
       const [listingsRes, featuredRes, creatorsRes, categoriesRes, statsRes] = await Promise.all([
@@ -181,7 +178,11 @@ export default function StrategyMarketplace() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeCategory, sortBy])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return
@@ -640,9 +641,9 @@ function CreatorCard({ creator, rank }: { creator: Creator; rank: number }) {
         </span>
       </div>
 
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center">
+      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center overflow-hidden">
         {creator.avatar_url ? (
-          <img src={creator.avatar_url} alt="" className="w-full h-full rounded-full" />
+          <Image src={creator.avatar_url} alt="" width={48} height={48} className="w-full h-full object-cover" />
         ) : (
           <User className="w-6 h-6" />
         )}

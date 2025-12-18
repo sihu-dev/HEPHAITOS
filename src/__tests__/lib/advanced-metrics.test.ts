@@ -19,11 +19,13 @@ describe('AdvancedMetricsCalculator', () => {
     entryPrice,
     exitPrice,
     quantity: 1,
-    entryTime: new Date(),
-    exitTime: new Date(Date.now() + duration),
+    entryTime: Date.now(),
+    exitTime: Date.now() + duration,
     pnl,
     pnlPercent: (pnl / (entryPrice * 1)) * 100,
     commission: 10,
+    slippage: 0.0005,
+    status: 'closed' as const,
   })
 
   // Helper function to create equity curve
@@ -301,12 +303,15 @@ describe('AdvancedMetricsCalculator', () => {
       ]
 
       // Total period: 24 hours (86400000 ms)
-      const equityCurve = Array.from({ length: 25 }, (_, i) => ({
-        timestamp: new Date(Date.now() + i * 3600000),
-        totalValue: 100000,
-        cashBalance: 50000,
+      const equityCurve: PortfolioSnapshot[] = Array.from({ length: 25 }, (_, i) => ({
+        timestamp: Date.now() + i * 3600000,
+        equity: 100000,
+        cash: 50000,
         positionValue: 50000,
-        openPositions: [],
+        unrealizedPnl: 0,
+        realizedPnl: 0,
+        drawdown: 0,
+        drawdownPercent: 0,
       }))
 
       const calculator = new AdvancedMetricsCalculator(trades, equityCurve, 100000)

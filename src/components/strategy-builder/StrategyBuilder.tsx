@@ -211,7 +211,7 @@ function StrategyBuilderInner() {
       setEdges((eds) => addEdge(connection, eds))
       setConnectionError(null)
     },
-    [nodes, edges, setEdges]
+    [nodes, edges, setEdges, t]
   )
 
   // Validate connection before it's created

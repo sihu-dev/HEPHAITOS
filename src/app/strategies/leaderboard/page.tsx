@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { StrategyCard } from './components/StrategyCard';
 import { LeaderboardFilters } from './components/LeaderboardFilters';
 
@@ -30,11 +30,7 @@ export default function LeaderboardPage() {
   const [sortBy, setSortBy] = useState<'sharpe' | 'cagr' | 'return'>('sharpe');
   const [total, setTotal] = useState(0);
 
-  useEffect(() => {
-    fetchLeaderboard();
-  }, [sortBy]);
-
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`/api/strategies/leaderboard?sortBy=${sortBy}&limit=100`);
@@ -49,7 +45,11 @@ export default function LeaderboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [sortBy]);
+
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [fetchLeaderboard]);
 
   return (
     <div className="min-h-screen bg-[#0D0D0F] p-6">

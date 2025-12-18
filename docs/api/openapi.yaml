@@ -1,0 +1,1328 @@
+openapi: 3.0.3
+info:
+  title: HEPHAITOS API
+  description: |
+    HEPHAITOS 트레이딩 교육 플랫폼 API
+
+    **중요**: 본 API는 교육 목적이며 투자 조언이 아닙니다.
+    모든 투자 결정은 본인 책임입니다.
+
+    ## 주요 기능
+    - 트레이딩 전략 생성 및 관리
+    - 백테스팅 및 시뮬레이션
+    - AI 기반 전략 생성
+    - 증권사 연동 (UnifiedBroker)
+    - 실시간 시장 데이터
+
+    ## 인증
+    모든 API는 Supabase Auth 토큰이 필요합니다.
+    ```
+    Authorization: Bearer <supabase-access-token>
+    ```
+
+    ## Rate Limits
+    - api: 100 req/min
+    - strategy: 50 req/min
+    - ai: 20 req/min
+    - exchange: 30 req/min
+    - write: 30 req/min
+  version: 2.0.0
+  contact:
+    name: HEPHAITOS Support
+    email: support@hephaitos.com
+    url: https://hephaitos.com
+  license:
+    name: Proprietary
+    url: https://hephaitos.com/terms
+
+servers:
+  - url: https://api.hephaitos.com
+    description: Production server
+  - url: https://staging-api.hephaitos.com
+    description: Staging server
+  - url: http://localhost:3000
+    description: Local development
+
+tags:
+  - name: Strategies
+    description: 트레이딩 전략 CRUD
+  - name: Backtest
+    description: 백테스팅 실행
+  - name: Trading
+    description: 거래 실행 및 조회
+  - name: AI
+    description: AI 기반 전략 생성 및 대화
+  - name: Market Data
+    description: 실시간 시장 데이터
+  - name: Broker
+    description: 증권사 연동
+
+paths:
+  /api/strategies:
+    get:
+      tags:
+        - Strategies
+      summary: 전략 목록 조회
+      description: 사용자의 트레이딩 전략 목록을 조회합니다.
+      operationId: getStrategies
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: 사용자 ID (기본값: 현재 사용자)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: 조회 개수
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: 페이지네이션 오프셋
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [name, updated_at, created_at]
+            default: updated_at
+          description: 정렬 기준
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: 정렬 순서
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StrategiesResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+
+    post:
+      tags:
+        - Strategies
+      summary: 전략 생성
+      description: 새로운 트레이딩 전략을 생성합니다.
+      operationId: createStrategy
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStrategyRequest'
+      responses:
+        '201':
+          description: 전략 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StrategyResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/LegalViolation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/strategies/{strategyId}:
+    get:
+      tags:
+        - Strategies
+      summary: 전략 조회
+      description: 특정 전략의 상세 정보를 조회합니다.
+      operationId: getStrategy
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StrategyId'
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StrategyDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    patch:
+      tags:
+        - Strategies
+      summary: 전략 수정
+      description: 전략 정보를 수정합니다.
+      operationId: updateStrategy
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StrategyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStrategyRequest'
+      responses:
+        '200':
+          description: 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StrategyResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags:
+        - Strategies
+      summary: 전략 삭제
+      description: 전략을 삭제합니다.
+      operationId: deleteStrategy
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StrategyId'
+      responses:
+        '200':
+          description: 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      deleted:
+                        type: boolean
+                        example: true
+                      id:
+                        type: string
+                        format: uuid
+
+  /api/strategies/{strategyId}/performance:
+    get:
+      tags:
+        - Strategies
+      summary: 전략 성과 조회
+      description: 전략의 백테스팅 성과 지표를 조회합니다.
+      operationId: getStrategyPerformance
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/StrategyId'
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [1m, 3m, 6m, 1y, all]
+            default: 1y
+          description: 조회 기간
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceResponse'
+
+  /api/strategies/leaderboard:
+    get:
+      tags:
+        - Strategies
+      summary: 전략 리더보드
+      description: 공개된 전략 중 성과가 우수한 전략 리더보드를 조회합니다.
+      operationId: getStrategiesLeaderboard
+      parameters:
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [sharpe, return, winRate]
+            default: sharpe
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [1m, 3m, 6m, 1y]
+            default: 1y
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaderboardResponse'
+
+  /api/strategies/ranking:
+    get:
+      tags:
+        - Strategies
+      summary: 전략 랭킹
+      description: 카테고리별 전략 랭킹을 조회합니다.
+      operationId: getStrategiesRanking
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [all, momentum, mean-reversion, breakout, ai]
+            default: all
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RankingResponse'
+
+  /api/backtest/queue:
+    post:
+      tags:
+        - Backtest
+      summary: 백테스팅 작업 큐 추가
+      description: 백테스팅 작업을 큐에 추가합니다 (BullMQ).
+      operationId: queueBacktest
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BacktestRequest'
+      responses:
+        '202':
+          description: 작업 큐 추가 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BacktestQueueResponse'
+
+  /api/trades:
+    get:
+      tags:
+        - Trading
+      summary: 거래 내역 조회
+      description: 사용자의 거래 내역을 조회합니다.
+      operationId: getTrades
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: symbol
+          in: query
+          schema:
+            type: string
+          description: 거래 심볼 필터
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 시작일
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: 종료일
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, closed, all]
+            default: all
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradesResponse'
+
+    post:
+      tags:
+        - Trading
+      summary: 거래 실행 (실전)
+      description: 실제 거래를 실행합니다. 실제 자금으로 거래됩니다.
+      operationId: executeTrade
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TradeRequest'
+      responses:
+        '201':
+          description: 주문 제출 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeResponse'
+
+  /api/simulation/trade:
+    get:
+      tags:
+        - Trading
+      summary: 시뮬레이션 거래 내역
+      description: Paper Trading (시뮬레이션) 거래 내역을 조회합니다.
+      operationId: getSimulationTrades
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationTradesResponse'
+
+    post:
+      tags:
+        - Trading
+      summary: 시뮬레이션 거래 실행
+      description: Paper Trading 주문을 실행합니다 (실제 자금 X).
+      operationId: executeSimulationTrade
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TradeRequest'
+      responses:
+        '201':
+          description: 시뮬레이션 주문 체결 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationTradeResponse'
+
+  /api/ai/strategy:
+    post:
+      tags:
+        - AI
+      summary: AI 전략 생성
+      description: AI를 사용하여 자연어 입력으로부터 트레이딩 전략을 생성합니다.
+      operationId: generateAIStrategy
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIStrategyRequest'
+      responses:
+        '200':
+          description: 전략 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIStrategyResponse'
+
+  /api/ai/agent:
+    post:
+      tags:
+        - AI
+      summary: AI 에이전트 대화
+      description: AI 트레이딩 에이전트와 대화합니다.
+      operationId: chatWithAIAgent
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIAgentRequest'
+      responses:
+        '200':
+          description: 응답 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIAgentResponse'
+
+  /api/exchange/tickers:
+    get:
+      tags:
+        - Market Data
+      summary: 실시간 시세 조회
+      description: 실시간 시세 데이터를 조회합니다.
+      operationId: getTickers
+      parameters:
+        - name: symbols
+          in: query
+          schema:
+            type: string
+          description: 심볼 목록 (쉼표 구분, 예: 'BTC/USD,ETH/USD')
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TickersResponse'
+
+  /api/broker:
+    get:
+      tags:
+        - Broker
+      summary: 증권사 연결 상태 조회
+      description: 사용자의 증권사 연결 상태를 조회합니다.
+      operationId: getBrokerConnections
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrokerConnectionsResponse'
+
+    post:
+      tags:
+        - Broker
+      summary: 증권사 연결
+      description: 새로운 증권사 계좌를 연결합니다.
+      operationId: connectBroker
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrokerConnectRequest'
+      responses:
+        '201':
+          description: 연결 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrokerConnectResponse'
+        '401':
+          description: 잘못된 API 키/시크릿
+        '503':
+          description: 증권사 서버 연결 실패
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth 토큰
+
+  parameters:
+    StrategyId:
+      name: strategyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: 전략 ID
+
+  schemas:
+    Strategy:
+      type: object
+      required:
+        - id
+        - name
+        - userId
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "RSI 역발상 전략"
+        description:
+          type: string
+          example: "RSI 30 이하 매수, 70 이상 매도"
+        userId:
+          type: string
+          format: uuid
+        code:
+          type: string
+          description: 전략 코드
+        config:
+          $ref: '#/components/schemas/StrategyConfig'
+        isPublic:
+          type: boolean
+          default: false
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["RSI", "역발상"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    StrategyConfig:
+      type: object
+      properties:
+        entryConditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        exitConditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        riskManagement:
+          $ref: '#/components/schemas/RiskManagement'
+
+    Condition:
+      type: object
+      required:
+        - type
+        - indicator
+        - operator
+        - value
+      properties:
+        type:
+          type: string
+          enum: [indicator, crossover, price]
+        indicator:
+          type: string
+          example: "RSI"
+        period:
+          type: integer
+          example: 14
+        operator:
+          type: string
+          enum: ['<', '>', '=', '<=', '>=']
+        value:
+          type: number
+          example: 30
+
+    RiskManagement:
+      type: object
+      properties:
+        stopLossPercent:
+          type: number
+          example: 5
+        takeProfitPercent:
+          type: number
+          example: 10
+        maxPositionSize:
+          type: number
+          example: 10
+          description: 포트폴리오의 %
+
+    CreateStrategyRequest:
+      type: object
+      required:
+        - name
+        - code
+        - config
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        code:
+          type: string
+        config:
+          $ref: '#/components/schemas/StrategyConfig'
+        isPublic:
+          type: boolean
+          default: false
+        tags:
+          type: array
+          items:
+            type: string
+
+    UpdateStrategyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        config:
+          $ref: '#/components/schemas/StrategyConfig'
+        isPublic:
+          type: boolean
+
+    StrategiesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            strategies:
+              type: array
+              items:
+                $ref: '#/components/schemas/Strategy'
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+
+    StrategyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/Strategy'
+
+    StrategyDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          allOf:
+            - $ref: '#/components/schemas/Strategy'
+            - type: object
+              properties:
+                performance:
+                  $ref: '#/components/schemas/PerformanceMetrics'
+
+    PerformanceMetrics:
+      type: object
+      properties:
+        totalReturn:
+          type: number
+          example: 18.5
+        sharpeRatio:
+          type: number
+          example: 1.82
+        maxDrawdown:
+          type: number
+          example: -8.3
+        winRate:
+          type: number
+          example: 0.65
+        profitFactor:
+          type: number
+          example: 2.1
+        totalTrades:
+          type: integer
+          example: 24
+
+    PerformanceResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            strategyId:
+              type: string
+              format: uuid
+            metrics:
+              $ref: '#/components/schemas/PerformanceMetrics'
+            equityCurve:
+              type: array
+              items:
+                type: object
+                properties:
+                  timestamp:
+                    type: integer
+                  value:
+                    type: number
+            trades:
+              type: array
+              items:
+                $ref: '#/components/schemas/Trade'
+            legalCompliance:
+              $ref: '#/components/schemas/LegalCompliance'
+
+    Trade:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        symbol:
+          type: string
+        side:
+          type: string
+          enum: [buy, sell, long, short]
+        quantity:
+          type: number
+        entryPrice:
+          type: number
+        exitPrice:
+          type: number
+        pnl:
+          type: number
+        pnlPercent:
+          type: number
+        status:
+          type: string
+          enum: [open, closed]
+        openedAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+
+    LegalCompliance:
+      type: object
+      properties:
+        passed:
+          type: boolean
+        warnings:
+          type: array
+          items:
+            type: string
+        riskLevel:
+          type: string
+          enum: [low, moderate, high, very_high]
+        disclaimer:
+          type: string
+          example: "이 전략은 교육 목적이며 투자 조언이 아닙니다."
+
+    LeaderboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            strategies:
+              type: array
+              items:
+                type: object
+                properties:
+                  rank:
+                    type: integer
+                  strategyId:
+                    type: string
+                    format: uuid
+                  strategyName:
+                    type: string
+                  creatorName:
+                    type: string
+                  metrics:
+                    $ref: '#/components/schemas/PerformanceMetrics'
+                  followerCount:
+                    type: integer
+                  isVerified:
+                    type: boolean
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+
+    RankingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            category:
+              type: string
+            rankings:
+              type: array
+              items:
+                type: object
+                properties:
+                  rank:
+                    type: integer
+                  strategyId:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  score:
+                    type: number
+                  tags:
+                    type: array
+                    items:
+                      type: string
+
+    BacktestRequest:
+      type: object
+      required:
+        - strategyId
+        - symbol
+        - startDate
+        - endDate
+      properties:
+        strategyId:
+          type: string
+          format: uuid
+        symbol:
+          type: string
+          example: "BTC/USD"
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        initialCapital:
+          type: number
+          default: 100000
+        commission:
+          type: number
+          default: 0.001
+        slippage:
+          type: number
+          default: 0.0005
+
+    BacktestQueueResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            jobId:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [queued, processing, completed, failed]
+            position:
+              type: integer
+            estimatedTime:
+              type: integer
+              description: 예상 시간 (초)
+
+    TradeRequest:
+      type: object
+      required:
+        - symbol
+        - side
+        - quantity
+        - orderType
+      properties:
+        symbol:
+          type: string
+        side:
+          type: string
+          enum: [buy, sell]
+        quantity:
+          type: number
+        orderType:
+          type: string
+          enum: [market, limit, stop, stop_limit]
+        price:
+          type: number
+        stopLoss:
+          type: number
+        takeProfit:
+          type: number
+
+    TradesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            trades:
+              type: array
+              items:
+                $ref: '#/components/schemas/Trade'
+            summary:
+              type: object
+              properties:
+                totalTrades:
+                  type: integer
+                openTrades:
+                  type: integer
+                closedTrades:
+                  type: integer
+                totalPnl:
+                  type: number
+                winRate:
+                  type: number
+
+    TradeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            orderId:
+              type: string
+              format: uuid
+            status:
+              type: string
+              enum: [submitted, filled, rejected]
+            timestamp:
+              type: string
+              format: date-time
+
+    SimulationTradesResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            trades:
+              type: array
+              items:
+                $ref: '#/components/schemas/Trade'
+            account:
+              type: object
+              properties:
+                balance:
+                  type: number
+                unrealizedPnl:
+                  type: number
+                totalPnl:
+                  type: number
+
+    SimulationTradeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            orderId:
+              type: string
+            status:
+              type: string
+              example: "filled"
+            filledPrice:
+              type: number
+            mode:
+              type: string
+              example: "simulation"
+            timestamp:
+              type: string
+              format: date-time
+
+    AIStrategyRequest:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          example: "RSI 30 이하일 때 매수하고 70 이상일 때 매도하는 전략을 만들어줘"
+        model:
+          type: string
+          enum: [claude-4, gpt-4]
+          default: "claude-4"
+        riskProfile:
+          type: string
+          enum: [conservative, moderate, aggressive]
+          default: "moderate"
+
+    AIStrategyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            strategy:
+              allOf:
+                - $ref: '#/components/schemas/Strategy'
+                - type: object
+                  properties:
+                    legalCompliance:
+                      $ref: '#/components/schemas/LegalCompliance'
+                    tokensUsed:
+                      type: integer
+                    costKRW:
+                      type: number
+
+    AIAgentRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        conversationId:
+          type: string
+          format: uuid
+        model:
+          type: string
+          default: "claude-4"
+
+    AIAgentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            response:
+              type: string
+            suggestions:
+              type: array
+              items:
+                type: string
+            conversationId:
+              type: string
+              format: uuid
+            tokensUsed:
+              type: integer
+            legalCompliance:
+              type: object
+              properties:
+                disclaimer:
+                  type: string
+
+    TickersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            tickers:
+              type: array
+              items:
+                type: object
+                properties:
+                  symbol:
+                    type: string
+                  bid:
+                    type: number
+                  ask:
+                    type: number
+                  last:
+                    type: number
+                  change:
+                    type: number
+                  changePercent:
+                    type: number
+                  volume:
+                    type: number
+                  timestamp:
+                    type: integer
+
+    BrokerConnectionsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            connections:
+              type: array
+              items:
+                type: object
+                properties:
+                  brokerId:
+                    type: string
+                    enum: [KIS, KIWOOM, ALPACA, BINANCE, UPBIT]
+                  accountNumber:
+                    type: string
+                  connected:
+                    type: boolean
+                  lastSync:
+                    type: string
+                    format: date-time
+                  balance:
+                    type: object
+                    properties:
+                      total:
+                        type: number
+                      available:
+                        type: number
+
+    BrokerConnectRequest:
+      type: object
+      required:
+        - brokerId
+        - apiKey
+        - apiSecret
+      properties:
+        brokerId:
+          type: string
+          enum: [KIS, KIWOOM, ALPACA, BINANCE, UPBIT]
+        apiKey:
+          type: string
+        apiSecret:
+          type: string
+        accountNumber:
+          type: string
+          description: 계좌번호 (KIS 필수)
+        isPaper:
+          type: boolean
+          default: false
+
+    BrokerConnectResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            connectionId:
+              type: string
+              format: uuid
+            brokerId:
+              type: string
+            status:
+              type: string
+              enum: [connected, failed]
+            accountNumber:
+              type: string
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        hasMore:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+
+  responses:
+    Unauthorized:
+      description: 인증 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "UNAUTHORIZED"
+              message: "로그인이 필요합니다."
+
+    Forbidden:
+      description: 권한 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "FORBIDDEN"
+              message: "접근 권한이 없습니다."
+
+    NotFound:
+      description: 리소스를 찾을 수 없음
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "NOT_FOUND"
+              message: "리소스를 찾을 수 없습니다."
+
+    ValidationError:
+      description: 요청 데이터 검증 실패
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "VALIDATION_ERROR"
+              message: "잘못된 요청 데이터입니다."
+
+    LegalViolation:
+      description: 법률 준수 위반
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "LEGAL_VIOLATION"
+              message: "투자 조언 표현이 포함되어 있습니다."
+
+    RateLimitExceeded:
+      description: Rate Limit 초과
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "RATE_LIMIT_EXCEEDED"
+              message: "요청 한도를 초과했습니다. 잠시 후 다시 시도하세요."

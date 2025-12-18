@@ -7,12 +7,10 @@ import ko from './messages/ko.json'
 
 const messages = { en, ko }
 
-type TranslationValue = string | string[] | Record<string, unknown>
-
 interface I18nContextType {
   locale: Locale
   setLocale: (locale: Locale) => void
-  t: (key: string) => TranslationValue
+  t: (key: string) => string
 }
 
 const I18nContext = createContext<I18nContextType | null>(null)
@@ -32,7 +30,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('locale', newLocale)
   }
 
-  const t = (key: string): TranslationValue => {
+  const t = (key: string): string => {
     const keys = key.split('.')
     let value: unknown = messages[locale]
 
@@ -44,8 +42,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    // Return the value as-is (string, array, or object)
-    return value !== undefined ? (value as TranslationValue) : key
+    // Return string value (convert arrays/objects to string)
+    if (typeof value === 'string') return value
+    if (Array.isArray(value)) return value.join(', ')
+    return key
   }
 
   return (

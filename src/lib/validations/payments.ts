@@ -12,6 +12,8 @@ export const createPaymentSchema = z.object({
   plan: z.enum(['free', 'starter', 'pro', 'premium']),
   billingCycle: z.enum(['monthly', 'yearly']).default('monthly'),
   userId: z.string().optional(),
+  successUrl: z.string().url().optional(),
+  failUrl: z.string().url().optional(),
 })
 
 // ============================================

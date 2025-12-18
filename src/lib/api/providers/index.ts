@@ -4,6 +4,21 @@
 // ============================================
 
 // ============================================
+// Import market helpers for local use
+// ============================================
+import {
+  isMarketOpen as kisIsMarketOpen,
+  isPreMarket as kisIsPreMarket,
+  isValidSymbol as kisIsValidSymbol,
+} from './kis'
+
+import {
+  isUSMarketOpen as polygonIsUSMarketOpen,
+  isExtendedHours as polygonIsExtendedHours,
+  isValidTicker as polygonIsValidTicker,
+} from './polygon'
+
+// ============================================
 // AI Provider (Claude)
 // ============================================
 
@@ -28,9 +43,9 @@ export {
 export {
   kisProvider,
   default as kis,
-  isMarketOpen as isKRMarketOpen,
-  isPreMarket,
-  isValidSymbol as isValidKRSymbol,
+  isMarketOpen as kisIsMarketOpenExport,
+  isPreMarket as kisIsPreMarketExport,
+  isValidSymbol as kisIsValidSymbolExport,
   type KISConfig,
   type KISToken,
   type StockPrice as KRStockPrice,
@@ -49,9 +64,9 @@ export {
 export {
   polygonProvider,
   default as polygon,
-  isUSMarketOpen,
-  isExtendedHours,
-  isValidTicker as isValidUSTicker,
+  isUSMarketOpen as polygonIsUSMarketOpenExport,
+  isExtendedHours as polygonIsExtendedHoursExport,
+  isValidTicker as polygonIsValidTickerExport,
   type PolygonConfig,
   type TickerDetails,
   type StockPrice as USStockPrice,
@@ -255,9 +270,9 @@ export async function getUnifiedPrice(
  */
 export function isMarketOpen(market: Market): boolean {
   if (market === 'KR') {
-    return isKRMarketOpen()
+    return kisIsMarketOpen()
   } else {
-    return isUSMarketOpen()
+    return polygonIsUSMarketOpen()
   }
 }
 
@@ -266,15 +281,21 @@ export function isMarketOpen(market: Market): boolean {
  */
 export function isValidSymbol(symbol: string, market: Market): boolean {
   if (market === 'KR') {
-    return isValidKRSymbol(symbol)
+    return kisIsValidSymbol(symbol)
   } else {
-    return isValidUSTicker(symbol)
+    return polygonIsValidTicker(symbol)
   }
 }
 
 // ============================================
-// Re-export market helpers
+// Re-export market helpers (with aliased names)
 // ============================================
 
-export { isKRMarketOpen, isPreMarket, isValidKRSymbol }
-export { isUSMarketOpen, isExtendedHours, isValidUSTicker }
+export {
+  kisIsMarketOpen as isKRMarketOpen,
+  kisIsPreMarket as isPreMarket,
+  kisIsValidSymbol as isValidKRSymbol,
+  polygonIsUSMarketOpen as isUSMarketOpen,
+  polygonIsExtendedHours as isExtendedHours,
+  polygonIsValidTicker as isValidUSTicker,
+}

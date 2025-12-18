@@ -23,28 +23,29 @@ import { clsx } from 'clsx'
 // Interactive Demo Components
 // ============================================
 
+// Demo conversations data (constant)
+const DEMO_CONVERSATIONS = [
+  [
+    { role: 'user' as const, content: '비트코인 RSI 30 이하면 매수하는 전략 만들어줘' },
+    { role: 'assistant' as const, content: '✨ 전략이 생성되었습니다!\n\n**RSI 역발상 매수 전략**\n• 진입: RSI(14) < 30\n• 청산: RSI(14) > 70\n• 손절: -5%\n\n백테스트를 실행하시겠습니까?' },
+  ],
+  [
+    { role: 'user' as const, content: '3개월 백테스트 돌려줘' },
+    { role: 'assistant' as const, content: '📊 백테스트 완료!\n\n• 총 수익률: +18.5%\n• 샤프 비율: 1.82\n• 최대 낙폭: -8.3%\n• 총 거래: 24회\n\n✅ 전략이 양호한 성과를 보입니다.' },
+  ],
+]
+
 // Demo Agent Chat Preview
 const AgentChatDemo = memo(function AgentChatDemo() {
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
   const [isTyping, setIsTyping] = useState(false)
   const [currentDemo, setCurrentDemo] = useState(0)
 
-  const demoConversations = [
-    [
-      { role: 'user' as const, content: '비트코인 RSI 30 이하면 매수하는 전략 만들어줘' },
-      { role: 'assistant' as const, content: '✨ 전략이 생성되었습니다!\n\n**RSI 역발상 매수 전략**\n• 진입: RSI(14) < 30\n• 청산: RSI(14) > 70\n• 손절: -5%\n\n백테스트를 실행하시겠습니까?' },
-    ],
-    [
-      { role: 'user' as const, content: '3개월 백테스트 돌려줘' },
-      { role: 'assistant' as const, content: '📊 백테스트 완료!\n\n• 총 수익률: +18.5%\n• 샤프 비율: 1.82\n• 최대 낙폭: -8.3%\n• 총 거래: 24회\n\n✅ 전략이 양호한 성과를 보입니다.' },
-    ],
-  ]
-
   const runDemo = useCallback(() => {
     setMessages([])
     setIsTyping(true)
 
-    const conversation = demoConversations[currentDemo]
+    const conversation = DEMO_CONVERSATIONS[currentDemo]
     let index = 0
 
     const addMessage = () => {
@@ -54,7 +55,7 @@ const AgentChatDemo = memo(function AgentChatDemo() {
         setTimeout(addMessage, index === 1 ? 1500 : 800)
       } else {
         setIsTyping(false)
-        setCurrentDemo(prev => (prev + 1) % demoConversations.length)
+        setCurrentDemo(prev => (prev + 1) % DEMO_CONVERSATIONS.length)
       }
     }
 

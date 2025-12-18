@@ -60,7 +60,7 @@ describe('Rate Limit Middleware', () => {
 
   describe('withRateLimit', () => {
     it('should allow request when under limit', async () => {
-      const handler = vi.fn(() => NextResponse.json({ success: true }))
+      const handler = vi.fn(async () => NextResponse.json({ success: true }))
       const wrappedHandler = withRateLimit(handler, { category: 'api' })
 
       const request = new NextRequest('http://localhost:3000/api/test')
@@ -78,7 +78,7 @@ describe('Rate Limit Middleware', () => {
         retryAfter: 60,
       })
 
-      const handler = vi.fn(() => NextResponse.json({ success: true }))
+      const handler = vi.fn(async () => NextResponse.json({ success: true }))
       const wrappedHandler = withRateLimit(handler, { category: 'api' })
 
       const request = new NextRequest('http://localhost:3000/api/test')
@@ -93,7 +93,7 @@ describe('Rate Limit Middleware', () => {
     })
 
     it('should add rate limit headers to response', async () => {
-      const handler = vi.fn(() => NextResponse.json({ success: true }))
+      const handler = vi.fn(async () => NextResponse.json({ success: true }))
       const wrappedHandler = withRateLimit(handler, { category: 'api' })
 
       const request = new NextRequest('http://localhost:3000/api/test')
@@ -105,7 +105,7 @@ describe('Rate Limit Middleware', () => {
     })
 
     it('should skip rate limit check when skipCheck returns true', async () => {
-      const handler = vi.fn(() => NextResponse.json({ success: true }))
+      const handler = vi.fn(async () => NextResponse.json({ success: true }))
       const wrappedHandler = withRateLimit(handler, {
         category: 'api',
         skipCheck: () => true,
@@ -121,7 +121,7 @@ describe('Rate Limit Middleware', () => {
     it('should fail-open on rate limiter error', async () => {
       vi.mocked(apiRateLimiter.check).mockRejectedValueOnce(new Error('Redis connection failed'))
 
-      const handler = vi.fn(() => NextResponse.json({ success: true }))
+      const handler = vi.fn(async () => NextResponse.json({ success: true }))
       const wrappedHandler = withRateLimit(handler, { category: 'api' })
 
       const request = new NextRequest('http://localhost:3000/api/test')
@@ -189,7 +189,7 @@ describe('Rate Limit Middleware', () => {
 describe('Error Handler Middleware', () => {
   describe('withErrorHandler', () => {
     it('should pass through successful responses', async () => {
-      const handler = vi.fn(() => NextResponse.json({ data: 'test' }))
+      const handler = vi.fn(async () => NextResponse.json({ data: 'test' }))
       const wrappedHandler = withErrorHandler(handler)
 
       const request = new NextRequest('http://localhost:3000/api/test')
@@ -200,7 +200,7 @@ describe('Error Handler Middleware', () => {
     })
 
     it('should catch and handle errors', async () => {
-      const handler = vi.fn(() => {
+      const handler = vi.fn(async () => {
         throw new Error('Something went wrong')
       })
       const wrappedHandler = withErrorHandler(handler, { logErrors: false })
@@ -215,8 +215,9 @@ describe('Error Handler Middleware', () => {
     })
 
     it('should handle async errors', async () => {
-      const handler = vi.fn(async () => {
+      const handler = vi.fn(async (): Promise<NextResponse> => {
         await Promise.reject(new Error('Async error'))
+        return NextResponse.json({}) // Never reached, but satisfies type
       })
       const wrappedHandler = withErrorHandler(handler, { logErrors: false })
 
@@ -355,7 +356,7 @@ describe('withApiMiddleware', () => {
   })
 
   it('should combine rate limiting and error handling', async () => {
-    const handler = vi.fn(() => NextResponse.json({ success: true }))
+    const handler = vi.fn(async () => NextResponse.json({ success: true }))
     const wrappedHandler = withApiMiddleware(handler, {
       rateLimit: { category: 'api' },
       errorHandler: { logErrors: false },
@@ -377,7 +378,7 @@ describe('withApiMiddleware', () => {
       retryAfter: 60,
     })
 
-    const handler = vi.fn(() => NextResponse.json({ success: true }))
+    const handler = vi.fn(async () => NextResponse.json({ success: true }))
     const wrappedHandler = withApiMiddleware(handler, {
       rateLimit: { category: 'api' },
       errorHandler: { logErrors: false },
@@ -391,7 +392,7 @@ describe('withApiMiddleware', () => {
   })
 
   it('should catch handler errors', async () => {
-    const handler = vi.fn(() => {
+    const handler = vi.fn(async () => {
       throw new Error('Handler error')
     })
     const wrappedHandler = withApiMiddleware(handler, {

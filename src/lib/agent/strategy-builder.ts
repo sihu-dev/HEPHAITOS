@@ -298,7 +298,7 @@ export class StrategyBuilder {
     // Validate with legal compliance
     const compliance = LegalCompliance.assessStrategyRisk({
       stopLoss: risk.stopLoss,
-      leverage: entities.indicators.some(i => i.type === 'leverage') ? 5 : undefined,
+      leverage: undefined, // 'leverage'는 IndicatorType에 없음
       positionSize: this.extractPositionSize(entities),
       indicators: entities.indicators.map(i => i.type),
     })

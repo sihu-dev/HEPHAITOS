@@ -57,7 +57,7 @@ export function useRealtimePortfolio(userId?: string) {
         .from('simulation_accounts')
         .select('balance, initial_balance, created_at')
         .eq('user_id', userId)
-        .single()
+        .single<{ balance: number; initial_balance: number; created_at: string }>()
 
       if (fetchError) throw fetchError
 

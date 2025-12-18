@@ -65,7 +65,7 @@ export const GET = withApiMiddleware(
 
     if (!user) {
       // Return mock data for non-authenticated users
-      return returnMockTrades(page, limit, strategyId, symbol)
+      return returnMockTrades(page, limit, strategyId ?? null, symbol ?? null)
     }
 
     // Try to fetch real trades from Supabase
@@ -93,7 +93,7 @@ export const GET = withApiMiddleware(
 
     if (error || !trades?.length) {
       // Fallback to mock data
-      return returnMockTrades(page, limit, strategyId, symbol)
+      return returnMockTrades(page, limit, strategyId ?? null, symbol ?? null)
     }
 
     // Transform to Trade type
@@ -221,8 +221,8 @@ export const POST = withApiMiddleware(
       type: type,
       status: 'pending',
       price: price || 0,
-      amount: amount,
-      total: (price || 0) * amount,
+      amount: amount || 0,
+      total: (price || 0) * (amount || 0),
     }
 
     const { data: newTrade, error } = await supabase

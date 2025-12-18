@@ -83,10 +83,16 @@ export function useFeatureFlags() {
         }
 
         // Try to fetch from Supabase (if feature_flags table exists)
+        interface FeatureFlagRow {
+          key: string
+          enabled: boolean
+          variant?: string
+          description?: string
+        }
         const { data, error } = await supabase
           .from('feature_flags')
           .select('*')
-          .eq('is_active', true)
+          .eq('is_active', true) as { data: FeatureFlagRow[] | null; error: Error | null }
 
         if (error) {
           // Table doesn't exist yet, use defaults
@@ -97,7 +103,7 @@ export function useFeatureFlags() {
 
         if (data) {
           const fetchedFlags: Record<string, FeatureFlag> = {}
-          data.forEach((flag) => {
+          data.forEach((flag: FeatureFlagRow) => {
             fetchedFlags[flag.key] = {
               key: flag.key,
               enabled: flag.enabled,

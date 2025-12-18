@@ -29,6 +29,7 @@ export function useRealtimeStrategies(initialStrategies: Strategy[]) {
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient()
+    if (!supabase) return
 
     // Subscribe to strategy_performance channel
     const strategyChannel = supabase

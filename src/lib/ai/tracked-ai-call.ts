@@ -108,14 +108,15 @@ export async function callOpenAIWithTracking(
 
   try {
     // OpenAI SDK 동적 import (선택적 의존성)
-    let OpenAI: any
-    try {
-      const module = await import('openai')
-      OpenAI = module.OpenAI
-    } catch (e) {
-      throw new Error('OpenAI SDK가 설치되지 않았습니다. npm install openai 를 실행하세요.')
-    }
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+    const openai = await (async () => {
+      try {
+        // @ts-expect-error - openai is optional dependency
+        const { OpenAI } = await import('openai')
+        return new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+      } catch {
+        throw new Error('OpenAI SDK가 설치되지 않았습니다. npm install openai 를 실행하세요.')
+      }
+    })()
 
     if (!process.env.OPENAI_API_KEY) {
       throw new Error('OPENAI_API_KEY 환경 변수가 설정되지 않았습니다.')

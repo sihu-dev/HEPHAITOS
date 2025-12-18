@@ -95,11 +95,10 @@ Format:
             { role: 'system', content: p.systemPrompt },
             { role: 'user', content: userPrompt },
           ],
-          maxTokens: 500,
         });
 
         p.output = result.text;
-        p.tokensUsed = result.usage.totalTokens;
+        p.tokensUsed = result.usage?.totalTokens ?? 0;
         p.latency = Date.now() - perspectiveStart;
 
         return p;
@@ -157,14 +156,13 @@ OUTPUT FORMAT:
 `,
       },
     ],
-    maxTokens: 800,
   });
 
   const aggregationLatency = Date.now() - aggregationStart;
   const totalLatency = Date.now() - startTime;
 
   // 비용 계산 (Claude Sonnet: $3/1M input, $15/1M output)
-  const totalTokens = results.reduce((sum, p) => sum + (p.tokensUsed || 0), 0) + aggregated.usage.totalTokens;
+  const totalTokens = results.reduce((sum, p) => sum + (p.tokensUsed || 0), 0) + (aggregated.usage?.totalTokens ?? 0);
   const estimatedCost = (totalTokens / 1_000_000) * 9; // 평균 $9/1M tokens
 
   return {
@@ -201,11 +199,10 @@ Include:
 Be specific and actionable.`,
       },
     ],
-    maxTokens: 800,
   });
 
   const latency = Date.now() - startTime;
-  const cost = (result.usage.totalTokens / 1_000_000) * 9;
+  const cost = ((result.usage?.totalTokens ?? 0) / 1_000_000) * 9;
 
   return {
     text: result.text,

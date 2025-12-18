@@ -55,12 +55,11 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. 환불 자격 확인
-    const { data: eligible, error: eligibleError } = await supabase.rpc(
-      'check_refund_eligibility',
-      {
-        p_user_id: user.id,
-      }
-    );
+    const { data: eligible, error: eligibleError } = await (supabase as unknown as {
+      rpc: (fn: string, params: Record<string, unknown>) => Promise<{ data: boolean | null; error: Error | null }>
+    }).rpc('check_refund_eligibility', {
+      p_user_id: user.id,
+    });
 
     if (eligibleError) {
       console.error('[Refund API] Eligibility check error:', eligibleError);
@@ -87,15 +86,15 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. 환불 요청 생성 (멱등성 보장)
-    const { data: refundRequest, error: createError } = await supabase.rpc(
-      'create_refund_request',
-      {
-        p_user_id: user.id,
-        p_payment_id: paymentId,
-        p_amount: amount,
-        p_reason: reason || null,
-      }
-    );
+    interface RefundRequestData { id: string; status: string; amount: number }
+    const { data: refundRequest, error: createError } = await (supabase as unknown as {
+      rpc: (fn: string, params: Record<string, unknown>) => Promise<{ data: RefundRequestData | null; error: Error | null }>
+    }).rpc('create_refund_request', {
+      p_user_id: user.id,
+      p_payment_id: paymentId,
+      p_amount: amount,
+      p_reason: reason || null,
+    });
 
     if (createError) {
       console.error('[Refund API] Create error:', createError);
@@ -109,6 +108,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Edge Function 트리거 (비동기)
+    if (!refundRequest) {
+      return NextResponse.json(
+        { success: false, error: { code: 'CREATE_FAILED', message: '환불 요청 데이터 없음' } },
+        { status: 500 }
+      );
+    }
+
     const { error: functionError } = await supabase.functions.invoke(
       'auto-refund-handler',
       {
@@ -167,12 +173,11 @@ export async function GET(req: NextRequest) {
     }
 
     // 2. 환불 이력 조회
-    const { data: history, error: historyError } = await supabase.rpc(
-      'get_user_refund_history',
-      {
-        p_user_id: user.id,
-      }
-    );
+    const { data: history, error: historyError } = await (supabase as unknown as {
+      rpc: (fn: string, params: Record<string, unknown>) => Promise<{ data: unknown[] | null; error: Error | null }>
+    }).rpc('get_user_refund_history', {
+      p_user_id: user.id,
+    });
 
     if (historyError) {
       console.error('[Refund API] History error:', historyError);

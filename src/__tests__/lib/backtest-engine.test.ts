@@ -45,19 +45,19 @@ function createTestStrategy(overrides?: Partial<Strategy>): Strategy {
     userId: 'user_1',
     name: 'Test Strategy',
     description: 'A test strategy for backtesting',
-    status: 'active',
+    status: 'running',
     config: {
       symbols: ['BTC/USDT'],
       timeframe: '1h',
       entryConditions: [
-        { type: 'rsi', operator: 'less_than', value: 30, indicator: 'rsi', period: 14 },
+        { id: 'entry_rsi', indicator: 'rsi', operator: 'lt', value: 30, params: { period: 14 } },
       ],
       exitConditions: [
-        { type: 'rsi', operator: 'greater_than', value: 70, indicator: 'rsi', period: 14 },
+        { id: 'exit_rsi', indicator: 'rsi', operator: 'gt', value: 70, params: { period: 14 } },
       ],
       riskManagement: {
-        stopLossPercent: 5,
-        takeProfitPercent: 10,
+        stopLoss: 5,
+        takeProfit: 10,
         maxDrawdown: 20,
       },
       allocation: 10,
@@ -71,6 +71,7 @@ function createTestStrategy(overrides?: Partial<Strategy>): Strategy {
 function createTestConfig(overrides?: Partial<BacktestConfig>): BacktestConfig {
   return {
     strategy: createTestStrategy(),
+    symbol: 'BTC/USD',
     startDate: new Date('2024-01-01').getTime(),
     endDate: new Date('2024-03-01').getTime(),
     initialCapital: 100000,
@@ -223,8 +224,8 @@ describe('BacktestEngine', () => {
           entryConditions: [],
           exitConditions: [],
           riskManagement: {
-            stopLossPercent: 2,
-            takeProfitPercent: 10,
+            stopLoss: 2,
+            takeProfit: 10,
           },
           allocation: 10,
         },
@@ -253,8 +254,8 @@ describe('BacktestEngine', () => {
           entryConditions: [],
           exitConditions: [],
           riskManagement: {
-            stopLossPercent: 20,
-            takeProfitPercent: 3,
+            stopLoss: 20,
+            takeProfit: 3,
           },
           allocation: 10,
         },

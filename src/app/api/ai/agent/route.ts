@@ -30,7 +30,7 @@ const processInputSchema = z.object({
 
 const confirmInputSchema = z.object({
   sessionId: z.string().optional().default('default'),
-  confirmed: z.boolean({ required_error: 'confirmed 값이 필요합니다' }),
+  confirmed: z.boolean({ message: 'confirmed 값이 필요합니다' }),
 })
 
 // ============================================

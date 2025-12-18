@@ -89,7 +89,7 @@ export default function DashboardPage() {
 
   // i18n에서 stages 텍스트 가져오기
   const getStageText = (stageId: string) => {
-    const stageData = t(`dashboard.stages.${stageId}`) as Record<string, unknown>
+    const stageData = t(`dashboard.stages.${stageId}`) as unknown as Record<string, unknown>
     return {
       stage: stageData.stage as string,
       title: stageData.title as string,
