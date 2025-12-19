@@ -257,7 +257,7 @@ node scripts/test-toss.js
 
 **HEPHAITOS 설정 문제**:
 - GitHub: https://github.com/YOUR_USERNAME/HEPHAITOS/issues
-- Email: support@hephaitos.io (예시)
+- Email: support@ioblock.io (예시)
 
 ---
 

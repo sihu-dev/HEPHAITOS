@@ -1,0 +1,26 @@
+{
+  "name": "@hephaitos/core",
+  "version": "1.0.0",
+  "description": "HEPHAITOS - L2 핵심 서비스 (Cells)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@hephaitos/types": "workspace:*",
+    "@hephaitos/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

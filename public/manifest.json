@@ -1,6 +1,6 @@
 {
-  "name": "HEPHAITOS",
-  "short_name": "HEPHAITOS",
+  "name": "IO block",
+  "short_name": "IO block",
   "description": "AI 트레이딩 시스템 빌더 - 자동화된 투자 전략 구축 플랫폼",
   "start_url": "/dashboard",
   "display": "standalone",

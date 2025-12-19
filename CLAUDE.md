@@ -1,7 +1,7 @@
 # HEPHAITOS 프로젝트 Claude Code 가이드
 
 > **세션 시작 시 반드시 읽을 것**
-> **마지막 업데이트**: 2025-12-18
+> **마지막 업데이트**: 2025-12-20
 
 ---
 
@@ -96,6 +96,47 @@
 
 ---
 
+## 나노팩터 아키텍처 (Nano-Factor Hierarchy)
+
+```
+L0 (Atoms)     → packages/types/src/     # 기본 타입 정의
+L1 (Molecules) → packages/utils/src/     # 유틸리티 함수
+L2 (Cells)     → packages/core/src/      # 비즈니스 로직
+L3 (Tissues)   → src/agents/             # 자율 에이전트
+```
+
+### 패키지 구조
+
+| 패키지 | 네임스페이스 | 역할 |
+|--------|-------------|------|
+| packages/types | @hephaitos/types | L0 타입 정의 (9개 파일) |
+| packages/utils | @hephaitos/utils | L1 유틸리티 (14개 파일) |
+| packages/core | @hephaitos/core | L2 서비스/리포지토리 (16개 파일) |
+| src/agents | - | L3 자율 에이전트 (3개 파일) |
+
+### 타입 시스템 (L0)
+
+| 파일 | 핵심 타입 |
+|-----|---------|
+| strategy.ts | StrategyType(7), Timeframe(9), IndicatorType(9), IStrategy |
+| backtest.ts | IBacktestConfig, IPerformanceMetrics(22개 지표) |
+| order.ts | ExecutionMode, IRiskConfig, IOrderRequest |
+| exchange.ts | ExchangeType(5), EXCHANGE_CONFIGS |
+| trade.ts | OrderSide, OrderType, OrderStatus, IOrder, ITrade, IOHLCV |
+| portfolio.ts | SyncStatus, IPortfolio, IPortfolioSummary |
+| asset.ts | IAsset, IAssetBalance, IAssetBreakdown |
+| credentials.ts | IExchangeCredentials, IEncryptedCredentials |
+
+### 에이전트 시스템 (L3)
+
+| 에이전트 | 역할 | 라인 수 |
+|---------|------|--------|
+| BacktestAgent | 백테스트 시뮬레이션, 22개 성과 지표 계산 | 645 |
+| OrderExecutorAgent | 주문 실행, 리스크 관리, 포지션 관리 | 633 |
+| PortfolioSyncAgent | 멀티 거래소 포트폴리오 동기화 | 324 |
+
+---
+
 ## 디자인 원칙 (절대 준수)
 
 ### 1. Dark Mode Only
@@ -176,7 +217,12 @@ const strategy = await generateStrategy({
 HEPHAITOS/
 ├── .claude/              # Claude Code 프로젝트 설정
 │   ├── settings.local.json
-│   └── rules.md
+│   ├── skills/           # 커스텀 스킬
+│   └── commands/         # 슬래시 명령어
+├── packages/             # 모노레포 패키지 (나노팩터)
+│   ├── types/            # L0 - 타입 정의 (@hephaitos/types)
+│   ├── utils/            # L1 - 유틸리티 (@hephaitos/utils)
+│   └── core/             # L2 - 코어 서비스 (@hephaitos/core)
 ├── docs/                 # 분석 리포트 및 레퍼런스
 │   ├── HEPHAITOS_CORE_REFERENCES.md
 │   ├── HEPHAITOS_DEEP_ANALYSIS_REPORT.md
@@ -186,6 +232,10 @@ HEPHAITOS/
 │   │   ├── api/          # API 라우트 (strategies, exchange, etc.)
 │   │   ├── auth/         # 인증 페이지
 │   │   └── dashboard/    # 대시보드 페이지
+│   ├── agents/           # L3 - 자율 에이전트
+│   │   ├── backtest-agent.ts
+│   │   ├── order-executor-agent.ts
+│   │   └── portfolio-sync-agent.ts
 │   ├── components/
 │   │   ├── ui/           # 기본 UI (Button, Card, etc.)
 │   │   ├── strategy-builder/  # 전략 빌더
@@ -203,6 +253,7 @@ HEPHAITOS/
 │   ├── stores/           # Zustand 스토어
 │   └── types/            # 타입 정의
 ├── supabase/             # Supabase 설정
+├── pnpm-workspace.yaml   # 모노레포 워크스페이스
 ├── BUSINESS_CONSTITUTION.md  # 사업 헌법 (불변)
 ├── BUSINESS_OVERVIEW.md      # 사업 개요서
 ├── DESIGN_SYSTEM.md          # 디자인 시스템
@@ -285,4 +336,4 @@ docs: 사업 헌법 업데이트
 ---
 
 *이 파일은 HEPHAITOS 프로젝트 전용입니다.*
-*마지막 업데이트: 2025-12-18*
+*마지막 업데이트: 2025-12-20*

@@ -2,6 +2,10 @@
 // Backtesting Engine Types
 // ============================================
 
+// NOTE: backtest module uses different type structure than @hephaitos/types
+// - Strategy has config.entryConditions (vs direct entryConditions)
+// - OHLCV uses number timestamps (vs string in IOHLCV)
+// Full migration requires backtest engine refactoring
 import type { OHLCV, Strategy } from '@/types'
 
 // Re-export for convenience

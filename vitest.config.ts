@@ -8,7 +8,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/__tests__/setup.ts'],
-    include: ['src/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+    include: [
+      'src/**/*.{test,spec}.{js,jsx,ts,tsx}',
+      'packages/**/__tests__/*.{test,spec}.{js,jsx,ts,tsx}',
+    ],
     exclude: ['node_modules', '.next'],
     coverage: {
       provider: 'v8',
@@ -25,6 +28,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '@hephaitos/types': resolve(__dirname, './packages/types/src/hephaitos/index.ts'),
+      '@hephaitos/utils': resolve(__dirname, './packages/utils/src/index.ts'),
+      '@hephaitos/core': resolve(__dirname, './packages/core/src/index.ts'),
     },
   },
 })

@@ -199,7 +199,7 @@ curl -X POST \
 ```bash
 # src/app/admin/layout.tsx 파일 수정
 const adminEmails = [
-  'admin@hephaitos.io',
+  'admin@ioblock.io',
   'your-email@example.com',  # ← 여기에 실제 관리자 이메일 추가
 ];
 ```

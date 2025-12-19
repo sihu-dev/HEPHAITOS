@@ -66,7 +66,7 @@ git push origin main
 - [ ] `src/app/admin/layout.tsx` 수정:
   ```typescript
   const adminEmails = [
-    'admin@hephaitos.io',
+    'admin@ioblock.io',
     'your-email@example.com',  // ← 추가
   ];
   ```

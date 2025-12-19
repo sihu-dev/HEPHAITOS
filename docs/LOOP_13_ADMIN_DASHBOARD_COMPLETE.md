@@ -102,7 +102,7 @@ export default async function AdminLayout({ children }) {
 
 function checkAdminRole(user: any): boolean {
   // 방법 1: 이메일 화이트리스트
-  const adminEmails = ['admin@hephaitos.io'];
+  const adminEmails = ['admin@ioblock.io'];
   if (adminEmails.includes(user.email)) return true;
 
   // 방법 2: user metadata의 role
@@ -242,7 +242,7 @@ TOSS_SECRET_KEY=xxx            # Edge Function용
 ```typescript
 // src/app/admin/layout.tsx
 const adminEmails = [
-  'admin@hephaitos.io',
+  'admin@ioblock.io',
   'your-email@example.com',  // ← 여기에 추가
 ];
 ```

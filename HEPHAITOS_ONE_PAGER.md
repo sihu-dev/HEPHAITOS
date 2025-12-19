@@ -277,7 +277,7 @@ Deploy:   Vercel (서울 리전) + Cloudflare
 ## 📞 Contact
 
 **Team**: HEPHAITOS
-**Email**: contact@hephaitos.io
+**Email**: contact@ioblock.io
 **Demo**: [Coming Soon]
 **Pitch Deck**: [Request Access]
 

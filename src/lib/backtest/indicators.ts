@@ -2,8 +2,7 @@
 // Technical Indicators for Backtesting
 // ============================================
 
-import type { OHLCV } from '@/types'
-import type { IndicatorResult, IndicatorType } from './types'
+import type { OHLCV, IndicatorResult, IndicatorType } from './types'
 
 // ============================================
 // Helper Functions

@@ -98,6 +98,54 @@ const nextConfig = {
         net: false,
         tls: false,
       }
+
+      // Chunk splitting optimization - 150KB target
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          maxSize: 150000, // 150KB per chunk
+          cacheGroups: {
+            // Separate vendor chunks
+            framework: {
+              name: 'framework',
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
+              priority: 50,
+              chunks: 'all',
+            },
+            framerMotion: {
+              name: 'framer-motion',
+              test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
+              priority: 40,
+              chunks: 'all',
+            },
+            radixUI: {
+              name: 'radix-ui',
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+              priority: 35,
+              chunks: 'all',
+            },
+            supabase: {
+              name: 'supabase',
+              test: /[\\/]node_modules[\\/]@supabase[\\/]/,
+              priority: 30,
+              chunks: 'all',
+            },
+            ai: {
+              name: 'ai-sdk',
+              test: /[\\/]node_modules[\\/](@ai-sdk|ai)[\\/]/,
+              priority: 25,
+              chunks: 'all',
+            },
+            commons: {
+              name: 'commons',
+              minChunks: 2,
+              priority: 10,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      }
     }
     return config
   },

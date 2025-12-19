@@ -83,7 +83,7 @@
 **5. 권한 확인**
 - API 키에 거래 권한이 있는지 확인
 
-그래도 안 되면: support@hephaitos.com으로 문의
+그래도 안 되면: support@ioblock.com으로 문의
 
 ---
 
@@ -225,7 +225,7 @@
 
 - **Documentation**: https://docs.hephaitos.com
 - **Community**: https://community.hephaitos.com
-- **Email**: support@hephaitos.com
+- **Email**: support@ioblock.com
 - **Discord**: https://discord.gg/hephaitos
 
 ### 평균 응답 시간

@@ -149,7 +149,7 @@ supabase functions deploy auto-refund-handler
 ```typescript
 // src/app/admin/layout.tsx 수정
 const adminEmails = [
-  'admin@hephaitos.io',
+  'admin@ioblock.io',
   'your-email@example.com',  // ← 추가
 ];
 ```

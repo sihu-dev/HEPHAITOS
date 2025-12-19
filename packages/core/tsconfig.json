@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@hephaitos/types": ["../types/src/hephaitos/index.ts"],
+      "@hephaitos/types/*": ["../types/src/hephaitos/*"],
+      "@hephaitos/utils": ["../utils/src/index.ts"],
+      "@hephaitos/utils/*": ["../utils/src/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../types" },
+    { "path": "../utils" }
+  ]
+}

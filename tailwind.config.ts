@@ -3,7 +3,7 @@ import type { Config } from 'tailwindcss'
 /**
  * HEPHAITOS Tailwind Configuration
  * Inherited from CATALYST AI + Linear Design
- * 
+ *
  * Primary: #5E6AD2 (Linear Purple)
  * Background: #0D0D0F
  * Glass: backdrop-blur-xl

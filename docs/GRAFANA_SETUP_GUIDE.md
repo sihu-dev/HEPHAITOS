@@ -63,7 +63,7 @@ SSL Mode: require
 # https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 
 # Email 설정:
-# To: team@hephaitos.io
+# To: team@ioblock.io
 # Subject: [HEPHAITOS] AI Cost Alert
 ```
 

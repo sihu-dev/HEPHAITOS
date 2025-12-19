@@ -484,7 +484,7 @@ API Secret: PASTE_YOUR_API_SECRET
 
 - **Documentation**: https://docs.hephaitos.com
 - **FAQ**: https://hephaitos.com/faq
-- **Support**: support@hephaitos.com
+- **Support**: support@ioblock.com
 - **Community**: https://community.hephaitos.com
 
 ---

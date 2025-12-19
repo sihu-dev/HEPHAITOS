@@ -123,7 +123,7 @@ HEPHAITOS는 다음 외부 데이터 소스를 사용하여 서비스를 제공�
 - ⚠️ **Rate Limit**:
   - 초당 10 requests 제한
   - User-Agent 헤더 필수 (이름/이메일 포함)
-  - 예: `User-Agent: HEPHAITOS/1.0 (contact@hephaitos.io)`
+  - 예: `User-Agent: HEPHAITOS/1.0 (contact@ioblock.io)`
 
 ### 구현 체크리스트
 - [ ] SEC API 호출 시 User-Agent 헤더 추가

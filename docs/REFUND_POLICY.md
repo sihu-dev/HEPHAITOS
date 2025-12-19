@@ -58,7 +58,7 @@ HEPHAITOS는 **크레딧 기반 선불제** 서비스로, 아래 조건에 따�
 ### 3.1 환불 요청 방법
 
 1. **이메일 요청**
-   - 수신: refund@hephaitos.io
+   - 수신: refund@ioblock.io
    - 제목: `[환불 요청] 주문번호 {order_id}`
    - 필수 정보:
      - 주문번호 (order_id)

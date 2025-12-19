@@ -33,7 +33,7 @@
 ```
 
 ### 준수 현황
-- [x] User-Agent 헤더 설정: `HEPHAITOS/1.0 (support@hephaitos.io)`
+- [x] User-Agent 헤더 설정: `HEPHAITOS/1.0 (support@ioblock.io)`
 - [x] Rate Limit 준수 (10 req/s)
 - [x] 출처 명시: "Data provided by SEC EDGAR"
 
@@ -288,9 +288,9 @@ export async function getCongressTrades(params: TradeParams) {
 
 | 역할 | 담당 | 연락처 |
 |------|------|--------|
-| 기술 검토 | 개발팀 | dev@hephaitos.io |
-| 법무 검토 | 법무팀 | legal@hephaitos.io |
-| 계약 관리 | 경영지원 | admin@hephaitos.io |
+| 기술 검토 | 개발팀 | dev@ioblock.io |
+| 법무 검토 | 법무팀 | legal@ioblock.io |
+| 계약 관리 | 경영지원 | admin@ioblock.io |
 
 ---
 

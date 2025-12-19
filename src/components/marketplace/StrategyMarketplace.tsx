@@ -643,7 +643,7 @@ function CreatorCard({ creator, rank }: { creator: Creator; rank: number }) {
 
       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center overflow-hidden">
         {creator.avatar_url ? (
-          <Image src={creator.avatar_url} alt="" width={48} height={48} className="w-full h-full object-cover" />
+          <Image src={creator.avatar_url} alt={`${creator.display_name} 프로필 이미지`} width={48} height={48} className="w-full h-full object-cover" />
         ) : (
           <User className="w-6 h-6" />
         )}

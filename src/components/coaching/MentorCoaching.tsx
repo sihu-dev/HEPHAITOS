@@ -366,7 +366,7 @@ function MentorCard({
       <div className="flex items-start gap-3 mb-3">
         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center overflow-hidden">
           {mentor.avatar_url ? (
-            <Image src={mentor.avatar_url} alt="" width={48} height={48} className="w-full h-full object-cover" />
+            <Image src={mentor.avatar_url} alt={`${mentor.display_name} 프로필 이미지`} width={48} height={48} className="w-full h-full object-cover" />
           ) : (
             <User className="w-6 h-6" />
           )}
@@ -560,7 +560,7 @@ function MentorDetailModal({
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center overflow-hidden">
               {mentor.avatar_url ? (
-                <Image src={mentor.avatar_url} alt="" width={64} height={64} className="w-full h-full object-cover" />
+                <Image src={mentor.avatar_url} alt={`${mentor.display_name} 프로필 이미지`} width={64} height={64} className="w-full h-full object-cover" />
               ) : (
                 <User className="w-8 h-8" />
               )}

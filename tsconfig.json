@@ -26,9 +26,13 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@hephaitos/types": ["./packages/types/src/hephaitos/index.ts"],
+      "@hephaitos/types/*": ["./packages/types/src/hephaitos/*"],
+      "@hephaitos/utils": ["./packages/utils/src/index.ts"],
+      "@hephaitos/utils/*": ["./packages/utils/src/*"],
+      "@hephaitos/core": ["./packages/core/src/index.ts"],
+      "@hephaitos/core/*": ["./packages/core/src/*"]
     },
     "baseUrl": "."
   },

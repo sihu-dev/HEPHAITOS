@@ -199,7 +199,7 @@ npx tsx scripts/test-redis.ts
 # 방법 1: 이메일 화이트리스트
 # src/app/admin/layout.tsx 수정
 const adminEmails = [
-  'admin@hephaitos.io',
+  'admin@ioblock.io',
   'test@example.com',  // ← 테스트 계정 추가
 ];
 

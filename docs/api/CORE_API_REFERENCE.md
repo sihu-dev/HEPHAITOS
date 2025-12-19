@@ -1048,7 +1048,7 @@ Accept-Version: 2.0
 
 - **Documentation**: https://docs.hephaitos.com
 - **GitHub**: https://github.com/anthropics/hephaitos
-- **Email**: support@hephaitos.com
+- **Email**: support@ioblock.com
 
 ---
 

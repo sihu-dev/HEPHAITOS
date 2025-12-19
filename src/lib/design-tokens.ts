@@ -1,7 +1,7 @@
 /**
  * HEPHAITOS Design System
  * Inherited from CATALYST AI + Linear Design Language
- * 
+ *
  * Primary: #5E6AD2 (Linear Purple)
  * Dark Mode Only: #0D0D0F Background
  * Glass Effect: backdrop-blur-xl

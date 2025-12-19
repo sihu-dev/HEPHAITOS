@@ -3,8 +3,9 @@
 // Core backtesting logic with Strategy Parser Integration
 // ============================================
 
-import type { OHLCV, Strategy } from '@/types'
 import type {
+  OHLCV,
+  Strategy,
   BacktestConfig,
   BacktestResult,
   BacktestMetrics,

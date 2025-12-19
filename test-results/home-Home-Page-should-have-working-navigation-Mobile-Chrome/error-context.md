@@ -520,7 +520,7 @@
         - generic [ref=e566]:
           - paragraph [ref=e567]: 더 궁금한 점이 있으신가요?
           - link "문의하기" [ref=e568] [cursor=pointer]:
-            - /url: mailto:support@hephaitos.io
+            - /url: mailto:support@ioblock.io
             - img [ref=e569]
             - text: 문의하기
       - generic [ref=e572]:
