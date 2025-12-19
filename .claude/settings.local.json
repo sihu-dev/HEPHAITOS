@@ -1,7 +1,10 @@
 {
   "$schema": "https://claude.ai/schemas/claude-code-settings.json",
   "version": "2.1",
+  "model": "opus",
+  "alwaysThinkingEnabled": true,
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
       "*",
       "mcp__ide__getDiagnostics",

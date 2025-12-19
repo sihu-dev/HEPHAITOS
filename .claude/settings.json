@@ -1,0 +1,96 @@
+{
+  "$schema": "https://claude.ai/schemas/claude-code-settings.json",
+  "version": "2.1",
+  "model": "opusplan",
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(pnpm:*)",
+      "Bash(npx:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh:*)",
+      "Bash(tree:*)",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Read(**/*)",
+      "Edit(src/**/*)",
+      "Edit(packages/**/*)",
+      "Write(src/**/*)",
+      "Write(packages/**/*)",
+      "mcp__github__*",
+      "mcp__ide__*",
+      "mcp__playwright__*"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/secrets/**)",
+      "Read(**/*.pem)",
+      "Bash(rm -rf /)",
+      "Bash(sudo rm:*)"
+    ]
+  },
+  "env": {
+    "NODE_ENV": "development",
+    "FORCE_COLOR": "1"
+  },
+  "alwaysThinkingEnabled": true,
+  "cleanupPeriodDays": 14,
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true",
+            "timeout": 10000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "작업이 완료되었는지 확인: 1) 모든 파일 저장됨 2) 타입 오류 없음 3) 테스트 통과"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'HEPHAITOS Session Started' && pwd"
+          }
+        ]
+      }
+    ]
+  },
+  "sandbox": {
+    "enabled": false,
+    "autoAllowBashIfSandboxed": true
+  },
+  "project": {
+    "name": "HEPHAITOS",
+    "description": "Replit for Trading - AI 트레이딩 봇 빌더 플랫폼",
+    "type": "next-app",
+    "framework": "next-15"
+  },
+  "performance": {
+    "parallelTools": true,
+    "cacheResults": true,
+    "maxConcurrentTasks": 5
+  }
+}
