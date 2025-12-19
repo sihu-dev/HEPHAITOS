@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "IO block AI Cost Dashboard",
+    "title": "HEPHAITOS AI Cost Dashboard",
     "tags": ["observability", "cost", "ai"],
     "timezone": "Asia/Seoul",
     "editable": true,

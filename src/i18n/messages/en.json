@@ -83,7 +83,7 @@
     "title1": "Before → After",
     "title2": "Real Transformations",
     "subtitle1": "See how retail investors",
-    "subtitle2": "built their own trading systems with IO block.",
+    "subtitle2": "built their own trading systems with HEPHAITOS.",
     "personas": {
       "minsu": {
         "name": "Mike",
@@ -205,14 +205,14 @@
       "button": "Start Building Free"
     },
     "disclaimer1": "* Personas are illustrative. Individual results vary.",
-    "disclaimer2": "IO block is an educational platform, not investment advice."
+    "disclaimer2": "HEPHAITOS is an educational platform, not investment advice."
   },
   "pricing": {
     "label": "Pricing",
     "title1": "Compare the",
     "title2": "real cost",
     "subtitle1": "Courses. Signals. Quant dev. All expensive.",
-    "subtitle2": "IO block gives you everything at",
+    "subtitle2": "HEPHAITOS gives you everything at",
     "subtitle3": "1/10",
     "subtitle4": "the price.",
     "currentCosts": "What you're paying now",
@@ -250,7 +250,7 @@
       "existingLabel": "Traditional stack",
       "existingMonthly": "$400–800+",
       "existingNote": "(courses + signals + data)",
-      "hephaitosLabel": "IO block Pro",
+      "hephaitosLabel": "HEPHAITOS Pro",
       "hephaitosMonthly": "$29",
       "hephaitosNote": "(everything included)",
       "savings": "Save up to 97%"
@@ -328,7 +328,7 @@
     },
     "disclaimer": {
       "title": "Important",
-      "text1": "IO block",
+      "text1": "HEPHAITOS",
       "text2": "does not provide investment advice",
       "text3": ". All plans are educational tools. Investment decisions and outcomes are your responsibility. Always backtest."
     },
@@ -345,7 +345,7 @@
       "$3K courses, still panic selling",
       "Quant trading? Can't code"
     ],
-    "solutionTitle": "With IO block...",
+    "solutionTitle": "With HEPHAITOS...",
     "solutions": [
       "Your idea → System in 5 minutes",
       "Plain English → Trading logic",
@@ -371,7 +371,7 @@
       "coding": "0 lines",
       "codingLabel": "Code needed"
     },
-    "disclaimer": "IO block is an educational platform, not investment advice. All decisions and outcomes are your responsibility. Past backtests ≠ future results."
+    "disclaimer": "HEPHAITOS is an educational platform, not investment advice. All decisions and outcomes are your responsibility. Past backtests ≠ future results."
   },
   "common": {
     "language": "Language",
@@ -431,7 +431,7 @@
   "footer": {
     "riskDisclosure": {
       "title": "Risk Disclosure",
-      "text1": "IO block",
+      "text1": "HEPHAITOS",
       "text2": "does not provide investment advice",
       "text3": ". This platform is for education and tools only. All investment decisions and outcomes are your responsibility. Past performance ≠ future results. Celebrity portfolio data is from public SEC 13F filings and may not reflect current holdings."
     },
@@ -468,7 +468,7 @@
     },
     "compliance": {
       "title": "Compliance",
-      "text": "IO block does not provide investment advisory services. All content is for general educational purposes and does not constitute buy/sell recommendations."
+      "text": "HEPHAITOS does not provide investment advisory services. All content is for general educational purposes and does not constitute buy/sell recommendations."
     },
     "dataSources": {
       "title": "Data Sources",
@@ -476,13 +476,13 @@
       "market": "Market Data: Polygon.io, SEC EDGAR",
       "note": "All data is from public sources and provided for educational purposes only."
     },
-    "copyright": "© 2025 IO block. All rights reserved.",
+    "copyright": "© 2025 HEPHAITOS. All rights reserved.",
     "businessInfo": {
       "registration": "Delaware C-Corp",
       "ceo": "CEO: John Doe",
       "address": "San Francisco, CA"
     },
-    "finalDisclaimer": "All backtests and metrics are based on historical data and do not guarantee future returns. Investing involves risk of loss. Consult professionals before making investment decisions. IO block is not liable for user losses."
+    "finalDisclaimer": "All backtests and metrics are based on historical data and do not guarantee future returns. Investing involves risk of loss. Consult professionals before making investment decisions. HEPHAITOS is not liable for user losses."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -654,20 +654,20 @@
       "full": "This service is for investment education and tools only, not investment advice. All investment decisions and resulting gains or losses are the user's responsibility. Past performance does not guarantee future results.",
       "legalTitle": "Legal Notice",
       "legal": "※ This platform provides education and tools, not investment advice.\n※ All investment decisions and resulting gains/losses are your responsibility.\n※ Backtest results are based on historical data and do not guarantee future returns.",
-      "regulatory": "IO block does not operate investment advisory or discretionary investment services.",
+      "regulatory": "HEPHAITOS does not operate investment advisory or discretionary investment services.",
       "dismissLabel": "Close disclaimer",
       "inlineTitle": "Investment Notice",
       "tradeWarning": "You are about to execute a trade with real funds. Be aware of potential loss of principal.",
       "backtestWarning": "Backtest results are simulations based on historical data and do not guarantee future returns.",
       "modalTitle": "Investment Notice",
-      "modalIntro": "Please confirm the following before using IO block services.",
+      "modalIntro": "Please confirm the following before using HEPHAITOS services.",
       "modalPoints": [
         "This service provides <strong class=\"text-white\">investment education and tools</strong>, not investment advice.",
         "All investment decisions and resulting <strong class=\"text-white\">gains or losses are your responsibility</strong>.",
         "Backtest results are based on historical data and <strong class=\"text-white\">do not guarantee future returns.</strong>",
         "You may lose <strong class=\"text-red-400\">some or all</strong> of your principal."
       ],
-      "modalFooter": "IO block does not operate investment advisory or discretionary investment services and does not recommend buying or selling specific stocks.",
+      "modalFooter": "HEPHAITOS does not operate investment advisory or discretionary investment services and does not recommend buying or selling specific stocks.",
       "acceptButton": "I understand and agree"
     },
     "loading": {
@@ -971,7 +971,7 @@
       },
       "submitButton": "Pay {price}",
       "disclaimer": {
-        "terms": "By proceeding, you agree to IO block Terms of Service.",
+        "terms": "By proceeding, you agree to HEPHAITOS Terms of Service.",
         "refund": "7-day refund available | No investment advice provided."
       }
     },
@@ -985,7 +985,7 @@
         "subtitle": "Custom solutions for large teams",
         "contact": "Contact Us"
       },
-      "disclaimer": "IO block is an investment education and tools platform. We do not provide investment advice. All investment decisions must be made at your own judgment and responsibility. Refund available within 7 days after payment."
+      "disclaimer": "HEPHAITOS is an investment education and tools platform. We do not provide investment advice. All investment decisions must be made at your own judgment and responsibility. Refund available within 7 days after payment."
     },
     "pricingCard": {
       "recommended": "Recommended",
@@ -1021,7 +1021,7 @@
     },
     "demo": {
       "backToHome": "Home",
-      "title": "IO block Demo",
+      "title": "HEPHAITOS Demo",
       "subtitle": "See how you can build your own trading strategy without coding.",
       "videoPlaceholder": "Demo video coming soon",
       "tryIt": {
@@ -1736,8 +1736,8 @@
         }
       },
       "welcome": {
-        "titleWithPain": "{count} problems, IO block solves them",
-        "titleNoPain": "Welcome to IO block",
+        "titleWithPain": "{count} problems, HEPHAITOS solves them",
+        "titleNoPain": "Welcome to HEPHAITOS",
         "subtitle": "Stop being swayed by others' strategies",
         "painBanner": {
           "pain": "{count} Pain Points",
@@ -1765,14 +1765,14 @@
         },
         "disclaimer": {
           "required": "Required",
-          "text": "IO block is an investment education and tools platform.",
+          "text": "HEPHAITOS is an investment education and tools platform.",
           "emphasis": "We do not provide investment advice",
           "suffix": ", and all investment decisions are your responsibility."
         }
       },
       "profile": {
         "title": "Profile Setup",
-        "subtitle": "Enter your nickname for IO block",
+        "subtitle": "Enter your nickname for HEPHAITOS",
         "nickname": "Nickname",
         "nicknamePlaceholder": "e.g. TradeMaster",
         "experience": "Investment Experience",

@@ -82,7 +82,7 @@
     "label": "유저 스토리",
     "title1": "Before → After",
     "title2": "실제 변화",
-    "subtitle1": "개인 투자자들이 IO block로",
+    "subtitle1": "개인 투자자들이 HEPHAITOS로",
     "subtitle2": "자신만의 트레이딩 시스템을 구축한 이야기.",
     "personas": {
       "minsu": {
@@ -205,14 +205,14 @@
       "button": "무료로 빌드 시작"
     },
     "disclaimer1": "* 페르소나는 예시입니다. 개인별 결과는 다를 수 있습니다.",
-    "disclaimer2": "IO block는 교육 플랫폼이며, 투자 조언이 아닙니다."
+    "disclaimer2": "HEPHAITOS는 교육 플랫폼이며, 투자 조언이 아닙니다."
   },
   "pricing": {
     "label": "가격",
     "title1": "실제 비용을",
     "title2": "비교하세요",
     "subtitle1": "강의. 시그널. 퀀트 외주. 다 비쌈.",
-    "subtitle2": "IO block는 전부 포함해서",
+    "subtitle2": "HEPHAITOS는 전부 포함해서",
     "subtitle3": "1/10",
     "subtitle4": "가격.",
     "currentCosts": "지금 지출하는 비용",
@@ -250,7 +250,7 @@
       "existingLabel": "기존 스택",
       "existingMonthly": "₩40만~80만+",
       "existingNote": "(강의 + 시그널 + 데이터)",
-      "hephaitosLabel": "IO block Pro",
+      "hephaitosLabel": "HEPHAITOS Pro",
       "hephaitosMonthly": "₩29,900",
       "hephaitosNote": "(전부 포함)",
       "savings": "최대 97% 절감"
@@ -328,7 +328,7 @@
     },
     "disclaimer": {
       "title": "중요",
-      "text1": "IO block는",
+      "text1": "HEPHAITOS는",
       "text2": "투자 조언을 제공하지 않습니다",
       "text3": ". 모든 플랜은 교육 도구입니다. 투자 결정과 결과는 본인 책임. 항상 백테스트하세요."
     },
@@ -345,7 +345,7 @@
       "강의 300만원, 여전히 패닉셀",
       "퀀트? 코딩 못해서 포기"
     ],
-    "solutionTitle": "IO block와 함께라면...",
+    "solutionTitle": "HEPHAITOS와 함께라면...",
     "solutions": [
       "내 아이디어 → 5분 만에 시스템",
       "자연어 → 트레이딩 로직",
@@ -371,7 +371,7 @@
       "coding": "0줄",
       "codingLabel": "필요 코드"
     },
-    "disclaimer": "IO block는 교육 플랫폼이며, 투자 조언이 아닙니다. 모든 결정과 결과는 본인 책임. 과거 백테스트 ≠ 미래 수익."
+    "disclaimer": "HEPHAITOS는 교육 플랫폼이며, 투자 조언이 아닙니다. 모든 결정과 결과는 본인 책임. 과거 백테스트 ≠ 미래 수익."
   },
   "common": {
     "language": "언어",
@@ -431,7 +431,7 @@
   "footer": {
     "riskDisclosure": {
       "title": "위험 고지",
-      "text1": "IO block는",
+      "text1": "HEPHAITOS는",
       "text2": "투자 조언을 제공하지 않습니다",
       "text3": ". 이 플랫폼은 교육과 도구 제공 전용입니다. 모든 투자 결정과 결과는 본인 책임입니다. 과거 성과 ≠ 미래 수익. 셀럽 포트폴리오 데이터는 SEC 13F 공개 자료 기반이며 현재 보유와 다를 수 있습니다."
     },
@@ -468,7 +468,7 @@
     },
     "compliance": {
       "title": "컴플라이언스",
-      "text": "IO block는 투자자문 서비스를 제공하지 않습니다. 모든 콘텐츠는 일반 교육 목적이며 매수/매도 추천이 아닙니다."
+      "text": "HEPHAITOS는 투자자문 서비스를 제공하지 않습니다. 모든 콘텐츠는 일반 교육 목적이며 매수/매도 추천이 아닙니다."
     },
     "dataSources": {
       "title": "데이터 출처",
@@ -476,13 +476,13 @@
       "market": "시장 데이터: Polygon.io, SEC EDGAR",
       "note": "모든 데이터는 공개 출처이며 교육 목적으로만 제공됩니다."
     },
-    "copyright": "© 2025 IO block. All rights reserved.",
+    "copyright": "© 2025 HEPHAITOS. All rights reserved.",
     "businessInfo": {
       "registration": "사업자등록번호: 000-00-00000",
       "ceo": "대표: 홍길동",
       "address": "서울특별시 강남구"
     },
-    "finalDisclaimer": "모든 백테스트와 지표는 과거 데이터 기반이며 미래 수익을 보장하지 않습니다. 투자는 원금 손실 위험이 있습니다. 투자 결정 전 전문가 상담 권장. IO block는 유저 손실에 대해 책임지지 않습니다."
+    "finalDisclaimer": "모든 백테스트와 지표는 과거 데이터 기반이며 미래 수익을 보장하지 않습니다. 투자는 원금 손실 위험이 있습니다. 투자 결정 전 전문가 상담 권장. HEPHAITOS는 유저 손실에 대해 책임지지 않습니다."
   },
   "dashboard": {
     "title": "대시보드",
@@ -654,20 +654,20 @@
       "full": "본 서비스는 투자 교육 및 도구 제공 목적이며, 투자 조언이 아닙니다. 모든 투자 결정과 그에 따른 손익은 사용자 본인의 책임입니다. 과거 성과는 미래 수익을 보장하지 않습니다.",
       "legalTitle": "법적 고지",
       "legal": "※ 본 플랫폼은 교육 및 도구를 제공하며, 투자 자문을 제공하지 않습니다.\n※ 모든 투자 결정과 그에 따른 손익은 사용자 본인의 책임입니다.\n※ 백테스트 결과는 과거 데이터 기반이며, 미래 수익을 보장하지 않습니다.",
-      "regulatory": "IO block는 투자자문업 또는 투자일임업을 영위하지 않습니다. (자본시장법 제6조)",
+      "regulatory": "HEPHAITOS는 투자자문업 또는 투자일임업을 영위하지 않습니다. (자본시장법 제6조)",
       "dismissLabel": "면책조항 닫기",
       "inlineTitle": "투자 유의사항",
       "tradeWarning": "실제 자금으로 거래를 실행합니다. 원금 손실 가능성을 인지하고 있어야 합니다.",
       "backtestWarning": "백테스트 결과는 과거 데이터 기반 시뮬레이션이며, 미래 수익을 보장하지 않습니다.",
       "modalTitle": "투자 유의사항",
-      "modalIntro": "IO block 서비스를 이용하기 전에 다음 사항을 반드시 확인해 주세요.",
+      "modalIntro": "HEPHAITOS 서비스를 이용하기 전에 다음 사항을 반드시 확인해 주세요.",
       "modalPoints": [
         "본 서비스는 <strong class=\"text-white\">투자 교육 및 도구 제공</strong> 목적이며, 투자 조언이 아닙니다.",
         "모든 투자 결정과 그에 따른 <strong class=\"text-white\">손익은 사용자 본인의 책임</strong>입니다.",
         "백테스트 결과는 과거 데이터 기반이며, <strong class=\"text-white\">미래 수익을 보장하지 않습니다.</strong>",
         "투자 원금의 <strong class=\"text-red-400\">일부 또는 전부 손실</strong>이 발생할 수 있습니다."
       ],
-      "modalFooter": "IO block는 투자자문업 또는 투자일임업을 영위하지 않으며, 특정 종목의 매수 또는 매도를 권유하지 않습니다.",
+      "modalFooter": "HEPHAITOS는 투자자문업 또는 투자일임업을 영위하지 않으며, 특정 종목의 매수 또는 매도를 권유하지 않습니다.",
       "acceptButton": "위 내용을 확인했습니다"
     },
     "loading": {
@@ -971,7 +971,7 @@
       },
       "submitButton": "{price} 결제하기",
       "disclaimer": {
-        "terms": "결제 진행 시 IO block 이용약관에 동의하는 것으로 간주됩니다.",
+        "terms": "결제 진행 시 HEPHAITOS 이용약관에 동의하는 것으로 간주됩니다.",
         "refund": "7일 이내 환불 가능 | 투자 조언을 제공하지 않습니다."
       }
     },
@@ -985,7 +985,7 @@
         "subtitle": "대규모 팀을 위한 맞춤 솔루션",
         "contact": "문의하기"
       },
-      "disclaimer": "IO block는 투자 교육 및 도구 플랫폼입니다. 투자 조언을 제공하지 않으며, 모든 투자 결정은 사용자 본인의 판단과 책임 하에 이루어져야 합니다. 결제 후 7일 이내 환불 가능합니다."
+      "disclaimer": "HEPHAITOS는 투자 교육 및 도구 플랫폼입니다. 투자 조언을 제공하지 않으며, 모든 투자 결정은 사용자 본인의 판단과 책임 하에 이루어져야 합니다. 결제 후 7일 이내 환불 가능합니다."
     },
     "pricingCard": {
       "recommended": "추천",
@@ -1021,7 +1021,7 @@
     },
     "demo": {
       "backToHome": "홈으로",
-      "title": "IO block 데모",
+      "title": "HEPHAITOS 데모",
       "subtitle": "코딩 없이 나만의 투자 전략을 만드는 과정을 확인하세요.",
       "videoPlaceholder": "데모 영상 준비 중",
       "tryIt": {
@@ -1736,8 +1736,8 @@
         }
       },
       "welcome": {
-        "titleWithPain": "{count}가지 고민, IO block가 해결합니다",
-        "titleNoPain": "IO block에 오신 것을 환영합니다",
+        "titleWithPain": "{count}가지 고민, HEPHAITOS가 해결합니다",
+        "titleNoPain": "HEPHAITOS에 오신 것을 환영합니다",
         "subtitle": "더 이상 남의 전략에 휘둘리지 마세요",
         "painBanner": {
           "pain": "{count}가지 Pain",
@@ -1765,14 +1765,14 @@
         },
         "disclaimer": {
           "required": "필수 동의",
-          "text": "IO block는 투자 교육 및 도구 플랫폼입니다.",
+          "text": "HEPHAITOS는 투자 교육 및 도구 플랫폼입니다.",
           "emphasis": "투자 조언을 제공하지 않으며",
           "suffix": ", 모든 투자 결정은 사용자 본인의 판단과 책임 하에 이루어져야 합니다."
         }
       },
       "profile": {
         "title": "프로필 설정",
-        "subtitle": "IO block에서 사용할 닉네임을 입력하세요",
+        "subtitle": "HEPHAITOS에서 사용할 닉네임을 입력하세요",
         "nickname": "닉네임",
         "nicknamePlaceholder": "예: 투자마스터",
         "experience": "투자 경험",
