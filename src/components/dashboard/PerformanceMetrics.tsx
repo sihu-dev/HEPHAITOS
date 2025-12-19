@@ -1,7 +1,6 @@
 'use client'
 
 import { memo } from 'react'
-import { clsx } from 'clsx'
 import {
   CurrencyDollarIcon,
   ChartBarIcon,
@@ -10,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { MetricCard } from '@/components/ui/MetricCard'
 import { useI18n } from '@/i18n/client'
+import { usePortfolioMetrics } from '@/hooks/usePortfolioMetrics'
 
 interface Metric {
   label: string
@@ -23,22 +23,23 @@ interface Metric {
 
 export const PerformanceMetrics = memo(function PerformanceMetrics() {
   const { t } = useI18n()
+  const { metrics: portfolioMetrics, isLoading } = usePortfolioMetrics()
 
-  // Demo data - replace with real data from API
+  // Build metrics from Supabase data
   const metrics: Metric[] = [
     {
       label: "Today's P&L",
-      value: 567.89,
-      change: 4.82,
+      value: portfolioMetrics.todayPnl,
+      change: portfolioMetrics.vsYesterday,
       changeLabel: 'vs yesterday',
       format: 'currency',
       icon: <CurrencyDollarIcon className="w-5 h-5 text-emerald-400" />,
-      variant: 'profit',
+      variant: portfolioMetrics.todayPnl >= 0 ? 'profit' : 'loss',
     },
     {
       label: 'Win Rate',
-      value: 68,
-      change: 5,
+      value: portfolioMetrics.winRate,
+      change: portfolioMetrics.vsLastWeek,
       changeLabel: 'vs last week',
       format: 'percent',
       icon: <ChartBarIcon className="w-5 h-5 text-[#5E6AD2]" />,
@@ -46,8 +47,8 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
     },
     {
       label: 'Sharpe Ratio',
-      value: 1.85,
-      change: -2,
+      value: portfolioMetrics.sharpeRatio,
+      change: portfolioMetrics.vsLastMonth,
       changeLabel: 'vs last month',
       format: 'number',
       icon: <ArrowTrendingUpIcon className="w-5 h-5 text-amber-400" />,
@@ -55,7 +56,7 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
     },
     {
       label: 'Max Drawdown',
-      value: -8.2,
+      value: portfolioMetrics.maxDrawdown,
       change: 0,
       changeLabel: 'no change',
       format: 'percent',
@@ -63,6 +64,16 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
       variant: 'loss',
     },
   ]
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="skeleton-shimmer h-24 rounded-xl" />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

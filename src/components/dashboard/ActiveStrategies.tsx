@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useState, useEffect, useRef, useMemo } from 'react'
+import { memo, useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import {
   PlayIcon,
   PauseIcon,
@@ -14,9 +14,9 @@ import { useI18n } from '@/i18n/client'
 import { clsx } from 'clsx'
 import { AnimatedValue } from '@/components/ui/AnimatedValue'
 import { LiveIndicator } from '@/components/ui/LiveIndicator'
-import { useRealtimeStrategies } from '@/lib/realtime/useRealtimeStrategies'
+import { useStrategies, type Strategy } from '@/hooks/useStrategies'
 
-interface Strategy {
+interface StrategyDisplay {
   id: string
   name: string
   status: 'running' | 'paused'
@@ -26,17 +26,11 @@ interface Strategy {
   riskLevel: 'low' | 'medium' | 'high'
 }
 
-// Demo data - strategy names are keys for i18n
-const demoStrategiesData = [
-  { id: '1', nameKey: 'momentum', status: 'running' as const, pnl: 18.7, trades: 45, winRate: 67.3, riskLevel: 'medium' as const },
-  { id: '2', nameKey: 'rsi', status: 'running' as const, pnl: 12.4, trades: 32, winRate: 62.5, riskLevel: 'low' as const },
-  { id: '3', nameKey: 'macd', status: 'paused' as const, pnl: -3.2, trades: 18, winRate: 44.4, riskLevel: 'high' as const },
-]
-
 interface StrategyRowProps {
-  strategy: Strategy
+  strategy: StrategyDisplay
   t: (key: string) => string | string[] | Record<string, unknown>
   index: number
+  onToggle: (id: string, currentStatus: 'running' | 'paused') => void
 }
 
 const riskColors = {
@@ -45,7 +39,15 @@ const riskColors = {
   high: 'bg-red-500/20 text-red-400 border-red-500/30',
 }
 
-const StrategyRow = memo(function StrategyRow({ strategy, t, index }: StrategyRowProps) {
+function determineRiskLevel(maxDrawdown: number | undefined): 'low' | 'medium' | 'high' {
+  if (maxDrawdown === undefined) return 'medium'
+  const dd = Math.abs(maxDrawdown)
+  if (dd < 10) return 'low'
+  if (dd < 20) return 'medium'
+  return 'high'
+}
+
+const StrategyRow = memo(function StrategyRow({ strategy, t, index, onToggle }: StrategyRowProps) {
   const isRunning = strategy.status === 'running'
   const isProfitable = strategy.pnl >= 0
   const tradesLabel = t('dashboard.components.activeStrategies.trades') as string
@@ -69,6 +71,7 @@ const StrategyRow = memo(function StrategyRow({ strategy, t, index }: StrategyRo
         {/* Play/Pause Button */}
         <button
           type="button"
+          onClick={() => onToggle(strategy.id, strategy.status)}
           className={clsx(
             'relative w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300',
             'border backdrop-blur-lg',
@@ -155,25 +158,32 @@ export const ActiveStrategies = memo(function ActiveStrategies({ showEmpty = fal
   const containerRef = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
 
-  // Build initial strategies with translated names
-  const initialStrategies = useMemo<Strategy[]>(() => {
+  // Fetch strategies from Supabase
+  const { strategies: dbStrategies, isLoading, updateStrategy } = useStrategies({
+    status: ['running', 'paused'],
+    limit: 10,
+  })
+
+  // Transform DB strategies to display format
+  const strategies = useMemo<StrategyDisplay[]>(() => {
     if (showEmpty) return []
-    return demoStrategiesData.map(s => ({
+
+    return dbStrategies.map(s => ({
       id: s.id,
-      name: t(`dashboard.components.activeStrategies.demoStrategies.${s.nameKey}`) as string,
-      status: s.status,
-      pnl: s.pnl,
-      trades: s.trades,
-      winRate: s.winRate,
-      riskLevel: s.riskLevel,
+      name: s.name,
+      status: (s.status === 'running' ? 'running' : 'paused') as 'running' | 'paused',
+      pnl: s.performance?.totalReturn ?? 0,
+      trades: s.performance?.totalTrades ?? 0,
+      winRate: s.performance?.winRate ?? 0,
+      riskLevel: determineRiskLevel(s.performance?.maxDrawdown),
     }))
-  }, [showEmpty, t])
+  }, [dbStrategies, showEmpty])
 
-  // Use Supabase Realtime for strategy updates
-  const { strategies: realtimeStrategies, isConnected } = useRealtimeStrategies(initialStrategies)
-
-  // Use realtime data if connected, otherwise use initial data
-  const strategies = isConnected ? realtimeStrategies : initialStrategies
+  // Toggle strategy status
+  const handleToggle = useCallback(async (id: string, currentStatus: 'running' | 'paused') => {
+    const newStatus = currentStatus === 'running' ? 'paused' : 'running'
+    await updateStrategy(id, { status: newStatus })
+  }, [updateStrategy])
 
   // Intersection Observer: Track visibility for performance
   useEffect(() => {
@@ -191,6 +201,29 @@ export const ActiveStrategies = memo(function ActiveStrategies({ showEmpty = fal
     return () => observer.disconnect()
   }, [])
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="p-4 rounded-xl animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-lg bg-white/[0.06]" />
+              <div className="flex-1">
+                <div className="h-4 w-32 bg-white/[0.06] rounded mb-2" />
+                <div className="h-3 w-48 bg-white/[0.04] rounded" />
+              </div>
+              <div className="text-right">
+                <div className="h-5 w-16 bg-white/[0.06] rounded mb-1" />
+                <div className="h-3 w-12 bg-white/[0.04] rounded" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   if (strategies.length === 0) {
     return <EmptyStrategies onCreate={() => router.push('/dashboard/ai-strategy')} />
   }
@@ -198,7 +231,13 @@ export const ActiveStrategies = memo(function ActiveStrategies({ showEmpty = fal
   return (
     <div ref={containerRef} className="space-y-1">
       {strategies.map((strategy, index) => (
-        <StrategyRow key={strategy.id} strategy={strategy} t={t} index={index} />
+        <StrategyRow
+          key={strategy.id}
+          strategy={strategy}
+          t={t}
+          index={index}
+          onToggle={handleToggle}
+        />
       ))}
     </div>
   )

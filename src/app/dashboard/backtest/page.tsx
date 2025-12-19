@@ -7,6 +7,7 @@ import { BacktestRunner } from '@/components/backtest'
 import { BacktestWarning, DisclaimerInline } from '@/components/ui/Disclaimer'
 import { SimulationWidget } from '@/components/widgets'
 import { useI18n } from '@/i18n/client'
+import { useBacktestResults, type BacktestResult } from '@/hooks/useBacktestResults'
 import {
   BeakerIcon,
   ClockIcon,
@@ -18,51 +19,9 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline'
 
-// Backtest result type
-interface BacktestResult {
-  id: string
-  strategyName: string
-  runDate: Date
-  period: { start: string; end: string }
-  totalReturn: number
-  sharpeRatio: number
-  maxDrawdown: number
-  winRate: number
-  totalTrades: number
-  equity: number[]
-}
-
-// Sample backtest results (demo)
-const sampleResults: BacktestResult[] = [
-  {
-    id: '1',
-    strategyName: 'RSI + MACD Crossover',
-    runDate: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    period: { start: '2023-01-01', end: '2024-01-01' },
-    totalReturn: 23.5,
-    sharpeRatio: 1.82,
-    maxDrawdown: -12.3,
-    winRate: 58.2,
-    totalTrades: 127,
-    equity: [100, 103, 101, 108, 112, 109, 115, 118, 114, 120, 123.5]
-  },
-  {
-    id: '2',
-    strategyName: 'Bollinger Band Mean Reversion',
-    runDate: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    period: { start: '2023-01-01', end: '2024-01-01' },
-    totalReturn: 18.2,
-    sharpeRatio: 1.45,
-    maxDrawdown: -15.7,
-    winRate: 62.1,
-    totalTrades: 89,
-    equity: [100, 102, 99, 104, 106, 103, 108, 111, 108, 114, 118.2]
-  }
-]
-
 export default function BacktestPage() {
   const { t } = useI18n()
-  const [historyCount] = useState(sampleResults.length)
+  const { results, isLoading, stats } = useBacktestResults({ status: 'completed', limit: 20 })
   const [selectedResult, setSelectedResult] = useState<BacktestResult | null>(null)
   const [showSimulation, setShowSimulation] = useState(false)
   const [activeTab, setActiveTab] = useState<'runner' | 'history' | 'simulation'>('runner')
@@ -71,19 +30,21 @@ export default function BacktestPage() {
     setSelectedResult(result)
   }, [])
 
-  const averageReturn = sampleResults.length > 0
-    ? sampleResults.reduce((sum, r) => sum + r.totalReturn, 0) / sampleResults.length
-    : 0
-
-  const lastRun = sampleResults.length > 0
-    ? new Date(Math.max(...sampleResults.map(r => r.runDate.getTime())))
-    : null
-
   const tabs = [
     { id: 'runner', labelKey: 'dashboard.backtest.tabs.runner', icon: PlayIcon },
     { id: 'history', labelKey: 'dashboard.backtest.tabs.history', icon: ClockIcon },
     { id: 'simulation', labelKey: 'dashboard.backtest.tabs.simulation', icon: ChartBarIcon }
   ]
+
+  // Format relative time
+  const formatRelativeTime = (date: Date | null) => {
+    if (!date) return '-'
+    const hours = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60))
+    if (hours < 1) return 'Just now'
+    if (hours < 24) return `${hours}h ago`
+    const days = Math.floor(hours / 24)
+    return `${days}d ago`
+  }
 
   return (
     <div className="space-y-6">
@@ -145,7 +106,11 @@ export default function BacktestPage() {
             <BeakerIcon className="w-4 h-4 text-zinc-500" />
             <span className="text-sm text-zinc-400">{t('dashboard.backtest.stats.totalBacktests') as string}</span>
           </div>
-          <p className="text-base font-medium text-white">{(t('dashboard.backtest.stats.runs') as string).replace('{count}', String(historyCount))}</p>
+          {isLoading ? (
+            <div className="h-5 w-16 bg-white/[0.06] rounded animate-pulse" />
+          ) : (
+            <p className="text-base font-medium text-white">{(t('dashboard.backtest.stats.runs') as string).replace('{count}', String(stats.totalRuns))}</p>
+          )}
         </motion.div>
 
         <motion.div
@@ -158,9 +123,13 @@ export default function BacktestPage() {
             <ArrowTrendingUpIcon className="w-4 h-4 text-zinc-500" />
             <span className="text-sm text-zinc-400">{t('dashboard.backtest.stats.avgReturn') as string}</span>
           </div>
-          <p className={`text-base font-medium ${averageReturn > 0 ? 'text-emerald-400' : 'text-zinc-400'}`}>
-            {averageReturn > 0 ? '+' : ''}{averageReturn.toFixed(1)}%
-          </p>
+          {isLoading ? (
+            <div className="h-5 w-16 bg-white/[0.06] rounded animate-pulse" />
+          ) : (
+            <p className={`text-base font-medium ${stats.avgReturn > 0 ? 'text-emerald-400' : 'text-zinc-400'}`}>
+              {stats.avgReturn > 0 ? '+' : ''}{stats.avgReturn.toFixed(1)}%
+            </p>
+          )}
         </motion.div>
 
         <motion.div
@@ -173,11 +142,13 @@ export default function BacktestPage() {
             <ChartBarIcon className="w-4 h-4 text-zinc-500" />
             <span className="text-sm text-zinc-400">{t('dashboard.backtest.stats.avgSharpe') as string}</span>
           </div>
-          <p className="text-base font-medium text-white">
-            {sampleResults.length > 0
-              ? (sampleResults.reduce((sum, r) => sum + r.sharpeRatio, 0) / sampleResults.length).toFixed(2)
-              : '-'}
-          </p>
+          {isLoading ? (
+            <div className="h-5 w-16 bg-white/[0.06] rounded animate-pulse" />
+          ) : (
+            <p className="text-base font-medium text-white">
+              {stats.avgSharpe > 0 ? stats.avgSharpe.toFixed(2) : '-'}
+            </p>
+          )}
         </motion.div>
 
         <motion.div
@@ -190,11 +161,13 @@ export default function BacktestPage() {
             <ClockIcon className="w-4 h-4 text-zinc-500" />
             <span className="text-sm text-zinc-400">{t('dashboard.backtest.stats.lastRun') as string}</span>
           </div>
-          <p className="text-base font-medium text-zinc-400">
-            {lastRun
-              ? (t('dashboard.backtest.stats.hoursAgo') as string).replace('{hours}', String(Math.floor((Date.now() - lastRun.getTime()) / (1000 * 60 * 60))))
-              : '-'}
-          </p>
+          {isLoading ? (
+            <div className="h-5 w-16 bg-white/[0.06] rounded animate-pulse" />
+          ) : (
+            <p className="text-base font-medium text-zinc-400">
+              {formatRelativeTime(stats.lastRunAt)}
+            </p>
+          )}
         </motion.div>
       </div>
 
@@ -248,50 +221,52 @@ export default function BacktestPage() {
                   </div>
 
                   {/* Mini Equity Chart */}
-                  <div className="h-24 relative">
-                    <svg width="100%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="equityGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.3" />
-                          <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path
-                        d={`M 0 ${40 - ((selectedResult.equity[0] - 100) / 30) * 40} ${selectedResult.equity.map((v, i) =>
-                          `L ${(i / (selectedResult.equity.length - 1)) * 100} ${40 - ((v - 100) / 30) * 40}`
-                        ).join(' ')} L 100 40 L 0 40 Z`}
-                        fill="url(#equityGradient)"
-                      />
-                      <path
-                        d={`M 0 ${40 - ((selectedResult.equity[0] - 100) / 30) * 40} ${selectedResult.equity.map((v, i) =>
-                          `L ${(i / (selectedResult.equity.length - 1)) * 100} ${40 - ((v - 100) / 30) * 40}`
-                        ).join(' ')}`}
-                        fill="none"
-                        stroke="rgb(16, 185, 129)"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
-                  </div>
+                  {selectedResult.equityCurve.length > 0 && (
+                    <div className="h-24 relative">
+                      <svg width="100%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="equityGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          d={`M 0 ${40 - ((selectedResult.equityCurve[0] - 100) / 30) * 40} ${selectedResult.equityCurve.map((v, i) =>
+                            `L ${(i / (selectedResult.equityCurve.length - 1)) * 100} ${40 - ((v - 100) / 30) * 40}`
+                          ).join(' ')} L 100 40 L 0 40 Z`}
+                          fill="url(#equityGradient)"
+                        />
+                        <path
+                          d={`M 0 ${40 - ((selectedResult.equityCurve[0] - 100) / 30) * 40} ${selectedResult.equityCurve.map((v, i) =>
+                            `L ${(i / (selectedResult.equityCurve.length - 1)) * 100} ${40 - ((v - 100) / 30) * 40}`
+                          ).join(' ')}`}
+                          fill="none"
+                          stroke="rgb(16, 185, 129)"
+                          strokeWidth="1.5"
+                        />
+                      </svg>
+                    </div>
+                  )}
 
                   {/* Stats Grid */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-2 bg-white/[0.02] rounded">
                       <p className="text-[10px] text-zinc-500">{t('dashboard.backtest.preview.totalReturn') as string}</p>
-                      <p className={`text-sm font-medium ${selectedResult.totalReturn > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {selectedResult.totalReturn > 0 ? '+' : ''}{selectedResult.totalReturn}%
+                      <p className={`text-sm font-medium ${(selectedResult.performance?.totalReturn ?? 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {(selectedResult.performance?.totalReturn ?? 0) > 0 ? '+' : ''}{selectedResult.performance?.totalReturn?.toFixed(1) ?? 0}%
                       </p>
                     </div>
                     <div className="p-2 bg-white/[0.02] rounded">
                       <p className="text-[10px] text-zinc-500">{t('dashboard.backtest.preview.sharpe') as string}</p>
-                      <p className="text-sm font-medium text-white">{selectedResult.sharpeRatio}</p>
+                      <p className="text-sm font-medium text-white">{selectedResult.performance?.sharpeRatio?.toFixed(2) ?? '-'}</p>
                     </div>
                     <div className="p-2 bg-white/[0.02] rounded">
                       <p className="text-[10px] text-zinc-500">{t('dashboard.backtest.preview.maxDrawdown') as string}</p>
-                      <p className="text-sm font-medium text-red-400">{selectedResult.maxDrawdown}%</p>
+                      <p className="text-sm font-medium text-red-400">{selectedResult.performance?.maxDrawdown?.toFixed(1) ?? 0}%</p>
                     </div>
                     <div className="p-2 bg-white/[0.02] rounded">
                       <p className="text-[10px] text-zinc-500">{t('dashboard.backtest.preview.winRate') as string}</p>
-                      <p className="text-sm font-medium text-white">{selectedResult.winRate}%</p>
+                      <p className="text-sm font-medium text-white">{selectedResult.performance?.winRate?.toFixed(1) ?? 0}%</p>
                     </div>
                   </div>
                 </div>
@@ -321,13 +296,28 @@ export default function BacktestPage() {
                 <div className="flex items-center gap-2">
                   <ClockIcon className="w-4 h-4 text-zinc-500" />
                   <h3 className="text-sm font-medium text-white">{t('dashboard.backtest.history.title') as string}</h3>
-                  <span className="text-xs text-zinc-400 ml-1">{(t('dashboard.backtest.history.count') as string).replace('{count}', String(historyCount))}</span>
+                  <span className="text-xs text-zinc-400 ml-1">{(t('dashboard.backtest.history.count') as string).replace('{count}', String(results.length))}</span>
                 </div>
               </div>
 
-              {sampleResults.length > 0 ? (
+              {isLoading ? (
                 <div className="divide-y divide-white/[0.06]">
-                  {sampleResults.map((result) => (
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="p-4 animate-pulse">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="h-4 w-40 bg-white/[0.06] rounded" />
+                        <div className="h-4 w-16 bg-white/[0.06] rounded" />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="h-3 w-32 bg-white/[0.04] rounded" />
+                        <div className="h-3 w-20 bg-white/[0.04] rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : results.length > 0 ? (
+                <div className="divide-y divide-white/[0.06]">
+                  {results.map((result) => (
                     <motion.div
                       key={result.id}
                       onClick={() => handleResultSelect(result)}
@@ -339,17 +329,27 @@ export default function BacktestPage() {
                       whileHover={{ x: 4 }}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm font-medium text-white">{result.strategyName}</p>
-                        <span className={`text-sm font-medium ${result.totalReturn > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          {result.totalReturn > 0 ? '+' : ''}{result.totalReturn}%
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-white">{result.strategyName}</p>
+                          <span className={`px-1.5 py-0.5 text-[10px] rounded ${
+                            result.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400' :
+                            result.status === 'processing' ? 'bg-blue-500/10 text-blue-400' :
+                            result.status === 'failed' ? 'bg-red-500/10 text-red-400' :
+                            'bg-zinc-500/10 text-zinc-400'
+                          }`}>
+                            {result.status}
+                          </span>
+                        </div>
+                        <span className={`text-sm font-medium ${(result.performance?.totalReturn ?? 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {(result.performance?.totalReturn ?? 0) > 0 ? '+' : ''}{result.performance?.totalReturn?.toFixed(1) ?? 0}%
                         </span>
                       </div>
                       <div className="flex items-center gap-4 text-xs text-zinc-400">
-                        <span>{result.period.start} ~ {result.period.end}</span>
+                        <span>{result.config.startDate} ~ {result.config.endDate}</span>
                         <span>•</span>
-                        <span>{t('dashboard.backtest.history.sharpe') as string} {result.sharpeRatio}</span>
+                        <span>{t('dashboard.backtest.history.sharpe') as string} {result.performance?.sharpeRatio?.toFixed(2) ?? '-'}</span>
                         <span>•</span>
-                        <span>{(t('dashboard.backtest.history.trades') as string).replace('{count}', String(result.totalTrades))}</span>
+                        <span>{(t('dashboard.backtest.history.trades') as string).replace('{count}', String(result.performance?.totalTrades ?? 0))}</span>
                       </div>
                     </motion.div>
                   ))}

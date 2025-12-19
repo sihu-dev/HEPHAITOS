@@ -21,7 +21,6 @@ import {
   ArrowsRightLeftIcon,
   BanknotesIcon,
   ScaleIcon,
-  ShieldCheckIcon,
   ChartBarIcon,
   ClockIcon,
   SparklesIcon,
@@ -29,87 +28,16 @@ import {
 import { clsx } from 'clsx'
 import { DisclaimerInline } from '@/components/ui/Disclaimer'
 import { useI18n } from '@/i18n/client'
+import { useHoldings, type HoldingItem, type PortfolioStats } from '@/hooks/useHoldings'
+import { usePortfolioHistory, type Transaction, type PortfolioHistoryPoint } from '@/hooks/usePortfolioHistory'
 
 export const dynamic = 'force-dynamic'
 
 // ============================================
-// Types
-// ============================================
-
-interface Holding {
-  symbol: string
-  name: string
-  quantity: number
-  avgPrice: number
-  currentPrice: number
-  value: number
-  profit: number
-  profitPercent: number
-  weight: number
-  sector: string
-  color: string
-}
-
-interface PortfolioStats {
-  totalValue: number
-  totalProfit: number
-  totalProfitPercent: number
-  todayProfit: number
-  todayProfitPercent: number
-  cash: number
-  invested: number
-  sharpeRatio: number
-  volatility: number
-  beta: number
-}
-
-interface Transaction {
-  id: string
-  type: 'buy' | 'sell'
-  symbol: string
-  quantity: number
-  price: number
-  date: Date
-}
-
-// ============================================
-// Mock Data
+// Constants
 // ============================================
 
 const COLORS = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EC4899', '#6366F1']
-
-const MOCK_HOLDINGS: Holding[] = [
-  { symbol: 'BTC', name: 'Bitcoin', quantity: 0.5, avgPrice: 42000, currentPrice: 97000, value: 48500, profit: 27500, profitPercent: 130.95, weight: 35.2, sector: 'Crypto', color: COLORS[0] },
-  { symbol: 'ETH', name: 'Ethereum', quantity: 5, avgPrice: 2200, currentPrice: 3850, value: 19250, profit: 8250, profitPercent: 75.00, weight: 14.0, sector: 'Crypto', color: COLORS[1] },
-  { symbol: 'AAPL', name: 'Apple Inc.', quantity: 50, avgPrice: 165, currentPrice: 178, value: 8900, profit: 650, profitPercent: 7.88, weight: 6.5, sector: 'Tech', color: COLORS[2] },
-  { symbol: 'MSFT', name: 'Microsoft', quantity: 20, avgPrice: 380, currentPrice: 410, value: 8200, profit: 600, profitPercent: 7.89, weight: 6.0, sector: 'Tech', color: COLORS[3] },
-  { symbol: 'SOL', name: 'Solana', quantity: 100, avgPrice: 80, currentPrice: 225, value: 22500, profit: 14500, profitPercent: 181.25, weight: 16.3, sector: 'Crypto', color: COLORS[4] },
-  { symbol: 'NVDA', name: 'NVIDIA', quantity: 15, avgPrice: 450, currentPrice: 520, value: 7800, profit: 1050, profitPercent: 15.56, weight: 5.7, sector: 'Tech', color: COLORS[5] },
-]
-
-const MOCK_STATS: PortfolioStats = {
-  totalValue: 137850,
-  totalProfit: 52550,
-  totalProfitPercent: 61.62,
-  todayProfit: 4250,
-  todayProfitPercent: 3.18,
-  cash: 22150,
-  invested: 115700,
-  sharpeRatio: 2.34,
-  volatility: 18.5,
-  beta: 1.15,
-}
-
-const MOCK_HISTORY = Array.from({ length: 30 }, (_, i) => ({
-  date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
-  value: 100000 + Math.random() * 40000 + i * 1000,
-}))
-
-const MOCK_TRANSACTIONS: Transaction[] = [
-  { id: '1', type: 'buy', symbol: 'BTC', quantity: 0.1, price: 95000, date: new Date(Date.now() - 2 * 60 * 60 * 1000) },
-  { id: '2', type: 'sell', symbol: 'ETH', quantity: 1, price: 3800, date: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-  { id: '3', type: 'buy', symbol: 'SOL', quantity: 20, price: 220, date: new Date(Date.now() - 48 * 60 * 60 * 1000) },
-]
 
 // ============================================
 // Components
@@ -154,7 +82,7 @@ const StatCard = memo(function StatCard({
   )
 })
 
-const EquityChart = memo(function EquityChart({ data }: { data: typeof MOCK_HISTORY }) {
+const EquityChart = memo(function EquityChart({ data }: { data: PortfolioHistoryPoint[] }) {
   const isPositive = data[data.length - 1].value > data[0].value
 
   return (
@@ -202,7 +130,7 @@ const EquityChart = memo(function EquityChart({ data }: { data: typeof MOCK_HIST
   )
 })
 
-const AllocationPieChart = memo(function AllocationPieChart({ holdings }: { holdings: Holding[] }) {
+const AllocationPieChart = memo(function AllocationPieChart({ holdings }: { holdings: HoldingItem[] }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
   return (
@@ -255,7 +183,7 @@ const AllocationPieChart = memo(function AllocationPieChart({ holdings }: { hold
   )
 })
 
-const HoldingCard = memo(function HoldingCard({ holding }: { holding: Holding }) {
+const HoldingCard = memo(function HoldingCard({ holding }: { holding: HoldingItem }) {
   const isPositive = holding.profit >= 0
 
   return (
@@ -371,9 +299,15 @@ const PerformanceMetric = memo(function PerformanceMetric({
 
 export default function PortfolioPage() {
   const { t } = useI18n()
-  const [holdings] = useState<Holding[]>(MOCK_HOLDINGS)
-  const [stats] = useState<PortfolioStats>(MOCK_STATS)
+  const { holdings, stats, isLoading: holdingsLoading, refresh: refreshHoldings } = useHoldings()
+  const { history, transactions, isLoading: historyLoading, refresh: refreshHistory } = usePortfolioHistory({ days: 30 })
   const [activeTab, setActiveTab] = useState<'holdings' | 'performance' | 'history'>('holdings')
+
+  const isLoading = holdingsLoading || historyLoading
+
+  const handleRefresh = async () => {
+    await Promise.all([refreshHoldings(), refreshHistory()])
+  }
 
   const sectorData = useMemo(() => {
     const sectors: Record<string, number> = {}
@@ -402,43 +336,62 @@ export default function PortfolioPage() {
         </div>
         <button
           type="button"
-          className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] rounded-lg transition-colors"
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-50 rounded-lg transition-colors"
         >
-          <ArrowPathIcon className="w-4 h-4" />
+          <ArrowPathIcon className={clsx('w-4 h-4', isLoading && 'animate-spin')} />
           새로고침
         </button>
       </div>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="총 자산"
-          value={`$${stats.totalValue.toLocaleString()}`}
-          change={`+${stats.totalProfitPercent.toFixed(2)}%`}
-          isPositive={stats.totalProfit >= 0}
-          icon={BanknotesIcon}
-          iconColor="text-emerald-400"
-        />
-        <StatCard
-          label="오늘 수익"
-          value={`$${stats.todayProfit.toLocaleString()}`}
-          change={`${stats.todayProfitPercent >= 0 ? '+' : ''}${stats.todayProfitPercent.toFixed(2)}%`}
-          isPositive={stats.todayProfit >= 0}
-          icon={ArrowTrendingUpIcon}
-          iconColor={stats.todayProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}
-        />
-        <StatCard
-          label="투자금"
-          value={`$${stats.invested.toLocaleString()}`}
-          icon={ArrowsRightLeftIcon}
-          iconColor="text-blue-400"
-        />
-        <StatCard
-          label="현금"
-          value={`$${stats.cash.toLocaleString()}`}
-          icon={ScaleIcon}
-          iconColor="text-amber-400"
-        />
+        {isLoading ? (
+          <>
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] animate-pulse">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="h-3 w-16 bg-white/[0.06] rounded" />
+                  <div className="h-4 w-4 bg-white/[0.06] rounded" />
+                </div>
+                <div className="h-6 w-24 bg-white/[0.08] rounded mb-1" />
+                <div className="h-3 w-16 bg-white/[0.04] rounded" />
+              </div>
+            ))}
+          </>
+        ) : (
+          <>
+            <StatCard
+              label="총 자산"
+              value={`$${stats.totalValue.toLocaleString()}`}
+              change={`${stats.totalProfitPercent >= 0 ? '+' : ''}${stats.totalProfitPercent.toFixed(2)}%`}
+              isPositive={stats.totalProfit >= 0}
+              icon={BanknotesIcon}
+              iconColor="text-emerald-400"
+            />
+            <StatCard
+              label="오늘 수익"
+              value={`$${stats.todayProfit.toLocaleString()}`}
+              change={`${stats.todayProfitPercent >= 0 ? '+' : ''}${stats.todayProfitPercent.toFixed(2)}%`}
+              isPositive={stats.todayProfit >= 0}
+              icon={ArrowTrendingUpIcon}
+              iconColor={stats.todayProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}
+            />
+            <StatCard
+              label="투자금"
+              value={`$${stats.invested.toLocaleString()}`}
+              icon={ArrowsRightLeftIcon}
+              iconColor="text-blue-400"
+            />
+            <StatCard
+              label="현금"
+              value={`$${stats.cash.toLocaleString()}`}
+              icon={ScaleIcon}
+              iconColor="text-amber-400"
+            />
+          </>
+        )}
       </div>
 
       {/* Equity Chart */}
@@ -467,7 +420,17 @@ export default function PortfolioPage() {
             ))}
           </div>
         </div>
-        <EquityChart data={MOCK_HISTORY} />
+        {isLoading ? (
+          <div className="h-64 flex items-center justify-center">
+            <div className="w-8 h-8 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
+          </div>
+        ) : history.length > 0 ? (
+          <EquityChart data={history} />
+        ) : (
+          <div className="h-64 flex items-center justify-center text-sm text-zinc-500">
+            데이터가 없습니다
+          </div>
+        )}
       </motion.div>
 
       {/* Tab Navigation */}
@@ -604,9 +567,15 @@ export default function PortfolioPage() {
               </button>
             </div>
             <div>
-              {MOCK_TRANSACTIONS.map(tx => (
-                <TransactionItem key={tx.id} tx={tx} />
-              ))}
+              {transactions.length > 0 ? (
+                transactions.map(tx => (
+                  <TransactionItem key={tx.id} tx={tx} />
+                ))
+              ) : (
+                <div className="py-8 text-center text-sm text-zinc-500">
+                  거래 내역이 없습니다
+                </div>
+              )}
             </div>
           </motion.div>
         )}

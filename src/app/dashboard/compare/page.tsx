@@ -11,23 +11,13 @@ import {
 } from '@/lib/mirroring/celebrity-portfolio'
 import { DisclaimerInline, TradeWarning } from '@/components/ui/Disclaimer'
 import { useI18n } from '@/i18n/client'
+import { useHoldings, type HoldingItem } from '@/hooks/useHoldings'
 
 export const dynamic = 'force-dynamic'
 
 // ============================================
 // Types
 // ============================================
-
-interface UserHolding {
-  symbol: string
-  name: string
-  shares: number
-  avgPrice: number
-  currentPrice: number
-  value: number
-  weight: number
-  change: number
-}
 
 interface ComparisonResult {
   symbol: string
@@ -79,19 +69,6 @@ const SyncIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
   </svg>
 )
-
-// ============================================
-// Mock User Portfolio Data
-// ============================================
-
-const MOCK_USER_PORTFOLIO: UserHolding[] = [
-  { symbol: 'AAPL', name: 'Apple', shares: 50, avgPrice: 165, currentPrice: 178, value: 8900, weight: 22.3, change: 7.9 },
-  { symbol: 'MSFT', name: 'Microsoft', shares: 20, avgPrice: 380, currentPrice: 410, value: 8200, weight: 20.5, change: 7.9 },
-  { symbol: 'GOOGL', name: 'Alphabet', shares: 40, avgPrice: 135, currentPrice: 142, value: 5680, weight: 14.2, change: 5.2 },
-  { symbol: 'TSLA', name: 'Tesla', shares: 25, avgPrice: 220, currentPrice: 250, value: 6250, weight: 15.6, change: 13.6 },
-  { symbol: 'AMZN', name: 'Amazon', shares: 30, avgPrice: 170, currentPrice: 185, value: 5550, weight: 13.9, change: 8.8 },
-  { symbol: 'META', name: 'Meta', shares: 10, avgPrice: 480, currentPrice: 520, value: 5200, weight: 13.0, change: 8.3 },
-]
 
 // ============================================
 // Comparison Bar Component
@@ -371,13 +348,14 @@ function SyncSuggestions({
 export default function ComparePage() {
   const { t } = useI18n()
   const [selectedCelebrity, setSelectedCelebrity] = useState<string>('nancy_pelosi')
+  const { holdings, isLoading } = useHoldings()
 
   const celebrities = celebrityPortfolioManager.getCelebrities()
   const celebrity = celebrityPortfolioManager.getCelebrity(selectedCelebrity)
   const celebrityPortfolio = celebrityPortfolioManager.getPortfolio(selectedCelebrity)
 
-  // Calculate comparison
-  const userHoldings = MOCK_USER_PORTFOLIO.map((h) => ({
+  // Calculate comparison using real holdings data
+  const userHoldings = holdings.map((h) => ({
     symbol: h.symbol,
     value: h.value,
   }))
@@ -388,7 +366,7 @@ export default function ComparePage() {
 
   // Add user holdings not in celebrity portfolio
   const celebritySymbols = new Set(comparisons.map((c) => c.symbol))
-  const userOnlyHoldings = MOCK_USER_PORTFOLIO.filter(
+  const userOnlyHoldings = holdings.filter(
     (h) => !celebritySymbols.has(h.symbol)
   ).map((h) => ({
     symbol: h.symbol,
@@ -402,7 +380,7 @@ export default function ComparePage() {
   const allComparisons: ComparisonResult[] = [
     ...comparisons.map((c) => ({
       ...c,
-      name: MOCK_USER_PORTFOLIO.find((h) => h.symbol === c.symbol)?.name ||
+      name: holdings.find((h) => h.symbol === c.symbol)?.name ||
             celebrityPortfolio?.holdings.find((h) => h.symbol === c.symbol)?.name ||
             c.symbol,
     })),
@@ -475,12 +453,12 @@ export default function ComparePage() {
         {/* User Portfolio */}
         <PortfolioStats
           title={t('dashboard.compare.page.myPortfolio') as string}
-          holdings={MOCK_USER_PORTFOLIO.map((h) => ({
+          holdings={holdings.map((h) => ({
             symbol: h.symbol,
             weight: h.weight,
           }))}
           performance={{
-            ytd: MOCK_USER_PORTFOLIO.reduce((sum, h) => sum + h.change * h.weight / 100, 0),
+            ytd: holdings.reduce((sum, h) => sum + h.profitPercent * h.weight / 100, 0),
           }}
           color="purple"
           t={t}

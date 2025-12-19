@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { clsx } from 'clsx'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { DisclaimerInline } from '@/components/ui/Disclaimer'
 import { AIAnalysisButton } from '@/components/widgets/AIAnalysisWidget'
 import { useI18n } from '@/i18n/client'
+import { useCoachingSessions, type Mentor, type LiveSession, type CoachingMessage } from '@/hooks/useCoachingSessions'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,48 +17,6 @@ export const dynamic = 'force-dynamic'
 // ============================================
 
 type TranslateFunction = (key: string) => string | string[] | Record<string, unknown>
-
-// ============================================
-// Types
-// ============================================
-
-interface Mentor {
-  id: string
-  name: string
-  nameKr: string
-  title: string
-  specialty: string[]
-  rating: number
-  students: number
-  sessions: number
-  hourlyRate: number
-  isOnline: boolean
-  nextAvailable?: Date
-  imageUrl?: string
-}
-
-interface LiveSession {
-  id: string
-  mentorId: string
-  title: string
-  description: string
-  startTime: Date
-  duration: number // minutes
-  participants: number
-  maxParticipants: number
-  topics: string[]
-  isLive: boolean
-  isPremium: boolean
-}
-
-interface CoachingMessage {
-  id: string
-  senderId: string
-  senderName: string
-  content: string
-  timestamp: Date
-  isQuestion?: boolean
-}
 
 // ============================================
 // Icons
@@ -128,112 +87,6 @@ const SparklesIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
   </svg>
 )
-
-// ============================================
-// Mock Data
-// ============================================
-
-const MENTORS: Mentor[] = [
-  {
-    id: 'mentor_1',
-    name: 'Kim Trading Pro',
-    nameKr: '김트레이딩',
-    title: '전업 트레이더 15년차',
-    specialty: ['기술적 분석', '스윙 트레이딩', '리스크 관리'],
-    rating: 4.9,
-    students: 2340,
-    sessions: 450,
-    hourlyRate: 50000,
-    isOnline: true,
-  },
-  {
-    id: 'mentor_2',
-    name: 'Value Hunter',
-    nameKr: '이가치투자',
-    title: '가치투자 전문가',
-    specialty: ['기본적 분석', '장기 투자', '배당 전략'],
-    rating: 4.8,
-    students: 1820,
-    sessions: 320,
-    hourlyRate: 45000,
-    isOnline: true,
-  },
-  {
-    id: 'mentor_3',
-    name: 'Quant Master',
-    nameKr: '박퀀트',
-    title: '알고리즘 트레이딩 전문가',
-    specialty: ['퀀트 전략', '백테스팅', 'Python'],
-    rating: 4.7,
-    students: 980,
-    sessions: 180,
-    hourlyRate: 60000,
-    isOnline: false,
-    nextAvailable: new Date(Date.now() + 2 * 60 * 60 * 1000),
-  },
-  {
-    id: 'mentor_4',
-    name: 'Crypto Sage',
-    nameKr: '최크립토',
-    title: '암호화폐 전문 트레이더',
-    specialty: ['암호화폐', 'DeFi', '온체인 분석'],
-    rating: 4.6,
-    students: 1560,
-    sessions: 290,
-    hourlyRate: 55000,
-    isOnline: true,
-  },
-]
-
-const LIVE_SESSIONS: LiveSession[] = [
-  {
-    id: 'session_1',
-    mentorId: 'mentor_1',
-    title: '실시간 차트 분석 & Q&A',
-    description: '오늘의 시장 동향과 주요 종목 차트 분석',
-    startTime: new Date(),
-    duration: 60,
-    participants: 127,
-    maxParticipants: 200,
-    topics: ['차트 분석', 'NVDA', 'TSLA'],
-    isLive: true,
-    isPremium: false,
-  },
-  {
-    id: 'session_2',
-    mentorId: 'mentor_2',
-    title: '가치주 발굴 비법 공개',
-    description: '저평가 우량주 찾는 방법 심층 분석',
-    startTime: new Date(Date.now() + 30 * 60 * 1000),
-    duration: 90,
-    participants: 45,
-    maxParticipants: 50,
-    topics: ['가치 투자', 'PER', 'PBR'],
-    isLive: false,
-    isPremium: true,
-  },
-  {
-    id: 'session_3',
-    mentorId: 'mentor_4',
-    title: '비트코인 사이클 분석',
-    description: '반감기 이후 시장 전망과 투자 전략',
-    startTime: new Date(Date.now() + 60 * 60 * 1000),
-    duration: 60,
-    participants: 89,
-    maxParticipants: 150,
-    topics: ['비트코인', '사이클', '반감기'],
-    isLive: false,
-    isPremium: false,
-  },
-]
-
-const MOCK_MESSAGES: CoachingMessage[] = [
-  { id: '1', senderId: 'mentor_1', senderName: '김트레이딩', content: '안녕하세요 여러분! 오늘 세션에 오신 것을 환영합니다.', timestamp: new Date(Date.now() - 10 * 60 * 1000) },
-  { id: '2', senderId: 'user_1', senderName: '홍길동', content: 'NVDA 현재 구간에서 진입해도 될까요?', timestamp: new Date(Date.now() - 8 * 60 * 1000), isQuestion: true },
-  { id: '3', senderId: 'mentor_1', senderName: '김트레이딩', content: 'RSI가 70을 넘어서 과매수 구간입니다. 조정 시 분할 매수가 좋아 보입니다.', timestamp: new Date(Date.now() - 7 * 60 * 1000) },
-  { id: '4', senderId: 'user_2', senderName: '이순신', content: '손절 라인은 어디로 잡아야 할까요?', timestamp: new Date(Date.now() - 5 * 60 * 1000), isQuestion: true },
-  { id: '5', senderId: 'mentor_1', senderName: '김트레이딩', content: '직전 저점인 $850 아래로 손절 설정하시면 됩니다. 약 5% 정도의 손절폭이 됩니다.', timestamp: new Date(Date.now() - 4 * 60 * 1000) },
-]
 
 // ============================================
 // Mentor Card Component
@@ -717,19 +570,22 @@ function LiveChat({
 
 export default function CoachingPage() {
   const { t } = useI18n()
+  const { mentors, liveSessions, messages, isLoading } = useCoachingSessions()
   const [activeSession, setActiveSession] = useState<LiveSession | null>(null)
   const [filter, setFilter] = useState<'all' | 'live' | 'upcoming'>('all')
   const [isScreenShareActive, setIsScreenShareActive] = useState(false)
 
-  const filteredSessions = LIVE_SESSIONS.filter((s) => {
-    if (filter === 'live') return s.isLive
-    if (filter === 'upcoming') return !s.isLive
-    return true
-  })
+  const filteredSessions = useMemo(() => {
+    return liveSessions.filter((s) => {
+      if (filter === 'live') return s.isLive
+      if (filter === 'upcoming') return !s.isLive
+      return true
+    })
+  }, [liveSessions, filter])
 
-  const liveSession = LIVE_SESSIONS.find((s) => s.isLive)
+  const liveSession = useMemo(() => liveSessions.find((s) => s.isLive), [liveSessions])
   const activeMentor = activeSession
-    ? MENTORS.find((m) => m.id === activeSession.mentorId)
+    ? mentors.find((m) => m.id === activeSession.mentorId)
     : undefined
 
   return (
@@ -761,7 +617,7 @@ export default function CoachingPage() {
               <div>
                 <p className="text-sm text-white font-medium">{liveSession.title}</p>
                 <p className="text-xs text-zinc-400">
-                  {MENTORS.find((m) => m.id === liveSession.mentorId)?.nameKr} · {(t('dashboard.coaching.banner.watching') as string).replace('{count}', String(liveSession.participants))}
+                  {mentors.find((m) => m.id === liveSession.mentorId)?.nameKr} · {(t('dashboard.coaching.banner.watching') as string).replace('{count}', String(liveSession.participants))}
                 </p>
               </div>
             </div>
@@ -803,7 +659,7 @@ export default function CoachingPage() {
                 <LiveSessionCard
                   key={session.id}
                   session={session}
-                  mentor={MENTORS.find((m) => m.id === session.mentorId)}
+                  mentor={mentors.find((m) => m.id === session.mentorId)}
                   onJoin={() => setActiveSession(session)}
                   t={t}
                 />
@@ -815,7 +671,7 @@ export default function CoachingPage() {
           <div>
             <h2 className="text-sm text-zinc-400 font-medium mb-4">{t('dashboard.coaching.sections.popularMentors') as string}</h2>
             <div className="space-y-3">
-              {MENTORS.map((mentor) => (
+              {mentors.map((mentor) => (
                 <MentorCard
                   key={mentor.id}
                   mentor={mentor}
@@ -832,7 +688,7 @@ export default function CoachingPage() {
           {activeSession ? (
             <LiveChat
               sessionId={activeSession.id}
-              messages={MOCK_MESSAGES}
+              messages={messages}
               onToggleScreenShare={() => setIsScreenShareActive(!isScreenShareActive)}
               isScreenShareActive={isScreenShareActive}
               t={t}

@@ -748,6 +748,102 @@ export interface Database {
           is_public?: boolean
         }
       }
+
+      // Portfolio Snapshots
+      portfolio_snapshots: {
+        Row: {
+          id: string
+          user_id: string
+          broker: string
+          snapshot_date: string
+          snapshot_time: string
+          total_assets: number
+          total_deposit: number
+          available_cash: number
+          total_purchase: number
+          total_evaluation: number
+          profit_loss: number
+          profit_loss_rate: number
+          holdings: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          broker: string
+          snapshot_date: string
+          snapshot_time?: string
+          total_assets: number
+          total_deposit: number
+          available_cash: number
+          total_purchase: number
+          total_evaluation: number
+          profit_loss: number
+          profit_loss_rate: number
+          holdings?: Json
+          created_at?: string
+        }
+        Update: {
+          total_assets?: number
+          total_deposit?: number
+          available_cash?: number
+          total_purchase?: number
+          total_evaluation?: number
+          profit_loss?: number
+          profit_loss_rate?: number
+          holdings?: Json
+        }
+      }
+
+      // Order Logs
+      order_logs: {
+        Row: {
+          id: string
+          user_id: string
+          broker: string
+          symbol: string
+          side: 'buy' | 'sell'
+          quantity: number
+          price: number | null
+          order_type: 'limit' | 'market'
+          order_id: string | null
+          status: 'pending' | 'submitted' | 'filled' | 'partial' | 'cancelled' | 'rejected'
+          filled_quantity: number
+          filled_price: number | null
+          message: string | null
+          strategy_id: string | null
+          execution_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          broker: string
+          symbol: string
+          side: 'buy' | 'sell'
+          quantity: number
+          price?: number | null
+          order_type?: 'limit' | 'market'
+          order_id?: string | null
+          status?: 'pending' | 'submitted' | 'filled' | 'partial' | 'cancelled' | 'rejected'
+          filled_quantity?: number
+          filled_price?: number | null
+          message?: string | null
+          strategy_id?: string | null
+          execution_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          status?: 'pending' | 'submitted' | 'filled' | 'partial' | 'cancelled' | 'rejected'
+          filled_quantity?: number
+          filled_price?: number | null
+          message?: string | null
+          order_id?: string | null
+          updated_at?: string
+        }
+      }
     }
 
     Views: {

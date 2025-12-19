@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useState, useEffect } from 'react'
+import { memo } from 'react'
 import { clsx } from 'clsx'
 import {
   ArrowUpIcon,
@@ -10,13 +10,15 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   ClockIcon,
+  BellIcon,
 } from '@heroicons/react/24/solid'
 import { useI18n } from '@/i18n/client'
+import { useRecentActivity, type Activity, type ActivityType } from '@/hooks/useRecentActivity'
+import Link from 'next/link'
 
-type ActivityType = 'buy' | 'sell' | 'strategy_start' | 'strategy_pause' | 'backtest' | 'alert'
 type ActivityStatus = 'profit' | 'loss' | 'neutral' | 'success' | 'warning'
 
-interface Activity {
+interface DisplayActivity {
   id: string
   type: ActivityType
   title: string
@@ -28,12 +30,11 @@ interface Activity {
 }
 
 const activityIcons: Record<ActivityType, typeof ArrowUpIcon> = {
-  buy: ArrowUpIcon,
-  sell: ArrowDownIcon,
-  strategy_start: PlayIcon,
-  strategy_pause: PauseIcon,
+  trade: ArrowUpIcon,
   backtest: CheckCircleIcon,
-  alert: ExclamationTriangleIcon,
+  strategy: PlayIcon,
+  notification: BellIcon,
+  system: ExclamationTriangleIcon,
 }
 
 const statusStyles: Record<ActivityStatus, { bg: string; border: string; text: string; glow: string }> = {
@@ -69,14 +70,63 @@ const statusStyles: Record<ActivityStatus, { bg: string; border: string; text: s
   },
 }
 
+function getActivityIcon(type: ActivityType, color: Activity['color']): typeof ArrowUpIcon {
+  if (type === 'trade') {
+    return color === 'green' ? ArrowUpIcon : ArrowDownIcon
+  }
+  return activityIcons[type] || BellIcon
+}
+
+function getActivityStatus(activity: Activity): ActivityStatus {
+  switch (activity.color) {
+    case 'green': return 'profit'
+    case 'red': return 'loss'
+    case 'yellow': return 'warning'
+    case 'blue': return 'success'
+    default: return 'neutral'
+  }
+}
+
+function formatRelativeTime(date: Date): string {
+  const now = Date.now()
+  const diff = now - date.getTime()
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${days}d ago`
+}
+
+function transformActivity(activity: Activity): DisplayActivity {
+  return {
+    id: activity.id,
+    type: activity.type,
+    title: activity.title,
+    description: activity.description,
+    timestamp: formatRelativeTime(activity.timestamp),
+    status: getActivityStatus(activity),
+    amount: activity.metadata?.price
+      ? `${activity.metadata.quantity || ''} @ $${activity.metadata.price}`
+      : activity.metadata?.totalReturn
+        ? `${Number(activity.metadata.totalReturn) > 0 ? '+' : ''}${activity.metadata.totalReturn}%`
+        : undefined,
+    meta: activity.metadata?.strategyName as string | undefined,
+  }
+}
+
 const ActivityRow = memo(function ActivityRow({
   activity,
+  originalActivity,
   index,
 }: {
-  activity: Activity
+  activity: DisplayActivity
+  originalActivity: Activity
   index: number
 }) {
-  const Icon = activityIcons[activity.type]
+  const Icon = getActivityIcon(originalActivity.type, originalActivity.color)
   const style = statusStyles[activity.status]
 
   return (
@@ -155,76 +205,59 @@ const ActivityRow = memo(function ActivityRow({
 
 export const RecentActivity = memo(function RecentActivity() {
   const { t } = useI18n()
-  const [activities, setActivities] = useState<Activity[]>([])
+  const { activities, isLoading } = useRecentActivity(5)
 
-  useEffect(() => {
-    // Initialize with mock data
-    const mockActivities: Activity[] = [
-      {
-        id: '1',
-        type: 'buy',
-        title: 'Bought AAPL',
-        description: 'Momentum Strategy executed buy order',
-        timestamp: '2m ago',
-        status: 'neutral',
-        amount: '10 shares @ $195.50',
-        meta: 'Market Order',
-      },
-      {
-        id: '2',
-        type: 'sell',
-        title: 'Sold TSLA',
-        description: 'RSI Strategy hit profit target',
-        timestamp: '15m ago',
-        status: 'profit',
-        amount: '+$125.00 (+5.2%)',
-        meta: '5 shares',
-      },
-      {
-        id: '3',
-        type: 'strategy_pause',
-        title: 'MACD Crossover Paused',
-        description: 'Max drawdown threshold (8%) reached',
-        timestamp: '1h ago',
-        status: 'warning',
-      },
-      {
-        id: '4',
-        type: 'backtest',
-        title: 'Backtest Completed',
-        description: 'Mean Reversion Strategy analysis finished',
-        timestamp: '2h ago',
-        status: 'success',
-        amount: 'Sharpe: 1.85',
-        meta: 'Win Rate: 72%',
-      },
-      {
-        id: '5',
-        type: 'strategy_start',
-        title: 'RSI Strategy Started',
-        description: 'Resumed after configuration update',
-        timestamp: '3h ago',
-        status: 'success',
-      },
-    ]
-    setActivities(mockActivities)
-  }, [])
+  // Transform activities for display
+  const displayActivities = activities.map(transformActivity)
 
   return (
     <div className="card-cinematic overflow-hidden">
       {/* Activity List */}
       <div className="p-2">
-        {activities.map((activity, index) => (
-          <ActivityRow key={activity.id} activity={activity} index={index} />
-        ))}
+        {isLoading ? (
+          // Loading skeleton
+          [...Array(3)].map((_, i) => (
+            <div key={i} className="flex items-start gap-4 p-4 -mx-2 rounded-xl animate-pulse">
+              <div className="w-10 h-10 rounded-xl bg-white/[0.06]" />
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="h-4 w-32 bg-white/[0.06] rounded" />
+                  <div className="h-3 w-16 bg-white/[0.04] rounded" />
+                </div>
+                <div className="h-3 w-48 bg-white/[0.04] rounded mb-2" />
+                <div className="h-6 w-24 bg-white/[0.04] rounded" />
+              </div>
+            </div>
+          ))
+        ) : displayActivities.length > 0 ? (
+          displayActivities.map((activity, index) => (
+            <ActivityRow
+              key={activity.id}
+              activity={activity}
+              originalActivity={activities[index]}
+              index={index}
+            />
+          ))
+        ) : (
+          <div className="py-8 text-center">
+            <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-white/[0.04] flex items-center justify-center">
+              <ClockIcon className="w-5 h-5 text-zinc-500" />
+            </div>
+            <p className="text-sm text-zinc-400">No recent activity</p>
+            <p className="text-xs text-zinc-500 mt-1">Your trading activities will appear here</p>
+          </div>
+        )}
       </div>
 
       {/* Footer */}
       <div className="px-4 py-3 border-t border-white/[0.06] bg-white/[0.01]">
-        <button className="w-full flex items-center justify-center gap-2 text-xs text-zinc-500 hover:text-white transition-colors group">
+        <Link
+          href="/dashboard/history"
+          className="w-full flex items-center justify-center gap-2 text-xs text-zinc-500 hover:text-white transition-colors group"
+        >
           <span>View All Activity</span>
           <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-        </button>
+        </Link>
       </div>
     </div>
   )
