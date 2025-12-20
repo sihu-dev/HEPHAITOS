@@ -331,7 +331,7 @@ export function PortfolioContent() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-base font-medium text-white flex items-center gap-2">
-            <ChartPieIcon className="w-5 h-5 text-violet-400" />
+            <ChartPieIcon className="w-5 h-5 text-[#7C8AEA]" />
             포트폴리오
           </h1>
           <p className="text-sm text-zinc-400 mt-0.5">자산 현황 및 성과 분석</p>
@@ -424,7 +424,7 @@ export function PortfolioContent() {
         </div>
         {isLoading ? (
           <div className="h-64 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[#5E6AD2]/30 border-t-[#5E6AD2] rounded-full animate-spin" />
           </div>
         ) : history.length > 0 ? (
           <EquityChart data={history} />
@@ -488,7 +488,7 @@ export function PortfolioContent() {
                       <div className="flex items-center gap-2">
                         <div className="w-24 h-1.5 rounded-full bg-white/[0.06]">
                           <div
-                            className="h-full rounded-full bg-violet-500"
+                            className="h-full rounded-full bg-[#5E6AD2]"
                             style={{ width: `${sector.value}%` }}
                           />
                         </div>
@@ -540,10 +540,10 @@ export function PortfolioContent() {
               description="투자금 대비 수익"
               status={stats.totalProfitPercent > 20 ? 'good' : stats.totalProfitPercent > 0 ? 'neutral' : 'warning'}
             />
-            <div className="p-4 rounded-xl bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/20">
+            <div className="p-4 rounded-xl bg-[#5E6AD2]/10 border border-[#5E6AD2]/20">
               <div className="flex items-center gap-2 mb-2">
-                <SparklesIcon className="w-4 h-4 text-violet-400" />
-                <span className="text-xs text-violet-400">AI 분석</span>
+                <SparklesIcon className="w-4 h-4 text-[#7C8AEA]" />
+                <span className="text-xs text-[#7C8AEA]">AI 분석</span>
               </div>
               <p className="text-sm text-white mb-1">포트폴리오 건강도</p>
               <p className="text-xs text-zinc-400">
@@ -564,7 +564,7 @@ export function PortfolioContent() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-medium text-white">최근 거래</h3>
-              <button type="button" className="text-xs text-violet-400 hover:text-violet-300">
+              <button type="button" className="text-xs text-[#7C8AEA] hover:text-[#9AA5EF]">
                 전체 보기
               </button>
             </div>

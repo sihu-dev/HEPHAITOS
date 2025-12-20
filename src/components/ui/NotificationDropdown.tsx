@@ -39,7 +39,7 @@ const NotificationColors: Record<NotificationType, string> = {
   price_alert: 'text-yellow-400 bg-yellow-400/10',
   trade_executed: 'text-emerald-400 bg-emerald-400/10',
   strategy_signal: 'text-[#7C8AEA] bg-[#5E6AD2]/10',
-  celebrity_trade: 'text-purple-400 bg-purple-400/10',
+  celebrity_trade: 'text-amber-400 bg-amber-400/10',
   portfolio_update: 'text-blue-400 bg-blue-400/10',
   system: 'text-zinc-400 bg-zinc-400/10',
   achievement: 'text-amber-400 bg-amber-400/10',

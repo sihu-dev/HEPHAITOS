@@ -474,7 +474,7 @@ function StrategyBuilderInner() {
             <button
               type="button"
               onClick={() => setShowAIGenerator(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-600/20 to-pink-600/20 hover:from-purple-600/30 hover:to-pink-600/30 border border-purple-500/30 rounded-lg text-purple-400 hover:text-purple-300 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-[#5E6AD2]/20 hover:bg-[#5E6AD2]/30 border border-[#5E6AD2]/30 rounded-lg text-[#7C8AEA] hover:text-[#9AA5EF] transition-colors"
               aria-label={t('dashboard.strategyBuilder.aiGenerate') as string}
               title={t('dashboard.strategyBuilder.aiGenerateTitle') as string}
             >

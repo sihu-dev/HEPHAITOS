@@ -57,7 +57,7 @@ export function BacktestContent() {
         <button
           type="button"
           onClick={() => setShowSimulation(!showSimulation)}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg hover:from-violet-500 hover:to-purple-500 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-[#5E6AD2] text-white rounded-lg hover:bg-[#6E7AE2] transition-all"
         >
           <SparklesIcon className="w-4 h-4" />
           {showSimulation ? t('dashboard.backtest.closeSimulation') as string : t('dashboard.backtest.aiSimulation') as string}
@@ -77,11 +77,11 @@ export function BacktestContent() {
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="border border-violet-500/20 rounded-lg bg-violet-500/5 p-4">
+            <div className="border border-[#5E6AD2]/20 rounded-lg bg-[#5E6AD2]/5 p-4">
               <div className="flex items-center gap-2 mb-4">
-                <SparklesIcon className="w-5 h-5 text-violet-400" />
+                <SparklesIcon className="w-5 h-5 text-[#7C8AEA]" />
                 <h3 className="text-sm font-medium text-white">{t('dashboard.backtest.aiPortfolioSimulation') as string}</h3>
-                <span className="px-2 py-0.5 text-[10px] bg-violet-500/20 text-violet-300 rounded">BETA</span>
+                <span className="px-2 py-0.5 text-[10px] bg-[#5E6AD2]/20 text-[#9AA5EF] rounded">BETA</span>
               </div>
               <SimulationWidget
                 strategyName={selectedResult?.strategyName || (t('dashboard.backtest.defaultStrategy') as string)}

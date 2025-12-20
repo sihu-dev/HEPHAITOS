@@ -373,7 +373,7 @@ function getNodeTypeColor(type: string): string {
     condition: 'bg-zinc-500/20',
     indicator: 'bg-emerald-500/20',
     action: 'bg-red-500/20',
-    risk: 'bg-purple-500/20',
+    risk: 'bg-[#8B5CF6]/20',
     default: 'bg-white/[0.06]',
   }
   return colors[type] ?? colors.default

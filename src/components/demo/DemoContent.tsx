@@ -67,12 +67,12 @@ const AgentChatDemo = memo(function AgentChatDemo() {
     <div className="border border-white/[0.06] rounded-xl bg-zinc-900/30 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+          <div className="w-6 h-6 rounded bg-[#5E6AD2] flex items-center justify-center">
             <ChatBubbleLeftRightIcon className="w-3.5 h-3.5 text-white" />
           </div>
           <span className="text-sm font-medium text-white">AI Agent Preview</span>
         </div>
-        <span className="text-[10px] text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded">NEW</span>
+        <span className="text-[10px] text-[#7C8AEA] bg-[#5E6AD2]/10 px-2 py-0.5 rounded">NEW</span>
       </div>
 
       <div className="h-64 p-4 space-y-3 overflow-y-auto">
@@ -87,7 +87,7 @@ const AgentChatDemo = memo(function AgentChatDemo() {
               <div className={clsx(
                 'max-w-[85%] px-3 py-2 rounded-lg text-sm whitespace-pre-line',
                 msg.role === 'user'
-                  ? 'bg-violet-600 text-white'
+                  ? 'bg-[#5E6AD2] text-white'
                   : 'bg-white/[0.04] border border-white/[0.06] text-zinc-200'
               )}>
                 {msg.content}
@@ -118,7 +118,7 @@ const AgentChatDemo = memo(function AgentChatDemo() {
         <button
           onClick={runDemo}
           disabled={isTyping}
-          className="w-full py-2 bg-violet-600 hover:bg-violet-500 disabled:bg-violet-600/50 text-white text-sm rounded-lg transition-colors"
+          className="w-full py-2 bg-[#5E6AD2] hover:bg-[#6E7AE2] disabled:bg-[#5E6AD2]/50 text-white text-sm rounded-lg transition-colors"
         >
           {isTyping ? '대화 진행 중...' : '데모 실행'}
         </button>
@@ -447,7 +447,7 @@ export function DemoContent() {
       icon: SparklesIcon,
       title: 'AI 전략 생성',
       description: '자연어로 전략을 설명하면 AI가 자동으로 빌드합니다',
-      color: 'violet',
+      color: 'primary',
     },
     {
       icon: ChartBarIcon,
@@ -469,7 +469,7 @@ export function DemoContent() {
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#5E6AD2]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-0 w-96 h-96 bg-[#5E6AD2]/5 rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-12">
@@ -550,13 +550,13 @@ export function DemoContent() {
             >
               <div className={clsx(
                 'w-10 h-10 rounded-lg flex items-center justify-center mb-4',
-                feature.color === 'violet' && 'bg-violet-500/10',
+                feature.color === 'primary' && 'bg-[#5E6AD2]/10',
                 feature.color === 'emerald' && 'bg-emerald-500/10',
                 feature.color === 'amber' && 'bg-amber-500/10'
               )}>
                 <feature.icon className={clsx(
                   'w-5 h-5',
-                  feature.color === 'violet' && 'text-violet-400',
+                  feature.color === 'primary' && 'text-[#7C8AEA]',
                   feature.color === 'emerald' && 'text-emerald-400',
                   feature.color === 'amber' && 'text-amber-400'
                 )} />

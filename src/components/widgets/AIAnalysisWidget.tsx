@@ -192,8 +192,8 @@ export function AIAnalysisWidget({
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-zinc-800">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg">
-            <SparklesIcon className="w-5 h-5 text-purple-400" />
+          <div className="p-2 bg-[#5E6AD2]/20 rounded-lg">
+            <SparklesIcon className="w-5 h-5 text-[#7C8AEA]" />
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white">{t('dashboard.aiAnalysis.title') as string}</h3>
@@ -261,7 +261,7 @@ export function AIAnalysisWidget({
                   </p>
                   <button
                     onClick={() => startAnalysis(trade)}
-                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-medium rounded-lg transition-all"
+                    className="px-4 py-2 bg-[#5E6AD2] hover:bg-[#6E7AE2] text-white text-sm font-medium rounded-lg transition-all"
                   >
                     <SparklesIcon className="w-4 h-4 inline-block mr-2" />
                     {t('dashboard.aiAnalysis.actions.start') as string}
@@ -272,7 +272,7 @@ export function AIAnalysisWidget({
               {/* Loading State */}
               {isLoading && !content && (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-purple-400">
+                  <div className="flex items-center gap-2 text-[#7C8AEA]">
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -321,7 +321,7 @@ export function AIAnalysisWidget({
                     <motion.span
                       animate={{ opacity: [1, 0.3, 1] }}
                       transition={{ duration: 0.8, repeat: Infinity }}
-                      className="inline-block w-2 h-4 bg-purple-400 ml-1"
+                      className="inline-block w-2 h-4 bg-[#7C8AEA] ml-1"
                     />
                   )}
                 </div>
@@ -339,7 +339,7 @@ export function AIAnalysisWidget({
                     </span>
                   )}
                   {isLoading && (
-                    <span className="text-purple-400">{t('dashboard.aiAnalysis.status.streaming') as string}</span>
+                    <span className="text-[#7C8AEA]">{t('dashboard.aiAnalysis.status.streaming') as string}</span>
                   )}
                 </div>
 
@@ -447,10 +447,9 @@ export function AIAnalysisButton({
         onClick={() => setShowWidget(true)}
         className={`
           inline-flex items-center font-medium rounded-lg transition-all
-          bg-gradient-to-r from-purple-600/20 to-pink-600/20
-          hover:from-purple-600/30 hover:to-pink-600/30
-          text-purple-300 hover:text-purple-200
-          border border-purple-500/30 hover:border-purple-500/50
+          bg-[#5E6AD2]/20 hover:bg-[#5E6AD2]/30
+          text-[#9AA5EF] hover:text-[#A8B4F5]
+          border border-[#5E6AD2]/30 hover:border-[#5E6AD2]/50
           ${sizeStyles[size]}
           ${className}
         `}

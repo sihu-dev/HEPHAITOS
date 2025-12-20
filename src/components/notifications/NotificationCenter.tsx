@@ -51,7 +51,7 @@ function getNotificationColor(type: NotificationType) {
     price_alert: 'text-amber-400 bg-amber-500/10',
     trade_executed: 'text-emerald-400 bg-emerald-500/10',
     strategy_signal: 'text-blue-400 bg-blue-500/10',
-    celebrity_trade: 'text-purple-400 bg-purple-500/10',
+    celebrity_trade: 'text-amber-400 bg-amber-500/10',
     portfolio_update: 'text-cyan-400 bg-cyan-500/10',
     system: 'text-zinc-400 bg-zinc-500/10',
     achievement: 'text-yellow-400 bg-yellow-500/10',
