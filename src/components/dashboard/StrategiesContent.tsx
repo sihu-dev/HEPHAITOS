@@ -16,6 +16,7 @@ import {
 import { useI18n } from '@/i18n/client'
 import { useStrategies, type Strategy } from '@/hooks/useStrategies'
 import { LiveIndicator } from '@/components/ui/LiveIndicator'
+import { DisclaimerInline } from '@/components/ui/Disclaimer'
 
 export function StrategiesContent() {
   const { t } = useI18n()
@@ -266,6 +267,9 @@ export function StrategiesContent() {
           })}
         </div>
       )}
+
+      {/* 면책조항 */}
+      <DisclaimerInline className="mt-6" />
     </div>
   )
 }

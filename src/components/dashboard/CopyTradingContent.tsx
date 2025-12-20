@@ -3,6 +3,7 @@
 
 import { UserGroupIcon } from '@heroicons/react/24/outline'
 import { useI18n } from '@/i18n/client'
+import { DisclaimerInline } from '@/components/ui/Disclaimer'
 
 export function CopyTradingContent() {
   const { t } = useI18n()
@@ -61,6 +62,9 @@ export function CopyTradingContent() {
           </p>
         </div>
       </div>
+
+      {/* 면책조항 */}
+      <DisclaimerInline className="mt-6" />
     </div>
   )
 }

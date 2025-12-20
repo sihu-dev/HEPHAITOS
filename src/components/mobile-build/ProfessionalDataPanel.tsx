@@ -216,7 +216,7 @@ export function ProfessionalDataPanel({
                 <h4 className="text-xs font-semibold text-amber-400 mb-1">투자 유의사항</h4>
                 <p className="text-xs text-zinc-400">
                   과거 성과는 미래 수익을 보장하지 않습니다.
-                  실전 투자 전 반드시 소액으로 테스트하세요.
+                  실전 투자 전 소액으로 테스트하는 것을 권장합니다.
                 </p>
               </div>
             </div>

@@ -70,6 +70,9 @@ import { AIStrategyGenerator } from './AIStrategyGenerator'
 // i18n
 import { useI18n } from '@/i18n/client'
 
+// Disclaimer
+import { DisclaimerInline } from '@/components/ui/Disclaimer'
+
 const nodeTypes = {
   trigger: TriggerNode,
   condition: ConditionNode,
@@ -794,6 +797,11 @@ function StrategyBuilderInner() {
         onClose={() => setShowAIGenerator(false)}
         onApply={handleAIStrategyApply}
       />
+
+      {/* 면책조항 */}
+      <div className="absolute bottom-4 left-4 right-4 z-10">
+        <DisclaimerInline />
+      </div>
     </div>
   )
 }
