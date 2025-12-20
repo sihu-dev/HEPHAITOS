@@ -117,7 +117,7 @@ export const AgentChat = memo(function AgentChat({ className = '', onStrategyCre
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-[#5E6AD2] flex items-center justify-center">
             <SparklesIcon className="w-4 h-4 text-white" />
           </div>
           <div>
@@ -167,12 +167,12 @@ export const AgentChat = memo(function AgentChat({ className = '', onStrategyCre
             onKeyDown={handleKeyDown}
             disabled={isDisabled || pendingConfirmation}
             placeholder={pendingConfirmation ? '확인 대기 중...' : '전략을 자연어로 입력하세요...'}
-            className="flex-1 px-4 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-violet-500/50 disabled:opacity-50 transition-colors"
+            className="flex-1 px-4 py-2.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#5E6AD2]/50 disabled:opacity-50 transition-colors"
           />
           <button
             type="submit"
             disabled={isDisabled || !inputValue.trim() || pendingConfirmation}
-            className="px-4 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg hover:from-violet-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="px-4 py-2.5 bg-[#5E6AD2] text-white rounded-lg hover:bg-[#6E7AE2] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             <PaperAirplaneIcon className="w-4 h-4" />
           </button>
@@ -218,7 +218,7 @@ const StatusIndicator = memo(function StatusIndicator({ state }: StatusIndicator
     idle: { color: 'bg-emerald-500', text: '준비 완료' },
     sending: { color: 'bg-amber-500 animate-pulse', text: '처리 중...' },
     streaming: { color: 'bg-blue-500 animate-pulse', text: '응답 중...' },
-    confirming: { color: 'bg-violet-500', text: '확인 대기' },
+    confirming: { color: 'bg-[#5E6AD2]', text: '확인 대기' },
     error: { color: 'bg-red-500', text: '오류 발생' },
   }
 
@@ -250,7 +250,7 @@ const MessageBubble = memo(function MessageBubble({ message, onSuggestionClick }
         className="flex justify-center"
       >
         <div className="max-w-md px-4 py-3 bg-white/[0.02] border border-white/[0.06] rounded-lg text-center">
-          <ChatBubbleLeftRightIcon className="w-5 h-5 text-violet-400 mx-auto mb-2" />
+          <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#7C8AEA] mx-auto mb-2" />
           <p className="text-sm text-zinc-400 whitespace-pre-line">{message.content}</p>
         </div>
       </motion.div>
@@ -271,7 +271,7 @@ const MessageBubble = memo(function MessageBubble({ message, onSuggestionClick }
             ? 'bg-zinc-700'
             : message.isError
               ? 'bg-red-500/20'
-              : 'bg-gradient-to-br from-violet-500 to-purple-600'
+              : 'bg-[#5E6AD2]'
         }`}
       >
         {isUser ? (
@@ -288,7 +288,7 @@ const MessageBubble = memo(function MessageBubble({ message, onSuggestionClick }
         <div
           className={`inline-block px-4 py-2.5 rounded-lg ${
             isUser
-              ? 'bg-violet-600 text-white'
+              ? 'bg-[#5E6AD2] text-white'
               : message.isError
                 ? 'bg-red-500/10 border border-red-500/20 text-red-400'
                 : 'bg-white/[0.04] border border-white/[0.06] text-zinc-200'
@@ -298,7 +298,7 @@ const MessageBubble = memo(function MessageBubble({ message, onSuggestionClick }
           <div className="text-sm whitespace-pre-line">
             {message.content}
             {message.isStreaming && (
-              <span className="inline-block w-1 h-4 ml-0.5 bg-violet-400 animate-pulse" />
+              <span className="inline-block w-1 h-4 ml-0.5 bg-[#7C8AEA] animate-pulse" />
             )}
           </div>
 

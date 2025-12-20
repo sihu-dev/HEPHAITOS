@@ -37,7 +37,9 @@ import { usePortfolioHistory, type Transaction, type PortfolioHistoryPoint } fro
 // Constants
 // ============================================
 
-const COLORS = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EC4899', '#6366F1']
+import { CHART_COLORS } from '@/constants/design-tokens'
+
+const COLORS = CHART_COLORS.palette
 
 // ============================================
 // Components

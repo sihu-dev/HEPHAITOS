@@ -157,6 +157,31 @@ export const WORKFLOW_COLORS = {
 export type WorkflowStepType = keyof typeof WORKFLOW_COLORS
 
 // ============================================
+// Chart Colors (일관된 차트 컬러 팔레트)
+// ============================================
+export const CHART_COLORS = {
+  // Primary brand colors first
+  primary: '#5E6AD2',
+  secondary: '#7C8AEA',
+  // Phase-based colors
+  copy: '#F59E0B',    // Amber - COPY phase
+  learn: '#3B82F6',   // Blue - LEARN phase
+  build: '#8B5CF6',   // Purple - BUILD phase
+  // Status colors
+  profit: '#22C55E',  // Emerald
+  loss: '#EF4444',    // Red
+  // Additional palette for multiple series
+  palette: [
+    '#5E6AD2',  // Primary
+    '#F59E0B',  // Amber (COPY)
+    '#3B82F6',  // Blue (LEARN)
+    '#8B5CF6',  // Purple (BUILD)
+    '#22C55E',  // Emerald (Profit)
+    '#EC4899',  // Pink (Accent)
+  ],
+} as const
+
+// ============================================
 // Helper Functions
 // ============================================
 

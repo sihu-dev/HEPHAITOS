@@ -53,14 +53,14 @@ function getNotificationColors(type: NotificationType) {
       icon: 'text-emerald-400',
     },
     strategy_signal: {
-      bg: 'bg-blue-500/10',
-      border: 'border-blue-500/30',
-      icon: 'text-blue-400',
+      bg: 'bg-[#5E6AD2]/10',
+      border: 'border-[#5E6AD2]/30',
+      icon: 'text-[#7C8AEA]',
     },
     celebrity_trade: {
-      bg: 'bg-purple-500/10',
-      border: 'border-purple-500/30',
-      icon: 'text-purple-400',
+      bg: 'bg-amber-500/10',
+      border: 'border-amber-500/30',
+      icon: 'text-amber-400',
     },
     portfolio_update: {
       bg: 'bg-cyan-500/10',
@@ -78,9 +78,9 @@ function getNotificationColors(type: NotificationType) {
       icon: 'text-yellow-400',
     },
     coaching: {
-      bg: 'bg-pink-500/10',
-      border: 'border-pink-500/30',
-      icon: 'text-pink-400',
+      bg: 'bg-blue-500/10',
+      border: 'border-blue-500/30',
+      icon: 'text-blue-400',
     },
   }
   return colors[type] || colors.system

@@ -55,7 +55,9 @@ interface HoldingJson {
 // Demo Data
 // ============================================
 
-const COLORS = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EC4899', '#6366F1']
+import { CHART_COLORS } from '@/constants/design-tokens'
+
+const COLORS = CHART_COLORS.palette
 
 const DEMO_HOLDINGS: HoldingItem[] = [
   { symbol: 'BTC', name: 'Bitcoin', quantity: 0.5, avgPrice: 42000, currentPrice: 97000, value: 48500, profit: 27500, profitPercent: 130.95, weight: 35.2, sector: 'Crypto', color: COLORS[0] },

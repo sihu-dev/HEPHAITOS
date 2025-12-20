@@ -98,12 +98,12 @@ export function NotificationSettings() {
                   onClick={() => toggleSetting(item.id)}
                   title={enabled ? t('dashboard.settings.notifications.enabled') as string : t('dashboard.settings.notifications.disabled') as string}
                   className={`relative w-9 h-5 rounded-full transition-colors ${
-                    enabled ? 'bg-violet-500/40' : 'bg-white/[0.06]'
+                    enabled ? 'bg-[#5E6AD2]/40' : 'bg-white/[0.06]'
                   }`}
                 >
                   <span
                     className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${
-                      enabled ? 'left-[18px] bg-violet-400' : 'left-0.5 bg-white'
+                      enabled ? 'left-[18px] bg-[#7C8AEA]' : 'left-0.5 bg-white'
                     }`}
                   />
                 </button>
