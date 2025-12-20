@@ -650,7 +650,7 @@ export function OnboardingWizard({
         </div>
 
         {/* Step Content */}
-        <div className="bg-[#0D0D0F] border border-white/[0.06] rounded-xl p-6 shadow-2xl">
+        <div className="bg-background-primary border border-white/[0.06] rounded-xl p-6 shadow-2xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}

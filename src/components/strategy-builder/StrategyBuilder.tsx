@@ -452,7 +452,7 @@ function StrategyBuilderInner() {
           defaultEdgeOptions={defaultEdgeOptions}
           isValidConnection={isValidConnectionHandler}
           fitView
-          className="bg-[#0D0D0F]"
+          className="bg-background-primary"
           proOptions={{ hideAttribution: true }}
         >
           <Background color="#27272a" gap={20} size={1} />
@@ -487,7 +487,7 @@ function StrategyBuilderInner() {
               <SparklesIcon className="w-4 h-4" />
               <span className="text-xs font-medium hidden sm:inline">{t('dashboard.strategyBuilder.aiGenerate') as string}</span>
             </button>
-            <div className="px-3 py-1.5 bg-[#0D0D0F] border border-white/[0.06] rounded">
+            <div className="px-3 py-1.5 bg-background-primary border border-white/[0.06] rounded">
               <label htmlFor="strategy-name" className="sr-only">{t('dashboard.strategyBuilder.strategyName') as string}</label>
               <input
                 id="strategy-name"
@@ -578,7 +578,7 @@ function StrategyBuilderInner() {
 
           {/* Bottom Toolbar */}
           <Panel position="bottom-center" className="flex items-center gap-2">
-            <div className="p-1 bg-[#0D0D0F] border border-white/[0.06] rounded flex items-center gap-1">
+            <div className="p-1 bg-background-primary border border-white/[0.06] rounded flex items-center gap-1">
               <button
                 type="button"
                 onClick={handleUndo}

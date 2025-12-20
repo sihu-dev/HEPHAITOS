@@ -66,7 +66,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
+    <div className="min-h-screen bg-background-secondary flex flex-col">
       {/* Header */}
       <header className="w-full px-6 py-4">
         <Link href="/" className="inline-flex items-center gap-2">
@@ -118,7 +118,7 @@ export function LoginForm() {
                 <div className="w-full border-t border-zinc-800" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-[#0A0A0A] px-2 text-zinc-500">{t('auth.login.or')}</span>
+                <span className="bg-background-secondary px-2 text-zinc-500">{t('auth.login.or')}</span>
               </div>
             </div>
 

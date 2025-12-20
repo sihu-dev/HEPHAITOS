@@ -202,7 +202,7 @@ export default function StrategyMarketplace() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0D0D0F] text-white p-6">
+    <div className="min-h-screen bg-background-primary text-white p-6">
       {/* Header */}
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">

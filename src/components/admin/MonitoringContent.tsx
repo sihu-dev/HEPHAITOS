@@ -200,7 +200,7 @@ export function MonitoringContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0D0D0F] flex items-center justify-center">
+      <div className="min-h-screen bg-background-primary flex items-center justify-center">
         <div className="text-white">Loading...</div>
       </div>
     )
@@ -208,7 +208,7 @@ export function MonitoringContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0D0D0F] flex items-center justify-center">
+      <div className="min-h-screen bg-background-primary flex items-center justify-center">
         <div className="text-red-400">{error}</div>
       </div>
     )
@@ -224,7 +224,7 @@ export function MonitoringContent() {
       : 'healthy'
 
   return (
-    <div className="min-h-screen bg-[#0D0D0F] text-white p-6">
+    <div className="min-h-screen bg-background-primary text-white p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* 헤더 */}
         <div className="flex items-center justify-between">

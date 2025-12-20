@@ -193,7 +193,7 @@ export function CodingSimulation({ isActive, progress, userPrompt }: CodingSimul
 
   if (!isActive && !userPrompt) {
     return (
-      <div className="h-full flex items-center justify-center bg-[#0D0D0F]">
+      <div className="h-full flex items-center justify-center bg-background-primary">
         <div className="text-center px-6">
           <div className="text-6xl mb-4">🎨</div>
           <h3 className="text-lg font-semibold text-white mb-2">
@@ -210,7 +210,7 @@ export function CodingSimulation({ isActive, progress, userPrompt }: CodingSimul
   }
 
   return (
-    <div className="h-full bg-[#0D0D0F] relative">
+    <div className="h-full bg-background-primary relative">
       {/* ReactFlow 캔버스 */}
       <ReactFlow
         nodes={nodes}

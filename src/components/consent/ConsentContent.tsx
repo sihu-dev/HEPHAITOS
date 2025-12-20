@@ -167,7 +167,7 @@ export function ConsentContent() {
   const days = Array.from({ length: 31 }, (_, i) => i + 1)
 
   return (
-    <div className="min-h-screen bg-[#0D0D0F] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background-primary flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* 헤더 */}
         <div className="text-center mb-8">

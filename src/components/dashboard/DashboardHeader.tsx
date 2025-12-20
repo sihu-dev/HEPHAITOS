@@ -25,7 +25,7 @@ export const DashboardHeader = memo(function DashboardHeader() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0D0D0F] border-b border-white/[0.06]">
+    <header className="sticky top-0 z-30 bg-background-primary border-b border-white/[0.06]">
       <div className="flex items-center justify-between h-12 px-4">
         {/* Search - Opens Command Palette */}
         <div className="flex-1 max-w-sm">

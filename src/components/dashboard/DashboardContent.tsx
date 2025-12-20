@@ -1,4 +1,5 @@
-'use client'
+'use client' 
+import { useMemo } from 'react'
 
 import dynamicImport from 'next/dynamic'
 import Link from 'next/link'
@@ -43,7 +44,8 @@ export function DashboardContent() {
   // Real-time portfolio data from Supabase Realtime
   const { portfolio, isConnected, isLoading } = useRealtimePortfolio()
 
-  const quickActions = [
+  // Memoize quickActions to prevent recreation on every render
+  const quickActions = useMemo(() => [
     {
       icon: SparklesIcon,
       label: 'AI Strategy',
@@ -73,7 +75,7 @@ export function DashboardContent() {
       href: '/dashboard/settings/broker',
       shortcut: 'C',
     },
-  ]
+  ], [])
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">

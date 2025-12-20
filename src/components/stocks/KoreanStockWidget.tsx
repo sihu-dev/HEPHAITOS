@@ -185,7 +185,7 @@ export default function KoreanStockWidget() {
   }
 
   return (
-    <div className="bg-[#0D0D0F] text-white rounded-xl border border-white/10 overflow-hidden">
+    <div className="bg-background-primary text-white rounded-xl border border-white/10 overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between mb-4">

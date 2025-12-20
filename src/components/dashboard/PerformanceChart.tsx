@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, memo } from 'react'
 import { PresentationChartLineIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/i18n/client'
@@ -21,14 +21,15 @@ const generateChartData = (days: number) => {
   return data
 }
 
-const chartData = generateChartData(30)
-const maxValue = Math.max(...chartData.map(d => d.value))
-const minValue = Math.min(...chartData.map(d => d.value))
-
-export function PerformanceChart() {
+export const PerformanceChart = memo(function PerformanceChart() {
   const { t, locale } = useI18n()
   const [selectedRange, setSelectedRange] = useState('1M')
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null)
+
+  // Memoize chart data to prevent regeneration on every render
+  const chartData = useMemo(() => generateChartData(30), [])
+  const maxValue = useMemo(() => Math.max(...chartData.map(d => d.value)), [chartData])
+  const minValue = useMemo(() => Math.min(...chartData.map(d => d.value)), [chartData])
 
   return (
     <div className="border border-white/[0.06] rounded-lg overflow-hidden">
@@ -177,4 +178,4 @@ export function PerformanceChart() {
       </div>
     </div>
   )
-}
+})

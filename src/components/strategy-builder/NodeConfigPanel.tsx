@@ -39,7 +39,7 @@ export function NodeConfigPanel({ node, onUpdate, onDelete, onClose }: NodeConfi
   }
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-72 sm:relative bg-[#0D0D0F] border-l border-white/[0.06] overflow-y-auto">
+    <div className="fixed inset-y-0 right-0 z-50 w-full sm:w-72 sm:relative bg-background-primary border-l border-white/[0.06] overflow-y-auto">
       {/* Header */}
       <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
         <div className="flex items-center gap-2">

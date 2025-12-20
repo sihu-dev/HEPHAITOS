@@ -478,7 +478,7 @@ export default function USStockWidget() {
   ]
 
   return (
-    <div className="bg-[#0D0D0F] border border-white/10 rounded-2xl p-4">
+    <div className="bg-background-primary border border-white/10 rounded-2xl p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

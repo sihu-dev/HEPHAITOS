@@ -75,7 +75,7 @@ export function MobileBuildContent() {
   // 세로모드 경고
   if (!isLandscape) {
     return (
-      <div className="fixed inset-0 bg-[#0D0D0F] flex items-center justify-center p-6">
+      <div className="fixed inset-0 bg-background-primary flex items-center justify-center p-6">
         <div className="text-center">
           <div className="text-6xl mb-6">📱</div>
           <h2 className="text-2xl font-bold text-white mb-4">
@@ -93,7 +93,7 @@ export function MobileBuildContent() {
   }
 
   return (
-    <div className="fixed inset-0 bg-[#0D0D0F] overflow-hidden">
+    <div className="fixed inset-0 bg-background-primary overflow-hidden">
       {/* Header */}
       <div className="h-14 border-b border-white/[0.06] bg-[#111113] flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
@@ -122,7 +122,7 @@ export function MobileBuildContent() {
       {/* Main Content - Grid Layout */}
       <div className="h-[calc(100vh-3.5rem)] grid grid-cols-5 gap-0">
         {/* Left Panel: 검색 위젯 (1/5) */}
-        <div className="col-span-1 border-r border-white/[0.06] bg-[#0D0D0F] overflow-y-auto">
+        <div className="col-span-1 border-r border-white/[0.06] bg-background-primary overflow-y-auto">
           <SearchWidget
             onStrategySelect={handleStrategySelect}
             selectedStrategy={selectedStrategy}
@@ -152,7 +152,7 @@ export function MobileBuildContent() {
         </div>
 
         {/* Right Panel: 전문 데이터 (1/5) */}
-        <div className="col-span-1 border-l border-white/[0.06] bg-[#0D0D0F] overflow-y-auto">
+        <div className="col-span-1 border-l border-white/[0.06] bg-background-primary overflow-y-auto">
           <ProfessionalDataPanel
             isVisible={!!userPrompt}
             userPrompt={userPrompt}

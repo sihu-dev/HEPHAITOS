@@ -144,7 +144,7 @@ export function StatusPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0D0D0F] text-white p-8">
+      <div className="min-h-screen bg-background-primary text-white p-8">
         <div className="max-w-4xl mx-auto">
           <div className="h-32 bg-white/5 rounded-xl animate-pulse" />
         </div>
@@ -153,7 +153,7 @@ export function StatusPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0D0D0F] text-white">
+    <div className="min-h-screen bg-background-primary text-white">
       {/* Header */}
       <header className="border-b border-white/10">
         <div className="max-w-4xl mx-auto px-4 py-6">
