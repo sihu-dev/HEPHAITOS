@@ -2,6 +2,7 @@
 
 import { memo } from 'react'
 import { useI18n } from '@/i18n/client'
+import { BG_COLORS, PHASE_COLORS } from '@/constants/design-tokens'
 
 // ============================================
 // Pain Point Cards - Supabase-minimal style
@@ -58,7 +59,7 @@ export const PainPointCards = memo(function PainPointCards() {
   const isKo = locale === 'ko'
 
   return (
-    <section className="py-24 bg-[#0A0A0A]">
+    <section className={`py-24 ${BG_COLORS.secondary}`}>
       <div className="max-w-5xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">

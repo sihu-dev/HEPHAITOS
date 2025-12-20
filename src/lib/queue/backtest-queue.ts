@@ -4,17 +4,7 @@
 // ============================================
 
 import { Queue } from 'bullmq'
-import { Redis } from 'ioredis'
 import type { BacktestJob, BacktestJobResult } from '@/types/queue'
-
-/**
- * Redis 연결 (Upstash)
- */
-const redis = new Redis(process.env.UPSTASH_REDIS_URL!, {
-  maxRetriesPerRequest: null, // BullMQ 요구사항
-  enableReadyCheck: false,
-  tls: process.env.NODE_ENV === 'production' ? {} : undefined,
-})
 
 /**
  * 백테스트 잡 데이터 (legacy compatibility)
@@ -44,27 +34,83 @@ export interface BacktestResult {
   avgLoss: number
 }
 
+// Lazy initialization for Redis and Queue
+let redis: import('ioredis').Redis | null = null
+let queue: Queue<BacktestJob, BacktestJobResult> | null = null
+
 /**
- * Backtest Queue 생성 (Loop 11 upgraded)
+ * Redis 연결 가져오기 (lazy initialization)
  */
-export const backtestQueue = new Queue<BacktestJob, BacktestJobResult>('backtest-queue', {
-  connection: redis,
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 2000, // 2초부터 시작
+async function getRedisConnection() {
+  if (redis) return redis
+
+  const redisUrl = process.env.UPSTASH_REDIS_URL
+  if (!redisUrl) {
+    throw new Error('UPSTASH_REDIS_URL is not configured')
+  }
+
+  const { default: Redis } = await import('ioredis')
+  redis = new Redis(redisUrl, {
+    maxRetriesPerRequest: null, // BullMQ 요구사항
+    enableReadyCheck: false,
+    tls: process.env.NODE_ENV === 'production' ? {} : undefined,
+  })
+
+  return redis
+}
+
+/**
+ * Backtest Queue 가져오기 (lazy initialization)
+ */
+export async function getBacktestQueue(): Promise<Queue<BacktestJob, BacktestJobResult>> {
+  if (queue) return queue
+
+  const connection = await getRedisConnection()
+  queue = new Queue<BacktestJob, BacktestJobResult>('backtest-queue', {
+    connection,
+    defaultJobOptions: {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 2000,
+      },
+      removeOnComplete: {
+        count: 100,
+        age: 86400,
+      },
+      removeOnFail: {
+        count: 200,
+        age: 172800,
+      },
     },
-    removeOnComplete: {
-      count: 100, // 최근 100개만 보관
-      age: 86400, // 24시간
-    },
-    removeOnFail: {
-      count: 200, // 최근 200개 실패 보관
-      age: 172800, // 48시간
-    },
+  })
+
+  return queue
+}
+
+// Legacy export for backward compatibility (will throw if not initialized)
+export const backtestQueue = {
+  async add(...args: Parameters<Queue<BacktestJob, BacktestJobResult>['add']>) {
+    const q = await getBacktestQueue()
+    return q.add(...args)
   },
-})
+  async getJob(jobId: string) {
+    const q = await getBacktestQueue()
+    return q.getJob(jobId)
+  },
+  async getWaiting() {
+    const q = await getBacktestQueue()
+    return q.getWaiting()
+  },
+  async getActive() {
+    const q = await getBacktestQueue()
+    return q.getActive()
+  },
+  async getJobCounts() {
+    const q = await getBacktestQueue()
+    return q.getJobCounts()
+  },
+}
 
 /**
  * 백테스트 잡 추가 (Loop 11: Priority 지원)

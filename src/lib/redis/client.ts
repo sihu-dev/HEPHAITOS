@@ -197,11 +197,28 @@ let redisClient: RedisClientType | null = null
 let isRedisAvailable = false
 
 /**
+ * 빌드 환경인지 확인
+ */
+function isBuildTime(): boolean {
+  return (
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.npm_lifecycle_event === 'build' ||
+    typeof window === 'undefined' && !process.env.REDIS_URL
+  )
+}
+
+/**
  * Redis 클라이언트 가져오기 (lazy initialization)
  * Redis가 없으면 메모리 기반 fallback 반환
  */
 export async function getRedisClient(): Promise<RedisClientType> {
   if (redisClient) {
+    return redisClient
+  }
+
+  // 빌드 시점에는 항상 메모리 fallback 사용
+  if (isBuildTime()) {
+    redisClient = new InMemoryRedis()
     return redisClient
   }
 
@@ -220,6 +237,7 @@ export async function getRedisClient(): Promise<RedisClientType> {
       maxRetriesPerRequest: 3,
       retryStrategy: (times: number) => Math.min(times * 100, 3000),
       lazyConnect: true,
+      connectTimeout: 5000,
     })
 
     await client.ping()

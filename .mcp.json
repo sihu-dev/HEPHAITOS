@@ -1,34 +1,30 @@
 {
-  "$schema": "https://claude.ai/schemas/mcp-config.json",
   "mcpServers": {
     "context7": {
-      "command": "npx",
-      "args": ["-y", "@context7/mcp-server"],
-      "description": "Up-to-date documentation for libraries (Next.js, Supabase, TailwindCSS)"
-    },
-    "supabase": {
-      "command": "npx",
-      "args": ["-y", "@supabase/mcp-server"],
-      "env": {
-        "SUPABASE_URL": "${SUPABASE_URL}",
-        "SUPABASE_SERVICE_ROLE_KEY": "${SUPABASE_SERVICE_ROLE_KEY}"
-      },
-      "description": "Supabase database and storage operations"
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
     },
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@anthropic/mcp-filesystem", "--allow-read", ".", "--allow-write", "."],
-      "description": "File system operations within project"
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/sihu2129/HEPHAITOS"
+      ]
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@anthropic/mcp-playwright"],
-      "description": "Browser automation and E2E testing"
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
     },
     "memory": {
       "command": "npx",
-      "args": ["-y", "@anthropic/mcp-memory"],
-      "description": "Persistent memory for project context"
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
     }
   }
 }

@@ -2,6 +2,7 @@
 
 import { memo, useState, useEffect } from 'react'
 import { useI18n } from '@/i18n/client'
+import { BG_COLORS } from '@/constants/design-tokens'
 
 // ============================================
 // Sticky CTA - Supabase-minimal style
@@ -26,7 +27,7 @@ export const StickyCTA = memo(function StickyCTA() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-3 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/95 to-transparent pointer-events-none transition-transform duration-300 ease-out"
+      className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-3 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent pointer-events-none transition-transform duration-300 ease-out"
       style={{
         transform: isVisible ? 'translateY(0)' : 'translateY(120%)',
       }}

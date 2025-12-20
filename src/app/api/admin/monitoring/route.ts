@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { withApiMiddleware, createApiResponse } from '@/lib/api/middleware'
 import { safeLogger } from '@/lib/utils/safe-logger'
-import { getRedisClient, isRedisConnected } from '@/lib/redis/client'
+import { isRedisConnected } from '@/lib/redis/client'
 import {
   aiCircuit,
   paymentCircuit,
@@ -19,10 +19,19 @@ import {
 import { getRateLimiterStatus } from '@/lib/redis/rate-limiter'
 import { getPerformanceSummary, getHealthStatus } from '@/lib/monitoring/performance'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy initialization to prevent build-time connection
+let supabaseAdmin: ReturnType<typeof createClient> | null = null
+
+function getSupabaseAdmin() {
+  if (!supabaseAdmin) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (url && key) {
+      supabaseAdmin = createClient(url, key)
+    }
+  }
+  return supabaseAdmin
+}
 
 /**
  * GET /api/admin/monitoring
@@ -59,11 +68,19 @@ export const GET = withApiMiddleware(
     }
 
     // 관리자 권한 확인
-    const { data: profile } = await supabaseAdmin
+    const admin = getSupabaseAdmin()
+    if (!admin) {
+      return createApiResponse(
+        { error: 'Supabase not configured' },
+        500
+      )
+    }
+
+    const { data: profile } = await admin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
-      .single()
+      .single<{ role: string }>()
 
     if (!profile || profile.role !== 'admin') {
       return createApiResponse(
@@ -137,7 +154,10 @@ async function getCircuitBreakerStatus() {
  * DLQ 통계 조회
  */
 async function getDLQStats() {
-  const { data, error } = await supabaseAdmin.rpc('get_dlq_stats')
+  const admin = getSupabaseAdmin()
+  if (!admin) return { error: 'Supabase not configured' }
+
+  const { data, error } = await admin.rpc('get_dlq_stats')
 
   if (error) {
     safeLogger.error('[Monitoring] DLQ stats error', { error })
@@ -157,9 +177,13 @@ async function getDLQStats() {
  * 웹훅 통계 조회
  */
 async function getWebhookStats() {
-  const { data, error } = await supabaseAdmin
+  const admin = getSupabaseAdmin()
+  if (!admin) return { error: 'Supabase not configured' }
+
+  const { data, error } = await admin
     .from('payment_webhook_events')
     .select('process_status')
+    .returns<{ process_status: string }[]>()
 
   if (error) {
     return { error: 'Failed to fetch webhook stats' }
@@ -182,7 +206,7 @@ async function getWebhookStats() {
   })
 
   // 최근 24시간 처리량
-  const { count: recentCount } = await supabaseAdmin
+  const { count: recentCount } = await admin
     .from('payment_webhook_events')
     .select('*', { count: 'exact', head: true })
     .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
@@ -197,11 +221,15 @@ async function getWebhookStats() {
  * 크레딧 시스템 통계 조회
  */
 async function getCreditStats() {
+  const admin = getSupabaseAdmin()
+  if (!admin) return { error: 'Supabase not configured' }
+
   // 전체 사용량
-  const { data: transactions } = await supabaseAdmin
+  const { data: transactions } = await admin
     .from('credit_transactions')
     .select('type, amount')
     .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+    .returns<{ type: string; amount: number }[]>()
 
   const stats = {
     last24h: {
@@ -220,7 +248,7 @@ async function getCreditStats() {
   })
 
   // 활성 사용자 수
-  const { count: activeUsers } = await supabaseAdmin
+  const { count: activeUsers } = await admin
     .from('credit_wallets')
     .select('*', { count: 'exact', head: true })
     .gt('balance', 0)

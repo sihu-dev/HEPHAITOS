@@ -1,6 +1,5 @@
 {
   "$schema": "https://claude.ai/schemas/claude-code-settings.json",
-  "version": "2.1",
   "model": "opusplan",
   "permissions": {
     "defaultMode": "acceptEdits",
@@ -8,12 +7,7 @@
       "Bash(npm run:*)",
       "Bash(pnpm:*)",
       "Bash(npx:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
+      "Bash(git:*)",
       "Bash(gh:*)",
       "Bash(tree:*)",
       "Bash(ls:*)",
@@ -25,9 +19,7 @@
       "Edit(packages/**/*)",
       "Write(src/**/*)",
       "Write(packages/**/*)",
-      "mcp__github__*",
-      "mcp__ide__*",
-      "mcp__playwright__*"
+      "mcp__*"
     ],
     "deny": [
       "Read(.env)",
@@ -42,21 +34,8 @@
     "NODE_ENV": "development",
     "FORCE_COLOR": "1"
   },
-  "alwaysThinkingEnabled": true,
   "cleanupPeriodDays": 14,
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "startup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh",
-            "timeout": 10000
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -65,34 +44,21 @@
             "type": "command",
             "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true",
             "timeout": 10000
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
+          },
           {
-            "type": "prompt",
-            "prompt": "작업이 완료되었는지 확인: 1) 모든 파일 저장됨 2) 타입 오류 없음 3) 테스트 통과"
+            "type": "command",
+            "command": "python3 /home/sihu2129/HEPHAITOS/.claude/hooks/audit-check.py",
+            "timeout": 5000
           }
         ]
       }
     ]
   },
-  "sandbox": {
-    "enabled": false,
-    "autoAllowBashIfSandboxed": true
-  },
-  "project": {
-    "name": "HEPHAITOS",
-    "description": "Replit for Trading - AI 트레이딩 봇 빌더 플랫폼",
-    "type": "next-app",
-    "framework": "next-15"
-  },
-  "performance": {
-    "parallelTools": true,
-    "cacheResults": true,
-    "maxConcurrentTasks": 5
+  "agents": {
+    "opus-auditor": {
+      "model": "opus",
+      "autoTrigger": true,
+      "triggers": ["검수", "리뷰", "audit", "검토", "품질 확인"]
+    }
   }
 }

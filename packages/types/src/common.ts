@@ -23,6 +23,8 @@ export interface IResultMetadata {
   duration_ms: number;
   /** 요청 추적 ID (선택) */
   request_id?: UUID;
+  /** 타임아웃 발생 여부 (선택) */
+  timed_out?: boolean;
 }
 
 /**

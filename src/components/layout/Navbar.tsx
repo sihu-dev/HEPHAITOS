@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronDownIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { BRAND_COLORS, BG_COLORS, BORDER_COLORS, TEXT_COLORS } from '@/constants/design-tokens'
 
 // ============================================
 // SUPABASE 100% BENCHMARK NAVBAR
@@ -136,14 +137,14 @@ export function Navbar() {
 
               <Link
                 href="/auth/login"
-                className="px-3 py-1.5 text-[13px] text-[#EDEDED] hover:text-white border border-[#3E3E3E] hover:border-[#5E5E5E] rounded-[4px] transition-colors"
+                className={`px-3 py-1.5 text-[13px] ${TEXT_COLORS.secondary} hover:text-white ${BORDER_COLORS.default} hover:border-zinc-600 rounded-[4px] transition-colors border`}
               >
                 Sign in
               </Link>
 
               <Link
                 href="/auth/signup"
-                className="h-[32px] px-3 inline-flex items-center text-[13px] text-white bg-[#5E6AD2] hover:bg-[#6E7AE2] rounded-[4px] transition-colors"
+                className={`h-[32px] px-3 inline-flex items-center text-[13px] text-white ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} rounded-[4px] transition-colors`}
               >
                 Start your project
               </Link>
@@ -212,7 +213,7 @@ export function Navbar() {
               <Link
                 href="/auth/signup"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="py-2 text-[14px] text-white bg-[#5E6AD2] hover:bg-[#6E7AE2] text-center rounded-[4px] transition-colors"
+                className={`py-2 text-[14px] text-white ${BRAND_COLORS.primary.bg} ${BRAND_COLORS.primary.bgHover} text-center rounded-[4px] transition-colors`}
               >
                 Start your project
               </Link>

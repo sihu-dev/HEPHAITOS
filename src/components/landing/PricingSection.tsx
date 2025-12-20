@@ -4,6 +4,7 @@ import { memo } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/i18n/client'
 import { usePricing, type CreditPackage, type FeaturePricing } from '@/lib/pricing/usePricing'
+import { PHASE_COLORS, BG_COLORS } from '@/constants/design-tokens'
 
 // ============================================
 // HEPHAITOS Pricing Section
@@ -103,11 +104,11 @@ export const PricingSection = memo(function PricingSection() {
   }
 
   return (
-    <section id="pricing" className="py-24 bg-[#0A0A0A]">
+    <section id="pricing" className={`py-24 ${BG_COLORS.secondary}`}>
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <p className="text-sm text-yellow-500 font-medium mb-3">
+          <p className={`text-sm ${PHASE_COLORS.COPY.text} font-medium mb-3`}>
             {isKo ? '가격' : 'Pricing'}
           </p>
           <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
@@ -115,7 +116,7 @@ export const PricingSection = memo(function PricingSection() {
           </h2>
           <p className="text-zinc-400 max-w-xl mx-auto">
             {isKo
-              ? '월 구독료 부담 없이, 사용한 기능만큼만 크레딧으로 결제하세요.'
+              ? '월 구독료 부담 없이, 사용한 기능만큼만 크레딧으로 결제할 수 있습니다.'
               : 'No monthly fees. Just buy credits and use them for any feature.'}
           </p>
         </div>
@@ -135,7 +136,7 @@ export const PricingSection = memo(function PricingSection() {
                   <span className="text-sm text-white">
                     {isKo ? feature.featureNameKo : feature.featureName}
                   </span>
-                  <span className={`text-sm font-medium ${feature.creditCost === 0 ? 'text-yellow-400' : 'text-zinc-400'}`}>
+                  <span className={`text-sm font-medium ${feature.creditCost === 0 ? 'text-amber-400' : 'text-zinc-400'}`}>
                     {feature.creditCost === 0
                       ? isKo ? '무료' : 'FREE'
                       : `${feature.creditCost}C`}
@@ -164,7 +165,7 @@ export const PricingSection = memo(function PricingSection() {
                 key={pkg.packageId}
                 className={`relative p-6 rounded-lg border transition-colors ${
                   pkg.isHighlighted
-                    ? 'bg-yellow-500/5 border-yellow-500/30'
+                    ? 'bg-amber-500/5 border-amber-500/30'
                     : 'bg-zinc-900/50 border-zinc-800 hover:border-zinc-700'
                 }`}
               >
@@ -177,7 +178,7 @@ export const PricingSection = memo(function PricingSection() {
 
                 {/* Highlight Badge */}
                 {pkg.isHighlighted && (
-                  <span className="absolute -top-2.5 left-4 px-2 py-0.5 bg-yellow-500 rounded text-xs text-white font-medium">
+                  <span className="absolute -top-2.5 left-4 px-2 py-0.5 bg-amber-500 rounded text-xs text-white font-medium">
                     {isKo ? '추천' : 'Best Value'}
                   </span>
                 )}
@@ -196,7 +197,7 @@ export const PricingSection = memo(function PricingSection() {
                     {isKo ? '크레딧' : 'credits'}
                   </span>
                   {pkg.bonusCredits > 0 && (
-                    <span className="ml-2 px-1.5 py-0.5 bg-yellow-500/10 border border-yellow-500/20 rounded text-xs text-yellow-400">
+                    <span className="ml-2 px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-xs text-amber-400">
                       +{pkg.bonusCredits}
                     </span>
                   )}
@@ -204,7 +205,7 @@ export const PricingSection = memo(function PricingSection() {
 
                 {/* Price */}
                 <div className="mb-6">
-                  <span className={`text-xl font-semibold ${pkg.isHighlighted ? 'text-yellow-400' : 'text-white'}`}>
+                  <span className={`text-xl font-semibold ${pkg.isHighlighted ? 'text-amber-400' : 'text-white'}`}>
                     {formatPrice(pkg.priceKrw, pkg.priceUsd)}
                   </span>
                   <p className="text-xs text-zinc-500 mt-1">
@@ -217,7 +218,7 @@ export const PricingSection = memo(function PricingSection() {
                   href={`/auth/signup?package=${pkg.packageId}`}
                   className={`w-full flex items-center justify-center py-2.5 rounded-md text-sm font-medium transition-colors ${
                     pkg.isHighlighted
-                      ? 'bg-yellow-600 hover:bg-yellow-500 text-white'
+                      ? 'bg-amber-600 hover:bg-amber-500 text-white'
                       : 'bg-zinc-800 hover:bg-zinc-700 text-white'
                   }`}
                 >
@@ -243,7 +244,7 @@ export const PricingSection = memo(function PricingSection() {
             </div>
             <Link
               href="/auth/signup"
-              className="flex-shrink-0 px-6 py-2.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded-md text-sm font-medium transition-colors"
+              className="flex-shrink-0 px-6 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-sm font-medium transition-colors"
             >
               {isKo ? '50 크레딧 받기' : 'Get 50 Credits'}
             </Link>
@@ -272,11 +273,11 @@ export const PricingSection = memo(function PricingSection() {
         </div>
 
         {/* Disclaimer */}
-        <div className="p-4 border border-yellow-500/20 bg-yellow-500/5 rounded-lg">
+        <div className="p-4 border border-amber-500/20 bg-amber-500/5 rounded-lg">
           <div className="flex items-start gap-3">
-            <span className="text-yellow-400">⚠</span>
+            <span className="text-amber-400">⚠</span>
             <p className="text-sm text-zinc-400">
-              <span className="text-yellow-400 font-medium">
+              <span className="text-amber-400 font-medium">
                 {isKo ? '중요' : 'Important'}:
               </span>{' '}
               {isKo

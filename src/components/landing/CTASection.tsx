@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import Link from 'next/link'
 import { useI18n } from '@/i18n/client'
+import { PHASE_COLORS, BG_COLORS } from '@/constants/design-tokens'
 
 // ============================================
 // HEPHAITOS CTA Section
@@ -17,7 +18,7 @@ export const CTASection = memo(function CTASection() {
   const solutions = t('cta.solutions') as unknown as string[]
 
   return (
-    <section className="py-24 bg-[#0A0A0A]">
+    <section className={`py-24 ${BG_COLORS.secondary}`}>
       <div className="max-w-4xl mx-auto px-6">
         {/* Pain → Solution Comparison */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
@@ -40,17 +41,17 @@ export const CTASection = memo(function CTASection() {
           </div>
 
           {/* Solution Side */}
-          <div className="p-6 bg-zinc-900/50 border border-yellow-500/20 rounded-lg">
+          <div className="p-6 bg-zinc-900/50 border border-amber-500/20 rounded-lg">
             <div className="flex items-center gap-2 mb-4">
-              <span className="w-6 h-6 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-400 text-sm">✓</span>
-              <h3 className="text-sm font-medium text-yellow-400">
+              <span className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 text-sm">✓</span>
+              <h3 className="text-sm font-medium text-amber-400">
                 {t('cta.solutionTitle')}
               </h3>
             </div>
             <ul className="space-y-3">
               {Array.isArray(solutions) && solutions.map((solution: string) => (
                 <li key={solution} className="flex items-start gap-2">
-                  <span className="text-yellow-400/60 mt-0.5">+</span>
+                  <span className="text-amber-400/60 mt-0.5">+</span>
                   <span className="text-sm text-zinc-400">{solution}</span>
                 </li>
               ))}
@@ -60,8 +61,8 @@ export const CTASection = memo(function CTASection() {
 
         {/* Main CTA Box */}
         <div className="p-8 md:p-12 bg-zinc-900/50 border border-zinc-800 rounded-lg text-center">
-          <p className="text-sm text-yellow-500 font-medium mb-3">
-            {isKo ? '지금 시작하세요' : 'Start Now'}
+          <p className="text-sm text-amber-500 font-medium mb-3">
+            {isKo ? '지금 시작 가능' : 'Start Now'}
           </p>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white mb-4">
@@ -78,7 +79,7 @@ export const CTASection = memo(function CTASection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <Link
               href="/auth/signup"
-              className="w-full sm:w-auto px-8 py-3 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg text-sm font-medium transition-colors"
+              className="w-full sm:w-auto px-8 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium transition-colors"
             >
               {t('cta.button')}
             </Link>
@@ -118,11 +119,11 @@ export const CTASection = memo(function CTASection() {
         </div>
 
         {/* Disclaimer */}
-        <div className="mt-8 p-4 border border-yellow-500/20 bg-yellow-500/5 rounded-lg">
+        <div className="mt-8 p-4 border border-amber-500/20 bg-amber-500/5 rounded-lg">
           <div className="flex items-start gap-3">
-            <span className="text-yellow-400">⚠</span>
+            <span className="text-amber-400">⚠</span>
             <p className="text-sm text-zinc-400">
-              <span className="text-yellow-400 font-medium">{t('common.important')}:</span>{' '}
+              <span className="text-amber-400 font-medium">{t('common.important')}:</span>{' '}
               {t('cta.disclaimer')}
             </p>
           </div>

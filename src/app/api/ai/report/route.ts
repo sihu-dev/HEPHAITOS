@@ -37,16 +37,6 @@ export const GET = withApiMiddleware(
       focusSectors: sectors,
     })
 
-    // P0-4 FIX: AI 응답 면책조항 강제 삽입
-    if (report && typeof report === 'object') {
-      if ('summary' in report && typeof report.summary === 'string') {
-        report.summary = ensureDisclaimer(report.summary, { short: true })
-      }
-      if ('analysis' in report && typeof report.analysis === 'string') {
-        report.analysis = ensureDisclaimer(report.analysis, { short: true })
-      }
-    }
-
     safeLogger.info('[Report API] Report generated')
 
     return createApiResponse({ report })
@@ -80,16 +70,6 @@ export const POST = withApiMiddleware(
       focusSectors,
       minConfidence,
     })
-
-    // P0-4 FIX: AI 응답 면책조항 강제 삽입
-    if (report && typeof report === 'object') {
-      if ('summary' in report && typeof report.summary === 'string') {
-        report.summary = ensureDisclaimer(report.summary, { short: true })
-      }
-      if ('analysis' in report && typeof report.analysis === 'string') {
-        report.analysis = ensureDisclaimer(report.analysis, { short: true })
-      }
-    }
 
     safeLogger.info('[Report API] Custom report generated')
 

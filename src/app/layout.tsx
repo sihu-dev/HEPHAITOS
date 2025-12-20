@@ -1,10 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter, IBM_Plex_Mono } from 'next/font/google'
+import { Suspense } from 'react'
 import '@/styles/globals.css'
-import { ToastProvider } from '@/components/ui/Toast'
-import { Toaster } from '@/components/ui/Toaster'
-import { I18nProvider } from '@/i18n/client'
-import { FeedbackWidget } from '@/components/feedback/FeedbackWidget'
+import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const ibmPlexMono = IBM_Plex_Mono({
@@ -12,9 +10,6 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ['latin'],
   variable: '--font-ibm-plex-mono',
 })
-
-// Force dynamic rendering for all pages to avoid SSR issues with framer-motion
-export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: {
@@ -84,13 +79,9 @@ export default function RootLayout({
 
         {/* Main Content */}
         <div className="relative z-10 min-h-screen">
-          <I18nProvider>
-            <ToastProvider>
-              {children}
-              <Toaster />
-              <FeedbackWidget />
-            </ToastProvider>
-          </I18nProvider>
+          <Providers>
+            {children}
+          </Providers>
         </div>
       </body>
     </html>

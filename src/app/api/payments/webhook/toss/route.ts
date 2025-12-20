@@ -163,8 +163,9 @@ async function processWebhookEvent(eventId: string, payload: any): Promise<void>
 
 /**
  * 재시도 대상 웹훅 처리 (Cron Job용)
+ * Note: 별도 cron route에서 import하여 사용
  */
-export async function processRetryQueue(): Promise<{ processed: number; failed: number }> {
+async function processRetryQueue(): Promise<{ processed: number; failed: number }> {
   const { data: pendingRetries, error } = await supabaseAdmin.rpc('get_pending_webhook_retries', {
     p_limit: 10,
   })

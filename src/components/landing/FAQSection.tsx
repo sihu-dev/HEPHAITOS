@@ -2,6 +2,7 @@
 
 import { memo, useState } from 'react'
 import { useI18n } from '@/i18n/client'
+import { BG_COLORS, PHASE_COLORS } from '@/constants/design-tokens'
 
 // ============================================
 // HEPHAITOS FAQ Section
@@ -61,7 +62,7 @@ const faqs: FAQItem[] = [
   {
     questionKo: '손실이 나면 책임져주나요?',
     questionEn: 'Are you responsible for my losses?',
-    answerKo: '아닙니다. 모든 투자 결정과 손실은 사용자 본인의 책임입니다. HEPHAITOS는 도구만 제공하며, 수익을 보장하지 않습니다. 반드시 손실 가능 금액 내에서만 투자하세요.',
+    answerKo: '아닙니다. 모든 투자 결정과 손실은 사용자 본인의 책임입니다. HEPHAITOS는 도구만 제공하며, 수익을 보장하지 않습니다. 손실 가능 금액 내에서만 투자하는 것을 권장합니다.',
     answerEn: 'No. All investment decisions and losses are your own responsibility. HEPHAITOS only provides tools and does not guarantee returns. Only invest what you can afford to lose.',
     category: '리스크',
     categoryEn: 'Risk',
@@ -93,7 +94,7 @@ export const FAQSection = memo(function FAQSection() {
   }
 
   return (
-    <section className="py-24 bg-[#0A0A0A]">
+    <section className={`py-24 ${BG_COLORS.secondary}`}>
       <div className="max-w-3xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -103,7 +104,7 @@ export const FAQSection = memo(function FAQSection() {
           </h2>
           <p className="text-zinc-400">
             {isKo
-              ? '궁금한 점이 있으신가요? 아래에서 답변을 확인하세요.'
+              ? '궁금한 점이 있으신가요? 아래에서 답변을 확인할 수 있습니다.'
               : 'Have questions? Find answers below.'}
           </p>
         </div>
