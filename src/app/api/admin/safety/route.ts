@@ -1,12 +1,14 @@
 // ============================================
 // Safety Net Monitoring API
 // Loop 13: 안전 정책 모니터링
+// P0 FIX: Admin 인증 추가
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
 import { getSafetyConfig, type SafetyConfig } from '@/lib/safety/config'
+import { requireAdminAuth } from '@/lib/api/middleware'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -33,6 +35,12 @@ interface SafetyEventStats {
  * 안전 정책 이벤트 통계 조회
  */
 export async function GET(request: NextRequest) {
+  // P0 FIX: Admin 인증 필수
+  const authResult = await requireAdminAuth(request)
+  if ('error' in authResult) {
+    return authResult.error
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'stats'
@@ -166,6 +174,12 @@ export async function GET(request: NextRequest) {
  * 안전 정책 설정 업데이트
  */
 export async function POST(request: NextRequest) {
+  // P0 FIX: Admin 인증 필수
+  const authResult = await requireAdminAuth(request)
+  if ('error' in authResult) {
+    return authResult.error
+  }
+
   try {
     const body = await request.json()
     const { action, config } = body

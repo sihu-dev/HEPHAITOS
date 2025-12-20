@@ -1,11 +1,13 @@
 // ============================================
 // ARPPU Analytics API
 // Loop 11: 코호트별 ARPPU 분석
+// P0 FIX: Admin 인증 추가
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { requireAdminAuth } from '@/lib/api/middleware'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,6 +37,12 @@ interface ARPPUSummary {
  * ARPPU 및 매출 메트릭 조회
  */
 export async function GET(request: NextRequest) {
+  // P0 FIX: Admin 인증 필수
+  const authResult = await requireAdminAuth(request)
+  if ('error' in authResult) {
+    return authResult.error
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'summary'

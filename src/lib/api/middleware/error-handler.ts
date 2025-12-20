@@ -373,3 +373,105 @@ export function validateQueryParams<T>(
     return { error: handleApiError(error) }
   }
 }
+
+// ============================================
+// Admin Auth Middleware (P0 FIX)
+// ============================================
+
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
+
+// P1 FIX: Lazy initialization to prevent test failures
+let supabaseAdmin: SupabaseClient | null = null
+
+function getSupabaseAdmin(): SupabaseClient {
+  if (!supabaseAdmin) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!url || !key) {
+      throw new Error('Supabase credentials not configured')
+    }
+    supabaseAdmin = createClient(url, key)
+  }
+  return supabaseAdmin
+}
+
+/**
+ * Admin 권한 검증 미들웨어
+ * P0 FIX: Admin API에 인증/인가 추가
+ */
+export async function requireAdminAuth(
+  request: NextRequest
+): Promise<{ userId: string; isAdmin: boolean } | { error: NextResponse }> {
+  try {
+    // Authorization 헤더에서 토큰 추출
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith('Bearer ')) {
+      return {
+        error: createErrorResponse('UNAUTHORIZED', '인증이 필요합니다.', 401),
+      }
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+
+    // Supabase로 토큰 검증
+    const { data: { user }, error } = await getSupabaseAdmin().auth.getUser(token)
+
+    if (error || !user) {
+      return {
+        error: createErrorResponse('UNAUTHORIZED', '유효하지 않은 토큰입니다.', 401),
+      }
+    }
+
+    // Admin 권한 확인 (user_metadata 또는 별도 테이블)
+    const { data: profile } = await getSupabaseAdmin()
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+
+    if (!isAdmin) {
+      safeLogger.warn('[Admin API] Unauthorized access attempt', { userId: user.id })
+      return {
+        error: createErrorResponse('FORBIDDEN', '관리자 권한이 필요합니다.', 403),
+      }
+    }
+
+    return { userId: user.id, isAdmin: true }
+  } catch (error) {
+    safeLogger.error('[Admin API] Auth error', { error })
+    return {
+      error: createErrorResponse('UNAUTHORIZED', '인증 처리 중 오류가 발생했습니다.', 401),
+    }
+  }
+}
+
+/**
+ * Admin 미들웨어 래퍼
+ * Admin API 핸들러에 인증 자동 적용
+ */
+export function withAdminAuth<T extends NextRequest>(
+  handler: (request: T, adminContext: { userId: string }) => Promise<NextResponse | Response>,
+  options: ApiHandlerOptions = {}
+): (request: T, context?: unknown) => Promise<NextResponse | Response> {
+  return async (request: T, context?: unknown): Promise<NextResponse | Response> => {
+    // Admin 인증 검증
+    const authResult = await requireAdminAuth(request)
+    if ('error' in authResult) {
+      return authResult.error
+    }
+
+    try {
+      return await handler(request, { userId: authResult.userId })
+    } catch (error) {
+      if (options.onError) {
+        options.onError(
+          error instanceof Error ? error : new Error(String(error)),
+          request
+        )
+      }
+      return handleApiError(error, options)
+    }
+  }
+}

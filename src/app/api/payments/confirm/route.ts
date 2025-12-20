@@ -26,6 +26,45 @@ export const POST = withApiMiddleware(
 
     const { paymentKey, orderId, amount } = validation.data
 
+    // ═══════════════════════════════════════════════════════════════
+    // P0 FIX: 결제 금액 DB 검증 (클라이언트 조작 방지)
+    // ═══════════════════════════════════════════════════════════════
+    const { data: order, error: orderError } = await supabaseAdmin
+      .from('payment_orders')
+      .select('amount, status, user_id')
+      .eq('order_id', orderId)
+      .single()
+
+    if (orderError || !order) {
+      safeLogger.error('[Payment API] Order not found', { orderId, error: orderError })
+      return createApiResponse(
+        { error: '유효하지 않은 주문입니다.' },
+        { status: 400 }
+      )
+    }
+
+    if (order.status !== 'pending') {
+      safeLogger.warn('[Payment API] Order already processed', { orderId, status: order.status })
+      return createApiResponse(
+        { error: '이미 처리된 주문입니다.' },
+        { status: 400 }
+      )
+    }
+
+    // 금액 검증 (클라이언트 조작 방지)
+    if (order.amount !== amount) {
+      safeLogger.error('[Payment API] Amount mismatch - possible tampering', {
+        orderId,
+        expected: order.amount,
+        received: amount,
+      })
+      return createApiResponse(
+        { error: '결제 금액이 일치하지 않습니다.' },
+        { status: 400 }
+      )
+    }
+    // ═══════════════════════════════════════════════════════════════
+
     // Circuit Breaker 체크
     const circuitAllowed = await paymentCircuit.isAllowed('toss-api')
     if (!circuitAllowed) {

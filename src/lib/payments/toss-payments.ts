@@ -229,11 +229,13 @@ export class TossPaymentsClient {
 
   /**
    * Generate order ID
+   * P1 FIX: crypto.randomUUID() 사용으로 충돌 방지
    */
   generateOrderId(): string {
+    // crypto.randomUUID()로 충돌 확률 극소화
+    const uuid = crypto.randomUUID().replace(/-/g, '').substring(0, 12)
     const timestamp = Date.now().toString(36)
-    const random = Math.random().toString(36).substring(2, 8)
-    return `HEPH_${timestamp}_${random}`.toUpperCase()
+    return `HEPH_${timestamp}_${uuid}`.toUpperCase()
   }
 
   /**

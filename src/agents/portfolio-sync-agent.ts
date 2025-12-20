@@ -1,6 +1,7 @@
 /**
  * HEPHAITOS - Portfolio Sync Agent
  * L3 (Tissues) - 포트폴리오 동기화 에이전트
+ * P1 FIX: 타임아웃 처리 개선
  *
  * 책임:
  * - 다중 거래소 병렬 조회
@@ -307,20 +308,55 @@ export class PortfolioSyncAgent {
 
   /**
    * 타임아웃 포함 잔고 조회
+   * P1 FIX: reject 대신 resolve로 에러 결과 반환하여 graceful 처리
    */
   private async fetchBalanceWithTimeout(
     service: IExchangeService,
     credentials: IExchangeCredentials
   ): Promise<IResult<IAsset[]>> {
-    return Promise.race([
-      service.getBalance(credentials),
-      new Promise<IResult<IAsset[]>>((_, reject) =>
-        setTimeout(
-          () => reject(new Error('Sync timeout exceeded')),
-          this.config.syncTimeoutMs
-        )
-      ),
-    ]);
+    // P1 FIX: AbortController 패턴으로 타임아웃 처리 개선
+    const timeoutPromise = new Promise<IResult<IAsset[]>>((resolve) => {
+      const timeoutId = setTimeout(() => {
+        resolve({
+          success: false,
+          error: new Error(`Sync timeout exceeded (${this.config.syncTimeoutMs}ms)`),
+          metadata: {
+            timestamp: new Date().toISOString(),
+            duration_ms: this.config.syncTimeoutMs,
+            timed_out: true,
+          },
+        });
+      }, this.config.syncTimeoutMs);
+
+      // Cleanup 함수 반환을 위해 timeoutId 저장
+      (timeoutPromise as unknown as { __timeoutId: ReturnType<typeof setTimeout> }).__timeoutId = timeoutId;
+    });
+
+    try {
+      // Race 실행
+      const result = await Promise.race([
+        service.getBalance(credentials),
+        timeoutPromise,
+      ]);
+
+      // 타이머 정리 (타임아웃이 아닌 경우)
+      const timeoutId = (timeoutPromise as unknown as { __timeoutId: ReturnType<typeof setTimeout> }).__timeoutId;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      return result;
+    } catch (error) {
+      // P1 FIX: 예외도 graceful하게 처리
+      return {
+        success: false,
+        error: error instanceof Error ? error : new Error(String(error)),
+        metadata: {
+          timestamp: new Date().toISOString(),
+          duration_ms: 0,
+        },
+      };
+    }
   }
 
   /**

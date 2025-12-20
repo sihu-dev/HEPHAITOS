@@ -207,3 +207,77 @@ export function quickSafetyCheck(content: string): boolean {
 
   return !blockPatterns.some(pattern => pattern.test(content))
 }
+
+// ============================================
+// P0-4 FIX: AI 응답 면책조항 자동 삽입
+// ============================================
+
+const AI_DISCLAIMER_KR = `
+
+⚠️ **면책조항**: 본 내용은 교육 및 정보 제공 목적으로 생성되었으며, 투자 조언이 아닙니다. 모든 투자 결정은 본인의 판단과 책임하에 이루어져야 합니다. 과거 성과는 미래 수익을 보장하지 않습니다.`
+
+const AI_DISCLAIMER_SHORT = '\n\n⚠️ 본 내용은 교육 목적이며, 투자 조언이 아닙니다. 투자 결정은 본인 책임입니다.'
+
+/**
+ * AI 응답에 면책조항 강제 삽입
+ * P0-4 FIX: 모든 AI 생성 콘텐츠에 면책조항 필수
+ *
+ * @param content AI 생성 콘텐츠
+ * @param options 옵션 (short: 짧은 버전 사용, force: 이미 있어도 강제 추가)
+ * @returns 면책조항이 추가된 콘텐츠
+ */
+export function ensureDisclaimer(
+  content: string,
+  options: { short?: boolean; force?: boolean } = {}
+): string {
+  const { short = false, force = false } = options
+
+  // 이미 면책조항이 있는지 확인
+  const hasDisclaimer = content.includes('면책조항') ||
+    content.includes('투자 조언이 아닙니다') ||
+    content.includes('본인 책임') ||
+    content.includes('⚠️')
+
+  if (hasDisclaimer && !force) {
+    return content
+  }
+
+  const disclaimer = short ? AI_DISCLAIMER_SHORT : AI_DISCLAIMER_KR
+  return content + disclaimer
+}
+
+/**
+ * AI 응답 객체의 특정 필드들에 면책조항 삽입
+ * 전략 생성, 리포트 등에서 사용
+ */
+export function ensureDisclaimerInFields<T extends Record<string, unknown>>(
+  obj: T,
+  fields: (keyof T)[],
+  options: { short?: boolean } = {}
+): T {
+  const result = { ...obj }
+
+  for (const field of fields) {
+    const value = result[field]
+    if (typeof value === 'string' && value.length > 0) {
+      result[field] = ensureDisclaimer(value, options) as T[typeof field]
+    }
+  }
+
+  return result
+}
+
+/**
+ * Safety Net 적용 후 면책조항 보장
+ * applySafetyNet의 래퍼 함수
+ */
+export async function applySafetyNetWithDisclaimer(
+  request: SafetyCheckRequest
+): Promise<SafetyCheckResult> {
+  const result = await applySafetyNet(request)
+
+  // 면책조항 강제 삽입
+  result.content = ensureDisclaimer(result.content, { short: true })
+
+  return result
+}

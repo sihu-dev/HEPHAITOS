@@ -1,11 +1,13 @@
 // ============================================
 // Cost Tracking API
 // Loop 15: 비용 대시보드
+// P0 FIX: Admin 인증 추가
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { requireAdminAuth } from '@/lib/api/middleware'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -67,6 +69,12 @@ interface Alert {
  * 비용 데이터 조회
  */
 export async function GET(request: NextRequest) {
+  // P0 FIX: Admin 인증 필수
+  const authResult = await requireAdminAuth(request)
+  if ('error' in authResult) {
+    return authResult.error
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'summary'
@@ -232,6 +240,12 @@ export async function GET(request: NextRequest) {
  * 비용 관련 액션
  */
 export async function POST(request: NextRequest) {
+  // P0 FIX: Admin 인증 필수
+  const authResult = await requireAdminAuth(request)
+  if ('error' in authResult) {
+    return authResult.error
+  }
+
   try {
     const body = await request.json()
     const { action } = body

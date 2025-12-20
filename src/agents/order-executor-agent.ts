@@ -1,6 +1,7 @@
 /**
  * HEPHAITOS - Order Executor Agent
  * L3 (Tissues) - 주문 실행 에이전트
+ * P1 FIX: Mutex 도입으로 Race Condition 방지
  *
  * ⚠️ 면책조항 (DISCLAIMER)
  * 본 시스템은 교육 및 시뮬레이션 목적입니다.
@@ -27,6 +28,58 @@
  * │                                                                │
  * └────────────────────────────────────────────────────────────────┘
  */
+
+// ═══════════════════════════════════════════════════════════════════
+// P1 FIX: Simple Mutex for Race Condition Prevention
+// ═══════════════════════════════════════════════════════════════════
+
+/**
+ * 심볼 기반 Mutex 클래스
+ * 동일 심볼에 대한 동시 주문/청산 방지
+ */
+class SymbolMutex {
+  private locks: Map<string, Promise<void>> = new Map();
+
+  /**
+   * 심볼에 대한 잠금 획득
+   * @param symbol 잠금할 심볼 (또는 'global' 전체 잠금)
+   * @returns 잠금 해제 함수
+   */
+  async acquire(symbol: string): Promise<() => void> {
+    // 기존 잠금이 있으면 대기
+    while (this.locks.has(symbol)) {
+      await this.locks.get(symbol);
+    }
+
+    // 새 잠금 생성
+    let release: () => void;
+    const lockPromise = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+
+    this.locks.set(symbol, lockPromise);
+
+    // 잠금 해제 함수 반환
+    return () => {
+      this.locks.delete(symbol);
+      release!();
+    };
+  }
+
+  /**
+   * 잠금 상태 확인
+   */
+  isLocked(symbol: string): boolean {
+    return this.locks.has(symbol);
+  }
+
+  /**
+   * 잠금된 심볼 목록
+   */
+  getLockedSymbols(): string[] {
+    return Array.from(this.locks.keys());
+  }
+}
 
 import type {
   IOrderRequest,
@@ -140,6 +193,9 @@ export class OrderExecutorAgent {
   private readonly orderRepo: IOrderRepository;
   private readonly positionRepo: IPositionRepository;
 
+  /** P1 FIX: 심볼 기반 Mutex로 Race Condition 방지 */
+  private readonly symbolMutex: SymbolMutex = new SymbolMutex();
+
   /** 일일 통계 */
   private dailyPnL: number = 0;
   private dailyTradeCount: number = 0;
@@ -170,83 +226,92 @@ export class OrderExecutorAgent {
 
   /**
    * 주문 제출
+   * P1 FIX: Mutex로 동일 심볼 동시 주문 방지
    */
   async submitOrder(request: IOrderRequest): Promise<IOrderSubmitResult> {
-    // 일일 한도 체크
-    this.checkDailyReset();
+    // P1 FIX: 심볼 잠금 획득
+    const release = await this.symbolMutex.acquire(request.symbol);
 
-    // 현재 가격 (시뮬레이션에서는 요청 가격 사용)
-    const currentPrice = request.price ?? 0;
+    try {
+      // 일일 한도 체크
+      this.checkDailyReset();
 
-    // 포지션 수 조회
-    const openPositionCount = await this.positionRepo.countOpenPositions();
+      // 현재 가격 (시뮬레이션에서는 요청 가격 사용)
+      const currentPrice = request.price ?? 0;
 
-    // 주문 검증
-    const validation = validateOrder(
-      request,
-      this.config.riskConfig,
-      currentPrice,
-      this.config.riskConfig.accountEquity + this.dailyPnL,
-      openPositionCount
-    );
+      // 포지션 수 조회
+      const openPositionCount = await this.positionRepo.countOpenPositions();
 
-    if (!validation.valid) {
-      return {
-        success: false,
-        validation,
-        error: validation.errors.join(', '),
-      };
-    }
+      // 주문 검증
+      const validation = validateOrder(
+        request,
+        this.config.riskConfig,
+        currentPrice,
+        this.config.riskConfig.accountEquity + this.dailyPnL,
+        openPositionCount
+      );
 
-    // 일일 거래 한도 체크
-    if (this.dailyTradeCount >= this.config.riskConfig.dailyTradeLimit) {
-      validation.errors.push('일일 거래 횟수 한도 초과');
-      return {
-        success: false,
-        validation,
-        error: '일일 거래 횟수 한도 초과',
-      };
-    }
+      if (!validation.valid) {
+        return {
+          success: false,
+          validation,
+          error: validation.errors.join(', '),
+        };
+      }
 
-    // 일일 손실 한도 체크
-    const dailyLossPercent =
-      (this.dailyPnL / this.config.riskConfig.accountEquity) * 100;
-    if (dailyLossPercent <= -this.config.riskConfig.dailyLossLimit) {
-      validation.errors.push('일일 손실 한도 도달');
-      return {
-        success: false,
-        validation,
-        error: '일일 손실 한도 도달',
-      };
-    }
+      // 일일 거래 한도 체크
+      if (this.dailyTradeCount >= this.config.riskConfig.dailyTradeLimit) {
+        validation.errors.push('일일 거래 횟수 한도 초과');
+        return {
+          success: false,
+          validation,
+          error: '일일 거래 횟수 한도 초과',
+        };
+      }
 
-    // 주문 생성
-    const order = this.createOrderFromRequest(request);
-    await this.orderRepo.createOrder(order);
+      // 일일 손실 한도 체크
+      const dailyLossPercent =
+        (this.dailyPnL / this.config.riskConfig.accountEquity) * 100;
+      if (dailyLossPercent <= -this.config.riskConfig.dailyLossLimit) {
+        validation.errors.push('일일 손실 한도 도달');
+        return {
+          success: false,
+          validation,
+          error: '일일 손실 한도 도달',
+        };
+      }
 
-    // 시뮬레이션 즉시 체결
-    if (this.config.mode === 'simulation' || this.config.mode === 'paper') {
-      const execution = await this.simulateExecution(order, currentPrice);
-      await this.orderRepo.addExecution(order.id, execution);
+      // 주문 생성
+      const order = this.createOrderFromRequest(request);
+      await this.orderRepo.createOrder(order);
 
-      // 포지션 업데이트
-      const position = await this.updatePositionFromExecution(order, execution);
+      // 시뮬레이션 즉시 체결
+      if (this.config.mode === 'simulation' || this.config.mode === 'paper') {
+        const execution = await this.simulateExecution(order, currentPrice);
+        await this.orderRepo.addExecution(order.id, execution);
 
-      this.dailyTradeCount++;
+        // 포지션 업데이트
+        const position = await this.updatePositionFromExecution(order, execution);
+
+        this.dailyTradeCount++;
+
+        return {
+          success: true,
+          order: await this.orderRepo.getOrderById(order.id) ?? order,
+          position,
+          validation,
+        };
+      }
 
       return {
         success: true,
-        order: await this.orderRepo.getOrderById(order.id) ?? order,
-        position,
+        order,
         validation,
       };
+    } finally {
+      // P1 FIX: 반드시 잠금 해제
+      release();
     }
-
-    return {
-      success: true,
-      order,
-      validation,
-    };
   }
 
   /**
@@ -295,6 +360,7 @@ export class OrderExecutorAgent {
 
   /**
    * 포지션 청산
+   * P1 FIX: Mutex로 동일 심볼 동시 청산 방지
    */
   async closePosition(
     positionId: string,
@@ -308,37 +374,54 @@ export class OrderExecutorAgent {
       };
     }
 
-    // 슬리피지 적용 (청산 방향 = 진입 반대)
-    const exitSide: OrderSide = position.side === 'buy' ? 'sell' : 'buy';
-    const actualExitPrice = simulateSlippage(
-      exitPrice,
-      exitSide,
-      this.config.simulationSlippagePercent
-    );
+    // P1 FIX: 심볼 잠금 획득
+    const release = await this.symbolMutex.acquire(position.symbol);
 
-    // 청산
-    const closed = await this.positionRepo.closePosition(
-      positionId,
-      actualExitPrice,
-      new Date().toISOString()
-    );
+    try {
+      // 잠금 획득 후 상태 재확인 (다른 요청에 의해 청산되었을 수 있음)
+      const currentPosition = await this.positionRepo.getPositionById(positionId);
+      if (!currentPosition || currentPosition.status !== 'open') {
+        return {
+          success: false,
+          error: '포지션이 이미 청산되었습니다',
+        };
+      }
 
-    if (closed) {
-      // 일일 PnL 업데이트
-      this.dailyPnL += closed.realizedPnL ?? 0;
-      this.dailyTradeCount++;
+      // 슬리피지 적용 (청산 방향 = 진입 반대)
+      const exitSide: OrderSide = currentPosition.side === 'buy' ? 'sell' : 'buy';
+      const actualExitPrice = simulateSlippage(
+        exitPrice,
+        exitSide,
+        this.config.simulationSlippagePercent
+      );
+
+      // 청산
+      const closed = await this.positionRepo.closePosition(
+        positionId,
+        actualExitPrice,
+        new Date().toISOString()
+      );
+
+      if (closed) {
+        // 일일 PnL 업데이트
+        this.dailyPnL += closed.realizedPnL ?? 0;
+        this.dailyTradeCount++;
+
+        return {
+          success: true,
+          position: closed,
+          realizedPnL: closed.realizedPnL,
+        };
+      }
 
       return {
-        success: true,
-        position: closed,
-        realizedPnL: closed.realizedPnL,
+        success: false,
+        error: '포지션 청산 실패',
       };
+    } finally {
+      // P1 FIX: 반드시 잠금 해제
+      release();
     }
-
-    return {
-      success: false,
-      error: '포지션 청산 실패',
-    };
   }
 
   /**

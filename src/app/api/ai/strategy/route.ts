@@ -12,7 +12,7 @@ import { createClaudeClient, TRADING_PROMPTS } from '@/lib/ai/claude-client'
 import { withApiMiddleware, createApiResponse, validateRequestBody } from '@/lib/api/middleware'
 import { aiStrategyConfigSchema } from '@/lib/validations/strategy'
 import { safeLogger } from '@/lib/utils/safe-logger'
-import { applySafetyNet } from '@/lib/safety/safety-net-v2'
+import { applySafetyNet, ensureDisclaimer } from '@/lib/safety/safety-net-v2'
 import { spendCredits, InsufficientCreditsError } from '@/lib/credits/spend-helper'
 import { checkUserConsent, createConsentRequiredResponse } from '@/lib/compliance/consent-gate'
 import { aiCircuit, withCircuitBreaker, createCircuitOpenResponse } from '@/lib/redis/circuit-breaker'
@@ -399,6 +399,10 @@ export const POST = withApiMiddleware(
       // 기타 에러는 로그만 남기고 계속 진행
       safeLogger.error('[Strategy API] Safety Net error', { error: safetyError })
     }
+
+    // P0-4 FIX: AI 응답 면책조항 강제 삽입
+    strategy.aiInsights = ensureDisclaimer(strategy.aiInsights, { short: true })
+    strategy.description = ensureDisclaimer(strategy.description, { short: true })
 
     safeLogger.info('[Strategy API] Strategy generated', {
       strategyId: strategy.id,

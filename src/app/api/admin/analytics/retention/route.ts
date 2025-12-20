@@ -1,11 +1,13 @@
 // ============================================
 // Retention Analytics API
 // Loop 10: D1/D7 리텐션 추적 시스템
+// P0 FIX: Admin 인증 추가
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { requireAdminAuth } from '@/lib/api/middleware'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,6 +41,12 @@ interface RetentionCurvePoint {
  * 리텐션 메트릭 조회
  */
 export async function GET(request: NextRequest) {
+  // P0 FIX: Admin 인증 필수
+  const authResult = await requireAdminAuth(request)
+  if ('error' in authResult) {
+    return authResult.error
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'daily'
@@ -170,6 +178,12 @@ export async function GET(request: NextRequest) {
  * 기존 이벤트 데이터로 리텐션 백필
  */
 export async function POST(request: NextRequest) {
+  // P0 FIX: Admin 인증 필수
+  const authResult = await requireAdminAuth(request)
+  if ('error' in authResult) {
+    return authResult.error
+  }
+
   try {
     const body = await request.json()
     const { action } = body

@@ -1,11 +1,13 @@
 // ============================================
 // Enhanced Refund Management API
 // Loop 14: 환불 정책 고도화
+// P0 FIX: Admin 인증 추가
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { requireAdminAuth, createErrorResponse } from '@/lib/api/middleware'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,6 +40,12 @@ interface RefundRequest {
  * 환불 요청 목록 및 통계 조회
  */
 export async function GET(request: NextRequest) {
+  // P0 FIX: Admin 인증 필수
+  const authResult = await requireAdminAuth(request)
+  if ('error' in authResult) {
+    return authResult.error
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'list'
@@ -161,6 +169,12 @@ export async function GET(request: NextRequest) {
  * 환불 요청 처리 (승인/거절/완료)
  */
 export async function POST(request: NextRequest) {
+  // P0 FIX: Admin 인증 필수
+  const authResult = await requireAdminAuth(request)
+  if ('error' in authResult) {
+    return authResult.error
+  }
+
   try {
     const body = await request.json()
     const { action, requestId, adminNote } = body

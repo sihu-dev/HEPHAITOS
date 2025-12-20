@@ -19,6 +19,9 @@ export {
   handleApiError,
   validateRequestBody,
   validateQueryParams,
+  // P0 FIX: Admin Auth
+  requireAdminAuth,
+  withAdminAuth,
   type ApiHandlerOptions,
   type ApiResponse,
 } from './error-handler'

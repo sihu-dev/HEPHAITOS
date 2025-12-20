@@ -456,6 +456,7 @@ export class BacktestAgent {
 
   /**
    * 포지션 크기 계산
+   * P1 FIX: 0 또는 음수 자본금 처리 추가
    */
   private calculatePositionSize(
     availableCash: number,
@@ -463,6 +464,11 @@ export class BacktestAgent {
     positionSizing: IStrategy['positionSizing'],
     riskManagement: IStrategy['riskManagement']
   ): number {
+    // P1 FIX: 0 또는 음수 자본금 조기 리턴
+    if (availableCash <= 0 || currentPrice <= 0) {
+      return 0;
+    }
+
     const maxUsage = riskManagement.maxCapitalUsage ?? 100;
     const maxCash = availableCash * (maxUsage / 100);
 
