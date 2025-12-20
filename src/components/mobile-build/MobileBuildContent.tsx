@@ -97,7 +97,7 @@ export function MobileBuildContent() {
       {/* Header */}
       <div className="h-14 border-b border-white/[0.06] bg-[#111113] flex items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#5E6AD2]/10 border border-[#5E6AD2]/20 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
             <span className="text-lg">🎨</span>
           </div>
           <div>
@@ -110,7 +110,7 @@ export function MobileBuildContent() {
           <div className="flex items-center gap-2">
             <div className="w-32 h-2 bg-white/[0.05] rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-[#5E6AD2] to-[#7C8AEA] transition-all duration-300"
+                className="h-full bg-gradient-to-r from-primary to-[#7C8AEA] transition-all duration-300"
                 style={{ width: `${buildProgress}%` }}
               />
             </div>

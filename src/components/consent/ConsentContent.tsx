@@ -182,7 +182,7 @@ export function ConsentContent() {
           {/* 연령 확인 */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#5E6AD2]/20 text-[#5E6AD2] text-sm flex items-center justify-center">
+              <span className="w-6 h-6 rounded-full bg-primary/20 text-primary text-sm flex items-center justify-center">
                 1
               </span>
               연령 확인
@@ -195,7 +195,7 @@ export function ConsentContent() {
               <select
                 value={consent.birthYear}
                 onChange={(e) => setConsent({ ...consent, birthYear: e.target.value })}
-                className="flex-1 bg-white/[0.05] border border-white/[0.1] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#5E6AD2]"
+                className="flex-1 bg-white/[0.05] border border-white/[0.1] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary"
               >
                 <option value="">출생년도</option>
                 {years.map((year) => (
@@ -206,7 +206,7 @@ export function ConsentContent() {
               <select
                 value={consent.birthMonth}
                 onChange={(e) => setConsent({ ...consent, birthMonth: e.target.value })}
-                className="w-24 bg-white/[0.05] border border-white/[0.1] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#5E6AD2]"
+                className="w-24 bg-white/[0.05] border border-white/[0.1] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary"
               >
                 <option value="">월</option>
                 {months.map((month) => (
@@ -217,7 +217,7 @@ export function ConsentContent() {
               <select
                 value={consent.birthDay}
                 onChange={(e) => setConsent({ ...consent, birthDay: e.target.value })}
-                className="w-24 bg-white/[0.05] border border-white/[0.1] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#5E6AD2]"
+                className="w-24 bg-white/[0.05] border border-white/[0.1] rounded-lg px-4 py-3 text-white focus:outline-none focus:border-primary"
               >
                 <option value="">일</option>
                 {days.map((day) => (
@@ -242,7 +242,7 @@ export function ConsentContent() {
           {/* 면책조항 */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#5E6AD2]/20 text-[#5E6AD2] text-sm flex items-center justify-center">
+              <span className="w-6 h-6 rounded-full bg-primary/20 text-primary text-sm flex items-center justify-center">
                 2
               </span>
               면책조항 동의
@@ -277,7 +277,7 @@ export function ConsentContent() {
                     type="checkbox"
                     checked={consent.disclaimerAgreed}
                     onChange={(e) => setConsent({ ...consent, disclaimerAgreed: e.target.checked })}
-                    className="mt-1 w-5 h-5 rounded border-white/20 bg-white/5 text-[#5E6AD2] focus:ring-[#5E6AD2] focus:ring-offset-0"
+                    className="mt-1 w-5 h-5 rounded border-white/20 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0"
                   />
                   <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
                     위 면책조항의 내용을 모두 읽고 이해했으며, 이에 동의합니다.
@@ -305,7 +305,7 @@ export function ConsentContent() {
             disabled={!isFormValid() || loading}
             className={`w-full py-4 rounded-xl font-medium text-white transition-all ${
               isFormValid() && !loading
-                ? 'bg-[#5E6AD2] hover:bg-[#6B78E5] cursor-pointer'
+                ? 'bg-primary hover:bg-[#6B78E5] cursor-pointer'
                 : 'bg-gray-700 cursor-not-allowed opacity-50'
             }`}
           >

@@ -1,10 +1,15 @@
 'use client'
 
 import { memo } from 'react'
+import { CHART_COLORS } from "@/constants/design-tokens"
 import { type NodeProps } from 'reactflow'
+import { CHART_COLORS } from "@/constants/design-tokens"
 import { ArrowsRightLeftIcon } from '@heroicons/react/24/outline'
+import { CHART_COLORS } from "@/constants/design-tokens"
 import { BaseNode } from './BaseNode'
+import { CHART_COLORS } from "@/constants/design-tokens"
 import { useI18n } from '@/i18n/client'
+import { CHART_COLORS } from "@/constants/design-tokens"
 
 export const ConditionNode = memo(function ConditionNode(props: NodeProps) {
   const { t } = useI18n()
@@ -26,9 +31,9 @@ export const ConditionNode = memo(function ConditionNode(props: NodeProps) {
     <BaseNode
       {...props}
       icon={ArrowsRightLeftIcon}
-      color="#5E6AD2"
+      color={CHART_COLORS.primary}
       bgColor="bg-zinc-900/80"
-      borderColor="border-[#5E6AD2]/30"
+      borderColor="border-primary/30"
       title={props.data?.label || (t('dashboard.nodes.condition.title') as string)}
       subtitle={getSubtitle()}
       hasInputHandle={true}

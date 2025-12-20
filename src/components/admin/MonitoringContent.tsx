@@ -247,7 +247,7 @@ export function MonitoringContent() {
             </label>
             <button
               onClick={fetchData}
-              className="px-4 py-2 bg-[#5E6AD2] hover:bg-[#6B78E5] rounded-lg text-sm"
+              className="px-4 py-2 bg-primary hover:bg-[#6B78E5] rounded-lg text-sm"
             >
               Refresh
             </button>

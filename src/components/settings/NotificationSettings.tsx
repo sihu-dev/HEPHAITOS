@@ -98,7 +98,7 @@ export function NotificationSettings() {
                   onClick={() => toggleSetting(item.id)}
                   title={enabled ? t('dashboard.settings.notifications.enabled') as string : t('dashboard.settings.notifications.disabled') as string}
                   className={`relative w-9 h-5 rounded-full transition-colors ${
-                    enabled ? 'bg-[#5E6AD2]/40' : 'bg-white/[0.06]'
+                    enabled ? 'bg-primary/40' : 'bg-white/[0.06]'
                   }`}
                 >
                   <span

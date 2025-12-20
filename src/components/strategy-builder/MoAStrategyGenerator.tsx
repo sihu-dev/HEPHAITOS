@@ -58,7 +58,7 @@ const TIER_CONFIG = {
     credits: 20,
     price: '₩1,420',
     description: '4명 전문가 + 안전성 검증',
-    color: 'bg-[#5E6AD2]',
+    color: 'bg-primary',
   },
 };
 
@@ -247,7 +247,7 @@ export function MoAStrategyGenerator() {
               <span className="text-2xl">✨</span>
               종합 전략
             </h3>
-            <Card className="p-6 bg-[#5E6AD2]/10 border-[#5E6AD2]/30">
+            <Card className="p-6 bg-primary/10 border-primary/30">
               {/* Validation Badge */}
               {result && (
                 <div className="mb-4">

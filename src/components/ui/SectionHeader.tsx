@@ -63,7 +63,7 @@ export function SectionHeader({
       {badge && (
         <span
           className={clsx(
-            'text-[#5E6AD2] uppercase tracking-wider font-medium mb-2 block',
+            'text-primary uppercase tracking-wider font-medium mb-2 block',
             styles.badge
           )}
         >

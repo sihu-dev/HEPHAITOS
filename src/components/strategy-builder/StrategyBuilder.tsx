@@ -73,6 +73,9 @@ import { useI18n } from '@/i18n/client'
 // Disclaimer
 import { DisclaimerInline } from '@/components/ui/Disclaimer'
 
+// Design Tokens
+import { CHART_COLORS } from '@/constants/design-tokens'
+
 const nodeTypes = {
   trigger: TriggerNode,
   condition: ConditionNode,
@@ -84,10 +87,10 @@ const nodeTypes = {
 const defaultEdgeOptions = {
   type: 'smoothstep',
   animated: true,
-  style: { stroke: '#5E6AD2', strokeWidth: 2 },
+  style: { stroke: CHART_COLORS.primary, strokeWidth: 2 },
   markerEnd: {
     type: MarkerType.ArrowClosed,
-    color: '#5E6AD2',
+    color: CHART_COLORS.primary,
   },
 }
 
@@ -416,7 +419,7 @@ function StrategyBuilderInner() {
       case 'trigger':
         return '#F59E0B'
       case 'condition':
-        return '#5E6AD2'
+        return CHART_COLORS.primary
       case 'indicator':
         return '#10B981'
       case 'action':
@@ -477,7 +480,7 @@ function StrategyBuilderInner() {
             <button
               type="button"
               onClick={() => setShowAIGenerator(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-[#5E6AD2]/20 hover:bg-[#5E6AD2]/30 border border-[#5E6AD2]/30 rounded-lg text-[#7C8AEA] hover:text-[#9AA5EF] transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-lg text-[#7C8AEA] hover:text-[#9AA5EF] transition-colors"
               aria-label={t('dashboard.strategyBuilder.aiGenerate') as string}
               title={t('dashboard.strategyBuilder.aiGenerateTitle') as string}
             >

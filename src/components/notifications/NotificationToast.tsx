@@ -53,8 +53,8 @@ function getNotificationColors(type: NotificationType) {
       icon: 'text-emerald-400',
     },
     strategy_signal: {
-      bg: 'bg-[#5E6AD2]/10',
-      border: 'border-[#5E6AD2]/30',
+      bg: 'bg-primary/10',
+      border: 'border-primary/30',
       icon: 'text-[#7C8AEA]',
     },
     celebrity_trade: {

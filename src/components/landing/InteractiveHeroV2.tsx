@@ -8,6 +8,7 @@ import {
   ArrowTrendingUpIcon,
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline'
+import { CHART_COLORS } from '@/constants/design-tokens'
 
 const PROMPTS = [
   '워렌 버핏처럼 가치투자 전략 만들어줘',
@@ -95,8 +96,8 @@ export function InteractiveHeroV2() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#5E6AD2]/10 border border-[#5E6AD2]/20 mb-6">
-            <SparklesIcon className="w-4 h-4 text-[#5E6AD2]" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
+            <SparklesIcon className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-[#7C8AEA]">
               Live Interactive Demo
             </span>
@@ -148,7 +149,7 @@ export function InteractiveHeroV2() {
             <button
               onClick={handleRun}
               disabled={isRunning}
-              className="w-full bg-gradient-to-r from-[#5E6AD2] to-[#4B56C8] hover:from-[#4B56C8] hover:to-[#3A44A8] disabled:from-zinc-800 disabled:to-zinc-700 text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-[#5E6AD2]/20 hover:shadow-[#5E6AD2]/30 disabled:cursor-not-allowed disabled:shadow-none"
+              className="w-full bg-gradient-to-r from-primary to-[#4B56C8] hover:from-[#4B56C8] hover:to-[#3A44A8] disabled:from-zinc-800 disabled:to-zinc-700 text-white font-semibold py-3.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-[#5E6AD2]/20 hover:shadow-[#5E6AD2]/30 disabled:cursor-not-allowed disabled:shadow-none"
             >
               {isRunning ? (
                 <span className="flex items-center justify-center gap-2">
@@ -218,7 +219,7 @@ export function InteractiveHeroV2() {
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-white/[0.04] rounded-xl border border-white/[0.06] p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <CurrencyDollarIcon className="w-4 h-4 text-[#5E6AD2]" />
+                        <CurrencyDollarIcon className="w-4 h-4 text-primary" />
                         <span className="text-xs text-zinc-500">
                           포트폴리오
                         </span>
@@ -327,7 +328,7 @@ export function InteractiveHeroV2() {
                           >
                             <stop
                               offset="0%"
-                              style={{ stopColor: '#5E6AD2', stopOpacity: 1 }}
+                              style={{ stopColor: CHART_COLORS.primary, stopOpacity: 1 }}
                             />
                             <stop
                               offset="100%"
@@ -358,7 +359,7 @@ export function InteractiveHeroV2() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href="/auth/signup"
-              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[#5E6AD2] to-[#4B56C8] hover:from-[#4B56C8] hover:to-[#3A44A8] text-white font-semibold rounded-xl transition-all shadow-lg shadow-[#5E6AD2]/20 hover:shadow-[#5E6AD2]/30"
+              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-primary to-[#4B56C8] hover:from-[#4B56C8] hover:to-[#3A44A8] text-white font-semibold rounded-xl transition-all shadow-lg shadow-[#5E6AD2]/20 hover:shadow-[#5E6AD2]/30"
             >
               무료로 시작하기
             </a>

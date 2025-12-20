@@ -38,7 +38,7 @@ const NotificationIcons: Record<NotificationType, React.ComponentType<{ classNam
 const NotificationColors: Record<NotificationType, string> = {
   price_alert: 'text-yellow-400 bg-yellow-400/10',
   trade_executed: 'text-emerald-400 bg-emerald-400/10',
-  strategy_signal: 'text-[#7C8AEA] bg-[#5E6AD2]/10',
+  strategy_signal: 'text-[#7C8AEA] bg-primary/10',
   celebrity_trade: 'text-amber-400 bg-amber-400/10',
   portfolio_update: 'text-blue-400 bg-blue-400/10',
   system: 'text-zinc-400 bg-zinc-400/10',
@@ -122,7 +122,7 @@ const NotificationItem = memo(function NotificationItem({
               {notification.title}
             </p>
             {!notification.read && (
-              <span className="w-2 h-2 rounded-full bg-[#5E6AD2] flex-shrink-0 mt-1.5" />
+              <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1.5" />
             )}
           </div>
           <p className="text-xs text-zinc-500 mt-0.5 line-clamp-2">
@@ -241,7 +241,7 @@ export const NotificationDropdown = memo(function NotificationDropdown({
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-white">알림</span>
             {unreadCount > 0 && (
-              <span className="px-1.5 py-0.5 rounded-full bg-[#5E6AD2]/20 text-[10px] font-medium text-[#7C8AEA]">
+              <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-[10px] font-medium text-[#7C8AEA]">
                 {unreadCount}
               </span>
             )}
@@ -334,7 +334,7 @@ export const NotificationBell = memo(function NotificationBell({
         <span className={clsx(
           'absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1',
           'flex items-center justify-center',
-          'rounded-full bg-[#5E6AD2] text-[10px] font-bold text-white'
+          'rounded-full bg-primary text-[10px] font-bold text-white'
         )}>
           {unreadCount > 99 ? '99+' : unreadCount}
         </span>

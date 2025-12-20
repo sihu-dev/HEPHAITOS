@@ -67,12 +67,12 @@ const AgentChatDemo = memo(function AgentChatDemo() {
     <div className="border border-white/[0.06] rounded-xl bg-zinc-900/30 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-[#5E6AD2] flex items-center justify-center">
+          <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
             <ChatBubbleLeftRightIcon className="w-3.5 h-3.5 text-white" />
           </div>
           <span className="text-sm font-medium text-white">AI Agent Preview</span>
         </div>
-        <span className="text-[10px] text-[#7C8AEA] bg-[#5E6AD2]/10 px-2 py-0.5 rounded">NEW</span>
+        <span className="text-[10px] text-[#7C8AEA] bg-primary/10 px-2 py-0.5 rounded">NEW</span>
       </div>
 
       <div className="h-64 p-4 space-y-3 overflow-y-auto">
@@ -87,7 +87,7 @@ const AgentChatDemo = memo(function AgentChatDemo() {
               <div className={clsx(
                 'max-w-[85%] px-3 py-2 rounded-lg text-sm whitespace-pre-line',
                 msg.role === 'user'
-                  ? 'bg-[#5E6AD2] text-white'
+                  ? 'bg-primary text-white'
                   : 'bg-white/[0.04] border border-white/[0.06] text-zinc-200'
               )}>
                 {msg.content}
@@ -118,7 +118,7 @@ const AgentChatDemo = memo(function AgentChatDemo() {
         <button
           onClick={runDemo}
           disabled={isTyping}
-          className="w-full py-2 bg-[#5E6AD2] hover:bg-[#6E7AE2] disabled:bg-[#5E6AD2]/50 text-white text-sm rounded-lg transition-colors"
+          className="w-full py-2 bg-primary hover:bg-[#6E7AE2] disabled:bg-primary/50 text-white text-sm rounded-lg transition-colors"
         >
           {isTyping ? '대화 진행 중...' : '데모 실행'}
         </button>
@@ -152,7 +152,7 @@ const StrategyDemo = memo(function StrategyDemo() {
     <div className="border border-white/[0.06] rounded-xl bg-zinc-900/30 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <BeakerIcon className="w-4 h-4 text-[#5E6AD2]" />
+          <BeakerIcon className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-white">Backtest Simulator</span>
         </div>
       </div>
@@ -167,7 +167,7 @@ const StrategyDemo = memo(function StrategyDemo() {
               className={clsx(
                 'px-3 py-2 rounded-lg text-xs font-medium transition-all',
                 strategy === s
-                  ? 'bg-[#5E6AD2] text-white'
+                  ? 'bg-primary text-white'
                   : 'bg-white/[0.04] text-zinc-400 hover:bg-white/[0.08] hover:text-white'
               )}
             >
@@ -268,7 +268,7 @@ const MarketTicker = memo(function MarketTicker() {
     <div className="border border-white/[0.06] rounded-xl bg-zinc-900/30 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <ChartBarIcon className="w-4 h-4 text-[#5E6AD2]" />
+          <ChartBarIcon className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium text-white">실시간 시세</span>
         </div>
         {!isLoading && (
@@ -467,9 +467,9 @@ export function DemoContent() {
     <main className="min-h-screen bg-[#0D0D0F]">
       {/* Background Effects */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#5E6AD2]/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-96 h-96 bg-[#5E6AD2]/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-12">
@@ -487,7 +487,7 @@ export function DemoContent() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5E6AD2]/10 border border-[#5E6AD2]/30 text-[#7C8AEA] text-xs font-medium mb-6"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-[#7C8AEA] text-xs font-medium mb-6"
           >
             <SparklesIcon className="w-4 h-4" />
             Interactive Demo
@@ -550,7 +550,7 @@ export function DemoContent() {
             >
               <div className={clsx(
                 'w-10 h-10 rounded-lg flex items-center justify-center mb-4',
-                feature.color === 'primary' && 'bg-[#5E6AD2]/10',
+                feature.color === 'primary' && 'bg-primary/10',
                 feature.color === 'emerald' && 'bg-emerald-500/10',
                 feature.color === 'amber' && 'bg-amber-500/10'
               )}>
@@ -575,7 +575,7 @@ export function DemoContent() {
           className="border border-white/[0.06] rounded-xl overflow-hidden mb-12"
         >
           <div className="aspect-video bg-zinc-900/50 flex items-center justify-center relative">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#5E6AD2]/5 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent" />
             <div className="text-center relative z-10">
               <div className="w-16 h-16 rounded-full bg-white/[0.08] backdrop-blur-sm flex items-center justify-center mx-auto mb-4 border border-white/[0.1] hover:scale-105 transition-transform cursor-pointer group">
                 <PlayIcon className="w-8 h-8 text-white ml-1 group-hover:scale-110 transition-transform" />
@@ -591,7 +591,7 @@ export function DemoContent() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="text-center p-8 rounded-xl bg-gradient-to-b from-[#5E6AD2]/10 to-transparent border border-[#5E6AD2]/20"
+          className="text-center p-8 rounded-xl bg-gradient-to-b from-primary/10 to-transparent border border-primary/20"
         >
           <h2 className="text-xl font-medium text-white mb-3">
             나만의 전략을 만들 준비가 되셨나요?
@@ -603,7 +603,7 @@ export function DemoContent() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/auth/signup"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#5E6AD2] text-white rounded-lg text-sm font-medium hover:bg-[#4F5ABF] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-[#4F5ABF] transition-colors"
             >
               무료 체험 시작
             </Link>

@@ -170,7 +170,7 @@ function TipCard({ icon: Icon, title, description, example }: TipCardProps) {
         <h3 className="text-sm font-medium text-white">{title}</h3>
       </div>
       <p className="text-xs text-zinc-400 mb-2">{description}</p>
-      <p className="text-xs text-[#7C8AEA] bg-[#5E6AD2]/10 px-2 py-1 rounded font-mono">
+      <p className="text-xs text-[#7C8AEA] bg-primary/10 px-2 py-1 rounded font-mono">
         {example}
       </p>
     </div>
@@ -179,7 +179,7 @@ function TipCard({ icon: Icon, title, description, example }: TipCardProps) {
 
 function StrategyPreview({ strategy }: { strategy: unknown }) {
   return (
-    <div className="border border-[#5E6AD2]/20 bg-[#5E6AD2]/5 rounded-lg p-4">
+    <div className="border border-primary/20 bg-primary/5 rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
         <SparklesIcon className="w-5 h-5 text-[#7C8AEA]" />
         <h3 className="text-sm font-medium text-white">생성된 전략</h3>
@@ -189,7 +189,7 @@ function StrategyPreview({ strategy }: { strategy: unknown }) {
       </pre>
       <button
         type="button"
-        className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-sm text-[#7C8AEA] hover:text-[#9AA5EF] bg-[#5E6AD2]/10 hover:bg-[#5E6AD2]/20 rounded transition-colors"
+        className="mt-3 w-full flex items-center justify-center gap-2 py-2 text-sm text-[#7C8AEA] hover:text-[#9AA5EF] bg-primary/10 hover:bg-primary/20 rounded transition-colors"
       >
         전략 빌더에서 편집
         <ArrowRightIcon className="w-4 h-4" />

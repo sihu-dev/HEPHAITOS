@@ -424,7 +424,7 @@ export function PortfolioContent() {
         </div>
         {isLoading ? (
           <div className="h-64 flex items-center justify-center">
-            <div className="w-8 h-8 border-2 border-[#5E6AD2]/30 border-t-[#5E6AD2] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
           </div>
         ) : history.length > 0 ? (
           <EquityChart data={history} />
@@ -488,7 +488,7 @@ export function PortfolioContent() {
                       <div className="flex items-center gap-2">
                         <div className="w-24 h-1.5 rounded-full bg-white/[0.06]">
                           <div
-                            className="h-full rounded-full bg-[#5E6AD2]"
+                            className="h-full rounded-full bg-primary"
                             style={{ width: `${sector.value}%` }}
                           />
                         </div>
@@ -540,7 +540,7 @@ export function PortfolioContent() {
               description="투자금 대비 수익"
               status={stats.totalProfitPercent > 20 ? 'good' : stats.totalProfitPercent > 0 ? 'neutral' : 'warning'}
             />
-            <div className="p-4 rounded-xl bg-[#5E6AD2]/10 border border-[#5E6AD2]/20">
+            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <SparklesIcon className="w-4 h-4 text-[#7C8AEA]" />
                 <span className="text-xs text-[#7C8AEA]">AI 분석</span>

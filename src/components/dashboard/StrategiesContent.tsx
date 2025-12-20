@@ -67,7 +67,7 @@ export function StrategiesContent() {
         <div className="flex gap-2">
           <Link
             href="/dashboard/ai-strategy"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#5E6AD2]/20 text-[#5E6AD2] border border-[#5E6AD2]/30 rounded-lg text-sm font-medium hover:bg-[#5E6AD2]/30 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg text-sm font-medium hover:bg-primary/30 transition-colors"
           >
             <SparklesIcon className="w-4 h-4" />
             AI 생성
@@ -193,7 +193,7 @@ export function StrategiesContent() {
                     <div className="flex items-center gap-2 mb-1">
                       <Link
                         href={`/dashboard/strategies/${strategy.id}`}
-                        className="text-sm font-semibold text-white hover:text-[#5E6AD2] transition-colors"
+                        className="text-sm font-semibold text-white hover:text-primary transition-colors"
                       >
                         {strategy.name}
                       </Link>

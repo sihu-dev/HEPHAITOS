@@ -192,7 +192,7 @@ export function AIAnalysisWidget({
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-zinc-800">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#5E6AD2]/20 rounded-lg">
+          <div className="p-2 bg-primary/20 rounded-lg">
             <SparklesIcon className="w-5 h-5 text-[#7C8AEA]" />
           </div>
           <div>
@@ -261,7 +261,7 @@ export function AIAnalysisWidget({
                   </p>
                   <button
                     onClick={() => startAnalysis(trade)}
-                    className="px-4 py-2 bg-[#5E6AD2] hover:bg-[#6E7AE2] text-white text-sm font-medium rounded-lg transition-all"
+                    className="px-4 py-2 bg-primary hover:bg-[#6E7AE2] text-white text-sm font-medium rounded-lg transition-all"
                   >
                     <SparklesIcon className="w-4 h-4 inline-block mr-2" />
                     {t('dashboard.aiAnalysis.actions.start') as string}
@@ -447,9 +447,9 @@ export function AIAnalysisButton({
         onClick={() => setShowWidget(true)}
         className={`
           inline-flex items-center font-medium rounded-lg transition-all
-          bg-[#5E6AD2]/20 hover:bg-[#5E6AD2]/30
+          bg-primary/20 hover:bg-primary/30
           text-[#9AA5EF] hover:text-[#A8B4F5]
-          border border-[#5E6AD2]/30 hover:border-[#5E6AD2]/50
+          border border-primary/30 hover:border-primary/50
           ${sizeStyles[size]}
           ${className}
         `}

@@ -160,7 +160,7 @@ export function SupabaseHero() {
           <h1 className="text-[32px] sm:text-[40px] lg:text-[56px] font-normal leading-[1.1] tracking-[-0.02em] text-white">
             Build in a weekend
             <br />
-            <span className="text-[#5E6AD2]">Scale to millions</span>
+            <span className="text-primary">Scale to millions</span>
           </h1>
 
           {/* Subtitle - Supabase style: 2 lines, centered */}

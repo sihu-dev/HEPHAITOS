@@ -79,7 +79,7 @@ export function DashboardContent() {
     <div className="min-h-screen bg-[var(--bg-primary)]">
       {/* Background Effects */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#5E6AD2]/5 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
       </div>
 
@@ -127,7 +127,7 @@ export function DashboardContent() {
                 'transition-all duration-300',
                 'hover:-translate-y-1 hover:shadow-xl hover:shadow-black/30',
                 action.highlight
-                  ? 'bg-[#5E6AD2]/10 border border-[#5E6AD2]/30 hover:border-[#5E6AD2]/50'
+                  ? 'bg-primary/10 border border-primary/30 hover:border-primary/50'
                   : 'bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.04]'
               )}
               style={{ animationDelay: `${(index + 3) * 50}ms` }}
@@ -135,13 +135,13 @@ export function DashboardContent() {
               <div className={clsx(
                 'flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-300',
                 action.highlight
-                  ? 'bg-[#5E6AD2]/20 group-hover:bg-[#5E6AD2]/30'
+                  ? 'bg-primary/20 group-hover:bg-primary/30'
                   : 'bg-white/[0.06] group-hover:bg-white/[0.12]'
               )}>
                 <action.icon className={clsx(
                   'w-5 h-5 transition-colors',
                   action.highlight
-                    ? 'text-[#5E6AD2] group-hover:text-[#7C8AEA]'
+                    ? 'text-primary group-hover:text-[#7C8AEA]'
                     : 'text-zinc-400 group-hover:text-white'
                 )} />
               </div>
@@ -159,7 +159,7 @@ export function DashboardContent() {
               <kbd className={clsx(
                 'hidden sm:block px-1.5 py-0.5 rounded text-[10px] font-mono',
                 action.highlight
-                  ? 'bg-[#5E6AD2]/20 text-[#7C8AEA]'
+                  ? 'bg-primary/20 text-[#7C8AEA]'
                   : 'bg-white/[0.06] text-zinc-500'
               )}>
                 {action.shortcut}

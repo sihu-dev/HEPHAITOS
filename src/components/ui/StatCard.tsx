@@ -29,8 +29,8 @@ const variantStyles = {
     accent: 'text-white',
   },
   primary: {
-    bg: 'bg-[#5E6AD2]/10',
-    border: 'border-[#5E6AD2]/30',
+    bg: 'bg-primary/10',
+    border: 'border-primary/30',
     accent: 'text-[#7C8AEA]',
   },
   success: {
@@ -112,7 +112,7 @@ export function StatCard({
           'absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl opacity-20',
           variant === 'success' && 'bg-emerald-500',
           variant === 'error' && 'bg-red-500',
-          variant === 'primary' && 'bg-[#5E6AD2]',
+          variant === 'primary' && 'bg-primary',
           variant === 'warning' && 'bg-amber-500',
           variant === 'default' && 'bg-white/10'
         )}

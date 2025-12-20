@@ -72,7 +72,7 @@ export function Navbar() {
               <Link href="/" className="flex items-center gap-2">
                 {/* Logo Icon - HEPHAITOS Anvil/Forge Symbol */}
                 <svg
-                  className="w-5 h-5 text-[#5E6AD2]"
+                  className="w-5 h-5 text-primary"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >

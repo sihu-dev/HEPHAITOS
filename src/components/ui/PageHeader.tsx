@@ -31,8 +31,8 @@ export function PageHeader({
     <div className={clsx('animate-fade-in', className)}>
       {/* Badge */}
       {badge && (
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 rounded-full bg-[#5E6AD2]/10 border border-[#5E6AD2]/20">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#5E6AD2]" />
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 rounded-full bg-primary/10 border border-primary/20">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary" />
           <span className="text-xs text-[#7C8AEA] font-medium">{badge}</span>
         </div>
       )}

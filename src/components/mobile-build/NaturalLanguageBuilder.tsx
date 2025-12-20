@@ -65,7 +65,7 @@ export function NaturalLanguageBuilder({
           onKeyDown={handleKeyDown}
           placeholder="전략 선택 시 자동으로 백테스팅 & 정량 평가가 시작됩니다..."
           disabled={isBuilding}
-          className="w-full h-20 px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder-zinc-500 resize-none focus:outline-none focus:border-[#5E6AD2]/50 disabled:opacity-50"
+          className="w-full h-20 px-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-white placeholder-zinc-500 resize-none focus:outline-none focus:border-primary/50 disabled:opacity-50"
         />
 
         {/* 상태 표시 영역 */}
@@ -82,7 +82,7 @@ export function NaturalLanguageBuilder({
           {/* 빌드 상태 표시 */}
           {isBuilding && (
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 border-2 border-[#5E6AD2] border-t-transparent rounded-full animate-spin" />
+              <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <span className="text-xs text-zinc-400">전략 검증 실행 중...</span>
             </div>
           )}
@@ -98,7 +98,7 @@ export function NaturalLanguageBuilder({
               <button
                 key={index}
                 onClick={() => handleExampleClick(example)}
-                className="w-full text-left px-3 py-2 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-[#5E6AD2]/30 rounded-lg text-xs text-zinc-300 transition-all"
+                className="w-full text-left px-3 py-2 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] hover:border-primary/30 rounded-lg text-xs text-zinc-300 transition-all"
               >
                 {example}
               </button>
@@ -109,8 +109,8 @@ export function NaturalLanguageBuilder({
 
       {/* 선택된 전략 표시 */}
       {selectedStrategy && (
-        <div className="mt-3 p-3 bg-[#5E6AD2]/10 border border-[#5E6AD2]/20 rounded-lg">
-          <p className="text-xs text-[#5E6AD2]">
+        <div className="mt-3 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+          <p className="text-xs text-primary">
             🎨 <strong>선택된 템플릿:</strong> {selectedStrategy}
           </p>
           <p className="text-xs text-zinc-400 mt-1">

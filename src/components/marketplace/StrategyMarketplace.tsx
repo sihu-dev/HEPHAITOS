@@ -218,17 +218,17 @@ export default function StrategyMarketplace() {
             <StatsCard
               label="등록 전략"
               value={stats.active_listings}
-              icon={<Sparkles className="w-5 h-5 text-[#5E6AD2]" />}
+              icon={<Sparkles className="w-5 h-5 text-primary" />}
             />
             <StatsCard
               label="크리에이터"
               value={stats.total_creators}
-              icon={<User className="w-5 h-5 text-[#5E6AD2]" />}
+              icon={<User className="w-5 h-5 text-primary" />}
             />
             <StatsCard
               label="총 카피"
               value={stats.total_copies}
-              icon={<Download className="w-5 h-5 text-[#5E6AD2]" />}
+              icon={<Download className="w-5 h-5 text-primary" />}
             />
             <StatsCard
               label="평균 평점"
@@ -249,13 +249,13 @@ export default function StrategyMarketplace() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5E6AD2]"
+              className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
             />
           </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#5E6AD2]"
+            className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary"
           >
             <option value="popular">인기순</option>
             <option value="rating">평점순</option>
@@ -299,7 +299,7 @@ export default function StrategyMarketplace() {
                     onClick={() => setActiveCategory(cat.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                       activeCategory === cat.id
-                        ? 'bg-[#5E6AD2] text-white'
+                        ? 'bg-primary text-white'
                         : 'text-gray-400 hover:bg-white/5'
                     }`}
                   >
@@ -354,7 +354,7 @@ export default function StrategyMarketplace() {
             <div className="flex-1">
               {loading ? (
                 <div className="flex items-center justify-center h-64">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5E6AD2]" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : listings.length === 0 ? (
                 <div className="text-center py-16 text-gray-400">
@@ -466,7 +466,7 @@ function TabButton({
       onClick={onClick}
       className={`px-4 py-3 border-b-2 transition-colors ${
         active
-          ? 'border-[#5E6AD2] text-white'
+          ? 'border-primary text-white'
           : 'border-transparent text-gray-400 hover:text-white'
       }`}
     >
@@ -485,14 +485,14 @@ function StrategyCard({
   return (
     <div
       onClick={onClick}
-      className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-[#5E6AD2]/50 cursor-pointer transition-all"
+      className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-primary/50 cursor-pointer transition-all"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             {listing.featured && (
-              <span className="px-2 py-0.5 bg-[#5E6AD2] text-xs rounded-full">추천</span>
+              <span className="px-2 py-0.5 bg-primary text-xs rounded-full">추천</span>
             )}
             <span className={`text-xs ${RISK_LEVELS[listing.risk_level as keyof typeof RISK_LEVELS]?.color || 'text-gray-400'}`}>
               {RISK_LEVELS[listing.risk_level as keyof typeof RISK_LEVELS]?.label || listing.risk_level}
@@ -567,7 +567,7 @@ function StrategyCard({
           {listing.pricing_type === 'free' ? (
             <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">무료</span>
           ) : (
-            <span className="font-semibold text-[#5E6AD2]">
+            <span className="font-semibold text-primary">
               {listing.price_credits} 크레딧
             </span>
           )}
@@ -587,12 +587,12 @@ function FeaturedCard({
   return (
     <div
       onClick={onClick}
-      className="flex gap-6 p-6 bg-gradient-to-r from-[#5E6AD2]/20 to-transparent rounded-xl border border-[#5E6AD2]/30 hover:border-[#5E6AD2] cursor-pointer transition-all"
+      className="flex gap-6 p-6 bg-gradient-to-r from-primary/20 to-transparent rounded-xl border border-primary/30 hover:border-primary cursor-pointer transition-all"
     >
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-5 h-5 text-[#5E6AD2]" />
-          <span className="text-[#5E6AD2] text-sm font-semibold">추천 전략</span>
+          <Sparkles className="w-5 h-5 text-primary" />
+          <span className="text-primary text-sm font-semibold">추천 전략</span>
         </div>
         <h3 className="text-xl font-bold mb-2">{listing.title}</h3>
         <p className="text-gray-400 mb-4">{listing.description}</p>
@@ -623,7 +623,7 @@ function FeaturedCard({
             </div>
           </div>
         )}
-        <button className="px-4 py-2 bg-[#5E6AD2] text-white rounded-lg hover:bg-[#4E5AC2] transition-colors flex items-center gap-2">
+        <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4E5AC2] transition-colors flex items-center gap-2">
           <ShoppingCart className="w-4 h-4" />
           {listing.pricing_type === 'free' ? '무료 받기' : `${listing.price_credits} 크레딧`}
         </button>
@@ -636,12 +636,12 @@ function CreatorCard({ creator, rank }: { creator: Creator; rank: number }) {
   return (
     <div className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/10">
       <div className="w-10 text-center">
-        <span className={`text-xl font-bold ${rank <= 3 ? 'text-[#5E6AD2]' : 'text-gray-400'}`}>
+        <span className={`text-xl font-bold ${rank <= 3 ? 'text-primary' : 'text-gray-400'}`}>
           #{rank}
         </span>
       </div>
 
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center overflow-hidden">
+      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center overflow-hidden">
         {creator.avatar_url ? (
           <Image src={creator.avatar_url} alt={`${creator.display_name} 프로필 이미지`} width={48} height={48} className="w-full h-full object-cover" />
         ) : (
@@ -674,13 +674,13 @@ function CreatorCard({ creator, rank }: { creator: Creator; rank: number }) {
         </div>
         <div>
           <div className="text-xs text-gray-400">수익</div>
-          <div className="font-semibold text-[#5E6AD2]">
+          <div className="font-semibold text-primary">
             {creator.total_revenue.toLocaleString()}
           </div>
         </div>
       </div>
 
-      <button className="px-4 py-2 border border-[#5E6AD2] text-[#5E6AD2] rounded-lg hover:bg-[#5E6AD2] hover:text-white transition-colors">
+      <button className="px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
         팔로우
       </button>
     </div>
@@ -731,7 +731,7 @@ function StrategyDetailModal({
             <div>
               <div className="flex items-center gap-2 mb-2">
                 {listing.featured && (
-                  <span className="px-2 py-0.5 bg-[#5E6AD2] text-xs rounded-full">추천</span>
+                  <span className="px-2 py-0.5 bg-primary text-xs rounded-full">추천</span>
                 )}
                 <span className={RISK_LEVELS[listing.risk_level as keyof typeof RISK_LEVELS]?.color}>
                   {RISK_LEVELS[listing.risk_level as keyof typeof RISK_LEVELS]?.label}
@@ -751,7 +751,7 @@ function StrategyDetailModal({
         <div className="p-6 space-y-6">
           {/* Creator Info */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center">
               <User className="w-5 h-5" />
             </div>
             <div>
@@ -827,7 +827,7 @@ function StrategyDetailModal({
             <button
               onClick={handlePurchase}
               disabled={purchasing}
-              className="flex-1 py-3 bg-[#5E6AD2] text-white rounded-lg hover:bg-[#4E5AC2] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 py-3 bg-primary text-white rounded-lg hover:bg-[#4E5AC2] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <ShoppingCart className="w-5 h-5" />
               {purchasing ? '처리 중...' : (
