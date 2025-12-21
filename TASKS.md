@@ -5,26 +5,26 @@
 
 ## 🎯 Phase 5: 시스템 통합 및 최적화
 
-### P0 - 즉시 실행
+### P0 - 즉시 실행 (총 4.5시간)
 
-- [ ] Supabase RLS 정책 검증 (보안 강화)
-- [ ] API Rate Limiting 테스트 (Redis 기반)
-- [ ] 대용량 파일 리팩토링 (executor.ts 1000+ 라인)
-- [ ] 타입 시스템 통합 (src/types → @hephaitos/types)
+- [ ] Supabase RLS 정책 검증 (보안 강화) - 30분
+- [ ] API Rate Limiting 테스트 (Redis 기반) - 20분
+- [ ] 대용량 파일 리팩토링 (executor.ts 1000+ 라인) - 2시간
+- [ ] 타입 시스템 통합 (src/types → @hephaitos/types) - 1.5시간
 
-### P1 - 중요 (다음 세션)
+### P1 - 중요 (다음 세션, 총 6시간)
 
-- [ ] Server Actions 구현 (API 라우트 대체)
-- [ ] E2E 테스트 추가 (Playwright)
-- [ ] 성능 벤치마크 설정
-- [ ] PWA 설정 (오프라인 지원)
+- [ ] Server Actions 구현 (API 라우트 대체) - 3시간
+- [ ] E2E 테스트 추가 (Playwright) - 1.5시간
+- [ ] 성능 벤치마크 설정 - 45분
+- [ ] PWA 설정 (오프라인 지원) - 45분
 
-### P2 - 개선 사항
+### P2 - 개선 사항 (여유 시, 총 4시간)
 
-- [ ] Storybook 설정 (컴포넌트 문서화)
-- [ ] i18n 영어 번역 완성도 향상
-- [ ] 접근성 개선 (WCAG 2.1 AA)
-- [ ] SEO 메타데이터 최적화
+- [ ] Storybook 설정 (컴포넌트 문서화) - 1.5시간
+- [ ] i18n 영어 번역 완성도 향상 - 1시간
+- [ ] 접근성 개선 (WCAG 2.1 AA) - 1시간
+- [ ] SEO 메타데이터 최적화 - 30분
 
 ---
 
