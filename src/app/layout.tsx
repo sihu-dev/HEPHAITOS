@@ -27,6 +27,22 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: 'cover',
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0D0D0F' },
+    { media: '(prefers-color-scheme: light)', color: '#0D0D0F' },
+  ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'HEPHAITOS',
+  },
   openGraph: {
     title: 'HEPHAITOS - 트레이딩 시스템 빌더',
     description: '코딩 없이, 나만의 트레이딩 시스템을 만드세요.',

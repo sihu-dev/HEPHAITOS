@@ -1,15 +1,11 @@
 'use client'
 
 import { memo } from 'react'
-import { CHART_COLORS } from "@/constants/design-tokens"
 import { type NodeProps } from 'reactflow'
-import { CHART_COLORS } from "@/constants/design-tokens"
 import { ArrowsRightLeftIcon } from '@heroicons/react/24/outline'
-import { CHART_COLORS } from "@/constants/design-tokens"
 import { BaseNode } from './BaseNode'
-import { CHART_COLORS } from "@/constants/design-tokens"
 import { useI18n } from '@/i18n/client'
-import { CHART_COLORS } from "@/constants/design-tokens"
+import { CHART_COLORS } from '@/constants/design-tokens'
 
 export const ConditionNode = memo(function ConditionNode(props: NodeProps) {
   const { t } = useI18n()

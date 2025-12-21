@@ -40,6 +40,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.56",
     "@anthropic-ai/sdk": "^0.71.2",
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.2.2",
