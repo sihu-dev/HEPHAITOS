@@ -3,7 +3,6 @@
 import { memo, useMemo, useState, useCallback } from 'react'
 import { CHART_COLORS } from "@/constants/design-tokens"
 import {
-import { CHART_COLORS } from "@/constants/design-tokens"
   AreaChart,
   Area,
   XAxis,
@@ -18,7 +17,6 @@ import { CHART_COLORS } from "@/constants/design-tokens"
   Cell,
 } from 'recharts'
 import {
-import { CHART_COLORS } from "@/constants/design-tokens"
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   ChartBarIcon,
@@ -26,7 +24,6 @@ import { CHART_COLORS } from "@/constants/design-tokens"
   CalendarIcon,
 } from '@heroicons/react/24/outline'
 import type { BacktestResult, BacktestTrade, PortfolioSnapshot } from '@/lib/backtest'
-import { CHART_COLORS } from "@/constants/design-tokens"
 
 interface BacktestChartProps {
   result: BacktestResult

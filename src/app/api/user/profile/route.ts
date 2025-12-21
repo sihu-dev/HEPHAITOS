@@ -74,7 +74,14 @@ export const PATCH = withApiMiddleware(
 
     safeLogger.info('[Profile API] Updating profile', { userId: user.id })
 
-    const profile = await updateUserProfile(user.id, validation.data as any)
+    // Map validation data to service layer format
+    const updateData = {
+      nickname: validation.data.displayName,
+      investmentStyle: validation.data.riskProfile,
+      interests: validation.data.preferredSectors,
+    }
+
+    const profile = await updateUserProfile(user.id, updateData)
 
     if (!profile) {
       return createApiResponse({ error: 'Profile not found' }, { status: 404 })

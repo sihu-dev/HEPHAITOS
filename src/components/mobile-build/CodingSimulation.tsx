@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { CHART_COLORS } from "@/constants/design-tokens"
 import ReactFlow, {
-import { CHART_COLORS } from "@/constants/design-tokens"
   Node,
   Edge,
   Background,
@@ -13,7 +12,6 @@ import { CHART_COLORS } from "@/constants/design-tokens"
   Position,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-import { CHART_COLORS } from "@/constants/design-tokens"
 
 // ============================================
 // 노드 기반 개발 과정 시각화
@@ -34,7 +32,7 @@ const STRATEGY_NODES = [
     label: '📝 자연어 입력',
     description: '사용자 전략 요청',
     position: { x: 50, y: 50 },
-    color: {CHART_COLORS.primary},
+    color: CHART_COLORS.primary,
   },
   {
     id: 'analyze',
@@ -159,7 +157,7 @@ export function CodingSimulation({ isActive, progress, userPrompt }: CodingSimul
       ...edge,
       animated: idx === nodeIndex - 1,
       style: {
-        stroke: idx === nodeIndex - 1 ? {CHART_COLORS.primary} : '#374151',
+        stroke: idx === nodeIndex - 1 ? CHART_COLORS.primary : '#374151',
         strokeWidth: idx === nodeIndex - 1 ? 3 : 2,
       },
     }))

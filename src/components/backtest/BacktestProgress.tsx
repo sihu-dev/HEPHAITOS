@@ -46,19 +46,20 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
             filter: `job_id=eq.${jobId}`,
           },
           (payload) => {
-            const data = payload.new as any;
+            const data = payload.new as Record<string, unknown>;
 
             console.log('[BacktestProgress] Realtime update:', data);
 
-            setProgress(data.progress || 0);
-            setStatus(data.status);
-            setMessage(data.message || '처리 중...');
+            setProgress((data.progress as number) || 0);
+            setStatus(data.status as string);
+            setMessage((data.message as string) || '처리 중...');
 
             if (data.status === 'completed') {
               setResult(data.result);
               onComplete?.(data.result);
             } else if (data.status === 'failed') {
-              onError?.(data.result?.error || '알 수 없는 오류');
+              const result = data.result as { error?: string } | undefined;
+              onError?.(result?.error || '알 수 없는 오류');
             }
           }
         )

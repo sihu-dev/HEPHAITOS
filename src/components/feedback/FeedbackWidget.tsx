@@ -97,7 +97,7 @@ export function FeedbackWidget() {
         description: formData.description,
         browser_info: browserInfo,
         device_info: deviceInfo,
-      } as any)
+      })
 
       if (insertError) {
         throw insertError
