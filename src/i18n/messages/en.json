@@ -1699,8 +1699,8 @@
       },
       "units": {
         "hours": "h",
-        "times": "",
-        "count": ""
+        "times": "times",
+        "count": "count"
       }
     },
     "onboarding": {

@@ -1,0 +1,114 @@
+name: Performance Benchmark
+
+on:
+  push:
+    branches: [main, develop, claude/**]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  performance:
+    name: Performance Benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build for production
+        run: pnpm build
+        env:
+          NODE_ENV: production
+          SKIP_ENV_VALIDATION: true
+        continue-on-error: true
+
+      - name: Analyze bundle size
+        run: |
+          echo "📦 Bundle Analysis"
+          echo "=================="
+
+          # Main bundle
+          MAIN_SIZE=$(du -sk .next/static/chunks/main-*.js 2>/dev/null | awk '{print $1}' || echo "0")
+          echo "Main bundle: ${MAIN_SIZE}KB"
+
+          # Framework bundle
+          FRAMEWORK_SIZE=$(du -sk .next/static/chunks/framework-*.js 2>/dev/null | awk '{print $1}' || echo "0")
+          echo "Framework bundle: ${FRAMEWORK_SIZE}KB"
+
+          # Total static
+          TOTAL_SIZE=$(du -sk .next/static 2>/dev/null | awk '{print $1}' || echo "0")
+          echo "Total static: ${TOTAL_SIZE}KB"
+
+          # Save to artifact
+          cat > bundle-report.txt <<EOF
+          ## Bundle Size Report
+
+          | Bundle | Size |
+          |--------|------|
+          | Main | ${MAIN_SIZE}KB |
+          | Framework | ${FRAMEWORK_SIZE}KB |
+          | Total Static | ${TOTAL_SIZE}KB |
+
+          **Threshold**: 500KB per chunk
+          EOF
+
+      - name: Check performance thresholds
+        run: |
+          MAIN_SIZE=$(du -sk .next/static/chunks/main-*.js 2>/dev/null | awk '{print $1}' || echo "0")
+
+          if [ $MAIN_SIZE -gt 500 ]; then
+            echo "::error::Main bundle ($MAIN_SIZE KB) exceeds threshold (500 KB)"
+            echo "::warning::Consider code splitting or removing unused dependencies"
+            exit 1
+          else
+            echo "::notice::Bundle size OK ($MAIN_SIZE KB / 500 KB)"
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-artifacts
+          path: |
+            bundle-report.txt
+            .next/static/chunks/*.js
+          retention-days: 7
+
+      - name: Comment PR with results
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && always()
+        with:
+          script: |
+            const fs = require('fs');
+            let report = 'Performance check failed - build error';
+
+            try {
+              if (fs.existsSync('bundle-report.txt')) {
+                report = fs.readFileSync('bundle-report.txt', 'utf8');
+              }
+            } catch (error) {
+              console.log('No report file found');
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 📊 Performance Benchmark\n\n${report}`
+            });
