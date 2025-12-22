@@ -529,6 +529,7 @@
       "strategyBuilder": "Strategy Builder",
       "aiAgent": "AI Agent",
       "backtest": "Backtest",
+      "backtestQueue": "Backtest Queue",
       "portfolio": "Portfolio",
       "tradeHistory": "Trade History",
       "settings": "Settings",

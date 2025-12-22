@@ -21,6 +21,7 @@ import {
   AcademicCapIcon,
   BeakerIcon,
   ChatBubbleLeftRightIcon,
+  QueueListIcon,
 } from '@heroicons/react/24/outline'
 import { useI18n } from '@/i18n/client'
 
@@ -87,6 +88,13 @@ const mainNavItemsConfig = [
     icon: BeakerIcon,
     labelKey: 'backtest',
     href: '/dashboard/backtest',
+    stage: 'BUILD',
+    stageColor: 'amber',
+  },
+  {
+    icon: QueueListIcon,
+    labelKey: 'backtestQueue',
+    href: '/dashboard/queue',
     stage: 'BUILD',
     stageColor: 'amber',
   },

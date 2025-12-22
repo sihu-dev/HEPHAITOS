@@ -15,21 +15,21 @@
 - [ ] 실시간 진행률 표시 (WebSocket)
 - [ ] Worker 장애 복구 자동화
 
-### Week 1: 기초 인프라 (12/22-12/28)
+### Week 1: 기초 인프라 (12/22-12/28) ✅ 완료
 
 - [x] BullMQ + IORedis 설치 - 완료
 - [x] Queue 정의 파일 생성 (src/lib/queue/index.ts) - 완료
-- [ ] Upstash Redis 계정 + 연결 테스트 - 30분
-- [ ] API Route 구현 (/api/backtest/queue) - 2시간
-- [ ] Worker 프로세스 구현 (기존 로직 이전) - 4시간
-- [ ] 진행률 업데이트 로직 - 2시간
+- [x] Upstash Redis 설정 문서 (.env.local.upstash-setup.md) - 완료
+- [x] API Route 구현 (/api/backtest/queue) - 완료 (크레딧 통합)
+- [x] Worker 프로세스 구현 (기존 로직 이전) - 완료 (Realtime 브로드캐스트)
+- [x] 진행률 업데이트 로직 - 완료 (10%, 20%, 30%, 80%, 100%)
 
-### Week 2: 실시간 통합 (12/29-1/5)
+### Week 2: 실시간 통합 (12/29-1/5) 🔄 진행 중
 
-- [ ] Supabase Realtime 채널 설정 - 2시간
-- [ ] Worker → Supabase 푸시 로직 - 2시간
-- [ ] Frontend 구독 컴포넌트 (<BacktestProgress />) - 3시간
-- [ ] 큐 대시보드 페이지 - 2시간
+- [x] Supabase Realtime 채널 설정 - 완료 (migration)
+- [x] Worker → Supabase 푸시 로직 - 완료 (broadcastProgress)
+- [x] Frontend 구독 컴포넌트 (<BacktestProgress />) - 완료 (WebSocket + polling)
+- [ ] 큐 대시보드 페이지 - 2시간 ⏳ 진행 중
 - [ ] 부하 테스트 (동시 100명 시뮬레이션) - 2시간
 
 ---

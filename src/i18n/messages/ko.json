@@ -529,6 +529,7 @@
       "strategyBuilder": "전략 빌더",
       "aiAgent": "AI 에이전트",
       "backtest": "백테스트",
+      "backtestQueue": "백테스트 큐",
       "portfolio": "포트폴리오",
       "tradeHistory": "거래 내역",
       "settings": "설정",
