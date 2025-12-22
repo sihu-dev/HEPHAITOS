@@ -279,8 +279,32 @@ export const POST = withApiMiddleware(
     }
 
     // 4. Tiered Rate Limit (P0-3: 일당 + 분당 제한)
-    // TODO: 사용자 tier 정보를 프로필에서 조회 (현재는 free로 기본 설정)
-    const userTier: UserTier = 'free'
+    // Fetch user tier from subscriptions table
+    let userTier: UserTier = 'free'
+    try {
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('plan_id')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .single()
+
+      if (subscription) {
+        const planId = (subscription as { plan_id: string }).plan_id
+        // Map plan to tier (free | basic | pro | premium)
+        if (planId === 'team') {
+          userTier = 'premium'
+        } else if (planId === 'pro') {
+          userTier = 'pro'
+        } else if (planId === 'starter') {
+          userTier = 'basic'
+        }
+      }
+    } catch {
+      // Default to free tier on error
+      safeLogger.warn('[Strategy API] Could not fetch user tier, defaulting to free')
+    }
+
     const rateLimitResult = await aiTieredLimiter.check(userId, userTier)
     if (!rateLimitResult.allowed) {
       safeLogger.warn('[Strategy API] Rate limited', {
@@ -428,34 +452,95 @@ export const GET = withApiMiddleware(
   async (_request: NextRequest) => {
     safeLogger.info('[Strategy API] Fetching user strategies')
 
-    // Mock recent strategies
-    const recentStrategies = [
+    // Get Supabase client
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
-        id: 'strategy_1',
-        name: '모멘텀 스윙',
-        totalReturn: 32.5,
-        trades: 45,
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-      },
-      {
-        id: 'strategy_2',
-        name: '배당 성장',
-        totalReturn: 18.2,
-        trades: 12,
-        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      },
-      {
-        id: 'strategy_3',
-        name: '테크 섹터 포커스',
-        totalReturn: 48.7,
-        trades: 67,
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      },
-    ]
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
 
-    safeLogger.info('[Strategy API] Strategies fetched', { count: recentStrategies.length })
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL === 'REDACTED') {
+      // Return demo strategies for unconfigured environment
+      const demoStrategies = [
+        {
+          id: 'demo_1',
+          name: '모멘텀 스윙 (데모)',
+          totalReturn: 32.5,
+          trades: 45,
+          createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        },
+        {
+          id: 'demo_2',
+          name: '배당 성장 (데모)',
+          totalReturn: 18.2,
+          trades: 12,
+          createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        },
+      ]
+      return createApiResponse({ strategies: demoStrategies, isDemo: true })
+    }
 
-    return createApiResponse({ strategies: recentStrategies })
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      // Return empty for unauthenticated users
+      return createApiResponse({ strategies: [], message: '로그인이 필요합니다' })
+    }
+
+    // Fetch strategies from database
+    const { data: strategies, error: fetchError } = await supabase
+      .from('strategies')
+      .select('id, name, config, performance, status, created_at, updated_at')
+      .eq('user_id', user.id)
+      .order('updated_at', { ascending: false })
+      .limit(20)
+
+    if (fetchError) {
+      safeLogger.error('[Strategy API] Database error', { error: fetchError })
+      return createApiResponse(
+        { error: '전략 조회 중 오류가 발생했습니다' },
+        { status: 500 }
+      )
+    }
+
+    // Transform to response format
+    interface StrategyRow {
+      id: string
+      name: string
+      config: { totalReturn?: number } | null
+      performance: { totalTrades?: number } | null
+      status: string
+      created_at: string
+      updated_at: string
+    }
+
+    const transformedStrategies = ((strategies || []) as StrategyRow[]).map(s => ({
+      id: s.id,
+      name: s.name,
+      totalReturn: s.config?.totalReturn ?? s.performance?.totalTrades ?? 0,
+      trades: s.performance?.totalTrades ?? 0,
+      status: s.status,
+      createdAt: new Date(s.created_at),
+      updatedAt: new Date(s.updated_at),
+    }))
+
+    safeLogger.info('[Strategy API] Strategies fetched', { count: transformedStrategies.length })
+
+    return createApiResponse({ strategies: transformedStrategies })
   },
   {
     rateLimit: { category: 'api' },

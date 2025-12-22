@@ -107,27 +107,29 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
       }
 
       if (params.id && !params.id.startsWith('local_')) {
-        // Update existing strategy (type-cast for missing database types)
-        const { data, error: updateError } = await (supabase as any)
+        // Update existing strategy
+        const { data, error: updateError } = await supabase
           .from('strategies')
-          .update(strategyData)
+          .update(strategyData as never)
           .eq('id', params.id)
           .eq('user_id', user.id)
           .select('id')
           .single()
 
         if (updateError) throw updateError
-        return (data as { id: string } | null)?.id || null
+        const result = data as { id: string } | null
+        return result?.id || null
       } else {
-        // Create new strategy (type-cast for missing database types)
-        const { data, error: insertError } = await (supabase as any)
+        // Create new strategy
+        const { data, error: insertError } = await supabase
           .from('strategies')
-          .insert(strategyData)
+          .insert(strategyData as never)
           .select('id')
           .single()
 
         if (insertError) throw insertError
-        return (data as { id: string } | null)?.id || null
+        const result = data as { id: string } | null
+        return result?.id || null
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save strategy'
