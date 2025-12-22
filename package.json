@@ -1,7 +1,31 @@
 {
   "name": "hephaitos",
   "version": "2.0.0",
-  "description": "HEPHAITOS - Trading System Engineering Platform (코딩 없이, 나만의 트레이딩 시스템)",
+  "description": "AI-powered investment education platform - Build trading strategies with natural language (Replit for Trading)",
+  "keywords": [
+    "trading",
+    "ai",
+    "claude",
+    "nextjs",
+    "algorithmic-trading",
+    "backtesting",
+    "education",
+    "fintech",
+    "investment",
+    "quant",
+    "strategy-builder",
+    "no-code"
+  ],
+  "homepage": "https://github.com/your-org/hephaitos#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-org/hephaitos.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/hephaitos/issues"
+  },
+  "author": "HEPHAITOS Team",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",
