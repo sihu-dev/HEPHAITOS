@@ -15,6 +15,7 @@ export interface CacheMetrics {
   output_tokens: number // 출력 토큰
   endpoint: string // API 엔드포인트 (/api/ai/strategy 등)
   model: string // 사용 모델
+  user_tier?: 'free' | 'starter' | 'pro' // 사용자 티어
   user_id?: string // 사용자 ID (있는 경우)
 }
 

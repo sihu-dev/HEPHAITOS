@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS cache_metrics (
   -- 메타데이터
   endpoint TEXT NOT NULL,
   model TEXT NOT NULL,
+  user_tier user_tier,
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
 
   -- 인덱스 최적화

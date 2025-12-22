@@ -8,9 +8,10 @@
  */
 export interface ClaudeConfig {
   apiKey: string
-  model?: 'claude-sonnet-4-5-20250514' | 'claude-3-5-sonnet-20241022' | 'claude-3-haiku-20240307'
+  model?: 'claude-sonnet-4-5-20250514' | 'claude-opus-4-5-20251101' | 'claude-3-5-sonnet-20241022' | 'claude-3-haiku-20240307'
   maxTokens?: number
   temperature?: number
+  useExtendedContext?: boolean // 🆕 Enable 200K context window
 }
 
 /**
@@ -122,11 +123,21 @@ export class ClaudeClient {
   private maxTokens: number
   private temperature: number
   private baseUrl = 'https://api.anthropic.com/v1'
+  private useExtendedContext: boolean
 
   constructor(config: ClaudeConfig) {
     this.apiKey = config.apiKey
     this.model = config.model || 'claude-sonnet-4-5-20250514'
-    this.maxTokens = config.maxTokens || 4096
+    this.useExtendedContext = config.useExtendedContext || false
+
+    // 🆕 Extended Context: Adjust max tokens based on model
+    if (this.useExtendedContext) {
+      // Sonnet 4.5 / Opus 4.5 support 200K context
+      this.maxTokens = config.maxTokens || 8192 // Increase output tokens
+    } else {
+      this.maxTokens = config.maxTokens || 4096
+    }
+
     this.temperature = config.temperature || 0.7
   }
 
@@ -365,6 +376,235 @@ ${tradeData.recentNews.map((n, i) => `${i + 1}. ${n}`).join('\n')}` : ''}`
 ${portfolio.holdings.map(h => `- ${h.symbol}: ${h.value.toLocaleString()}원 (${h.weight.toFixed(1)}%)`).join('\n')}`
 
     return this.chat([{ role: 'user', content: prompt }])
+  }
+
+  /**
+   * 🆕 Analyze backtest result with Extended Context (200K tokens)
+   *
+   * @description
+   * 10년치 백테스트 데이터를 한 번에 분석합니다.
+   * Extended Context (200K tokens)를 활용하여 청킹 없이 전체 데이터를 처리합니다.
+   *
+   * @param backtestData - Complete backtest result
+   * @returns Comprehensive analysis report
+   *
+   * @example
+   * ```typescript
+   * const client = new ClaudeClient({
+   *   apiKey: process.env.ANTHROPIC_API_KEY,
+   *   useExtendedContext: true
+   * })
+   *
+   * const analysis = await client.analyzeBacktest({
+   *   metrics: result.metrics,
+   *   trades: result.trades,
+   *   equityCurve: result.equityCurve
+   * })
+   * ```
+   */
+  async analyzeBacktest(backtestData: {
+    metrics: Record<string, number | string>
+    trades: Array<{ entryTime: number; exitTime: number | null; pnl: number; pnlPercent: number; side: string }>
+    equityCurve: Array<{ timestamp: number; equity: number; drawdown: number }>
+    strategyName?: string
+  }): Promise<string> {
+    if (!this.useExtendedContext) {
+      throw new Error('Extended Context must be enabled for full backtest analysis. Set useExtendedContext: true in config.')
+    }
+
+    const prompt = `당신은 퀀트 전략 분석 전문가입니다. 다음 백테스트 결과를 종합적으로 분석하고 한국어로 상세 리포트를 작성해주세요.
+
+# 백테스트 결과 데이터
+
+## 전략 정보
+- 전략명: ${backtestData.strategyName || '전략'}
+
+## 성과 지표
+\`\`\`json
+${JSON.stringify(backtestData.metrics, null, 2)}
+\`\`\`
+
+## 거래 내역 (${backtestData.trades.length}건)
+\`\`\`json
+${JSON.stringify(backtestData.trades, null, 2)}
+\`\`\`
+
+## 자산 곡선 (${backtestData.equityCurve.length}개 데이터 포인트)
+\`\`\`json
+${JSON.stringify(backtestData.equityCurve, null, 2)}
+\`\`\`
+
+---
+
+# 분석 요청 사항
+
+다음 항목을 포함하여 **마크다운 형식**으로 상세 리포트를 작성해주세요:
+
+## 1. 종합 평가 (Executive Summary)
+- 전략의 전반적인 성과 평가 (3-4줄)
+- 투자 적합성 (공격적/중립/보수적)
+- 핵심 강점 3가지
+- 핵심 약점 3가지
+
+## 2. 수익률 분석
+- 총 수익률 및 연환산 수익률 해석
+- 샤프 비율, 소르티노 비율 평가
+- 벤치마크 대비 성과 (코스피/코스닥 대비)
+
+## 3. 리스크 분석
+- 최대 낙폭 (MDD) 심층 분석
+- MDD 발생 시점 및 원인 추정
+- 변동성 (Volatility) 평가
+- 칼마 비율 (Calmar Ratio) 해석
+
+## 4. 거래 패턴 분석
+- 승률 및 평균 손익 분석
+- Profit Factor 해석
+- 연속 손실 구간 분석
+- 거래 빈도 (평균 보유 기간)
+- 주요 수익/손실 거래 케이스 스터디 (상위 3개씩)
+
+## 5. 자산 곡선 분석
+- 자산 증가 추세 (선형/지수/변동적)
+- Drawdown 구간 분석
+- 회복 속도 (Recovery Time) 평가
+- 안정성 평가
+
+## 6. 개선 제안
+- 리스크 관리 개선 방안 (손절매, 포지션 사이즈 조정 등)
+- 진입/청산 타이밍 개선 아이디어
+- 추가 검증 필요 사항 (다른 기간, 다른 종목)
+
+## 7. 실전 적용 시 주의사항
+- 슬리피지 및 수수료 고려사항
+- 시장 환경 변화 대응 방안
+- 포지션 사이징 권장사항
+
+## 8. 최종 결론
+- 실전 적용 추천 여부 (추천/조건부 추천/비추천)
+- 권장 투자 금액 범위
+- 추가 테스트 필요 여부
+
+---
+
+**중요 원칙:**
+- 과거 성과는 미래 수익을 보장하지 않습니다
+- 모든 분석은 교육 및 참고 목적입니다
+- 투자 결정은 본인의 책임입니다`
+
+    return this.chat(
+      [{ role: 'user', content: prompt }],
+      {
+        maxTokens: this.maxTokens,
+        temperature: 0.3, // 낮은 온도로 일관된 분석
+      }
+    )
+  }
+
+  /**
+   * 🆕 Compare multiple strategies with Extended Context
+   *
+   * @description
+   * 여러 전략의 백테스트 결과를 동시에 비교 분석합니다.
+   * 최대 3개 전략까지 지원 (각 50K 토큰 = 150K 총합).
+   *
+   * @param strategies - Array of strategy results (max 3)
+   * @returns Comparative analysis report
+   */
+  async compareStrategies(strategies: Array<{
+    name: string
+    metrics: Record<string, number | string>
+    trades: Array<Record<string, unknown>>
+    equityCurve: Array<Record<string, number>>
+  }>): Promise<string> {
+    if (!this.useExtendedContext) {
+      throw new Error('Extended Context required for strategy comparison')
+    }
+
+    if (strategies.length < 2) {
+      throw new Error('At least 2 strategies required for comparison')
+    }
+
+    if (strategies.length > 3) {
+      throw new Error('Maximum 3 strategies can be compared at once')
+    }
+
+    const prompt = `당신은 퀀트 전략 비교 분석 전문가입니다. 다음 ${strategies.length}개 전략의 백테스트 결과를 비교 분석하고 한국어로 리포트를 작성해주세요.
+
+# 전략 데이터
+
+${strategies.map((s, i) => `
+## 전략 ${i + 1}: ${s.name}
+
+### 성과 지표
+\`\`\`json
+${JSON.stringify(s.metrics, null, 2)}
+\`\`\`
+
+### 거래 내역 (${s.trades.length}건)
+\`\`\`json
+${JSON.stringify(s.trades, null, 2)}
+\`\`\`
+
+### 자산 곡선 (${s.equityCurve.length}개 포인트)
+\`\`\`json
+${JSON.stringify(s.equityCurve, null, 2)}
+\`\`\`
+`).join('\n---\n')}
+
+---
+
+# 비교 분석 요청
+
+다음 형식으로 **마크다운 리포트**를 작성해주세요:
+
+## 1. 종합 비교표
+| 지표 | ${strategies.map(s => s.name).join(' | ')} |
+|------|${strategies.map(() => '---').join('|')}|
+| 총 수익률 | ... | ... |
+| 샤프 비율 | ... | ... |
+| 최대 낙폭 | ... | ... |
+| 승률 | ... | ... |
+| Profit Factor | ... | ... |
+
+## 2. 수익성 비교
+- 어느 전략이 가장 높은 수익률을 보였는가?
+- 리스크 대비 수익 (샤프 비율 기준)은?
+
+## 3. 리스크 비교
+- 최대 낙폭 (MDD) 비교
+- 변동성 비교
+- 안정성 순위
+
+## 4. 거래 패턴 비교
+- 승률 vs Profit Factor 트레이드오프
+- 거래 빈도 차이
+- 평균 손익 비교
+
+## 5. 적합한 시장 환경
+- 각 전략이 유리한 시장 조건
+- 불리한 시장 조건
+
+## 6. 포트폴리오 조합 제안
+- 전략 간 상관관계 추정
+- 조합 시 시너지 효과
+- 권장 비중 배분
+
+## 7. 최종 추천
+- 투자 성향별 추천 전략
+  - 공격적 투자자: ?
+  - 중립 투자자: ?
+  - 보수적 투자자: ?
+
+**중요:** 과거 성과는 미래를 보장하지 않으며, 모든 분석은 교육 목적입니다.`
+
+    return this.chat(
+      [{ role: 'user', content: prompt }],
+      {
+        maxTokens: this.maxTokens,
+        temperature: 0.3,
+      }
+    )
   }
 }
 

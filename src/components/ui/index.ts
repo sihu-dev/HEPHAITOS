@@ -36,6 +36,7 @@ export type { CheckboxProps } from './Checkbox'
 
 // Badge
 export { Badge } from './Badge'
+export { TierBadge, ModelBadge } from './TierBadge'
 
 // Glass Panel
 export { GlassPanel } from './GlassPanel'

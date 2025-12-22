@@ -17,6 +17,7 @@ import { spendCredits, InsufficientCreditsError } from '@/lib/credits/spend-help
 import { checkUserConsent, createConsentRequiredResponse } from '@/lib/compliance/consent-gate'
 import { aiCircuit, withCircuitBreaker, createCircuitOpenResponse } from '@/lib/redis/circuit-breaker'
 import { aiTieredLimiter, createTieredRateLimitResponse, type UserTier } from '@/lib/redis/rate-limiter'
+import type { UserTier as ClaudeUserTier } from '@/lib/api/providers/claude'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,7 +64,7 @@ interface GeneratedStrategy {
 // Claude Strategy Generation
 // ============================================
 
-async function generateStrategyWithClaude(config: StrategyConfig): Promise<GeneratedStrategy> {
+async function generateStrategyWithClaude(config: StrategyConfig, userTier: UserTier = 'free'): Promise<GeneratedStrategy> {
   const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY
   if (!apiKey) throw new Error('Claude API key not configured')
 
@@ -278,9 +279,16 @@ export const POST = withApiMiddleware(
       return createCircuitOpenResponse()
     }
 
-    // 4. Tiered Rate Limit (P0-3: 일당 + 분당 제한)
-    // TODO: 사용자 tier 정보를 프로필에서 조회 (현재는 free로 기본 설정)
-    const userTier: UserTier = 'free'
+    // 4. 사용자 티어 조회
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('tier')
+      .eq('id', userId)
+      .single()
+
+    const userTier: UserTier = (profile?.tier as UserTier) || 'free'
+
+    // 5. Tiered Rate Limit (P0-3: 일당 + 분당 제한)
     const rateLimitResult = await aiTieredLimiter.check(userId, userTier)
     if (!rateLimitResult.allowed) {
       safeLogger.warn('[Strategy API] Rate limited', {
@@ -347,7 +355,7 @@ export const POST = withApiMiddleware(
       try {
         // Circuit Breaker로 Claude 호출 감싸기
         strategy = await withCircuitBreaker(aiCircuit, 'claude-api', async () => {
-          return generateStrategyWithClaude(config)
+          return generateStrategyWithClaude(config, userTier)
         })
       } catch (claudeError) {
         if (claudeError instanceof Error && claudeError.message === 'CIRCUIT_OPEN') {

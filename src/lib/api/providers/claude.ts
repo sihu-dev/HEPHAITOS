@@ -17,6 +17,7 @@ import { saveCacheMetrics, type CacheMetrics } from '@/lib/monitoring/cache-metr
 
 export interface StrategyGenerationRequest {
   prompt: string // 자연어 전략 설명
+  userTier?: UserTier // 사용자 티어 (모델 선택용)
   context?: {
     symbol?: string
     timeframe?: string
@@ -100,11 +101,35 @@ export interface AITutorResponse {
 // Claude Client
 // ============================================
 
+// ============================================
+// User Tier Type
+// ============================================
+
+export type UserTier = 'free' | 'starter' | 'pro'
+
 class ClaudeProvider {
   private client: Anthropic | null = null
   private models = {
     fast: 'claude-sonnet-4-20250514',
     analysis: 'claude-opus-4-20250514',
+  }
+
+  /**
+   * Get Claude model based on user tier
+   * - Free: claude-haiku-4 (fastest, cheapest)
+   * - Starter: claude-sonnet-4-5 (balanced)
+   * - Pro: claude-opus-4-5 (highest quality)
+   */
+  getModelForUser(userTier: UserTier): string {
+    switch (userTier) {
+      case 'pro':
+        return 'claude-opus-4-20250514' // +40% quality
+      case 'starter':
+        return 'claude-sonnet-4-20250514' // balanced
+      case 'free':
+      default:
+        return 'claude-haiku-4-20250514' // fast & cheap
+    }
   }
 
   /**
@@ -142,6 +167,9 @@ class ClaudeProvider {
   async generateStrategy(request: StrategyGenerationRequest): Promise<StrategyGenerationResponse> {
     // ✅ Prompt Caching 적용: 전략 템플릿 라이브러리를 캐싱
     const cachedSystemBlocks = buildCachedSystemPrompt('build')
+
+    // 티어에 맞는 모델 선택
+    const model = request.userTier ? this.getModelForUser(request.userTier) : this.models.fast
 
     // 추가 지시사항 (캐싱 안됨, 요청마다 다를 수 있음)
     const additionalInstructions: CacheControlBlock = {
@@ -182,7 +210,7 @@ ${request.context?.riskLevel ? `리스크 성향: ${request.context.riskLevel}` 
 위 요청을 분석하여 트레이딩 전략을 JSON 형식으로 생성해주세요.`
 
     const response = await this.getClient().messages.create({
-      model: this.models.fast,
+      model,
       max_tokens: 2048,
       messages: [
         { role: 'user', content: userPrompt }
@@ -191,7 +219,7 @@ ${request.context?.riskLevel ? `리스크 성향: ${request.context.riskLevel}` 
     })
 
     // 💰 캐시 메트릭 저장
-    await this.trackCacheUsage(response.usage, '/api/strategies/generate')
+    await this.trackCacheUsage(response.usage, '/api/strategies/generate', model, request.userTier)
 
     const content = response.content[0]
     if (content.type !== 'text') {
@@ -398,7 +426,9 @@ ${trades.slice(-10).map((t, i) => `${i + 1}. ${t.side} - PnL: ${t.pnl.toFixed(2)
       cache_creation_input_tokens?: number
       cache_read_input_tokens?: number
     },
-    endpoint: string
+    endpoint: string,
+    model: string = this.models.fast,
+    userTier?: UserTier
   ): Promise<void> {
     try {
       const metrics: CacheMetrics = {
@@ -407,7 +437,8 @@ ${trades.slice(-10).map((t, i) => `${i + 1}. ${t.side} - PnL: ${t.pnl.toFixed(2)
         input_tokens: usage.input_tokens,
         output_tokens: usage.output_tokens,
         endpoint,
-        model: this.models.fast,
+        model,
+        user_tier: userTier,
       }
 
       await saveCacheMetrics(metrics)
