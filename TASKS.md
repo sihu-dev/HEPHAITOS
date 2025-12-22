@@ -11,18 +11,18 @@
 **문서**: [CLAUDE_API_OPTIMIZATION_REPORT.md](docs/CLAUDE_API_OPTIMIZATION_REPORT.md)
 
 ### 목표
-- [ ] Batch API 통합 (50% 비용 절감)
-- [ ] Extended Thinking 적용 (Pro 티어)
+- [x] Batch API 통합 (50% 비용 절감) - ✅ 완료
+- [x] Extended Thinking 적용 (Pro 티어) - ✅ 완료
 - [ ] SSE Streaming 구현 (UX 10x 향상)
 - [ ] Advanced Tool Use 테스트
 
-### Week 1: Batch API + Extended Thinking (12/22-12/28)
+### Week 1: Batch API + Extended Thinking (12/22-12/28) ✅ 완료
 
-- [ ] Batch API 테스트 구현 (`src/lib/queue/batch-processor.ts`)
-- [ ] 야간 백테스트 배치 Cron (`/api/cron/batch-backtest`)
-- [ ] 시장 분석 배치 Cron (`/api/cron/batch-analysis`)
-- [ ] Extended Thinking Pro 티어 적용 (`claude.ts` 수정)
-- [ ] 배치 결과 폴링 로직 구현
+- [x] Batch API 테스트 구현 (`src/lib/queue/batch-processor.ts`) - 완료
+- [x] 야간 백테스트 배치 Cron (`/api/cron/batch-backtest`) - 완료
+- [x] 시장 분석 배치 Cron (`/api/cron/batch-analysis`) - 완료
+- [x] Extended Thinking Pro 티어 적용 (`claude.ts` 수정) - 완료
+- [x] 배치 결과 폴링 로직 구현 - 완료
 
 ### Week 2: Streaming + UX (12/29-1/5)
 
