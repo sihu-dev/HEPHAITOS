@@ -5,6 +5,11 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { requireClaudeConfig } from '@/lib/config/env'
+import {
+  buildCachedSystemPrompt,
+  type CacheControlBlock,
+} from '@/lib/ai/cache-config'
+import { saveCacheMetrics, type CacheMetrics } from '@/lib/monitoring/cache-metrics'
 
 // ============================================
 // Types
@@ -135,10 +140,13 @@ class ClaudeProvider {
   // ============================================
 
   async generateStrategy(request: StrategyGenerationRequest): Promise<StrategyGenerationResponse> {
-    const systemPrompt = `당신은 HEPHAITOS의 전략 생성 엔진입니다.
-사용자의 자연어 설명을 분석하여 실행 가능한 트레이딩 전략으로 변환합니다.
+    // ✅ Prompt Caching 적용: 전략 템플릿 라이브러리를 캐싱
+    const cachedSystemBlocks = buildCachedSystemPrompt('build')
 
-응답 형식 (JSON):
+    // 추가 지시사항 (캐싱 안됨, 요청마다 다를 수 있음)
+    const additionalInstructions: CacheControlBlock = {
+      type: 'text',
+      text: `응답 형식 (JSON):
 {
   "strategyName": "전략 이름",
   "description": "전략 설명",
@@ -163,7 +171,8 @@ class ClaudeProvider {
 1. 항상 유효한 JSON 형식으로 응답
 2. 사용 가능한 지표: SMA, EMA, RSI, MACD, Bollinger, ATR, Stochastic, CCI, ADX
 3. 리스크 관리는 보수적으로 설정 (손절 2-5%, 익절 4-15%)
-4. 사용자의 리스크 성향을 반영`
+4. 사용자의 리스크 성향을 반영`,
+    }
 
     const userPrompt = `전략 요청: "${request.prompt}"
 ${request.context?.symbol ? `종목: ${request.context.symbol}` : ''}
@@ -178,8 +187,11 @@ ${request.context?.riskLevel ? `리스크 성향: ${request.context.riskLevel}` 
       messages: [
         { role: 'user', content: userPrompt }
       ],
-      system: systemPrompt,
+      system: [...cachedSystemBlocks, additionalInstructions],
     })
+
+    // 💰 캐시 메트릭 저장
+    await this.trackCacheUsage(response.usage, '/api/strategies/generate')
 
     const content = response.content[0]
     if (content.type !== 'text') {
@@ -194,10 +206,12 @@ ${request.context?.riskLevel ? `리스크 성향: ${request.context.riskLevel}` 
   // ============================================
 
   async analyzeMarket(request: MarketAnalysisRequest): Promise<MarketAnalysisResponse> {
-    const systemPrompt = `당신은 HEPHAITOS의 시장 분석 AI입니다.
-제공된 OHLCV 데이터와 지표를 분석하여 전문적인 시장 분석을 제공합니다.
+    // ✅ Prompt Caching 적용: 분석 가이드를 캐싱
+    const cachedSystemBlocks = buildCachedSystemPrompt('analyze')
 
-응답 형식 (JSON):
+    const additionalInstructions: CacheControlBlock = {
+      type: 'text',
+      text: `응답 형식 (JSON):
 {
   "summary": "시장 요약",
   "trend": "bullish|bearish|neutral",
@@ -216,7 +230,8 @@ ${request.context?.riskLevel ? `리스크 성향: ${request.context.riskLevel}` 
 1. 객관적인 기술적 분석에 기반
 2. 투자 조언이 아닌 교육적 정보 제공
 3. 신뢰도(confidence)는 보수적으로 평가
-4. 항상 리스크 경고 포함`
+4. 항상 리스크 경고 포함`,
+    }
 
     const recentData = request.data.ohlcv.slice(-20)
     const userPrompt = `${request.symbol} 시장 분석 요청
@@ -236,8 +251,11 @@ ${request.data.indicators ? `지표 데이터: ${JSON.stringify(request.data.ind
       messages: [
         { role: 'user', content: userPrompt }
       ],
-      system: systemPrompt,
+      system: [...cachedSystemBlocks, additionalInstructions],
     })
+
+    // 💰 캐시 메트릭 저장
+    await this.trackCacheUsage(response.usage, '/api/market/analyze')
 
     const content = response.content[0]
     if (content.type !== 'text') {
@@ -252,21 +270,12 @@ ${request.data.indicators ? `지표 데이터: ${JSON.stringify(request.data.ind
   // ============================================
 
   async askTutor(request: AITutorRequest): Promise<AITutorResponse> {
-    const systemPrompt = `당신은 HEPHAITOS의 AI 투자 튜터입니다.
-사용자의 투자 관련 질문에 친절하고 교육적으로 답변합니다.
+    // ✅ Prompt Caching 적용: AI 멘토 + 기술 지표 가이드 캐싱
+    const cachedSystemBlocks = buildCachedSystemPrompt('learn')
 
-역할:
-1. 투자/트레이딩 개념 설명
-2. 기술적 분석 교육
-3. 전략 구현 가이드
-4. 리스크 관리 조언
-
-중요 규칙:
-1. 항상 교육적 관점에서 답변
-2. 특정 종목 추천 금지
-3. "투자 조언이 아닙니다" 명시
-4. 초보자도 이해할 수 있게 설명
-5. ${request.context?.userLevel === 'beginner' ? '쉬운 용어 사용' : request.context?.userLevel === 'advanced' ? '전문 용어 사용 가능' : '적절한 수준의 설명'}
+    const additionalInstructions: CacheControlBlock = {
+      type: 'text',
+      text: `사용자 수준: ${request.context?.userLevel === 'beginner' ? '초보자 (쉬운 용어 사용)' : request.context?.userLevel === 'advanced' ? '고급 (전문 용어 사용 가능)' : '중급 (적절한 수준)'}
 
 응답 형식 (JSON):
 {
@@ -274,7 +283,8 @@ ${request.data.indicators ? `지표 데이터: ${JSON.stringify(request.data.ind
   "followUpQuestions": ["후속 질문1", "후속 질문2"],
   "relatedTopics": ["관련 주제1", "관련 주제2"],
   "references": ["참고 자료"]
-}`
+}`,
+    }
 
     const messages: Anthropic.MessageParam[] = []
 
@@ -297,8 +307,11 @@ ${request.data.indicators ? `지표 데이터: ${JSON.stringify(request.data.ind
       model: this.models.fast,
       max_tokens: 2048,
       messages,
-      system: systemPrompt,
+      system: [...cachedSystemBlocks, additionalInstructions],
     })
+
+    // 💰 캐시 메트릭 저장
+    await this.trackCacheUsage(response.usage, '/api/ai/tutor')
 
     const content = response.content[0]
     if (content.type !== 'text') {
@@ -369,6 +382,49 @@ ${trades.slice(-10).map((t, i) => `${i + 1}. ${t.side} - PnL: ${t.pnl.toFixed(2)
     }
 
     return content.text
+  }
+
+  // ============================================
+  // Cache Metrics Tracking
+  // ============================================
+
+  /**
+   * 캐시 사용량 추적 및 저장
+   */
+  private async trackCacheUsage(
+    usage: {
+      input_tokens: number
+      output_tokens: number
+      cache_creation_input_tokens?: number
+      cache_read_input_tokens?: number
+    },
+    endpoint: string
+  ): Promise<void> {
+    try {
+      const metrics: CacheMetrics = {
+        cache_creation_tokens: usage.cache_creation_input_tokens || 0,
+        cache_read_tokens: usage.cache_read_input_tokens || 0,
+        input_tokens: usage.input_tokens,
+        output_tokens: usage.output_tokens,
+        endpoint,
+        model: this.models.fast,
+      }
+
+      await saveCacheMetrics(metrics)
+
+      // 로그로 즉시 피드백 (개발 환경)
+      if (process.env.NODE_ENV === 'development') {
+        const total_cached = metrics.cache_creation_tokens + metrics.cache_read_tokens
+        if (total_cached > 0) {
+          console.log(
+            `[Cache] ${endpoint} - Created: ${metrics.cache_creation_tokens}, Read: ${metrics.cache_read_tokens}, Regular: ${metrics.input_tokens}`
+          )
+        }
+      }
+    } catch (error) {
+      // 메트릭 저장 실패는 핵심 기능에 영향 없음
+      console.error('[Cache Metrics] Failed to track:', error)
+    }
   }
 }
 

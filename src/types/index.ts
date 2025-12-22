@@ -404,3 +404,39 @@ export interface PortfolioStoreState {
   isLoading: boolean
   error: string | null
 }
+
+// ============================================
+// Chart Analysis Types (Claude Vision)
+// ============================================
+
+export interface ChartAnalysis {
+  trend: 'uptrend' | 'downtrend' | 'sideways'
+  strength: number // 0-100
+  support: number[]
+  resistance: number[]
+  patterns: CandlePattern[]
+  recommendation: {
+    action: 'buy' | 'sell' | 'hold' | 'wait'
+    reasoning: string
+    confidence: number // 0-100
+  }
+  volume_analysis: string
+  risk_level: 'low' | 'medium' | 'high'
+  disclaimer: string
+}
+
+export interface CandlePattern {
+  name: string // "doji", "hammer", "engulfing", "shooting_star", etc.
+  type: 'bullish' | 'bearish' | 'neutral'
+  description: string
+  confidence: number // 0-100
+}
+
+export interface ChartAnalysisRequest {
+  chartImageBase64: string
+  symbol: string
+  timeframe?: string
+  question?: string
+}
+
+export interface ChartAnalysisResponse extends ChartAnalysis {}

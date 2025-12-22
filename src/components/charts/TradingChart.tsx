@@ -22,6 +22,9 @@ import {
   type Time,
 } from 'lightweight-charts'
 import { calculateSMA, calculateEMA, calculateRSI, calculateMACD, calculateBollingerBands } from '@/lib/indicators'
+import html2canvas from 'html2canvas'
+import { ChartAnalysisPanel } from './ChartAnalysisPanel'
+import type { ChartAnalysisResponse } from '@/types'
 
 // ============================================
 // Types
@@ -54,6 +57,9 @@ export interface TradingChartProps {
   panes?: IndicatorPane[]
   showVolume?: boolean
   showToolbar?: boolean
+  showAIAnalysis?: boolean // AI 분석 버튼 표시 여부
+  symbol?: string // 종목 코드 (AI 분석용)
+  timeframe?: string // 타임프레임 (AI 분석용)
   onCrosshairMove?: (data: { time: Time; price: number } | null) => void
   className?: string
 }
@@ -136,6 +142,9 @@ export const TradingChart = memo(function TradingChart({
   panes = [],
   showVolume = true,
   showToolbar = true,
+  showAIAnalysis = true,
+  symbol = 'UNKNOWN',
+  timeframe = '1d',
   onCrosshairMove,
   className = '',
 }: TradingChartProps) {
@@ -148,6 +157,11 @@ export const TradingChart = memo(function TradingChart({
   const [currentPrice, setCurrentPrice] = useState<number | null>(null)
   const [priceChange, setPriceChange] = useState<number>(0)
   const [priceChangePercent, setPriceChangePercent] = useState<number>(0)
+
+  // AI Analysis state
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false)
+  const [analysisResult, setAnalysisResult] = useState<ChartAnalysisResponse | null>(null)
+  const [showAnalysisPanel, setShowAnalysisPanel] = useState<boolean>(false)
 
   // Calculate price statistics
   useEffect(() => {
@@ -404,6 +418,83 @@ export const TradingChart = memo(function TradingChart({
     }
   }, [])
 
+  // ============================================
+  // AI Chart Analysis Functions
+  // ============================================
+
+  /**
+   * 차트를 캡처하여 base64 이미지로 변환
+   */
+  const captureChart = useCallback(async (): Promise<string> => {
+    if (!chartContainerRef.current) {
+      throw new Error('Chart container not found')
+    }
+
+    try {
+      const canvas = await html2canvas(chartContainerRef.current, {
+        backgroundColor: '#0A0A0C',
+        scale: 2, // Higher quality
+        logging: false,
+      })
+
+      return canvas.toDataURL('image/png')
+    } catch (error) {
+      console.error('[TradingChart] Failed to capture chart:', error)
+      throw new Error('차트 캡처에 실패했습니다')
+    }
+  }, [])
+
+  /**
+   * AI 차트 분석 실행
+   */
+  const handleAIAnalysis = useCallback(async () => {
+    try {
+      setIsAnalyzing(true)
+      setShowAnalysisPanel(true)
+
+      // Capture chart
+      const chartImage = await captureChart()
+
+      // Call API
+      const response = await fetch('/api/ai/chart-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chartImage,
+          symbol,
+          timeframe,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('AI 분석 요청에 실패했습니다')
+      }
+
+      const result = await response.json()
+
+      if (result.success && result.data) {
+        setAnalysisResult(result.data)
+      } else {
+        throw new Error(result.error?.message || 'AI 분석에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('[TradingChart] AI analysis failed:', error)
+      alert(error instanceof Error ? error.message : 'AI 분석에 실패했습니다')
+      setShowAnalysisPanel(false)
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }, [captureChart, symbol, timeframe])
+
+  /**
+   * 분석 패널 닫기
+   */
+  const handleCloseAnalysis = useCallback(() => {
+    setShowAnalysisPanel(false)
+  }, [])
+
   return (
     <div className={`relative ${className}`}>
       {/* Header with price info */}
@@ -450,6 +541,26 @@ export const TradingChart = memo(function TradingChart({
 
           {/* Toolbar */}
           <div className="flex items-center gap-1">
+            {showAIAnalysis && (
+              <>
+                <button
+                  onClick={handleAIAnalysis}
+                  disabled={isAnalyzing}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="AI 차트 분석"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  {isAnalyzing ? (
+                    <span className="text-xs">분석중...</span>
+                  ) : (
+                    <span className="text-xs">AI 분석</span>
+                  )}
+                </button>
+                <div className="w-px h-4 bg-white/[0.06]" />
+              </>
+            )}
             <button
               onClick={handleZoomIn}
               className="p-1.5 text-zinc-500 hover:text-white hover:bg-white/[0.05] rounded transition-colors"
@@ -492,6 +603,15 @@ export const TradingChart = memo(function TradingChart({
       <div className="absolute bottom-4 right-4 text-[10px] text-zinc-500 pointer-events-none">
         Data: Polygon.io
       </div>
+
+      {/* AI Analysis Panel */}
+      {showAnalysisPanel && (
+        <ChartAnalysisPanel
+          analysis={analysisResult}
+          isLoading={isAnalyzing}
+          onClose={handleCloseAnalysis}
+        />
+      )}
     </div>
   )
 })
