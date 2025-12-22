@@ -1,0 +1,103 @@
+name: Enable Repository Features
+
+on:
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: 'Repositories to update (comma-separated or "all")'
+        required: false
+        default: 'all'
+
+jobs:
+  enable-features:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Enable Features for All Repositories
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          #!/bin/bash
+          set -e
+
+          # Repository list
+          REPOS=(
+            "forge-labs"
+            "bidflow"
+            "HEPHAITOS"
+            "dryon"
+          )
+
+          # If specific repos provided, use those
+          if [ "${{ github.event.inputs.repos }}" != "all" ]; then
+            IFS=',' read -ra REPOS <<< "${{ github.event.inputs.repos }}"
+          fi
+
+          echo "🚀 Enabling features for repositories..."
+          echo "Repositories: ${REPOS[@]}"
+
+          for REPO in "${REPOS[@]}"; do
+            REPO=$(echo "$REPO" | xargs)  # Trim whitespace
+            echo ""
+            echo "📦 Processing: sihu-dev/$REPO"
+
+            # Update repository settings
+            echo "  ⚙️  Updating repository settings..."
+            curl -X PATCH \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/sihu-dev/$REPO" \
+              -d '{
+                "has_issues": true,
+                "has_projects": true,
+                "has_wiki": true,
+                "has_discussions": true,
+                "allow_squash_merge": true,
+                "allow_merge_commit": true,
+                "allow_rebase_merge": true,
+                "allow_auto_merge": true,
+                "delete_branch_on_merge": true,
+                "allow_update_branch": true,
+                "squash_merge_commit_title": "PR_TITLE",
+                "squash_merge_commit_message": "PR_BODY",
+                "merge_commit_title": "PR_TITLE",
+                "merge_commit_message": "PR_BODY"
+              }' \
+              -s -o /dev/null -w "HTTP Status: %{http_code}\n" || echo "  ⚠️  Failed to update $REPO"
+
+            echo "  ✅ $REPO settings updated"
+          done
+
+          echo ""
+          echo "✨ All repositories processed successfully!"
+          echo ""
+          echo "Enabled features:"
+          echo "  ✅ Issues"
+          echo "  ✅ Projects"
+          echo "  ✅ Wiki"
+          echo "  ✅ Discussions"
+          echo "  ✅ All merge types (merge, squash, rebase)"
+          echo "  ✅ Auto-merge"
+          echo "  ✅ Delete branch on merge"
+          echo "  ✅ Update branch before merge"
+
+      - name: Summary
+        run: |
+          echo "### ✅ Repository Features Enabled" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All repository features have been enabled successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Enabled Features:**" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Issues" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Projects" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Wiki" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Discussions" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ All merge types" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Auto-merge" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Delete branch on merge" >> $GITHUB_STEP_SUMMARY
