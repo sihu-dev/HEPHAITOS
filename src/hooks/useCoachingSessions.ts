@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 
 // ============================================
 // Types
@@ -175,6 +176,12 @@ interface UseCoachingSessionsReturn {
   error: Error | null
   refresh: () => Promise<void>
   bookSession: (mentorId: string, availabilityId: string, topic?: string) => Promise<{ success: boolean; error?: string }>
+  // Real-time session features
+  joinSession: (sessionId: string) => void
+  leaveSession: () => void
+  sendMessage: (content: string, isQuestion?: boolean) => Promise<boolean>
+  activeSessionId: string | null
+  isConnected: boolean
 }
 
 export function useCoachingSessions(options: UseCoachingSessionsOptions = {}): UseCoachingSessionsReturn {
@@ -184,6 +191,12 @@ export function useCoachingSessions(options: UseCoachingSessionsOptions = {}): U
   const [messages, setMessages] = useState<CoachingMessage[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+
+  // Real-time state
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
+  const [isConnected, setIsConnected] = useState(false)
+  const channelRef = useRef<RealtimeChannel | null>(null)
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null)
 
   const fetchData = useCallback(async () => {
     // Check if Supabase is configured
@@ -387,6 +400,240 @@ export function useCoachingSessions(options: UseCoachingSessionsOptions = {}): U
     fetchData()
   }, [fetchData])
 
+  // ============================================
+  // Real-time Session Management
+  // ============================================
+
+  // Initialize Supabase client ref
+  useEffect(() => {
+    try {
+      supabaseRef.current = createClient()
+    } catch {
+      console.warn('[useCoachingSessions] Failed to create Supabase client')
+    }
+  }, [])
+
+  // Join a coaching session (subscribe to real-time updates)
+  const joinSession = useCallback((sessionId: string) => {
+    const supabase = supabaseRef.current
+    if (!supabase) {
+      console.warn('[useCoachingSessions] Supabase not available, using demo mode')
+      setActiveSessionId(sessionId)
+      setMessages(DEMO_MESSAGES)
+      return
+    }
+
+    // Leave previous session if any
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current)
+    }
+
+    // Create new channel for this session
+    const channel = supabase
+      .channel(`coaching-session:${sessionId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'coaching_messages',
+          filter: `session_id=eq.${sessionId}`,
+        },
+        (payload) => {
+          const newMsg = payload.new as {
+            id: string
+            sender_id: string
+            sender_name: string
+            content: string
+            is_question: boolean
+            created_at: string
+          }
+
+          const message: CoachingMessage = {
+            id: newMsg.id,
+            senderId: newMsg.sender_id,
+            senderName: newMsg.sender_name,
+            content: newMsg.content,
+            timestamp: new Date(newMsg.created_at),
+            isQuestion: newMsg.is_question,
+          }
+
+          setMessages(prev => [...prev, message])
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'coaching_sessions',
+          filter: `id=eq.${sessionId}`,
+        },
+        (payload) => {
+          const updated = payload.new as {
+            id: string
+            status: string
+            participants_count?: number
+          }
+
+          // Update session in list
+          setLiveSessions(prev => prev.map(session =>
+            session.id === updated.id
+              ? {
+                  ...session,
+                  isLive: updated.status === 'in_progress',
+                  participants: updated.participants_count ?? session.participants,
+                }
+              : session
+          ))
+        }
+      )
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState()
+        const participantCount = Object.keys(state).length
+
+        // Update participant count
+        setLiveSessions(prev => prev.map(session =>
+          session.id === sessionId
+            ? { ...session, participants: participantCount }
+            : session
+        ))
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          setIsConnected(true)
+          setActiveSessionId(sessionId)
+
+          // Track presence
+          const { data: { user } } = await supabase.auth.getUser()
+          if (user) {
+            channel.track({
+              user_id: user.id,
+              joined_at: new Date().toISOString(),
+            })
+          }
+
+          // Load existing messages
+          const { data: existingMessages } = await supabase
+            .from('coaching_messages' as never)
+            .select('*')
+            .eq('session_id', sessionId)
+            .order('created_at', { ascending: true })
+            .limit(100)
+
+          if (existingMessages && existingMessages.length > 0) {
+            const transformed = existingMessages.map((msg: {
+              id: string
+              sender_id: string
+              sender_name: string
+              content: string
+              is_question: boolean
+              created_at: string
+            }): CoachingMessage => ({
+              id: msg.id,
+              senderId: msg.sender_id,
+              senderName: msg.sender_name,
+              content: msg.content,
+              timestamp: new Date(msg.created_at),
+              isQuestion: msg.is_question,
+            }))
+            setMessages(transformed)
+          } else {
+            // Use demo messages if no real messages
+            setMessages(DEMO_MESSAGES)
+          }
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('[useCoachingSessions] Channel error')
+          setIsConnected(false)
+        }
+      })
+
+    channelRef.current = channel
+  }, [])
+
+  // Leave current session
+  const leaveSession = useCallback(() => {
+    const supabase = supabaseRef.current
+
+    if (channelRef.current && supabase) {
+      supabase.removeChannel(channelRef.current)
+      channelRef.current = null
+    }
+
+    setActiveSessionId(null)
+    setIsConnected(false)
+    setMessages([])
+  }, [])
+
+  // Send a message in the current session
+  const sendMessage = useCallback(async (content: string, isQuestion = false): Promise<boolean> => {
+    const supabase = supabaseRef.current
+
+    if (!activeSessionId) {
+      console.warn('[useCoachingSessions] No active session')
+      return false
+    }
+
+    // Demo mode - just add to local state
+    if (!supabase) {
+      const demoMessage: CoachingMessage = {
+        id: `demo_${Date.now()}`,
+        senderId: 'current_user',
+        senderName: '나',
+        content,
+        timestamp: new Date(),
+        isQuestion,
+      }
+      setMessages(prev => [...prev, demoMessage])
+      return true
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        return false
+      }
+
+      // Get user profile for name
+      const { data: profile } = await supabase
+        .from('profiles' as never)
+        .select('display_name')
+        .eq('id', user.id)
+        .single()
+
+      const profileData = profile as { display_name?: string } | null
+
+      const { error } = await supabase
+        .from('coaching_messages' as never)
+        .insert({
+          session_id: activeSessionId,
+          sender_id: user.id,
+          sender_name: profileData?.display_name || '익명',
+          content,
+          is_question: isQuestion,
+        } as never)
+
+      if (error) {
+        console.error('[useCoachingSessions] Send message error:', error)
+        return false
+      }
+
+      return true
+    } catch (err) {
+      console.error('[useCoachingSessions] Send message failed:', err)
+      return false
+    }
+  }, [activeSessionId])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (channelRef.current && supabaseRef.current) {
+        supabaseRef.current.removeChannel(channelRef.current)
+      }
+    }
+  }, [])
+
   return {
     mentors,
     liveSessions,
@@ -395,5 +642,11 @@ export function useCoachingSessions(options: UseCoachingSessionsOptions = {}): U
     error,
     refresh: fetchData,
     bookSession,
+    // Real-time features
+    joinSession,
+    leaveSession,
+    sendMessage,
+    activeSessionId,
+    isConnected,
   }
 }

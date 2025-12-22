@@ -460,21 +460,31 @@ function LiveChat({
   messages,
   onToggleScreenShare,
   isScreenShareActive,
+  isConnected,
+  onSendMessage,
   t,
 }: {
   sessionId: string
   messages: CoachingMessage[]
   onToggleScreenShare: () => void
   isScreenShareActive: boolean
+  isConnected: boolean
+  onSendMessage: (content: string, isQuestion?: boolean) => Promise<boolean>
   t: TranslateFunction
 }) {
   const [newMessage, setNewMessage] = useState('')
+  const [isSending, setIsSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const handleSend = () => {
-    if (!newMessage.trim()) return
-    console.log('Send message:', { sessionId, content: newMessage })
-    setNewMessage('')
+  const handleSend = async () => {
+    if (!newMessage.trim() || isSending) return
+
+    setIsSending(true)
+    const success = await onSendMessage(newMessage.trim())
+    if (success) {
+      setNewMessage('')
+    }
+    setIsSending(false)
   }
 
   // Auto-scroll to bottom
@@ -489,6 +499,11 @@ function LiveChat({
           <CardTitle className="flex items-center gap-2 text-sm">
             <MessageIcon />
             {t('dashboard.coaching.chat.title') as string}
+            {/* Connection Status */}
+            <span className={clsx(
+              'ml-2 w-2 h-2 rounded-full',
+              isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-500'
+            )} />
           </CardTitle>
           <Button
             size="sm"
@@ -551,12 +566,22 @@ function LiveChat({
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) => e.key === 'Enter' && !isSending && handleSend()}
             placeholder={t('dashboard.coaching.chat.placeholder') as string}
-            className="flex-1 h-9 px-3 text-sm text-white bg-white/[0.04] border border-white/[0.06] rounded focus:outline-none focus:border-white/[0.12]"
+            disabled={isSending}
+            className="flex-1 h-9 px-3 text-sm text-white bg-white/[0.04] border border-white/[0.06] rounded focus:outline-none focus:border-white/[0.12] disabled:opacity-50"
           />
-          <Button size="sm" onClick={handleSend} aria-label="Send message">
-            <SendIcon />
+          <Button
+            size="sm"
+            onClick={handleSend}
+            disabled={isSending || !newMessage.trim()}
+            aria-label="Send message"
+          >
+            {isSending ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <SendIcon />
+            )}
           </Button>
         </div>
       </CardContent>
@@ -570,10 +595,29 @@ function LiveChat({
 
 export function CoachingContent() {
   const { t } = useI18n()
-  const { mentors, liveSessions, messages, isLoading } = useCoachingSessions()
+  const {
+    mentors,
+    liveSessions,
+    messages,
+    isLoading,
+    joinSession,
+    leaveSession,
+    sendMessage,
+    activeSessionId,
+    isConnected,
+  } = useCoachingSessions()
   const [activeSession, setActiveSession] = useState<LiveSession | null>(null)
   const [filter, setFilter] = useState<'all' | 'live' | 'upcoming'>('all')
   const [isScreenShareActive, setIsScreenShareActive] = useState(false)
+
+  // Handle session join/leave
+  useEffect(() => {
+    if (activeSession) {
+      joinSession(activeSession.id)
+    } else {
+      leaveSession()
+    }
+  }, [activeSession, joinSession, leaveSession])
 
   const filteredSessions = useMemo(() => {
     return liveSessions.filter((s) => {
@@ -691,6 +735,8 @@ export function CoachingContent() {
               messages={messages}
               onToggleScreenShare={() => setIsScreenShareActive(!isScreenShareActive)}
               isScreenShareActive={isScreenShareActive}
+              isConnected={isConnected}
+              onSendMessage={sendMessage}
               t={t}
             />
           ) : (
