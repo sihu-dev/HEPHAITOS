@@ -63,7 +63,14 @@ export function useSubscription(): UseSubscriptionResult {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  const supabase = createClient()
+  // Get supabase client - may be null if not configured
+  const supabase = (() => {
+    try {
+      return createClient()
+    } catch {
+      return null
+    }
+  })()
 
   // Transform database row to Subscription object
   const transformSubscription = useCallback((row: Record<string, unknown>): Subscription => {
@@ -90,6 +97,13 @@ export function useSubscription(): UseSubscriptionResult {
       setError(null)
 
       // Check if Supabase is configured
+      if (!supabase) {
+        console.warn('[useSubscription] Supabase not configured, using fallback')
+        setSubscription(FALLBACK_SUBSCRIPTION)
+        setIsLoading(false)
+        return
+      }
+
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       if (!supabaseUrl || supabaseUrl === 'REDACTED') {
         console.warn('[useSubscription] Supabase not configured, using fallback')
@@ -146,6 +160,10 @@ export function useSubscription(): UseSubscriptionResult {
     billingCycle: BillingCycle = 'monthly'
   ): Promise<boolean> => {
     try {
+      if (!supabase) {
+        throw new Error('Supabase not configured')
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -157,12 +175,13 @@ export function useSubscription(): UseSubscriptionResult {
         p_user_id: user.id,
         p_plan_id: planId,
         p_billing_cycle: billingCycle,
-      })
+      } as unknown as undefined)
 
       if (error) throw error
 
-      if (data?.success && data?.subscription) {
-        setSubscription(transformSubscription(data.subscription))
+      const result = data as { success?: boolean; subscription?: Record<string, unknown> } | null
+      if (result?.success && result?.subscription) {
+        setSubscription(transformSubscription(result.subscription))
         return true
       }
 
@@ -177,6 +196,10 @@ export function useSubscription(): UseSubscriptionResult {
   // Cancel subscription
   const cancelSubscription = useCallback(async (): Promise<boolean> => {
     try {
+      if (!supabase) {
+        throw new Error('Supabase not configured')
+      }
+
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -185,12 +208,13 @@ export function useSubscription(): UseSubscriptionResult {
 
       const { data, error } = await supabase.rpc('cancel_subscription', {
         p_user_id: user.id,
-      })
+      } as unknown as undefined)
 
       if (error) throw error
 
-      if (data?.success && data?.subscription) {
-        setSubscription(transformSubscription(data.subscription))
+      const result = data as { success?: boolean; subscription?: Record<string, unknown> } | null
+      if (result?.success && result?.subscription) {
+        setSubscription(transformSubscription(result.subscription))
         return true
       }
 
@@ -209,6 +233,8 @@ export function useSubscription(): UseSubscriptionResult {
 
   // Subscribe to auth changes
   useEffect(() => {
+    if (!supabase) return
+
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session?.user) {

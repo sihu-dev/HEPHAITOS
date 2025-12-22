@@ -63,7 +63,14 @@ export function useCreditBalance(): UseCreditBalanceResult {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  const supabase = createClient()
+  // Get supabase client - may be null if not configured
+  const supabase = (() => {
+    try {
+      return createClient()
+    } catch {
+      return null
+    }
+  })()
 
   // Transform database row to CreditWallet
   const transformWallet = useCallback((row: Record<string, unknown>): CreditWallet => {
@@ -100,6 +107,14 @@ export function useCreditBalance(): UseCreditBalanceResult {
       setError(null)
 
       // Check if Supabase is configured
+      if (!supabase) {
+        console.warn('[useCreditBalance] Supabase not configured, using fallback')
+        setWallet(FALLBACK_WALLET)
+        setTransactions([])
+        setIsLoading(false)
+        return
+      }
+
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
       if (!supabaseUrl || supabaseUrl === 'REDACTED') {
         console.warn('[useCreditBalance] Supabase not configured, using fallback')
@@ -181,6 +196,8 @@ export function useCreditBalance(): UseCreditBalanceResult {
 
   // Subscribe to auth changes
   useEffect(() => {
+    if (!supabase) return
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session?.user) {
@@ -200,7 +217,7 @@ export function useCreditBalance(): UseCreditBalanceResult {
 
   // Real-time subscription for wallet updates
   useEffect(() => {
-    if (!wallet?.userId) return
+    if (!supabase || !wallet?.userId) return
 
     const channel = supabase
       .channel('credit-wallet-changes')
