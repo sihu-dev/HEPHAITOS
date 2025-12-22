@@ -81,7 +81,7 @@ export function OnboardingContent() {
 
   const handleStepChange = useCallback((step: number, data: Partial<OnboardingData>) => {
     // 스텝 변경 시 진행 상태 자동 저장
-    saveProgress(step, data as any)
+    void saveProgress(step, data)
   }, [saveProgress])
 
   // 로딩 중
@@ -112,7 +112,7 @@ export function OnboardingContent() {
     <OnboardingWizard
       onComplete={handleComplete}
       onSkip={handleSkip}
-      onStepChange={handleStepChange as any}
+      onStepChange={handleStepChange}
       initialStep={currentStep}
       initialData={initialData ?? undefined}
     />

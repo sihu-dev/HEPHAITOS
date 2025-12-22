@@ -37,10 +37,17 @@ type TranslateFunction = (key: string) => string | string[] | Record<string, unk
 // Refund Request Section Component
 // ============================================
 
+interface RefundPreview {
+  usage_rate: number
+  eligible: boolean
+  refund_amount: number
+  message?: string
+}
+
 function RefundRequestSection() {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [refundReason, setRefundReason] = useState('')
-  const [refundPreview, setRefundPreview] = useState<any>(null)
+  const [refundPreview, setRefundPreview] = useState<RefundPreview | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [notification, setNotification] = useState<{
     type: 'success' | 'error'
@@ -375,8 +382,12 @@ function BillingContentInner() {
           message: (t('dashboard.billing.notifications.upgradedTo') as string).replace('{plan}', plan?.name || ''),
         })
       }
-    } catch (error) {
-      throw error
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : t('dashboard.billing.errors.paymentCreationFailed') as string
+      setNotification({
+        type: 'error',
+        message: errorMessage,
+      })
     } finally {
       setIsLoading(false)
     }

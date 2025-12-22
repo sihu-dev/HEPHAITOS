@@ -311,7 +311,7 @@ export class AIReportGenerator {
           entryPoints: this.generateMockEntryPoints(),
         }
 
-      case 'entry_analysis':
+      case 'entry_analysis': {
         const indicators = params.indicators as EntryIndicators
         const signalCount = [
           indicators.ma20Above,
@@ -328,6 +328,7 @@ export class AIReportGenerator {
           targetPrice: 75000,
           stopLoss: 69000,
         }
+      }
 
       case 'strategy_generation':
         return {

@@ -535,7 +535,7 @@ export class TradingAgentOrchestrator {
 
   private async executeAction(action: AgentAction): Promise<AgentResponse> {
     switch (action.type) {
-      case 'START_LIVE':
+      case 'START_LIVE': {
         this.context.activePosition = true
         const strategy = this.context.currentStrategy!
         return {
@@ -547,6 +547,7 @@ export class TradingAgentOrchestrator {
           intent: { type: 'LIVE_START', confidence: 1, entities: { symbols: [], prices: [], percentages: [], indicators: [], timeframes: [], conditions: [], actions: [] }, rawText: '', timestamp: new Date() },
           action,
         }
+      }
 
       case 'STOP_LIVE':
         this.context.activePosition = false

@@ -330,7 +330,7 @@ export const TradingChart = memo(function TradingChart({
           values = calculateEMA(closes, overlay.period)
           color = color || chartTheme.indicatorColors.ema
           break
-        case 'bollinger':
+        case 'bollinger': {
           const bb = calculateBollingerBands(closes, overlay.period)
           // Add three lines for Bollinger Bands
           const upperSeries = chartRef.current!.addSeries(LineSeries, {
@@ -356,6 +356,7 @@ export const TradingChart = memo(function TradingChart({
           lowerSeries.setData(convertToLineData(times, bb.lower))
           overlaySeriesRef.current.push(lowerSeries)
           return
+        }
       }
 
       if (values.length > 0) {

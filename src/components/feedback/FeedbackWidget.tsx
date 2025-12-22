@@ -86,7 +86,8 @@ export function FeedbackWidget() {
         screenResolution: `${screen.width}x${screen.height}`,
       }
 
-      const { error: insertError } = await supabase.from('feedback').insert({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: insertError } = await (supabase.from('feedback') as any).insert({
         user_id: user?.id || null,
         email: formData.email || user?.email || null,
         type: formData.type,
@@ -97,7 +98,7 @@ export function FeedbackWidget() {
         description: formData.description,
         browser_info: browserInfo,
         device_info: deviceInfo,
-      } as any)
+      })
 
       if (insertError) {
         throw insertError

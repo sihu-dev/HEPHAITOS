@@ -297,7 +297,7 @@ export function calculateIndicator(
     case 'rsi':
       values = rsi(closes, params.period || 14)
       break
-    case 'macd':
+    case 'macd': {
       const macdResult = macd(
         closes,
         params.fastPeriod || 12,
@@ -306,7 +306,8 @@ export function calculateIndicator(
       )
       values = macdResult.macd
       break
-    case 'bollinger':
+    }
+    case 'bollinger': {
       const bbResult = bollingerBands(
         closes,
         params.period || 20,
@@ -314,10 +315,11 @@ export function calculateIndicator(
       )
       values = bbResult.middle
       break
+    }
     case 'atr':
       values = atr(candles, params.period || 14)
       break
-    case 'stochastic':
+    case 'stochastic': {
       const stochResult = stochastic(
         candles,
         params.kPeriod || 14,
@@ -325,6 +327,7 @@ export function calculateIndicator(
       )
       values = stochResult.k
       break
+    }
     case 'momentum':
       values = momentum(closes, params.period || 10)
       break

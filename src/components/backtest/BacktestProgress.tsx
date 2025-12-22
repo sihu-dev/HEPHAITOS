@@ -10,9 +10,18 @@ import { createClient } from '@/lib/supabase/client';
 import { Progress } from '@/components/ui/progress';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
+interface BacktestResult {
+  metrics?: Record<string, number>;
+  trades?: unknown[];
+  equity?: number[];
+  totalReturn?: number;
+  sharpeRatio?: number;
+  [key: string]: unknown;
+}
+
 interface BacktestProgressProps {
   jobId: string;
-  onComplete?: (result: any) => void;
+  onComplete?: (result: BacktestResult) => void;
   onError?: (error: string) => void;
 }
 
@@ -20,7 +29,7 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<'pending' | 'active' | 'completed' | 'failed'>('pending');
   const [message, setMessage] = useState('대기 중...');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<BacktestResult | null>(null);
 
   const supabase = createClient();
 
@@ -53,8 +62,9 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
             setMessage((data.message as string) || '처리 중...');
 
             if (data.status === 'completed') {
-              setResult(data.result);
-              onComplete?.(data.result);
+              const resultData = data.result as BacktestResult;
+              setResult(resultData);
+              onComplete?.(resultData);
             } else if (data.status === 'failed') {
               const resultData = data.result as { error?: string } | undefined;
               onError?.(resultData?.error || '알 수 없는 오류');

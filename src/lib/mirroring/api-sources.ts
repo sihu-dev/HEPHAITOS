@@ -433,8 +433,8 @@ export class ARKInvestClient {
           company: cols[2].replace(/"/g, '').trim(),
           cusip: cols[4].replace(/"/g, '').trim(),
           shares: parseInt(cols[5].replace(/[",]/g, '')) || 0,
-          marketValue: parseFloat(cols[6].replace(/[",\$]/g, '')) || 0,
-          weight: parseFloat(cols[7].replace(/[",\%]/g, '')) || 0,
+          marketValue: parseFloat(cols[6].replace(/[",]/g, '').replace('$', '')) || 0,
+          weight: parseFloat(cols[7].replace(/["%,]/g, '')) || 0,
         })
       }
     }

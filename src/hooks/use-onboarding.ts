@@ -10,9 +10,9 @@ import { useRouter } from 'next/navigation'
 
 export interface UserProfile {
   nickname: string
-  investmentStyle: 'conservative' | 'moderate' | 'aggressive'
+  investmentStyle: 'conservative' | 'moderate' | 'aggressive' | ''
   interests: string[]
-  experience: 'beginner' | 'intermediate' | 'advanced'
+  experience: 'beginner' | 'intermediate' | 'advanced' | ''
   painPoints?: string[]
 }
 
