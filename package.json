@@ -32,7 +32,12 @@
     "audit:lighthouse": "lhci autorun --config=.lighthouserc.json",
     "worker": "tsx watch src/lib/queue/backtest-worker.ts",
     "worker:prod": "tsx src/lib/queue/backtest-worker.ts",
-    "ci": "npm run lint && npm run test && npm run build"
+    "ci": "npm run lint && npm run test && npm run build",
+    "eval:frontend": "tsx scripts/evaluate-frontend.ts",
+    "eval:backend": "tsx scripts/evaluate-backend.ts",
+    "eval:all": "tsx scripts/evaluate-all.ts",
+    "eval:lighthouse": "lhci autorun --config=.lighthouserc.json",
+    "build:analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.56",
@@ -75,6 +80,8 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.2",
     "@next/bundle-analyzer": "^16.0.10",
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
@@ -87,6 +94,7 @@
     "autoprefixer": "^10.4.16",
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "glob": "^13.0.0",
     "husky": "^9.1.7",
@@ -95,6 +103,7 @@
     "playwright": "^1.57.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.3.0",
     "vitest": "^4.0.15"
   }
