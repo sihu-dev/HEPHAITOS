@@ -128,7 +128,7 @@ function WorkflowNode({
       case 'process':
         return 'border-blue-500/30 bg-blue-500/5'
       case 'decision':
-        return 'border-amber-500/30 bg-amber-500/5'
+        return 'border-primary/30 bg-primary/5'
       case 'action':
         return 'border-purple-500/30 bg-purple-500/5'
       case 'output':

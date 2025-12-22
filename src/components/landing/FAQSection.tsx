@@ -70,10 +70,10 @@ const faqs: FAQItem[] = [
 ]
 
 const categoryColors: Record<string, string> = {
-  '법률': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  'Legal': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  '성능': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  'Performance': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  '법률': 'bg-primary/10 text-primary-400 border-primary/20',
+  'Legal': 'bg-primary/10 text-primary-400 border-primary/20',
+  '성능': 'bg-primary/10 text-primary-400 border-primary/20',
+  'Performance': 'bg-primary/10 text-primary-400 border-primary/20',
   '기술': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   'Tech': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   '가격': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
@@ -98,7 +98,7 @@ export const FAQSection = memo(function FAQSection() {
       <div className="max-w-3xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-sm text-amber-500 font-medium mb-3">FAQ</p>
+          <p className="text-sm text-primary font-medium mb-3">FAQ</p>
           <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
             {isKo ? '자주 묻는 질문' : 'Frequently Asked Questions'}
           </h2>
@@ -119,7 +119,7 @@ export const FAQSection = memo(function FAQSection() {
               <div
                 key={index}
                 className={`bg-zinc-900/50 border rounded-lg transition-colors ${
-                  isOpen ? 'border-amber-500/30' : 'border-zinc-800'
+                  isOpen ? 'border-primary/30' : 'border-zinc-800'
                 }`}
               >
                 {/* Question Button */}
@@ -134,7 +134,7 @@ export const FAQSection = memo(function FAQSection() {
                       {category}
                     </span>
                     <p className={`text-sm font-medium transition-colors ${
-                      isOpen ? 'text-amber-400' : 'text-white'
+                      isOpen ? 'text-primary-400' : 'text-white'
                     }`}>
                       {isKo ? faq.questionKo : faq.questionEn}
                     </p>

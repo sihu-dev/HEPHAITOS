@@ -80,7 +80,7 @@ export const FeaturesSection = memo(function FeaturesSection() {
               </span>
 
               {/* Title */}
-              <h3 className="text-lg font-medium text-white mb-2 group-hover:text-amber-400 transition-colors">
+              <h3 className="text-lg font-medium text-white mb-2 group-hover:text-primary-400 transition-colors">
                 {isKo ? feature.titleKo : feature.titleEn}
               </h3>
 
@@ -90,7 +90,7 @@ export const FeaturesSection = memo(function FeaturesSection() {
               </p>
 
               {/* Arrow */}
-              <div className="mt-4 text-zinc-600 group-hover:text-amber-400 transition-colors">
+              <div className="mt-4 text-zinc-600 group-hover:text-primary-400 transition-colors">
                 <span className="text-sm">→</span>
               </div>
             </Link>

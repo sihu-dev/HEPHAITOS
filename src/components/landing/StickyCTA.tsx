@@ -35,7 +35,7 @@ export const StickyCTA = memo(function StickyCTA() {
       <div className="max-w-md mx-auto pointer-events-auto">
         <a
           href="/auth/signup"
-          className="flex items-center justify-center gap-2 w-full py-3.5 px-6 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center justify-center gap-2 w-full py-3.5 px-6 bg-primary hover:bg-primary-400 text-white rounded-lg text-sm font-medium transition-colors"
         >
           <span>{isKo ? '50 크레딧 무료로 시작' : 'Start with 50 Free Credits'}</span>
           <span>→</span>

@@ -63,7 +63,7 @@ export const PainPointCards = memo(function PainPointCards() {
       <div className="max-w-5xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-sm text-amber-500 font-medium mb-3">
+          <p className="text-sm text-primary font-medium mb-3">
             {isKo ? '문제 해결' : 'Pain Points'}
           </p>
           <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
@@ -93,7 +93,7 @@ export const PainPointCards = memo(function PainPointCards() {
                     "{isKo ? point.problemKo : point.problemEn}"
                   </p>
                   <div className="flex items-center gap-2">
-                    <span className="text-amber-400">→</span>
+                    <span className="text-primary-400">→</span>
                     <p className="text-sm text-zinc-400">
                       {isKo ? point.solutionKo : point.solutionEn}
                     </p>
@@ -108,7 +108,7 @@ export const PainPointCards = memo(function PainPointCards() {
         <div className="mt-12 text-center">
           <a
             href="/auth/signup"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-400 text-white rounded-lg text-sm font-medium transition-colors"
           >
             <span>{isKo ? '50 크레딧 무료로 시작' : 'Start with 50 Free Credits'}</span>
             <span>→</span>

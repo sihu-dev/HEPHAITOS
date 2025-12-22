@@ -77,7 +77,7 @@ export const SocialProofSection = memo(function SocialProofSection() {
       <div className="max-w-5xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-sm text-amber-500 font-medium mb-3">
+          <p className="text-sm text-primary font-medium mb-3">
             {isKo ? '사용 사례' : 'Use Cases'}
           </p>
           <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
@@ -127,7 +127,7 @@ export const SocialProofSection = memo(function SocialProofSection() {
               </p>
 
               {/* Result */}
-              <span className="inline-flex px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 rounded text-xs text-amber-400 font-medium">
+              <span className="inline-flex px-2.5 py-1 bg-primary/10 border border-primary/20 rounded text-xs text-primary-400 font-medium">
                 ✓ {isKo ? story.resultKo : story.resultEn}
               </span>
             </div>
@@ -135,7 +135,7 @@ export const SocialProofSection = memo(function SocialProofSection() {
         </div>
 
         {/* Demo Notice */}
-        <div className="p-3 border border-amber-500/20 bg-amber-500/5 rounded-lg text-center">
+        <div className="p-3 border border-primary/20 bg-primary/5 rounded-lg text-center">
           <p className="text-xs text-zinc-400">
             ⚠ {isKo
               ? '위 스토리는 예상 사용 시나리오입니다. 실제 투자 결과를 보장하지 않습니다.'

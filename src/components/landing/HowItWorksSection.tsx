@@ -14,7 +14,7 @@ type PersonaKey = 'minsu' | 'jihyun' | 'youngho'
 const personaKeys: PersonaKey[] = ['minsu']
 
 const journeySteps = [
-  { step: 'COPY', color: 'amber' },
+  { step: 'COPY', color: 'primary' },
   { step: 'LEARN', color: 'blue' },
   { step: 'BUILD', color: 'purple' },
 ]
@@ -28,7 +28,7 @@ export const HowItWorksSection = memo(function HowItWorksSection() {
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <p className="text-sm text-amber-500 font-medium mb-3">
+          <p className="text-sm text-primary font-medium mb-3">
             {t('howItWorks.label')}
           </p>
           <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">
@@ -102,11 +102,11 @@ export const HowItWorksSection = memo(function HowItWorksSection() {
 
                   {/* After */}
                   <div className="p-6 flex items-center">
-                    <div className="w-full p-4 bg-zinc-900/50 border border-amber-500/20 rounded-lg">
+                    <div className="w-full p-4 bg-zinc-900/50 border border-primary/20 rounded-lg">
                       <div className="flex items-start gap-3">
-                        <span className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 text-xs">✓</span>
+                        <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary-400 text-xs">✓</span>
                         <div>
-                          <p className="text-xs text-amber-400 font-medium uppercase mb-1">AFTER</p>
+                          <p className="text-xs text-primary-400 font-medium uppercase mb-1">AFTER</p>
                           <p className="text-sm text-white mb-1">{after.result}</p>
                           <p className="text-xs text-zinc-500">{after.gain}</p>
                         </div>
@@ -121,7 +121,7 @@ export const HowItWorksSection = memo(function HowItWorksSection() {
                     {personaJourney.map((step, index) => {
                       const journeyStep = journeySteps[index]
                       const getBadgeColor = () => {
-                        if (journeyStep.color === 'amber') return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                        if (journeyStep.color === 'primary') return 'bg-primary/10 text-primary-400 border-primary/20'
                         if (journeyStep.color === 'blue') return 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                         return 'bg-purple-500/10 text-purple-400 border-purple-500/20'
                       }
@@ -155,7 +155,7 @@ export const HowItWorksSection = memo(function HowItWorksSection() {
             <div key={step.step} className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className={`w-3 h-3 rounded-full ${
-                  step.color === 'amber' ? 'bg-amber-500' :
+                  step.color === 'primary' ? 'bg-primary' :
                   step.color === 'blue' ? 'bg-blue-500' : 'bg-purple-500'
                 }`} />
                 <span className="text-xs text-zinc-500">{step.step}</span>
