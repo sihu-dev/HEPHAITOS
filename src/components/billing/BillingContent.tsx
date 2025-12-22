@@ -16,28 +16,22 @@ import {
   ArrowPathIcon,
   CalendarIcon,
   CurrencyDollarIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline'
 import { PricingTable, PaymentModal } from '@/components/pricing'
 import {
   PRICING_PLANS,
-  getPlanById,
+  getPlanById as getTossPaymentPlan,
   formatPrice,
   type PlanType,
   type BillingCycle,
 } from '@/lib/payments/toss-payments'
 import { DisclaimerInline } from '@/components/ui/Disclaimer'
 import { useI18n } from '@/i18n/client'
+import { useSubscription, getPlanById, getDaysRemaining } from '@/hooks/useSubscription'
+import { useCreditBalance, formatCredits } from '@/hooks/useCreditBalance'
 
 type TranslateFunction = (key: string) => string | string[] | Record<string, unknown>
-
-// 현재 구독 정보 (Mock)
-const mockSubscription = {
-  planId: 'starter' as PlanType,
-  billingCycle: 'monthly' as BillingCycle,
-  status: 'active',
-  currentPeriodEnd: new Date('2025-01-15'),
-  nextPaymentAmount: 9900,
-}
 
 // ============================================
 // Refund Request Section Component
@@ -285,6 +279,10 @@ function BillingContentInner() {
     message: string
   } | null>(null)
 
+  // Real data from hooks
+  const { subscription, isLoading: subscriptionLoading, cancelSubscription: cancelSub } = useSubscription()
+  const { balance, wallet, isLoading: creditLoading } = useCreditBalance()
+
   // URL 파라미터로 결제 결과 확인
   useEffect(() => {
     const success = searchParams?.get('success')
@@ -315,14 +313,16 @@ function BillingContentInner() {
     return undefined
   }, [notification])
 
-  const currentPlan = getPlanById(mockSubscription.planId)
-  const daysRemaining = Math.ceil(
-    (mockSubscription.currentPeriodEnd.getTime() - Date.now()) /
-      (1000 * 60 * 60 * 24)
-  )
+  // Calculate plan details
+  const currentPlan = subscription ? getPlanById(subscription.planId) : getPlanById('free')
+  const daysRemaining = subscription ? getDaysRemaining(subscription.currentPeriodEnd) : 0
+  const tossPaymentPlan = subscription ? getTossPaymentPlan(subscription.planId) : null
+  const nextPaymentAmount = tossPaymentPlan
+    ? (subscription?.billingCycle === 'yearly' ? tossPaymentPlan.yearlyPrice : tossPaymentPlan.monthlyPrice)
+    : 0
 
   const handleSelectPlan = (planId: PlanType, billingCycle: BillingCycle) => {
-    if (planId === mockSubscription.planId) return
+    if (subscription && planId === subscription.planId) return
 
     if (planId === 'free') {
       // 무료 플랜으로 다운그레이드
@@ -369,9 +369,10 @@ function BillingContentInner() {
       } else {
         // 개발 환경에서는 바로 성공 처리 시뮬레이션
         setShowPaymentModal(false)
+        const plan = getTossPaymentPlan(selectedPlan)
         setNotification({
           type: 'success',
-          message: (t('dashboard.billing.notifications.upgradedTo') as string).replace('{plan}', getPlanById(selectedPlan)?.name || ''),
+          message: (t('dashboard.billing.notifications.upgradedTo') as string).replace('{plan}', plan?.name || ''),
         })
       }
     } catch (error) {
@@ -462,20 +463,41 @@ function BillingContentInner() {
             <div>
               <h2 className="text-white font-medium">{t('dashboard.billing.currentPlan') as string}</h2>
               <p className="text-sm text-zinc-400">
-                {currentPlan?.name} ({currentPlan?.nameKr})
+                {currentPlan?.name} ({currentPlan?.nameKo})
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <span
               className={`px-3 py-1 rounded-full text-xs font-medium ${
-                mockSubscription.status === 'active'
+                subscription?.status === 'active'
                   ? 'bg-emerald-500/20 text-emerald-400'
                   : 'bg-yellow-500/20 text-yellow-400'
               }`}
             >
-              {mockSubscription.status === 'active' ? t('dashboard.billing.status.active') as string : t('dashboard.billing.status.pending') as string}
+              {subscription?.status === 'active' ? t('dashboard.billing.status.active') as string : t('dashboard.billing.status.pending') as string}
             </span>
+          </div>
+        </div>
+
+        {/* Credit Balance Card */}
+        <div className="p-4 bg-gradient-to-r from-primary/20 to-primary/5 border border-primary/30 rounded-lg mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <SparklesIcon className="w-5 h-5 text-primary-400" />
+              </div>
+              <div>
+                <p className="text-sm text-zinc-400">{t('dashboard.billing.creditBalance') as string || '크레딧 잔액'}</p>
+                <p className="text-2xl font-bold text-white">{formatCredits(balance)} <span className="text-sm font-normal text-zinc-400">credits</span></p>
+              </div>
+            </div>
+            {wallet && (
+              <div className="text-right text-xs text-zinc-500">
+                <p>총 구매: {formatCredits(wallet.lifetimePurchased)}</p>
+                <p>총 사용: {formatCredits(wallet.lifetimeSpent)}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -486,7 +508,7 @@ function BillingContentInner() {
               <span>{t('dashboard.billing.nextPaymentDate') as string}</span>
             </div>
             <p className="text-white font-medium">
-              {mockSubscription.currentPeriodEnd.toLocaleDateString('ko-KR')}
+              {subscription?.currentPeriodEnd?.toLocaleDateString('ko-KR') || '-'}
             </p>
             <p className="text-xs text-zinc-400">{(t('dashboard.billing.daysRemaining') as string).replace('{days}', String(daysRemaining))}</p>
           </div>
@@ -497,10 +519,10 @@ function BillingContentInner() {
               <span>{t('dashboard.billing.paymentAmount') as string}</span>
             </div>
             <p className="text-white font-medium">
-              {formatPrice(mockSubscription.nextPaymentAmount)}
+              {formatPrice(nextPaymentAmount)}
             </p>
             <p className="text-xs text-zinc-400">
-              {mockSubscription.billingCycle === 'yearly' ? t('dashboard.billing.yearly') as string : t('dashboard.billing.monthly') as string}
+              {subscription?.billingCycle === 'yearly' ? t('dashboard.billing.yearly') as string : t('dashboard.billing.monthly') as string}
             </p>
           </div>
 
@@ -509,7 +531,11 @@ function BillingContentInner() {
               <ArrowPathIcon className="w-4 h-4" />
               <span>{t('dashboard.billing.autoRenewal') as string}</span>
             </div>
-            <p className="text-white font-medium">{t('dashboard.billing.enabled') as string}</p>
+            <p className="text-white font-medium">
+              {subscription?.cancelAtPeriodEnd
+                ? t('dashboard.billing.disabled') as string || '비활성화'
+                : t('dashboard.billing.enabled') as string}
+            </p>
             <p className="text-xs text-zinc-400">{t('dashboard.billing.cardPayment') as string}</p>
           </div>
         </div>
@@ -522,7 +548,7 @@ function BillingContentInner() {
           >
             {showPricing ? t('dashboard.billing.hidePlans') as string : t('dashboard.billing.changePlan') as string}
           </button>
-          {mockSubscription.planId !== 'free' && (
+          {subscription?.planId !== 'free' && (
             <button
               type="button"
               onClick={handleCancelSubscription}
@@ -545,7 +571,7 @@ function BillingContentInner() {
             className="overflow-hidden"
           >
             <PricingTable
-              currentPlanId={mockSubscription.planId}
+              currentPlanId={subscription?.planId || 'free'}
               onSelectPlan={handleSelectPlan}
               isLoading={isLoading}
             />
@@ -611,7 +637,7 @@ function BillingContentInner() {
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
-        plan={selectedPlan ? getPlanById(selectedPlan) || null : null}
+        plan={selectedPlan ? getTossPaymentPlan(selectedPlan) || null : null}
         billingCycle={selectedCycle}
         onConfirm={handlePaymentConfirm}
       />
