@@ -387,8 +387,7 @@ export function CompareContent() {
     ...userOnlyHoldings,
   ]
 
-  const handleSync = (items: ComparisonResult[]) => {
-    console.log('Syncing portfolio:', items)
+  const handleSync = (_items: ComparisonResult[]) => {
     // TODO: Implement actual sync logic
   }
 

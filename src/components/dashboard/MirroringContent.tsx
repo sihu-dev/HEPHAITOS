@@ -485,8 +485,7 @@ export function MirroringContent() {
     setShowMirrorModal(true)
   }
 
-  const handleMirrorConfirm = (amount: number) => {
-    console.log('Mirror confirmed:', { celebrity: selectedCelebrity, amount })
+  const handleMirrorConfirm = (_amount: number) => {
     setShowMirrorModal(false)
     // TODO: Implement actual mirror setup with broker integration
   }

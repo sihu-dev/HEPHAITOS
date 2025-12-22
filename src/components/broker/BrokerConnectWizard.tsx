@@ -146,7 +146,6 @@ function BrokerCard({
     e.stopPropagation()
     setNotificationRequested(true)
     // TODO: 실제 알림 신청 API 호출
-    console.log(`알림 신청: ${broker.id}`)
   }
 
   return (

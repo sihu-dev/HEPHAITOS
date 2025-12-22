@@ -51,8 +51,6 @@ export function OnboardingContent() {
     acceptedDisclaimer?: boolean
   }) => {
     try {
-      console.log('[Onboarding] Completing...', data)
-
       // 훅을 통해 완료 처리 (API + 로컬 스토리지)
       const success = await completeOnboarding({
         nickname: data.nickname,

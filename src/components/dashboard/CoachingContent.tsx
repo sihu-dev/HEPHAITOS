@@ -719,7 +719,9 @@ export function CoachingContent() {
                 <MentorCard
                   key={mentor.id}
                   mentor={mentor}
-                  onBook={() => console.log('Book mentor:', mentor.id)}
+                  onBook={() => {
+                    // TODO: 멘토 예약 API 연동
+                  }}
                   t={t}
                 />
               ))}
