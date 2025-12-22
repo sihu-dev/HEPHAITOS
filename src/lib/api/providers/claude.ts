@@ -171,6 +171,10 @@ class ClaudeProvider {
     // 티어에 맞는 모델 선택
     const model = request.userTier ? this.getModelForUser(request.userTier) : this.models.fast
 
+    // 전략 복잡도 판단 (Extended Thinking 사용 여부)
+    const isComplexStrategy = this.assessStrategyComplexity(request.prompt)
+    const isProTier = request.userTier === 'pro'
+
     // 추가 지시사항 (캐싱 안됨, 요청마다 다를 수 있음)
     const additionalInstructions: CacheControlBlock = {
       type: 'text',
@@ -209,24 +213,74 @@ ${request.context?.riskLevel ? `리스크 성향: ${request.context.riskLevel}` 
 
 위 요청을 분석하여 트레이딩 전략을 JSON 형식으로 생성해주세요.`
 
-    const response = await this.getClient().messages.create({
+    // ✨ Extended Thinking 적용 (Pro 티어 + 복잡한 전략)
+    const requestParams: Anthropic.MessageCreateParams = {
       model,
       max_tokens: 2048,
       messages: [
         { role: 'user', content: userPrompt }
       ],
       system: [...cachedSystemBlocks, additionalInstructions],
-    })
+    }
+
+    // Pro 티어이고 복잡한 전략이면 Extended Thinking 활성화
+    if (isProTier && isComplexStrategy) {
+      requestParams.thinking = {
+        type: 'enabled',
+        budget_tokens: 8000, // 복잡한 전략 생성을 위한 충분한 토큰
+      }
+    }
+
+    const response = await this.getClient().messages.create(requestParams)
 
     // 💰 캐시 메트릭 저장
     await this.trackCacheUsage(response.usage, '/api/strategies/generate', model, request.userTier)
 
-    const content = response.content[0]
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type')
+    // Extended Thinking 사용 시 로그 출력
+    if (isProTier && isComplexStrategy && process.env.NODE_ENV === 'development') {
+      console.log('[Extended Thinking] Pro 티어 복잡 전략 - Extended Thinking 활성화')
     }
 
-    return this.parseJsonResponse<StrategyGenerationResponse>(content.text, 'strategy generation')
+    // Response에서 text content 추출 (thinking block은 무시)
+    const textContent = response.content.find((c) => c.type === 'text')
+    if (!textContent || textContent.type !== 'text') {
+      throw new Error('No text content in response')
+    }
+
+    return this.parseJsonResponse<StrategyGenerationResponse>(textContent.text, 'strategy generation')
+  }
+
+  /**
+   * 전략 복잡도 판단
+   * 다음 키워드가 포함되면 복잡한 전략으로 간주:
+   * - 다중 지표 조합 (2개 이상)
+   * - 시장 환경 분석 (추세, 변동성)
+   * - 동적 파라미터 조정
+   * - 포트폴리오 리밸런싱
+   */
+  private assessStrategyComplexity(prompt: string): boolean {
+    const complexKeywords = [
+      '다중',
+      '조합',
+      '복합',
+      '추세',
+      '변동성',
+      '동적',
+      '자동 조정',
+      '리밸런싱',
+      '포트폴리오',
+      '분산',
+      '상관관계',
+      '시장 환경',
+      '머신러닝',
+      'ML',
+      'AI',
+    ]
+
+    const lowerPrompt = prompt.toLowerCase()
+    const matchCount = complexKeywords.filter((keyword) => lowerPrompt.includes(keyword)).length
+
+    return matchCount >= 2 // 2개 이상 키워드 매치 시 복잡한 전략
   }
 
   // ============================================
