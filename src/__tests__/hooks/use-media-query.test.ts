@@ -65,7 +65,7 @@ describe('useMediaQuery', () => {
   })
 
   it('should update when media query changes', () => {
-    let mockMatches = false
+    const mockMatches = false
     const listeners: ((event: MediaQueryListEvent) => void)[] = []
 
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({

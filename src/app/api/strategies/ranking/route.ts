@@ -21,7 +21,7 @@ export async function GET(req: Request) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const marketCondition = searchParams.get('market_condition')
 
-    let query = supabaseAdmin
+    const query = supabaseAdmin
       .from('public_strategy_ranking')
       .select('*')
       .limit(limit)

@@ -7,7 +7,7 @@
 // To re-enable: npm install @sentry/nextjs
 
 // 초기화 상태
-let isInitialized = false
+const isInitialized = false
 
 /**
  * Sentry 초기화 (disabled)

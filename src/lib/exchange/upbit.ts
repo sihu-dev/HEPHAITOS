@@ -429,7 +429,7 @@ export class UpbitExchange extends BaseExchange {
 
     // Calculate total value in KRW
     const krwBalance = balances.find(b => b.currency === 'KRW')
-    let totalValue = krwBalance?.total || 0
+    const totalValue = krwBalance?.total || 0
 
     // Add estimated value of other assets (would need price data for accuracy)
     // For now, just return KRW balance
