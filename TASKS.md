@@ -29,8 +29,8 @@
 - [x] Supabase Realtime 채널 설정 - 완료 (migration)
 - [x] Worker → Supabase 푸시 로직 - 완료 (broadcastProgress)
 - [x] Frontend 구독 컴포넌트 (<BacktestProgress />) - 완료 (WebSocket + polling)
-- [ ] 큐 대시보드 페이지 - 2시간 ⏳ 진행 중
-- [ ] 부하 테스트 (동시 100명 시뮬레이션) - 2시간
+- [x] 큐 대시보드 페이지 - 완료 (/dashboard/queue + QueueDashboard 컴포넌트)
+- [ ] 부하 테스트 (동시 100명 시뮬레이션) - 2시간 ⏳ 다음
 
 ---
 
