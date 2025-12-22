@@ -39,11 +39,27 @@ const TOP_500_SYMBOLS = [
 ]
 
 /**
+ * GET /api/cron/batch-analysis?action=submit (default)
  * POST /api/cron/batch-analysis
  *
  * 매일 22:00 실행되어 500개 종목 시장 분석을 배치 처리
  */
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const action = searchParams.get('action') || 'submit'
+
+  if (action === 'retrieve') {
+    return handleRetrieveResults(request)
+  }
+
+  return handleSubmitBatch(request)
+}
+
 export async function POST(request: Request) {
+  return handleSubmitBatch(request)
+}
+
+async function handleSubmitBatch(request: Request) {
   // Verify Cron Secret (Vercel 보안)
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -114,12 +130,7 @@ export async function POST(request: Request) {
   }
 }
 
-/**
- * GET /api/cron/batch-analysis/results
- *
- * 매일 06:00 실행되어 밤새 처리된 배치 결과 가져오기
- */
-export async function GET(request: Request) {
+async function handleRetrieveResults(request: Request) {
   // Verify Cron Secret
   const authHeader = request.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
