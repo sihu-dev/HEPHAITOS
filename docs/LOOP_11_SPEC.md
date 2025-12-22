@@ -1,985 +1,759 @@
-# Loop 11 Specification: 백테스트 큐 시스템
-**BullMQ + Supabase Realtime 통합**
+# Loop 11: 백테스트 큐 시스템 상세 스펙
 
-작성일: 2025-12-16
-목표 완료: 2025-12-29 (2주)
-담당: Backend + Frontend 풀스택
-V2 9.5 → V3 9.7
+> **Version**: 2.0
+> **Date**: 2025-12-22
+> **Status**: 🔄 In Progress
+> **Priority**: P0 (베타 블로커)
 
 ---
 
-## 🎯 목표 & 성공 지표
+## 1. 개요
 
-### 비즈니스 목표
-- 동시 접속자 확장: 10명 → **100명**
-- 베타 오픈 블로커 해결
-- 매출 증대: **+₩677,500/월** (ROI 33배)
+### 1.1 문제 정의
 
-### 기술 목표
-- 백테스트 비동기 처리 (60초 타임아웃 해결)
+**현재 상황**:
+- 백테스트가 동기식으로 실행되어 10명 이상 동시 접속 시 서버 과부하
+- 평균 백테스트 시간 2-5분 × 10명 = 20-50분 대기
+- 진행 상황 표시 없음 → 사용자 이탈률 증가
+- Worker 장애 시 복구 메커니즘 없음
+
+**목표**:
+- 동시 100명 백테스트 처리 (현재 10명 → 10배 향상)
+- 평균 대기시간 <30초
 - 실시간 진행률 표시 (WebSocket)
-- 유료 유저 우선 처리 (Priority Queue)
+- Worker 자동 복구 및 재시도
 
-### 성공 지표 (KPI)
-- ✅ 동시 100명 백테스트 처리 성공
-- ✅ 평균 대기시간 <30초
-- ✅ 진행률 업데이트 지연 <2초
-- ✅ Worker 장애 시 자동 복구 <5분
-- ✅ Redis 메모리 사용량 <100MB
+### 1.2 ROI 분석
 
----
+| 항목 | 개선 전 | 개선 후 | 효과 |
+|------|---------|---------|------|
+| 동시 사용자 | 10명 | 100명 | **10배** |
+| 평균 대기시간 | 5분 | <30초 | **10배 개선** |
+| 서버 비용 | $200/월 | $150/월 | **25% 절감** |
+| 사용자 이탈률 | 45% | <15% | **67% 감소** |
 
-## 📐 아키텍처 설계
-
-### 현재 아키텍처 (문제점)
-```mermaid
-graph LR
-    A[Frontend] -->|POST /api/backtest| B[API Route]
-    B -->|동기 실행| C[Backtest Engine]
-    C -->|60초 타임아웃| D[❌ 실패]
-    C -->|결과 저장| E[(Supabase)]
-
-    style D fill:#f99
-```
-
-**문제점:**
-1. 60초 타임아웃 (Vercel 제한)
-2. 동시 요청 시 서버 과부하
-3. 유저 이탈 (1분+ 대기)
-
-### 목표 아키텍처 (해결책)
-```mermaid
-graph TB
-    subgraph Frontend
-        A[React Component]
-        A1[BacktestProgress]
-    end
-
-    subgraph "Next.js API"
-        B[POST /api/backtest/queue]
-        C[GET /api/backtest/status/:jobId]
-    end
-
-    subgraph "BullMQ (Upstash Redis)"
-        D[backtest-queue]
-        D1[Job: pending]
-        D2[Job: active]
-        D3[Job: completed]
-    end
-
-    subgraph Worker
-        E[backtest-worker.ts]
-        E1[Process Job]
-        E2[Update Progress]
-    end
-
-    subgraph Supabase
-        F[(backtest_results)]
-        G[Realtime Channel]
-    end
-
-    A -->|1. Submit| B
-    B -->|2. Add Job| D
-    D --> D1
-    D1 --> D2
-    D2 -->|3. Pick| E
-    E --> E1
-    E1 -->|4. Progress| E2
-    E2 -->|5. Broadcast| G
-    G -->|6. Subscribe| A1
-    E1 -->|7. Save Result| F
-    D2 --> D3
-
-    style D fill:#9cf
-    style G fill:#9f9
-```
-
-**해결책:**
-1. Job Queue로 비동기 처리
-2. Worker 프로세스 분리 (타임아웃 없음)
-3. WebSocket 실시간 진행률
+**투자 회수 기간**: 첫 달 (33배 ROI)
 
 ---
 
-## 🗄️ 데이터 모델
+## 2. 시스템 아키텍처
 
-### 1. BullMQ Job Schema
+### 2.1 전체 플로우
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                     백테스트 큐 시스템 플로우                        │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  [Frontend]                                                      │
+│     │                                                            │
+│     │ POST /api/backtest/queue                                   │
+│     ├──────────────────────────────────────────────────────────► │
+│     │                                                            │
+│  [API Route]                                                     │
+│     │                                                            │
+│     │ addBacktestJob()                                           │
+│     ├──────────────────────────────────────────────────────────► │
+│     │                                                            │
+│  [BullMQ Queue] (Upstash Redis)                                  │
+│     │                                                            │
+│     │ Job: { userId, strategyId, params, priority }              │
+│     ├──────────────────────────────────────────────────────────► │
+│     │                                                            │
+│  [Worker Process]                                                │
+│     │                                                            │
+│     │ 1. 데이터 다운로드 (0-20%)                                  │
+│     │ 2. 지표 계산 (20-50%)                                       │
+│     │ 3. 백테스트 실행 (50-90%)                                   │
+│     │ 4. 결과 저장 (90-100%)                                      │
+│     │                                                            │
+│     │ 진행률 업데이트 → Supabase Realtime                         │
+│     ├──────────────────────────────────────────────────────────► │
+│     │                                                            │
+│  [Supabase Realtime]                                             │
+│     │                                                            │
+│     │ WebSocket Push                                             │
+│     └──────────────────────────────────────────────────────────► │
+│                                                                  │
+│  [Frontend] <BacktestProgress />                                 │
+│     │                                                            │
+│     │ "Processing... 67%"                                        │
+│     │ ████████████░░░░░░                                         │
+│                                                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### 2.2 기술 스택
+
+| 레이어 | 기술 | 역할 |
+|--------|------|------|
+| **Queue** | BullMQ | Job 스케줄링, 우선순위 관리 |
+| **Storage** | Upstash Redis | 큐 데이터 저장 (Serverless) |
+| **Worker** | Node.js Worker | 백테스트 실행 엔진 |
+| **Realtime** | Supabase Realtime | 진행률 WebSocket 푸시 |
+| **Frontend** | React + TanStack Query | 실시간 진행률 구독 |
+
+---
+
+## 3. 데이터 모델
+
+### 3.1 BacktestJobData (Queue 입력)
 
 ```typescript
-// src/types/queue.ts
-export interface BacktestJob {
-  // Job ID는 BullMQ가 자동 생성
-  userId: string;
-  strategyId: string;
-  backtestParams: {
-    symbol: string;
-    startDate: string; // ISO 8601
-    endDate: string;
-    initialCapital: number;
-    commission: number;
-    slippage: number;
-  };
-  priority: number; // 0 (Free) | 1 (Basic) | 2 (Pro)
-  createdAt: number; // timestamp
+export interface BacktestJobData {
+  userId: string              // 사용자 ID
+  strategyId: string          // 전략 ID
+  params: {
+    symbol: string            // 종목 코드 (예: "AAPL")
+    startDate: string         // 시작일 "2020-01-01"
+    endDate: string           // 종료일 "2025-12-22"
+    initialCapital: number    // 초기 자본 (예: 10000)
+  }
+  priority: number            // 1-10 (10이 최고 우선순위)
 }
+```
 
+### 3.2 BacktestJobResult (Queue 출력)
+
+```typescript
 export interface BacktestJobResult {
-  jobId: string;
-  status: 'pending' | 'active' | 'completed' | 'failed';
-  progress: number; // 0-100
-  result?: {
-    backtestId: string;
-    totalReturn: number;
-    sharpeRatio: number;
-    maxDrawdown: number;
-    // ... 기존 backtest_results 스키마
-  };
-  error?: string;
-  startedAt?: number;
-  completedAt?: number;
+  status: 'completed' | 'failed'
+  metrics?: {
+    // 성과 지표
+    sharpeRatio: number       // 샤프 비율
+    cagr: number              // 연평균 성장률
+    maxDrawdown: number       // 최대 낙폭
+    winRate: number           // 승률
+    totalTrades: number       // 총 거래 수
+    profitFactor: number      // 이익 팩터
+  }
+  error?: string              // 에러 메시지
 }
 ```
 
-### 2. Supabase 테이블 추가
-
-```sql
--- backtest_jobs 테이블 (선택적, Redis에 있으므로 필수 아님)
-CREATE TABLE backtest_jobs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  job_id TEXT UNIQUE NOT NULL, -- BullMQ Job ID
-  user_id UUID REFERENCES auth.users(id),
-  strategy_id UUID REFERENCES strategies(id),
-  status TEXT NOT NULL CHECK (status IN ('pending', 'active', 'completed', 'failed')),
-  progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
-  priority INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  started_at TIMESTAMPTZ,
-  completed_at TIMESTAMPTZ,
-  error_message TEXT
-);
-
-CREATE INDEX idx_backtest_jobs_user ON backtest_jobs(user_id);
-CREATE INDEX idx_backtest_jobs_status ON backtest_jobs(status);
-
--- Realtime 활성화
-ALTER PUBLICATION supabase_realtime ADD TABLE backtest_jobs;
-```
-
-### 3. Realtime Channel 구조
+### 3.3 BacktestProgress (Realtime 업데이트)
 
 ```typescript
-// Channel: backtest:progress
-// Event: progress_update
-
-interface ProgressUpdate {
-  jobId: string;
-  progress: number; // 0-100
-  status: 'active' | 'completed' | 'failed';
-  message?: string; // "데이터 로딩 중...", "백테스트 실행 중..."
-  timestamp: number;
+export interface BacktestProgress {
+  jobId: string
+  userId: string
+  status: 'waiting' | 'processing' | 'completed' | 'failed'
+  progress: number            // 0-100
+  currentStep: string         // "데이터 다운로드 중..."
+  estimatedTimeRemaining?: number  // 초 단위
 }
 ```
 
 ---
 
-## 🔧 기술 스택
+## 4. 구현 상세
 
-### 필수 패키지
+### 4.1 Week 1: 기초 인프라 (12/22-12/28)
 
-```json
-{
-  "dependencies": {
-    "bullmq": "^5.0.0",
-    "ioredis": "^5.3.2",
-    "@supabase/supabase-js": "^2.38.0" // 이미 설치됨
-  },
-  "devDependencies": {
-    "@types/ioredis": "^5.0.0"
-  }
-}
-```
+#### Task 1: Upstash Redis 계정 설정 (30분)
 
-### 환경 변수
+**Step 1**: Upstash 계정 생성
+- https://console.upstash.com/login
+- GitHub OAuth 로그인
 
-```env
+**Step 2**: Redis 데이터베이스 생성
+- Region: Seoul (ap-northeast-2)
+- Type: Regional (Edge는 비싸고 불필요)
+- Eviction: noeviction (데이터 손실 방지)
+
+**Step 3**: 환경 변수 설정
+```bash
 # .env.local
-UPSTASH_REDIS_URL=redis://:password@region.upstash.io:port
-UPSTASH_REDIS_TOKEN=your_token_here
-
-# Worker용 별도 프로세스
-WORKER_CONCURRENCY=5 # 동시 처리 Job 수
-WORKER_MAX_RETRIES=3 # 실패 시 재시도 횟수
+UPSTASH_REDIS_URL=rediss://default:***@***-seoul-1.upstash.io:6379
 ```
 
----
-
-## 📝 API 설계
-
-### 1. POST /api/backtest/queue
-**백테스트 Job 생성**
-
-```typescript
-// Request
-POST /api/backtest/queue
-{
-  "strategyId": "uuid",
-  "params": {
-    "symbol": "AAPL",
-    "startDate": "2024-01-01",
-    "endDate": "2024-12-31",
-    "initialCapital": 100000,
-    "commission": 0.001,
-    "slippage": 0.0005
-  }
-}
-
-// Response (200 OK)
-{
-  "jobId": "bull:backtest:1234567890",
-  "status": "pending",
-  "estimatedWaitTime": 15, // seconds
-  "queuePosition": 3
-}
-
-// Error (429 Too Many Requests)
-{
-  "error": "RATE_LIMIT_EXCEEDED",
-  "message": "You have 2 jobs in queue. Max 3 allowed for Free tier.",
-  "retryAfter": 120 // seconds
-}
+**Step 4**: 연결 테스트
+```bash
+node -e "const IORedis = require('ioredis'); const redis = new IORedis(process.env.UPSTASH_REDIS_URL); redis.ping().then(console.log)"
+# Expected: PONG
 ```
 
-**구현:**
+#### Task 2: API Route 구현 (2시간)
+
+**파일**: `src/app/api/backtest/queue/route.ts`
 
 ```typescript
-// src/app/api/backtest/queue/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { backtestQueue } from '@/lib/queue/backtest-queue';
-import { rateLimit } from '@/lib/rate-limit';
+import { NextRequest, NextResponse } from 'next/server'
+import { addBacktestJob, getQueueMetrics } from '@/lib/queue'
+import { createServerClient } from '@/lib/supabase/server'
+import { z } from 'zod'
 
-export async function POST(req: NextRequest) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+// 입력 검증 스키마
+const BacktestRequestSchema = z.object({
+  strategyId: z.string().uuid(),
+  params: z.object({
+    symbol: z.string().min(1).max(10),
+    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    initialCapital: z.number().min(100).max(10000000),
+  }),
+  priority: z.number().min(1).max(10).default(5),
+})
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export async function POST(request: NextRequest) {
+  try {
+    // 1. 인증 확인
+    const supabase = createServerClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-  // Rate limiting (Upstash Redis)
-  const { success, remaining } = await rateLimit(user.id, {
-    limit: 10, // 10 jobs per hour
-    window: 3600,
-  });
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
 
-  if (!success) {
+    // 2. 입력 검증
+    const body = await request.json()
+    const validated = BacktestRequestSchema.parse(body)
+
+    // 3. 큐에 Job 추가
+    const jobId = await addBacktestJob({
+      userId: user.id,
+      strategyId: validated.strategyId,
+      params: validated.params,
+      priority: validated.priority,
+    })
+
+    // 4. 초기 진행 상태 저장
+    await supabase.from('backtest_progress').insert({
+      job_id: jobId,
+      user_id: user.id,
+      status: 'waiting',
+      progress: 0,
+      current_step: 'Queued',
+    })
+
     return NextResponse.json({
-      error: 'RATE_LIMIT_EXCEEDED',
-      message: `Rate limit exceeded. ${remaining} requests remaining.`,
-    }, { status: 429 });
+      jobId,
+      status: 'queued',
+      estimatedWaitTime: 30, // TODO: 실제 큐 길이 기반 계산
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    console.error('Queue API Error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
-
-  const body = await req.json();
-  const { strategyId, params } = body;
-
-  // User tier 확인 (priority 결정)
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('tier')
-    .eq('user_id', user.id)
-    .single();
-
-  const priority = profile?.tier === 'pro' ? 2 : profile?.tier === 'basic' ? 1 : 0;
-
-  // Job 추가
-  const job = await backtestQueue.add('backtest', {
-    userId: user.id,
-    strategyId,
-    backtestParams: params,
-    priority,
-    createdAt: Date.now(),
-  }, {
-    priority, // BullMQ priority (높을수록 우선)
-    removeOnComplete: 100, // 완료 후 100개까지 보관
-    removeOnFail: 200,
-  });
-
-  // 대기 시간 추정
-  const waitingCount = await backtestQueue.getWaitingCount();
-  const estimatedWaitTime = waitingCount * 10; // 1 job당 10초 가정
-
-  return NextResponse.json({
-    jobId: job.id,
-    status: 'pending',
-    estimatedWaitTime,
-    queuePosition: waitingCount + 1,
-  });
-}
-```
-
-### 2. GET /api/backtest/status/:jobId
-**Job 상태 조회**
-
-```typescript
-// Request
-GET /api/backtest/status/bull:backtest:1234567890
-
-// Response (200 OK)
-{
-  "jobId": "bull:backtest:1234567890",
-  "status": "active",
-  "progress": 45,
-  "message": "백테스트 실행 중... (2023-06-15)",
-  "startedAt": 1734345600000,
-  "estimatedCompletion": 1734345660000
 }
 
-// Response (완료 시)
-{
-  "jobId": "bull:backtest:1234567890",
-  "status": "completed",
-  "progress": 100,
-  "result": {
-    "backtestId": "uuid",
-    "totalReturn": 0.234,
-    "sharpeRatio": 1.45,
-    "maxDrawdown": -0.12,
-    // ...
-  },
-  "completedAt": 1734345700000
-}
-```
+export async function GET(request: NextRequest) {
+  try {
+    // 큐 상태 조회
+    const metrics = await getQueueMetrics()
 
-**구현:**
-
-```typescript
-// src/app/api/backtest/status/[jobId]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { backtestQueue } from '@/lib/queue/backtest-queue';
-
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { jobId: string } }
-) {
-  const job = await backtestQueue.getJob(params.jobId);
-
-  if (!job) {
-    return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+    return NextResponse.json({
+      waiting: metrics.waiting,
+      active: metrics.active,
+      estimatedWaitTime: Math.ceil(metrics.waiting * 2.5), // 평균 2.5분/job
+    })
+  } catch (error) {
+    console.error('Queue Metrics Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch metrics' },
+      { status: 500 }
+    )
   }
-
-  const state = await job.getState();
-  const progress = job.progress as number;
-
-  return NextResponse.json({
-    jobId: job.id,
-    status: state,
-    progress,
-    data: job.data,
-    returnvalue: job.returnvalue, // 완료 시 결과
-    failedReason: job.failedReason,
-    processedOn: job.processedOn,
-    finishedOn: job.finishedOn,
-  });
 }
 ```
 
-### 3. DELETE /api/backtest/cancel/:jobId
-**Job 취소**
+#### Task 3: Worker 프로세스 구현 (4시간)
+
+**파일**: `src/workers/backtest-worker.ts`
 
 ```typescript
-// Request
-DELETE /api/backtest/cancel/bull:backtest:1234567890
+import { Worker, Job } from 'bullmq'
+import IORedis from 'ioredis'
+import { BacktestJobData, BacktestJobResult } from '@/lib/queue'
+import { createClient } from '@supabase/supabase-js'
+import { runBacktest } from '@/lib/backtest/engine' // 기존 백테스트 로직
 
-// Response (200 OK)
-{
-  "success": true,
-  "message": "Job cancelled successfully"
-}
-```
-
----
-
-## 🔨 Worker 구현
-
-### src/workers/backtest-worker.ts
-
-```typescript
-import { Worker, Job } from 'bullmq';
-import { createClient } from '@supabase/supabase-js';
-import { backtestEngine } from '@/lib/backtest/engine';
-import { BacktestJob, BacktestJobResult } from '@/types/queue';
+const connection = new IORedis(process.env.UPSTASH_REDIS_URL || '', {
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false,
+})
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // Service role key 필요
-);
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // Worker는 Service Role 사용
+)
 
-const worker = new Worker<BacktestJob, BacktestJobResult>(
+const worker = new Worker<BacktestJobData, BacktestJobResult>(
   'backtest-queue',
-  async (job: Job<BacktestJob>) => {
-    console.log(`[Worker] Processing job ${job.id}...`);
-
-    const { userId, strategyId, backtestParams } = job.data;
+  async (job: Job<BacktestJobData>) => {
+    const { userId, strategyId, params } = job.data
 
     try {
-      // 1. 진행률 업데이트: 데이터 로딩 중
-      await job.updateProgress(10);
-      await broadcastProgress(job.id!, 10, 'active', '데이터 로딩 중...');
+      // 1. 데이터 다운로드 (0-20%)
+      await updateProgress(job.id!, userId, 10, '데이터 다운로드 중...')
+      const marketData = await fetchMarketData(params.symbol, params.startDate, params.endDate)
 
-      // 2. 백테스트 실행 (기존 엔진 재사용)
-      const result = await backtestEngine.run({
-        ...backtestParams,
-        onProgress: async (progress: number, message: string) => {
-          // 진행률: 10% (로딩) + 80% (실행) + 10% (저장)
-          const adjustedProgress = 10 + (progress * 0.8);
-          await job.updateProgress(adjustedProgress);
-          await broadcastProgress(job.id!, adjustedProgress, 'active', message);
-        },
-      });
+      // 2. 지표 계산 (20-50%)
+      await updateProgress(job.id!, userId, 35, '기술 지표 계산 중...')
+      const indicators = await calculateIndicators(marketData)
 
-      // 3. 결과 저장
-      await job.updateProgress(95);
-      await broadcastProgress(job.id!, 95, 'active', '결과 저장 중...');
+      // 3. 백테스트 실행 (50-90%)
+      await updateProgress(job.id!, userId, 70, '백테스트 실행 중...')
+      const result = await runBacktest({
+        strategyId,
+        marketData,
+        indicators,
+        initialCapital: params.initialCapital,
+      })
 
-      const { data: backtest, error } = await supabase
-        .from('backtest_results')
-        .insert({
-          user_id: userId,
-          strategy_id: strategyId,
-          ...result,
-        })
-        .select()
-        .single();
+      // 4. 결과 저장 (90-100%)
+      await updateProgress(job.id!, userId, 95, '결과 저장 중...')
+      await supabase.from('backtest_results').insert({
+        user_id: userId,
+        strategy_id: strategyId,
+        job_id: job.id,
+        metrics: result.metrics,
+        trades: result.trades,
+      })
 
-      if (error) throw error;
-
-      // 4. 완료
-      await job.updateProgress(100);
-      await broadcastProgress(job.id!, 100, 'completed', '완료!');
-
-      console.log(`[Worker] Job ${job.id} completed successfully`);
+      await updateProgress(job.id!, userId, 100, '완료', 'completed')
 
       return {
-        jobId: job.id!,
         status: 'completed',
-        progress: 100,
-        result: {
-          backtestId: backtest.id,
-          ...result,
-        },
-      };
+        metrics: result.metrics,
+      }
     } catch (error) {
-      console.error(`[Worker] Job ${job.id} failed:`, error);
-      await broadcastProgress(
+      console.error(`Backtest Job ${job.id} failed:`, error)
+
+      await updateProgress(
         job.id!,
+        userId,
         0,
+        '오류 발생',
         'failed',
-        `오류 발생: ${(error as Error).message}`
-      );
-      throw error; // BullMQ가 재시도 처리
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+
+      return {
+        status: 'failed',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     }
   },
   {
-    connection: {
-      host: process.env.UPSTASH_REDIS_HOST,
-      port: parseInt(process.env.UPSTASH_REDIS_PORT!),
-      password: process.env.UPSTASH_REDIS_PASSWORD,
+    connection,
+    concurrency: 5, // 동시 5개 처리
+    limiter: {
+      max: 10,      // 10초당
+      duration: 10000, // 최대 10개 처리
     },
-    concurrency: parseInt(process.env.WORKER_CONCURRENCY || '5'),
-    removeOnComplete: { count: 100 },
-    removeOnFail: { count: 200 },
   }
-);
+)
 
-// Realtime 진행률 브로드캐스트
-async function broadcastProgress(
+async function updateProgress(
   jobId: string,
+  userId: string,
   progress: number,
-  status: 'active' | 'completed' | 'failed',
-  message: string
+  currentStep: string,
+  status: 'waiting' | 'processing' | 'completed' | 'failed' = 'processing',
+  error?: string
 ) {
-  await supabase
-    .from('backtest_jobs')
-    .upsert({
-      job_id: jobId,
-      progress,
-      status,
-      message,
-      updated_at: new Date().toISOString(),
-    });
+  await supabase.from('backtest_progress').upsert({
+    job_id: jobId,
+    user_id: userId,
+    status,
+    progress,
+    current_step: currentStep,
+    error,
+    updated_at: new Date().toISOString(),
+  })
 }
 
-// Worker 이벤트 핸들러
 worker.on('completed', (job) => {
-  console.log(`✅ Job ${job.id} completed`);
-});
+  console.log(`✅ Job ${job.id} completed`)
+})
 
 worker.on('failed', (job, err) => {
-  console.error(`❌ Job ${job?.id} failed:`, err.message);
-});
+  console.error(`❌ Job ${job?.id} failed:`, err.message)
+})
 
-worker.on('error', (err) => {
-  console.error('Worker error:', err);
-});
-
-console.log('🚀 Backtest worker started');
+console.log('🚀 Backtest Worker started')
 ```
 
-### Worker 실행 스크립트
-
-```json
-// package.json
+**실행 방법**:
+```bash
+# package.json
 {
   "scripts": {
-    "worker": "tsx watch src/workers/backtest-worker.ts",
-    "worker:prod": "tsx src/workers/backtest-worker.ts"
+    "worker": "tsx src/workers/backtest-worker.ts"
   }
 }
+
+# 실행
+pnpm worker
 ```
 
 ---
 
-## 🎨 Frontend 구현
+### 4.2 Week 2: 실시간 통합 (12/29-1/5)
 
-### 1. 진행률 컴포넌트
+#### Task 4: Supabase Realtime 채널 설정 (2시간)
 
-```typescript
-// src/components/BacktestProgress.tsx
-'use client';
+**Step 1**: 데이터베이스 테이블 생성
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { Progress } from '@/components/ui/progress';
-import { RealtimeChannel } from '@supabase/supabase-js';
+```sql
+-- backtest_progress 테이블
+CREATE TABLE backtest_progress (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  job_id TEXT NOT NULL UNIQUE,
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  status TEXT NOT NULL CHECK (status IN ('waiting', 'processing', 'completed', 'failed')),
+  progress INTEGER NOT NULL DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+  current_step TEXT NOT NULL,
+  error TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 인덱스
+CREATE INDEX idx_backtest_progress_user_id ON backtest_progress(user_id);
+CREATE INDEX idx_backtest_progress_job_id ON backtest_progress(job_id);
+
+-- RLS 정책
+ALTER TABLE backtest_progress ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own progress"
+  ON backtest_progress FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Service role can insert/update"
+  ON backtest_progress FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- Realtime 활성화
+ALTER PUBLICATION supabase_realtime ADD TABLE backtest_progress;
+```
+
+**Step 2**: Worker에서 Realtime 푸시
+
+위의 `updateProgress()` 함수가 자동으로 Realtime 푸시됨 (upsert 시 자동)
+
+#### Task 5: Frontend 구독 컴포넌트 (3시간)
+
+**파일**: `src/components/backtest/BacktestProgress.tsx`
+
+```tsx
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { Spinner } from '@/components/ui/Spinner'
+import { cn } from '@/lib/utils'
 
 interface BacktestProgressProps {
-  jobId: string;
-  onComplete?: (result: any) => void;
+  jobId: string
+  onComplete?: (result: any) => void
 }
 
 export function BacktestProgress({ jobId, onComplete }: BacktestProgressProps) {
-  const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState<'pending' | 'active' | 'completed' | 'failed'>('pending');
-  const [message, setMessage] = useState('대기 중...');
-  const supabase = createClient();
+  const [progress, setProgress] = useState(0)
+  const [status, setStatus] = useState<'waiting' | 'processing' | 'completed' | 'failed'>('waiting')
+  const [currentStep, setCurrentStep] = useState('Initializing...')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let channel: RealtimeChannel;
+    const supabase = createClient()
 
-    const subscribe = async () => {
-      // Realtime 구독
-      channel = supabase
-        .channel(`backtest:${jobId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'backtest_jobs',
-            filter: `job_id=eq.${jobId}`,
-          },
-          (payload) => {
-            const { progress, status, message } = payload.new as any;
-            setProgress(progress);
-            setStatus(status);
-            setMessage(message || '처리 중...');
+    // 1. 초기 상태 로드
+    supabase
+      .from('backtest_progress')
+      .select('*')
+      .eq('job_id', jobId)
+      .single()
+      .then(({ data }) => {
+        if (data) {
+          setProgress(data.progress)
+          setStatus(data.status)
+          setCurrentStep(data.current_step)
+          setError(data.error)
+        }
+      })
 
-            if (status === 'completed') {
-              // 완료 시 결과 가져오기
-              fetchResult();
-            }
+    // 2. Realtime 구독
+    const channel = supabase
+      .channel(`backtest:${jobId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'backtest_progress',
+          filter: `job_id=eq.${jobId}`,
+        },
+        (payload) => {
+          const data = payload.new as any
+          setProgress(data.progress)
+          setStatus(data.status)
+          setCurrentStep(data.current_step)
+          setError(data.error)
+
+          if (data.status === 'completed' && onComplete) {
+            onComplete(data)
           }
-        )
-        .subscribe();
-
-      // 초기 상태 polling (Realtime fallback)
-      const pollStatus = setInterval(async () => {
-        const res = await fetch(`/api/backtest/status/${jobId}`);
-        const data = await res.json();
-
-        if (data.status !== 'pending' && data.status !== 'active') {
-          clearInterval(pollStatus);
         }
-
-        setProgress(data.progress);
-        setStatus(data.status);
-
-        if (data.status === 'completed') {
-          clearInterval(pollStatus);
-          onComplete?.(data.result);
-        }
-      }, 2000); // 2초마다 폴링
-
-      return () => {
-        clearInterval(pollStatus);
-      };
-    };
-
-    subscribe();
+      )
+      .subscribe()
 
     return () => {
-      channel?.unsubscribe();
-    };
-  }, [jobId, supabase]);
-
-  const fetchResult = async () => {
-    const res = await fetch(`/api/backtest/status/${jobId}`);
-    const data = await res.json();
-    if (data.status === 'completed') {
-      onComplete?.(data.result);
+      supabase.removeChannel(channel)
     }
-  };
+  }, [jobId, onComplete])
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">
-          {status === 'pending' && '대기 중'}
-          {status === 'active' && '실행 중'}
-          {status === 'completed' && '완료'}
-          {status === 'failed' && '실패'}
-        </span>
-        <span className="text-sm text-muted-foreground">{progress}%</span>
+    <div className="w-full max-w-md p-6 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+      {/* 헤더 */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-medium text-white">
+          {status === 'completed' ? '✅ Complete' : status === 'failed' ? '❌ Failed' : '🔄 Running'}
+        </h3>
+        {status === 'processing' && <Spinner size="sm" variant="primary" />}
       </div>
 
-      <Progress value={progress} className="h-2" />
+      {/* 진행률 바 */}
+      <div className="mb-3">
+        <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
+          <div
+            className={cn(
+              'h-full transition-all duration-500',
+              status === 'completed'
+                ? 'bg-emerald-500'
+                : status === 'failed'
+                ? 'bg-red-500'
+                : 'bg-primary-500'
+            )}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <p className="mt-2 text-xs text-zinc-400 text-right">{progress}%</p>
+      </div>
 
-      <p className="text-xs text-muted-foreground">{message}</p>
+      {/* 현재 단계 */}
+      <p className="text-sm text-zinc-300">{currentStep}</p>
 
-      {status === 'failed' && (
-        <div className="rounded-md bg-destructive/10 p-3">
-          <p className="text-sm text-destructive">
-            백테스트 실행 중 오류가 발생했습니다.
-          </p>
+      {/* 에러 메시지 */}
+      {error && (
+        <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded">
+          <p className="text-xs text-red-400">{error}</p>
         </div>
       )}
     </div>
-  );
+  )
 }
 ```
 
-### 2. 백테스트 제출 플로우
+**사용 예시**:
+```tsx
+'use client'
 
-```typescript
-// src/app/backtest/page.tsx
-'use client';
+import { useState } from 'react'
+import { Button } from '@/components/ui/Button'
+import { BacktestProgress } from '@/components/backtest/BacktestProgress'
 
-import { useState } from 'react';
-import { BacktestProgress } from '@/components/BacktestProgress';
+export function BacktestRunner() {
+  const [jobId, setJobId] = useState<string | null>(null)
 
-export default function BacktestPage() {
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
-
-  const handleSubmit = async (params: any) => {
-    const res = await fetch('/api/backtest/queue', {
+  const handleStart = async () => {
+    const response = await fetch('/api/backtest/queue', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(params),
-    });
+      body: JSON.stringify({
+        strategyId: 'uuid-here',
+        params: {
+          symbol: 'AAPL',
+          startDate: '2020-01-01',
+          endDate: '2025-12-22',
+          initialCapital: 10000,
+        },
+        priority: 5,
+      }),
+    })
 
-    const data = await res.json();
-    setJobId(data.jobId);
-  };
-
-  const handleComplete = (backtestResult: any) => {
-    setResult(backtestResult);
-    setJobId(null);
-  };
+    const data = await response.json()
+    setJobId(data.jobId)
+  }
 
   return (
     <div>
-      {!jobId && !result && (
-        <button onClick={() => handleSubmit({ /* params */ })}>
-          백테스트 시작
-        </button>
-      )}
-
-      {jobId && (
-        <BacktestProgress jobId={jobId} onComplete={handleComplete} />
-      )}
-
-      {result && (
-        <div>
-          <h2>백테스트 결과</h2>
-          <p>총 수익률: {result.totalReturn}%</p>
-          <p>샤프 비율: {result.sharpeRatio}</p>
-        </div>
+      {!jobId ? (
+        <Button onClick={handleStart}>Start Backtest</Button>
+      ) : (
+        <BacktestProgress
+          jobId={jobId}
+          onComplete={(result) => {
+            console.log('Backtest completed:', result)
+            // 결과 페이지로 이동
+          }}
+        />
       )}
     </div>
-  );
+  )
 }
 ```
 
 ---
 
-## 🧪 테스트 계획
+## 5. 테스트 계획
 
-### 1. 단위 테스트
+### 5.1 부하 테스트 (2시간)
 
-```typescript
-// tests/queue/backtest-queue.test.ts
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { backtestQueue } from '@/lib/queue/backtest-queue';
+**도구**: k6 (https://k6.io/)
 
-describe('Backtest Queue', () => {
-  beforeAll(async () => {
-    await backtestQueue.obliterate({ force: true }); // 테스트 DB 초기화
-  });
+**시나리오**: 100명 동시 백테스트 제출
 
-  it('should add job to queue', async () => {
-    const job = await backtestQueue.add('backtest', {
-      userId: 'test-user',
-      strategyId: 'test-strategy',
-      backtestParams: {},
-      priority: 1,
-      createdAt: Date.now(),
-    });
+```javascript
+// k6-load-test.js
+import http from 'k6/http'
+import { check, sleep } from 'k6'
 
-    expect(job.id).toBeDefined();
-    expect(job.data.userId).toBe('test-user');
-  });
+export const options = {
+  stages: [
+    { duration: '1m', target: 50 },   // Ramp-up to 50 users
+    { duration: '2m', target: 100 },  // Ramp-up to 100 users
+    { duration: '3m', target: 100 },  // Stay at 100 users
+    { duration: '1m', target: 0 },    // Ramp-down to 0 users
+  ],
+  thresholds: {
+    http_req_duration: ['p(95)<3000'], // 95% 요청이 3초 이내
+    http_req_failed: ['rate<0.1'],     // 실패율 10% 이하
+  },
+}
 
-  it('should prioritize pro users', async () => {
-    const freeJob = await backtestQueue.add('backtest', { priority: 0 });
-    const proJob = await backtestQueue.add('backtest', { priority: 2 });
+export default function () {
+  const payload = JSON.stringify({
+    strategyId: '123e4567-e89b-12d3-a456-426614174000',
+    params: {
+      symbol: 'AAPL',
+      startDate: '2020-01-01',
+      endDate: '2025-12-22',
+      initialCapital: 10000,
+    },
+    priority: 5,
+  })
 
-    const jobs = await backtestQueue.getJobs(['waiting']);
-    expect(jobs[0].id).toBe(proJob.id); // Pro 유저가 먼저
-  });
-
-  afterAll(async () => {
-    await backtestQueue.close();
-  });
-});
-```
-
-### 2. 부하 테스트 (Locust)
-
-```python
-# locustfile.py
-from locust import HttpUser, task, between
-
-class BacktestUser(HttpUser):
-    wait_time = between(1, 3)
-
-    @task
-    def submit_backtest(self):
-        response = self.client.post("/api/backtest/queue", json={
-            "strategyId": "test-strategy",
-            "params": {
-                "symbol": "AAPL",
-                "startDate": "2024-01-01",
-                "endDate": "2024-12-31",
-                "initialCapital": 100000
-            }
-        })
-
-        if response.status_code == 200:
-            job_id = response.json()["jobId"]
-            self.poll_status(job_id)
-
-    def poll_status(self, job_id):
-        while True:
-            response = self.client.get(f"/api/backtest/status/{job_id}")
-            status = response.json()["status"]
-
-            if status in ["completed", "failed"]:
-                break
-```
-
-**실행:**
-```bash
-locust -f locustfile.py --users 100 --spawn-rate 10
-```
-
-### 3. 통합 테스트
-
-```typescript
-// tests/integration/backtest-flow.test.ts
-import { describe, it, expect } from 'vitest';
-
-describe('Backtest Flow (E2E)', () => {
-  it('should complete backtest end-to-end', async () => {
-    // 1. Job 제출
-    const submitRes = await fetch('/api/backtest/queue', {
-      method: 'POST',
-      body: JSON.stringify({ /* params */ }),
-    });
-    const { jobId } = await submitRes.json();
-
-    // 2. 상태 폴링 (최대 60초)
-    let status = 'pending';
-    let attempts = 0;
-    while (status !== 'completed' && attempts < 30) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const statusRes = await fetch(`/api/backtest/status/${jobId}`);
-      const data = await statusRes.json();
-      status = data.status;
-      attempts++;
+  const response = http.post(
+    'https://hephaitos.vercel.app/api/backtest/queue',
+    payload,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${__ENV.AUTH_TOKEN}`,
+      },
     }
+  )
 
-    // 3. 결과 검증
-    expect(status).toBe('completed');
-    expect(data.result).toBeDefined();
-    expect(data.result.totalReturn).toBeTypeOf('number');
-  }, 60000); // 60초 타임아웃
-});
-```
+  check(response, {
+    'status is 200': (r) => r.status === 200,
+    'has jobId': (r) => JSON.parse(r.body).jobId !== undefined,
+  })
 
----
-
-## 📊 모니터링 & 운영
-
-### 1. Redis 메모리 모니터링
-
-```typescript
-// src/lib/queue/monitor.ts
-import { backtestQueue } from './backtest-queue';
-
-export async function getQueueMetrics() {
-  const [waiting, active, completed, failed] = await Promise.all([
-    backtestQueue.getWaitingCount(),
-    backtestQueue.getActiveCount(),
-    backtestQueue.getCompletedCount(),
-    backtestQueue.getFailedCount(),
-  ]);
-
-  return {
-    waiting,
-    active,
-    completed,
-    failed,
-    total: waiting + active,
-  };
-}
-
-// Cron job: 5분마다 Grafana로 전송
-setInterval(async () => {
-  const metrics = await getQueueMetrics();
-  console.log('[Queue Metrics]', metrics);
-
-  // TODO: Grafana Loki로 전송
-}, 300000); // 5분
-```
-
-### 2. Worker Health Check
-
-```typescript
-// src/workers/health.ts
-import { Worker } from 'bullmq';
-
-export function setupHealthCheck(worker: Worker) {
-  worker.on('error', (err) => {
-    console.error('[Worker] Error:', err);
-    // TODO: Sentry로 전송
-  });
-
-  worker.on('stalled', (jobId) => {
-    console.warn('[Worker] Job stalled:', jobId);
-    // TODO: 알림 발송
-  });
+  sleep(1)
 }
 ```
 
-### 3. Grafana 대시보드 쿼리
-
-```promql
-# 큐 대기 시간
-rate(backtest_queue_waiting_count[5m])
-
-# Worker 처리 속도
-rate(backtest_queue_completed_count[5m])
-
-# 실패율
-rate(backtest_queue_failed_count[5m]) / rate(backtest_queue_total_count[5m])
-```
-
----
-
-## 🚨 장애 대응
-
-### 시나리오 1: Worker 프로세스 다운
-**증상**: Job이 `active` 상태에서 멈춤
-
-**대응:**
-1. Worker 재시작: `npm run worker:prod`
-2. BullMQ가 자동으로 stalled job 감지 (30초 후)
-3. 자동 재시도 (최대 3회)
-
-**예방:**
-- PM2로 Worker 프로세스 관리 (자동 재시작)
+**실행**:
 ```bash
-pm2 start npm --name "backtest-worker" -- run worker:prod
-pm2 startup
-pm2 save
+k6 run k6-load-test.js
 ```
 
-### 시나리오 2: Redis 연결 끊김
-**증상**: Job 추가 실패
+**예상 결과**:
+- ✅ 100명 동시 처리 가능
+- ✅ p95 응답시간 <3초
+- ✅ 실패율 <10%
 
-**대응:**
-1. Upstash Redis 상태 확인
-2. 연결 재시도 (BullMQ 자동)
-3. 30초 후에도 실패 시 유저에게 알림
+---
 
-**예방:**
-- Connection retry 설정
+## 6. 모니터링
+
+### 6.1 BullMQ Admin UI
+
+**설치**:
+```bash
+pnpm add @bull-board/api @bull-board/nextjs
+```
+
+**파일**: `src/app/api/admin/queues/[[...slug]]/route.ts`
+
 ```typescript
-{
-  connection: {
-    maxRetriesPerRequest: 3,
-    retryDelayOnFailover: 1000,
-  }
-}
+import { createBullBoard } from '@bull-board/api'
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter'
+import { NextAdapter } from '@bull-board/nextjs'
+import { backtestQueue } from '@/lib/queue'
+
+const serverAdapter = new NextAdapter()
+
+createBullBoard({
+  queues: [new BullMQAdapter(backtestQueue)],
+  serverAdapter,
+})
+
+serverAdapter.setBasePath('/api/admin/queues')
+
+export const GET = serverAdapter.registerPlugin()
+export const POST = serverAdapter.registerPlugin()
 ```
 
-### 시나리오 3: Supabase Realtime 지연
-**증상**: 진행률 업데이트 느림 (>5초)
+**접속**: https://hephaitos.vercel.app/api/admin/queues
 
-**대응:**
-1. Polling fallback 자동 활성화 (2초 간격)
-2. Supabase 상태 확인
+### 6.2 Upstash 대시보드
 
----
-
-## 📦 배포 체크리스트
-
-### 환경 변수 설정
-- [ ] `UPSTASH_REDIS_URL` 프로덕션 값 설정
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` 설정
-- [ ] `WORKER_CONCURRENCY` 설정 (권장: 5)
-
-### 데이터베이스 마이그레이션
-- [ ] `backtest_jobs` 테이블 생성
-- [ ] Realtime 활성화
-- [ ] 인덱스 생성
-
-### Worker 배포
-- [ ] PM2 설정 완료
-- [ ] Health check 엔드포인트 추가
-- [ ] 로그 수집 설정 (Grafana Loki)
-
-### 모니터링
-- [ ] Grafana 대시보드 추가
-- [ ] Sentry 에러 추적 설정
-- [ ] 알림 채널 설정 (Slack/이메일)
-
-### 테스트
-- [ ] 부하 테스트 (100명 동시 접속)
-- [ ] 장애 시나리오 테스트
-- [ ] 롤백 계획 수립
+- Queue 길이: https://console.upstash.com/redis/{db-id}/browser
+- 메모리 사용량: https://console.upstash.com/redis/{db-id}/metrics
 
 ---
 
-## 📚 참고 문서
+## 7. 배포 체크리스트
 
-- BullMQ 공식 문서: https://docs.bullmq.io/
-- Supabase Realtime: https://supabase.com/docs/guides/realtime
-- Upstash Redis: https://upstash.com/docs/redis
+### 7.1 Week 1 완료 기준
+
+- [ ] Upstash Redis 연결 성공 (PONG 응답)
+- [ ] `/api/backtest/queue` POST 200 응답
+- [ ] Worker 프로세스 정상 실행
+- [ ] 진행률 업데이트 Supabase에 저장 확인
+
+### 7.2 Week 2 완료 기준
+
+- [ ] Realtime 채널 구독 성공
+- [ ] `<BacktestProgress />` 컴포넌트 렌더링
+- [ ] 부하 테스트 통과 (100명, p95 <3초)
+- [ ] BullMQ Admin UI 접속 가능
 
 ---
 
-**작성**: Claude Code (Sonnet 4.5)
-**문서 버전**: 1.0
-**최종 업데이트**: 2025-12-16
+## 8. FAQ
+
+### Q1: Worker를 어디에 배포하나요?
+**A**: Vercel에서는 Worker를 직접 실행할 수 없으므로 다음 중 선택:
+- **Option A**: Railway.app (추천) - $5/월, 자동 재시작
+- **Option B**: Render.com - 무료 티어 가능
+- **Option C**: AWS Lambda (Scheduled) - 복잡하지만 저렴
+
+### Q2: Upstash 비용은?
+**A**: Free Tier - 10,000 commands/day (충분함)
+- 초과 시: Pay-as-you-go $0.2 per 100K commands
+
+### Q3: Realtime 동시 접속 제한은?
+**A**: Supabase Free Tier - 200 동시 접속
+- Pro Plan ($25/월) - 500 동시 접속
+
+---
+
+*이 문서는 Loop 11 구현의 단일 소스(SSOT)입니다.*
+*구현 중 변경사항은 이 문서에 즉시 반영합니다.*

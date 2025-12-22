@@ -128,7 +128,7 @@ export const StrategyBuilder: Story = {
           { value: 'medium', label: 'Medium Risk' },
           { value: 'high', label: 'High Risk' },
         ]}
-        placeholder: 'Select risk level'
+        placeholder="Select risk level"
       />
     </div>
   ),
