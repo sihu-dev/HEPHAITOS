@@ -50,5 +50,8 @@ next-env.d.ts
 public/sw.js
 public/workbox-*.js
 
+# Storybook
+storybook-static/
+
 .vercel
 .env*.local
