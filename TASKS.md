@@ -3,7 +3,38 @@
 > 지능형 반자동 루프 시스템 - 'ㄱ'만 입력하면 자동 진행
 > 마지막 업데이트: 2025-12-22
 
-## 🎯 Loop 11: 백테스트 큐 시스템 (CRITICAL)
+## 🎯 Loop 12: Claude API 최적화 (NEW)
+
+**기간**: 2주 (12/22 - 1/5)
+**우선순위**: P0 (비용 최적화)
+**ROI**: 연간 $17,904 절감 (약 ₩23.8M)
+**문서**: [CLAUDE_API_OPTIMIZATION_REPORT.md](docs/CLAUDE_API_OPTIMIZATION_REPORT.md)
+
+### 목표
+- [ ] Batch API 통합 (50% 비용 절감)
+- [ ] Extended Thinking 적용 (Pro 티어)
+- [ ] SSE Streaming 구현 (UX 10x 향상)
+- [ ] Advanced Tool Use 테스트
+
+### Week 1: Batch API + Extended Thinking (12/22-12/28)
+
+- [ ] Batch API 테스트 구현 (`src/lib/queue/batch-processor.ts`)
+- [ ] 야간 백테스트 배치 Cron (`/api/cron/batch-backtest`)
+- [ ] 시장 분석 배치 Cron (`/api/cron/batch-analysis`)
+- [ ] Extended Thinking Pro 티어 적용 (`claude.ts` 수정)
+- [ ] 배치 결과 폴링 로직 구현
+
+### Week 2: Streaming + UX (12/29-1/5)
+
+- [ ] SSE Streaming AI 튜터 (`/api/ai/tutor/stream`)
+- [ ] Frontend StreamingResponse 컴포넌트
+- [ ] 실시간 타이핑 효과 UI
+- [ ] 비용 대시보드 구현 (`/dashboard/costs`)
+- [ ] 최적화 전/후 비용 비교 리포트
+
+---
+
+## 🎯 Loop 11: 백테스트 큐 시스템 ✅ 완료
 
 **기간**: 2주 (12/22 - 1/5)
 **우선순위**: P0 (베타 블로커)
@@ -70,19 +101,28 @@
 | Phase 4 | TypeScript strict mode | ✅ 완료 | +10 |
 | **Phase 5** | **시스템 통합** | ✅ **완료** | +10 |
 | **Loop 11** | **백테스트 큐** | ✅ **완료** | +10 |
+| **Loop 12** | **Claude API 최적화** | 🔄 **진행중** | - |
 
 **현재 점수**: 100/100 (A+) 🎖️🎉
+**다음 목표**: Batch API 통합으로 연간 $17,904 절감
 
 ## 🚀 최신 완료 작업 (2025-12-22)
 
-### Claude 최신 기능 통합 (4/5 완료)
+### Claude 최신 기능 조사 완료 (2025-12-22)
 - [x] Prompt Caching (90% 비용 절감, 월 $1,428 절약)
 - [x] Vision API (차트 이미지 AI 분석, 월 $365 수익 증가)
 - [x] Claude Opus 4.5 (Pro 티어 전용, +40% 품질)
 - [x] Extended Context (200K 토큰, 10년 백테스트 단일 분석)
-- [ ] Batch API (50% 할인, 야간 처리) - 대기 중
+- [x] **API 최적화 보고서 작성** (docs/CLAUDE_API_OPTIMIZATION_REPORT.md)
 
-**ROI**: 연간 $52,992 (₩70.4M) 순익 증가
+### 신규 기능 도입 대기중
+- [ ] Batch API (50% 할인, 야간 처리) - **Loop 12 Week 1**
+- [ ] Extended Thinking (복잡한 분석 품질 +40%) - **Loop 12 Week 1**
+- [ ] SSE Streaming (실시간 타이핑 UX) - **Loop 12 Week 2**
+- [ ] Advanced Tool Use (토큰 37% 절감) - P2
+- [ ] MCP Server (외부 플랫폼 통합) - P2
+
+**예상 ROI**: 연간 $17,904 절감 (Batch + Extended Thinking)
 
 ### 프로덕션 배포 준비
 - [x] PRODUCTION_DEPLOYMENT_GUIDE.md (856줄)
