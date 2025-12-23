@@ -145,7 +145,7 @@ class MockPositionRepository {
     position.status = 'closed';
     position.exitPrice = exitPrice;
     position.exitTime = exitTime;
-    position.realizedPnL = (exitPrice - position.entryPrice) * position.quantity * (position.side === 'long' ? 1 : -1);
+    position.realizedPnL = (exitPrice - position.entryPrice) * position.quantity * (position.side === 'buy' ? 1 : -1);
 
     return position;
   }
@@ -154,10 +154,20 @@ class MockPositionRepository {
     const position = this.positions.get(positionId);
     if (!position) throw new Error(`Position ${positionId} not found`);
 
-    position.partialExits.push({ price, quantity, timestamp });
-    position.quantity -= quantity;
+    const realizedPnL = (price - position.entryPrice) * amount * (position.side === 'buy' ? 1 : -1);
+    const exitPercent = (amount / position.quantity) * 100;
 
-    const realizedPnL = (price - position.entryPrice) * quantity * (position.side === 'long' ? 1 : -1);
+    position.partialExits.push({
+      exitedAt: timestamp,
+      exitPrice: price,
+      price,
+      quantity: amount,
+      realizedPnL,
+      exitPercent,
+    });
+    position.quantity -= amount;
+
+    const unusedRealizedPnL = (price - position.entryPrice) * amount * (position.side === 'buy' ? 1 : -1);
     position.realizedPnL = (position.realizedPnL || 0) + realizedPnL;
 
     if (position.quantity <= 0) {
@@ -175,7 +185,7 @@ class MockPositionRepository {
     const position = await this.getPositionBySymbol(symbol);
     if (position) {
       position.currentPrice = price;
-      position.unrealizedPnL = (price - position.entryPrice) * position.quantity * (position.side === 'long' ? 1 : -1);
+      position.unrealizedPnL = (price - position.entryPrice) * position.quantity * (position.side === 'buy' ? 1 : -1);
     }
   }
 
