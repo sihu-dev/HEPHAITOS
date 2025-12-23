@@ -18,10 +18,13 @@ import { BacktestAgent, createBacktestAgent } from '@/agents/backtest-agent';
 import type {
   IBacktestConfig,
   IBacktestResult,
+  IBacktestSummary,
+  IStrategyComparison,
   IStrategy,
   IOHLCV,
   IRoundTrip,
   IResult,
+  IPaginatedResult,
   IPerformanceMetrics,
   Timeframe,
 } from '@hephaitos/types';
@@ -300,14 +303,42 @@ class MockBacktestResultRepository implements IBacktestResultRepository {
     };
   }
 
-  async listByStrategy(strategyId: string) {
-    const results = Array.from(this.results.values()).filter(
-      (r) => r.strategyId === strategyId
-    );
+  async listByStrategy(
+    strategyId: string,
+    pagination: { page: number; limit: number } = { page: 1, limit: 10 }
+  ): Promise<IPaginatedResult<IBacktestSummary>> {
+    const filtered = Array.from(this.results.values())
+      .filter((r) => r.strategyId === strategyId)
+      .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+
+    const total = filtered.length;
+    const offset = (pagination.page - 1) * pagination.limit;
+    const paged = filtered.slice(offset, offset + pagination.limit);
+
+    const summaries: IBacktestSummary[] = paged.map((r) => ({
+      id: r.id,
+      strategyId: r.strategyId,
+      strategyName: '',
+      status: r.status,
+      startDate: r.startedAt,
+      endDate: r.completedAt ?? '',
+      totalReturn: r.metrics.totalReturn,
+      sharpeRatio: r.metrics.sharpeRatio,
+      maxDrawdown: r.metrics.maxDrawdown,
+      winRate: r.metrics.winRate,
+      totalTrades: r.metrics.totalTrades,
+      completedAt: r.completedAt,
+    }));
 
     return {
       success: true,
-      data: results,
+      data: summaries,
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        total,
+        hasMore: offset + pagination.limit < total,
+      },
       metadata: {
         timestamp: new Date().toISOString(),
         duration_ms: 10,
@@ -315,24 +346,29 @@ class MockBacktestResultRepository implements IBacktestResultRepository {
     };
   }
 
-  async listRecent(limit?: number) {
-    const results = Array.from(this.results.values())
+  async listRecent(limit: number = 10): Promise<IResult<IBacktestSummary[]>> {
+    const sorted = Array.from(this.results.values())
       .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
-      .slice(0, limit || 10);
+      .slice(0, limit);
+
+    const summaries: IBacktestSummary[] = sorted.map((r) => ({
+      id: r.id,
+      strategyId: r.strategyId,
+      strategyName: '',
+      status: r.status,
+      startDate: r.startedAt,
+      endDate: r.completedAt ?? '',
+      totalReturn: r.metrics.totalReturn,
+      sharpeRatio: r.metrics.sharpeRatio,
+      maxDrawdown: r.metrics.maxDrawdown,
+      winRate: r.metrics.winRate,
+      totalTrades: r.metrics.totalTrades,
+      completedAt: r.completedAt,
+    }));
 
     return {
       success: true,
-      data: results.map((r) => ({
-        id: r.id,
-        strategyId: r.strategyId,
-        status: r.status,
-        totalReturn: r.metrics.totalReturn,
-        sharpeRatio: r.metrics.sharpeRatio,
-        maxDrawdown: r.metrics.maxDrawdown,
-        totalTrades: r.metrics.totalTrades,
-        startedAt: r.startedAt,
-        completedAt: r.completedAt,
-      })),
+      data: summaries,
       metadata: {
         timestamp: new Date().toISOString(),
         duration_ms: 10,
@@ -353,21 +389,60 @@ class MockBacktestResultRepository implements IBacktestResultRepository {
     };
   }
 
-  async compareStrategies(backtestIds: string[]) {
+  async compareStrategies(backtestIds: string[]): Promise<IResult<IStrategyComparison>> {
     const results = backtestIds
       .map((id) => this.results.get(id))
-      .filter(Boolean);
+      .filter((r): r is IBacktestResult => r !== undefined);
+
+    const summaries: IBacktestSummary[] = results.map((r) => ({
+      id: r.id,
+      strategyId: r.strategyId,
+      strategyName: '',
+      status: r.status,
+      startDate: r.startedAt,
+      endDate: r.completedAt ?? '',
+      totalReturn: r.metrics.totalReturn,
+      sharpeRatio: r.metrics.sharpeRatio,
+      maxDrawdown: r.metrics.maxDrawdown,
+      winRate: r.metrics.winRate,
+      totalTrades: r.metrics.totalTrades,
+      completedAt: r.completedAt,
+    }));
+
+    const comparison: IStrategyComparison = {
+      backtestIds,
+      period: {
+        start: results[0]?.startedAt ?? '',
+        end: results[0]?.completedAt ?? '',
+      },
+      summaries,
+      rankings: {
+        byReturn: [...backtestIds].sort((a, b) => {
+          const aRes = this.results.get(a);
+          const bRes = this.results.get(b);
+          return (bRes?.metrics.totalReturn ?? 0) - (aRes?.metrics.totalReturn ?? 0);
+        }),
+        bySharpe: [...backtestIds].sort((a, b) => {
+          const aRes = this.results.get(a);
+          const bRes = this.results.get(b);
+          return (bRes?.metrics.sharpeRatio ?? 0) - (aRes?.metrics.sharpeRatio ?? 0);
+        }),
+        byDrawdown: [...backtestIds].sort((a, b) => {
+          const aRes = this.results.get(a);
+          const bRes = this.results.get(b);
+          return (aRes?.metrics.maxDrawdown ?? 0) - (bRes?.metrics.maxDrawdown ?? 0);
+        }),
+        byWinRate: [...backtestIds].sort((a, b) => {
+          const aRes = this.results.get(a);
+          const bRes = this.results.get(b);
+          return (bRes?.metrics.winRate ?? 0) - (aRes?.metrics.winRate ?? 0);
+        }),
+      },
+    };
 
     return {
       success: true,
-      data: {
-        results,
-        comparison: {
-          bestSharpeRatio: results[0],
-          bestReturn: results[0],
-          lowestDrawdown: results[0],
-        },
-      },
+      data: comparison,
       metadata: {
         timestamp: new Date().toISOString(),
         duration_ms: 20,
@@ -386,6 +461,7 @@ function createTestStrategy(): IStrategy {
     name: 'Test RSI Strategy',
     description: 'Buy when RSI < 30, sell when RSI > 70',
     type: 'momentum',
+    version: '1.0.0',
     symbols: ['BTC/USDT'],
     timeframe: '1d',
     entryConditions: {
@@ -423,8 +499,10 @@ function createTestStrategy(): IStrategy {
       takeProfitPercent: 10,
       maxCapitalUsage: 100,
     },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    metadata: {
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
   };
 }
 
