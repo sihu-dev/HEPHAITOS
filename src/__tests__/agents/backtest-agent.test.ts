@@ -401,8 +401,10 @@ function createTestBacktestConfig(strategyId: string): IBacktestConfig {
     startDate: '2024-01-01T00:00:00Z',
     endDate: '2024-07-01T00:00:00Z',
     initialCapital: 100000,
+    currency: 'USD',
     feeRate: 0.1,
     slippage: 0.05,
+    useMargin: false,
     leverage: 1,
   };
 }
