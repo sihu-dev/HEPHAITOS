@@ -350,6 +350,8 @@ export interface IExecutionStats {
   winRate: number;
   /** 총 손익 */
   totalPnL?: number;
+  /** 손익 비율 (평균 이익 / 평균 손실) */
+  profitFactor?: number;
   /** 심볼별 통계 */
   bySymbol: Record<string, {
     orders: number;

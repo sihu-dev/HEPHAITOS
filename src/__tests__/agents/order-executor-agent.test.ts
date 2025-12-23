@@ -214,7 +214,6 @@ function createTestOrderRequest(overrides: Partial<IOrderRequest> = {}): IOrderR
     price: 150,
     stopLoss: { type: 'fixed_price', price: 145 },
     takeProfit: { type: 'fixed_price', price: 160 },
-    trailingStopPercent: undefined,
     leverage: 1,
     timestamp: new Date().toISOString(),
     ...overrides,
@@ -615,7 +614,6 @@ describe('OrderExecutorAgent', () => {
       const request = createTestOrderRequest({
         price: 100,
         amount: 100,
-        trailingStopPercent: 5,
       });
       await agent.submitOrder(request);
 

@@ -383,7 +383,6 @@ class MockBacktestResultRepository implements IBacktestResultRepository {
 function createTestStrategy(): IStrategy {
   return {
     id: 'test-strategy-' + crypto.randomUUID(),
-    userId: 'test-user',
     name: 'Test RSI Strategy',
     description: 'Buy when RSI < 30, sell when RSI > 70',
     type: 'momentum',
