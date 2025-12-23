@@ -19,6 +19,7 @@ import type {
   QuoteCallback,
   OrderCallback,
 } from '../types'
+import { safeLogger } from '@/lib/utils/safe-logger'
 
 /**
  * KIS API 응답 타입
@@ -130,7 +131,7 @@ export class KISBroker implements UnifiedBroker {
         balance,
       }
     } catch (error) {
-      console.error('[KISBroker] Connect failed:', error)
+      safeLogger.error('[KISBroker] Connect failed:', error)
       return {
         success: false,
         message: '연결 실패',
@@ -183,17 +184,17 @@ export class KISBroker implements UnifiedBroker {
       if (res.ok) {
         const data: KISWebSocketApprovalResponse = await res.json()
         this.wsApprovalKey = data.approval_key
-        console.log('[KISBroker] WebSocket approval key acquired')
+        safeLogger.info('[KISBroker] WebSocket approval key acquired')
       }
     } catch (error) {
-      console.error('[KISBroker] Failed to get WebSocket approval key:', error)
+      safeLogger.error('[KISBroker] Failed to get WebSocket approval key:', error)
     }
   }
 
   private initWebSocket(): void {
     if (this.wsConnection?.readyState === WebSocket.OPEN) return
     if (!this.wsApprovalKey) {
-      console.warn('[KISBroker] WebSocket approval key not available')
+      safeLogger.warn('[KISBroker] WebSocket approval key not available')
       return
     }
 
@@ -201,9 +202,9 @@ export class KISBroker implements UnifiedBroker {
       this.wsConnection = new WebSocket(this.wsUrl)
 
       this.wsConnection.onopen = () => {
-        console.log('[KISBroker] WebSocket connected')
+        safeLogger.info('[KISBroker] WebSocket connected')
         this.reconnectAttempts = 0
-        
+
         // 기존 구독 복구
         this.quoteCallbacks.forEach((_, stockCode) => {
           this.sendSubscription(stockCode, true)
@@ -215,26 +216,26 @@ export class KISBroker implements UnifiedBroker {
       }
 
       this.wsConnection.onerror = (error) => {
-        console.error('[KISBroker] WebSocket error:', error)
+        safeLogger.error('[KISBroker] WebSocket error:', error)
       }
 
       this.wsConnection.onclose = () => {
-        console.log('[KISBroker] WebSocket disconnected')
+        safeLogger.info('[KISBroker] WebSocket disconnected')
         this.handleReconnect()
       }
     } catch (error) {
-      console.error('[KISBroker] Failed to init WebSocket:', error)
+      safeLogger.error('[KISBroker] Failed to init WebSocket:', error)
     }
   }
 
   private handleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[KISBroker] Max reconnect attempts reached')
+      safeLogger.error('[KISBroker] Max reconnect attempts reached')
       return
     }
 
     this.reconnectAttempts++
-    console.log(`[KISBroker] Reconnecting... (attempt ${this.reconnectAttempts})`)
+    safeLogger.info(`[KISBroker] Reconnecting... (attempt ${this.reconnectAttempts})`)
 
     setTimeout(() => {
       if (this.quoteCallbacks.size > 0 || this.orderCallbacks.size > 0) {
@@ -264,7 +265,7 @@ export class KISBroker implements UnifiedBroker {
     })
 
     this.wsConnection.send(message)
-    console.log(`[KISBroker] ${subscribe ? 'Subscribed' : 'Unsubscribed'}: ${stockCode}`)
+    safeLogger.debug(`[KISBroker] ${subscribe ? 'Subscribed' : 'Unsubscribed'}: ${stockCode}`)
   }
 
   private handleWebSocketMessage(data: string): void {
@@ -324,7 +325,7 @@ export class KISBroker implements UnifiedBroker {
         try {
           callback(quote)
         } catch (e) {
-          console.error('[KISBroker] Quote callback error:', e)
+          safeLogger.error('[KISBroker] Quote callback error:', e)
         }
       })
     }
@@ -352,7 +353,7 @@ export class KISBroker implements UnifiedBroker {
       try {
         callback(order as Order)
       } catch (e) {
-        console.error('[KISBroker] Order callback error:', e)
+        safeLogger.error('[KISBroker] Order callback error:', e)
       }
     })
   }
@@ -477,7 +478,7 @@ export class KISBroker implements UnifiedBroker {
       )
 
       if (res.rt_cd !== '0') {
-        console.error('[KISBroker] getOrders failed:', res.msg1)
+        safeLogger.error('[KISBroker] getOrders failed:', res.msg1)
         return []
       }
 
@@ -512,7 +513,7 @@ export class KISBroker implements UnifiedBroker {
       }
       return orders
     } catch (error) {
-      console.error('[KISBroker] getOrders error:', error)
+      safeLogger.error('[KISBroker] getOrders error:', error)
       return []
     }
   }
@@ -574,7 +575,7 @@ export class KISBroker implements UnifiedBroker {
       )
 
       if (res.rt_cd !== '0') {
-        console.error('[KISBroker] getOrderHistory failed:', res.msg1)
+        safeLogger.error('[KISBroker] getOrderHistory failed:', res.msg1)
         return []
       }
 
@@ -599,7 +600,7 @@ export class KISBroker implements UnifiedBroker {
         }
       })
     } catch (error) {
-      console.error('[KISBroker] getOrderHistory error:', error)
+      safeLogger.error('[KISBroker] getOrderHistory error:', error)
       return []
     }
   }
@@ -717,7 +718,7 @@ export class KISBroker implements UnifiedBroker {
         message: '주문 취소 완료',
       }
     } catch (error) {
-      console.error('[KISBroker] cancelOrder error:', error)
+      safeLogger.error('[KISBroker] cancelOrder error:', error)
       return {
         success: false,
         message: '주문 취소 실패',
@@ -779,7 +780,7 @@ export class KISBroker implements UnifiedBroker {
         message: `주문 정정 완료 (가격: ${newPrice.toLocaleString()}원)`,
       }
     } catch (error) {
-      console.error('[KISBroker] modifyOrder error:', error)
+      safeLogger.error('[KISBroker] modifyOrder error:', error)
       return {
         success: false,
         message: '주문 정정 실패',
@@ -952,7 +953,7 @@ export class KISBroker implements UnifiedBroker {
       )
 
       if (res.rt_cd !== '0') {
-        console.error('[KISBroker] searchStock failed:', res.msg1)
+        safeLogger.error('[KISBroker] searchStock failed:', res.msg1)
         return this.searchStockFallback(keyword)
       }
 
@@ -969,7 +970,7 @@ export class KISBroker implements UnifiedBroker {
           market: item.mket_id_cd === '1' ? 'KOSPI' : 'KOSDAQ',
         }))
     } catch (error) {
-      console.error('[KISBroker] searchStock error:', error)
+      safeLogger.error('[KISBroker] searchStock error:', error)
       return this.searchStockFallback(keyword)
     }
   }

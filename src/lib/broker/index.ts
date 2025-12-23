@@ -16,6 +16,7 @@ import { KiwoomBroker } from './adapters/kiwoom'
 import { AlpacaBroker } from './adapters/alpaca'
 import { BinanceBroker } from './adapters/binance'
 import { UpbitBroker } from './adapters/upbit'
+import { safeLogger } from '@/lib/utils/safe-logger'
 
 // ============================================
 // Broker Registry
@@ -258,14 +259,14 @@ class BrokerManager {
       const idleTime = now - connection.lastUsed.getTime()
 
       if (idleTime > this.IDLE_TIMEOUT) {
-        console.log(
+        safeLogger.info(
           `[BrokerManager] Cleaning up idle connection: ${key} (idle for ${Math.round(idleTime / 60000)}m)`
         )
 
         try {
           connection.broker.disconnect()
         } catch (error) {
-          console.error(`[BrokerManager] Error disconnecting broker ${key}:`, error)
+          safeLogger.error(`[BrokerManager] Error disconnecting broker ${key}:`, error)
         }
 
         keysToRemove.push(key)
@@ -279,7 +280,7 @@ class BrokerManager {
     }
 
     if (keysToRemove.length > 0) {
-      console.log(`[BrokerManager] Cleaned up ${keysToRemove.length} idle connections`)
+      safeLogger.info(`[BrokerManager] Cleaned up ${keysToRemove.length} idle connections`)
     }
   }
 
@@ -313,7 +314,7 @@ class BrokerManager {
 
         if (health.errorCount >= this.MAX_ERROR_COUNT) {
           health.isHealthy = false
-          console.error(
+          safeLogger.error(
             `[BrokerManager] Connection ${key} marked as unhealthy after ${health.errorCount} errors`
           )
 
@@ -361,12 +362,12 @@ class BrokerManager {
         return result
       } catch (error) {
         lastError = error
-        console.error(`[BrokerManager] Attempt ${attempt}/${maxAttempts} failed:`, error)
+        safeLogger.error(`[BrokerManager] Attempt ${attempt}/${maxAttempts} failed:`, error)
 
         if (attempt < maxAttempts) {
           // Exponential backoff
           const delay = Math.min(initialDelay * Math.pow(2, attempt - 1), maxDelay)
-          console.log(`[BrokerManager] Retrying in ${delay}ms...`)
+          safeLogger.info(`[BrokerManager] Retrying in ${delay}ms...`)
           await new Promise((resolve) => setTimeout(resolve, delay))
         }
       }
@@ -430,13 +431,13 @@ class BrokerManager {
           errorCount: 0,
         })
 
-        console.log(`[BrokerManager] Successfully connected: ${key}`)
+        safeLogger.info(`[BrokerManager] Successfully connected: ${key}`)
       }
 
       return { ...result, broker: result.success ? broker : undefined }
     } catch (error) {
       const message = error instanceof Error ? error.message : '연결 중 오류가 발생했습니다'
-      console.error(`[BrokerManager] Connection failed for ${key}:`, error)
+      safeLogger.error(`[BrokerManager] Connection failed for ${key}:`, error)
 
       return {
         success: false,
@@ -459,7 +460,7 @@ class BrokerManager {
       try {
         await connection.broker.disconnect()
       } catch (error) {
-        console.error(`[BrokerManager] Error disconnecting ${key}:`, error)
+        safeLogger.error(`[BrokerManager] Error disconnecting ${key}:`, error)
       }
 
       this.instances.delete(key)
@@ -470,7 +471,7 @@ class BrokerManager {
       this.activeConnections.delete(userId)
     }
 
-    console.log(`[BrokerManager] Disconnected: ${key}`)
+    safeLogger.info(`[BrokerManager] Disconnected: ${key}`)
   }
 
   /**
@@ -543,7 +544,7 @@ class BrokerManager {
    * Graceful shutdown (cleanup on app termination)
    */
   shutdown(): void {
-    console.log('[BrokerManager] Shutting down...')
+    safeLogger.info('[BrokerManager] Shutting down...')
 
     if (this.cleanupInterval) clearInterval(this.cleanupInterval)
     if (this.healthCheckInterval) clearInterval(this.healthCheckInterval)
@@ -551,10 +552,10 @@ class BrokerManager {
     // Disconnect all brokers
     for (const [key, connection] of this.instances) {
       try {
-        console.log(`[BrokerManager] Disconnecting ${key}`)
+        safeLogger.info(`[BrokerManager] Disconnecting ${key}`)
         connection.broker.disconnect()
       } catch (error) {
-        console.error(`[BrokerManager] Error during shutdown for ${key}:`, error)
+        safeLogger.error(`[BrokerManager] Error during shutdown for ${key}:`, error)
       }
     }
 
@@ -562,7 +563,7 @@ class BrokerManager {
     this.healthStatus.clear()
     this.activeConnections.clear()
 
-    console.log('[BrokerManager] Shutdown complete')
+    safeLogger.info('[BrokerManager] Shutdown complete')
   }
 }
 
