@@ -231,9 +231,9 @@ class MockStrategyRepository implements IStrategyRepository {
 }
 
 class MockBacktestResultRepository implements IBacktestResultRepository {
-  private results: Map<string, any> = new Map();
+  private results: Map<string, IResult> = new Map();
 
-  async save(result: any) {
+  async save(result: IResult) {
     this.results.set(result.id, result);
     return {
       success: true,
@@ -758,7 +758,7 @@ describe('BacktestAgent', () => {
       };
 
       const limitedAgent = createBacktestAgent(
-        limitedPriceService as any,
+        limitedPriceService as IPriceDataService,
         strategyRepo,
         resultRepo
       );

@@ -13,6 +13,7 @@ import {
   atr,
   stochastic,
   calculateIndicator,
+  type IndicatorType,
 } from '@/lib/backtest/indicators'
 import type { OHLCV } from '@/types'
 
@@ -388,7 +389,7 @@ describe('calculateIndicator', () => {
   })
 
   it('should return closes for unknown indicator type', () => {
-    const result = calculateIndicator('unknown' as any, candles, {})
+    const result = calculateIndicator('unknown' as IndicatorType, candles, {})
 
     expect(result.values).toEqual(candles.map(c => c.close))
   })

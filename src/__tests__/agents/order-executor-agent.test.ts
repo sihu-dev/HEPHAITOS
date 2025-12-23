@@ -22,6 +22,7 @@ import type {
   OrderStatus,
   PositionStatus,
 } from '@hephaitos/types';
+import type { IOrderRepository, IPositionRepository } from '@hephaitos/core';
 
 // ============================================
 // Mock Repositories
@@ -223,7 +224,7 @@ describe('OrderExecutorAgent', () => {
     orderRepo = new MockOrderRepository();
     positionRepo = new MockPositionRepository();
 
-    agent = new OrderExecutorAgent(orderRepo as any, positionRepo as any, {
+    agent = new OrderExecutorAgent(orderRepo as IOrderRepository, positionRepo as IPositionRepository, {
       mode: 'simulation',
       simulationSlippagePercent: 0.1,
       simulationFeePercent: 0.1,
