@@ -42,3 +42,9 @@ export {
   type IPriceDataService,
   MockPriceDataService,
 } from './services/price-data-service.js';
+
+export {
+  type ICredentialsService,
+  CredentialsService,
+  createCredentialsService,
+} from './services/credentials-service.js';
