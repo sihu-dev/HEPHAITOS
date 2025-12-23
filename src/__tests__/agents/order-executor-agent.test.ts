@@ -265,7 +265,7 @@ describe('OrderExecutorAgent', () => {
       const result = await agent.submitOrder(request);
 
       expect(result.success).toBe(false);
-      expect(result.validation.isValid).toBe(false);
+      expect(result.validation.valid).toBe(false);
       expect(result.validation.errors).toContain('Stop loss is required');
     });
 
@@ -274,7 +274,7 @@ describe('OrderExecutorAgent', () => {
       const result = await agent.submitOrder(request);
 
       expect(result.success).toBe(false);
-      expect(result.validation.isValid).toBe(false);
+      expect(result.validation.valid).toBe(false);
       expect(result.validation.errors.some(e => e.includes('레버리지'))).toBe(true);
     });
 
@@ -810,7 +810,7 @@ describe('OrderExecutorAgent', () => {
       const result = await agent.submitOrder(request);
 
       expect(result.success).toBe(false);
-      expect(result.validation.isValid).toBe(false);
+      expect(result.validation.valid).toBe(false);
     });
 
     it('should validate order price is positive', async () => {
@@ -821,7 +821,7 @@ describe('OrderExecutorAgent', () => {
       const result = await agent.submitOrder(request);
 
       expect(result.success).toBe(false);
-      expect(result.validation.isValid).toBe(false);
+      expect(result.validation.valid).toBe(false);
     });
   });
 

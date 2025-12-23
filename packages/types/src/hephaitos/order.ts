@@ -131,6 +131,10 @@ export interface IOrderExecution {
   latencyMs: number;
   /** 실행 시간 */
   executedAt: string;
+  /** 체결 수량 (편의 필드, trade.quantity와 동일) */
+  quantity: number;
+  /** 체결 가격 (편의 필드, trade.price와 동일) */
+  price: number;
 }
 
 /**
