@@ -105,11 +105,12 @@ class MockPriceDataService implements IPriceDataService {
     };
   }
 
-  async getOHLCV(symbol: string, timeframe: Timeframe, limit: number = 100) {
+  async getOHLCV(query: { symbol: string; timeframe: Timeframe; startDate: string; endDate: string; limit?: number }) {
     const candles: IOHLCV[] = [];
     const now = Date.now();
     let price = 50000;
-    
+    const limit = query.limit || 100;
+
     for (let i = 0; i < limit; i++) {
       const change = (Math.random() - 0.5) * 1000;
       candles.push({
@@ -122,7 +123,7 @@ class MockPriceDataService implements IPriceDataService {
       });
       price += change;
     }
-    
+
     return {
       success: true,
       data: candles,
