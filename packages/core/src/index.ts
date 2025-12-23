@@ -29,6 +29,12 @@ export {
   createPositionRepository,
 } from './repositories/position-repository.js';
 
+export {
+  type IPortfolioRepository,
+  InMemoryPortfolioRepository,
+  createPortfolioRepository,
+} from './repositories/portfolio-repository.js';
+
 // Services
 export {
   type IPriceDataQuery,
