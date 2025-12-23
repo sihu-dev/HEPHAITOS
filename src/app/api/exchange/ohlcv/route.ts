@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getExchange } from '@/lib/exchange'
 import type { ExchangeId } from '@/types'
 import { exchangeRateLimiter, getClientIP, createRateLimitResponse } from '@/lib/rate-limiter'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // GET /api/exchange/ohlcv?exchange=binance&symbol=BTC/USDT&interval=1h&limit=100
 export async function GET(request: NextRequest) {
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('OHLCV API Error:', error)
+    safeLogger.error('OHLCV API Error:', error)
     return NextResponse.json(
       {
         success: false,

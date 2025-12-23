@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getExchange } from '@/lib/exchange'
 import type { ExchangeId } from '@/types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // GET /api/exchange/markets?exchange=binance
 export async function GET(request: NextRequest) {
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Markets API Error:', error)
+    safeLogger.error('Markets API Error:', error)
     return NextResponse.json(
       {
         success: false,

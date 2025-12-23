@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { celebrityPortfolioManager } from '@/lib/mirroring'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export const dynamic = 'force-dynamic'
 
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[API] Portfolio comparison failed:', error)
+    safeLogger.error('[API] Portfolio comparison failed:', error)
     return NextResponse.json(
       {
         success: false,
@@ -176,7 +177,7 @@ export async function PUT(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[API] Portfolio sync failed:', error)
+    safeLogger.error('[API] Portfolio sync failed:', error)
     return NextResponse.json(
       {
         success: false,

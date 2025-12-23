@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getExchange } from '@/lib/exchange'
 import type { ExchangeId } from '@/types'
 import { exchangeRateLimiter, getClientIP, createRateLimitResponse } from '@/lib/rate-limiter'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // GET /api/exchange/orderbook?exchange=binance&symbol=BTC/USDT&limit=20
 export async function GET(request: NextRequest) {
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('OrderBook API Error:', error)
+    safeLogger.error('OrderBook API Error:', error)
     return NextResponse.json(
       {
         success: false,

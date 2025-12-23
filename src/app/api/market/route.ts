@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { jsonSuccess, internalError } from '@/lib/api-response'
 import { fetchCoinGeckoPrices, fetchCoinGeckoMarkets } from '@/lib/market/coingecko'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // Force dynamic rendering for this route
 export const dynamic = 'force-dynamic'
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     return jsonSuccess(data)
   } catch (error) {
-    console.error('[API/market] Error:', error)
+    safeLogger.error('[API/market] Error:', error)
     return internalError('시장 데이터 조회에 실패했습니다.')
   }
 }

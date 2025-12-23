@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 type SortBy = 'sharpe' | 'cagr' | 'return' | 'backtest_count';
 
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest) {
     }).returns<LeaderboardEntry[]>();
 
     if (error) {
-      console.error('[Leaderboard] Query error:', error);
+      safeLogger.error('[Leaderboard] Query error:', error);
       return NextResponse.json(
         {
           success: false,
@@ -119,7 +120,7 @@ export async function GET(req: NextRequest) {
       }
     );
   } catch (error) {
-    console.error('[Leaderboard] Error:', error);
+    safeLogger.error('[Leaderboard] Error:', error);
     return NextResponse.json(
       {
         success: false,

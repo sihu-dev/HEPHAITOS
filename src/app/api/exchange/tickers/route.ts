@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getExchange, type Ticker } from '@/lib/exchange'
 import type { ExchangeId } from '@/types'
 import { exchangeRateLimiter, getClientIP, createRateLimitResponse } from '@/lib/rate-limiter'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // GET /api/exchange/tickers?exchange=binance&symbols=BTC/USDT,ETH/USDT
 export async function GET(request: NextRequest) {
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Tickers API Error:', error)
+    safeLogger.error('Tickers API Error:', error)
     return NextResponse.json(
       {
         success: false,
