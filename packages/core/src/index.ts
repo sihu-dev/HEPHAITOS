@@ -35,6 +35,12 @@ export {
   createPortfolioRepository,
 } from './repositories/portfolio-repository.js';
 
+export {
+  type IUserRepository,
+  InMemoryUserRepository,
+  createUserRepository,
+} from './repositories/user-repository.js';
+
 // Services
 export {
   type IPriceDataQuery,
