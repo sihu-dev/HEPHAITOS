@@ -47,6 +47,12 @@ export {
   createTransactionRepository,
 } from './repositories/transaction-repository.js';
 
+export {
+  type IAlertRepository,
+  InMemoryAlertRepository,
+  createAlertRepository,
+} from './repositories/alert-repository.js';
+
 // Services
 export {
   type IPriceDataQuery,
