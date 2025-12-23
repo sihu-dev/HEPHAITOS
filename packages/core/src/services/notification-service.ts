@@ -14,7 +14,7 @@ export type NotificationChannel = 'email' | 'push' | 'sms' | 'webhook';
 /**
  * 알림 우선순위
  */
-export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type NotificationPriority = 'low' | 'normal' | 'medium' | 'high' | 'urgent';
 
 /**
  * 알림 전송 입력
@@ -56,6 +56,8 @@ export interface ISentNotification {
   data?: Record<string, unknown>;
   /** 전송 상태 */
   status: 'pending' | 'sent' | 'failed' | 'read';
+  /** 읽음 여부 (legacy compatibility) */
+  is_read?: boolean;
   /** 전송 시간 */
   sent_at?: string;
   /** 읽은 시간 */
