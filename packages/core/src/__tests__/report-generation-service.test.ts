@@ -236,15 +236,15 @@ describe('ReportGenerationService', () => {
     });
   });
 
-  describe('generateMonthlyReport', () => {
-    it('should generate monthly report', async () => {
+  describe('generateWeeklyReport', () => {
+    it('should generate weekly report', async () => {
       const userId = 'user-123';
-      const month = '2025-12';
+      const weekStart = '2025-12-16';
 
-      const result = await service.generateMonthlyReport(userId, month);
+      const result = await service.generateWeeklyReport(userId, weekStart);
 
       expect(result.success).toBe(true);
-      expect(result.data!.type).toBe('monthly');
+      expect(result.data!.type).toBe('weekly');
       expect(result.data!.user_id).toBe(userId);
     });
   });
