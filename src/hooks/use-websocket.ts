@@ -9,8 +9,8 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import { WSManager, WSConfig, WSConnectionState, createWSManager } from '@/lib/websocket/ws-manager'
 import type { WSMessage, WSSubscription, WSEventType, Ticker } from '@/lib/exchange/types'
 import { useExchangeStore } from '@/stores'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import {
-import { safeLogger } from '@/lib/utils/safe-logger';
   getTickerStreamName,
   formatSubscribeMessage,
   formatUnsubscribeMessage,

@@ -6,13 +6,25 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from './types'
 
+// Check if Supabase is configured
+const USE_SUPABASE = process.env.NEXT_PUBLIC_USE_SUPABASE === 'true'
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+const isConfigured = USE_SUPABASE && SUPABASE_URL && SUPABASE_ANON_KEY
+
 // Server client with user session (for authenticated routes)
 export async function createServerSupabaseClient() {
+  if (!isConfigured) {
+    return null
+  }
+
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL!,
+    SUPABASE_ANON_KEY!,
     {
       cookies: {
         get(name: string) {
@@ -41,10 +53,14 @@ export async function createServerSupabaseClient() {
 let adminClient: ReturnType<typeof createServerClient<Database>> | null = null
 
 export function createAdminClient() {
+  if (!isConfigured || !SUPABASE_SERVICE_KEY) {
+    return null
+  }
+
   if (!adminClient) {
     adminClient = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      SUPABASE_URL!,
+      SUPABASE_SERVICE_KEY!,
       {
         cookies: {
           get: () => undefined,
@@ -64,6 +80,8 @@ export function createAdminClient() {
 // Helper: Get current user with error handling
 export async function getCurrentUser() {
   const supabase = await createServerSupabaseClient()
+  if (!supabase) return null
+
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) return null
   return user
@@ -72,6 +90,8 @@ export async function getCurrentUser() {
 // Helper: Get user with profile
 export async function getUserWithProfile() {
   const supabase = await createServerSupabaseClient()
+  if (!supabase) return null
+
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) return null
 
