@@ -17,6 +17,27 @@ interface FeedbackData {
   email?: string
 }
 
+// Supabase feedback 테이블 insert 타입
+interface FeedbackInsert {
+  user_id: string | null
+  email: string | null
+  type: string
+  category: string
+  severity: string
+  page_url: string
+  title: string
+  description: string
+  browser_info: {
+    userAgent: string
+    viewport: { width: number; height: number }
+    language: string
+  }
+  device_info: {
+    platform: string
+    screenResolution: string
+  }
+}
+
 export function FeedbackWidget() {
   const { locale } = useI18n()
   const isKo = locale === 'ko'
@@ -87,7 +108,7 @@ export function FeedbackWidget() {
         screenResolution: `${screen.width}x${screen.height}`,
       }
 
-      const { error: insertError } = await supabase.from('feedback').insert({
+      const feedbackData: FeedbackInsert = {
         user_id: user?.id || null,
         email: formData.email || user?.email || null,
         type: formData.type,
@@ -98,7 +119,9 @@ export function FeedbackWidget() {
         description: formData.description,
         browser_info: browserInfo,
         device_info: deviceInfo,
-      } as any)
+      }
+
+      const { error: insertError } = await supabase.from('feedback').insert(feedbackData)
 
       if (insertError) {
         throw insertError
