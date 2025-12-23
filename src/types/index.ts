@@ -43,6 +43,7 @@ export interface User {
 }
 
 // Strategy Types
+export type IndicatorType = 'price' | 'sma' | 'ema' | 'rsi' | 'macd' | 'bollinger' | 'atr' | 'volume' | 'vwap'
 export type StrategyStatus = 'draft' | 'backtesting' | 'ready' | 'running' | 'paused' | 'stopped'
 
 export interface Strategy {

@@ -89,7 +89,7 @@ function checkAdminRole(user: User): boolean {
     // 실제 관리자 이메일 추가
   ];
 
-  if (adminEmails.includes(user.email)) {
+  if (user.email && adminEmails.includes(user.email)) {
     return true;
   }
 

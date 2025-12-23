@@ -874,7 +874,7 @@ describe('BacktestAgent', () => {
       };
 
       const limitedAgent = createBacktestAgent(
-        limitedPriceService as IPriceDataService,
+        limitedPriceService as unknown as IPriceDataService,
         strategyRepo,
         resultRepo
       );

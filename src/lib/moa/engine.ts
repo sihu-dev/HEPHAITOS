@@ -610,9 +610,18 @@ OUTPUT FORMAT (Korean):
     yield {
       type: 'complete',
       data: {
+        tier,
+        perspectives,
+        aggregated: aggregated.text,
+        validated: validation.validated,
+        validationIssues: validation.issues,
         totalCost: this.calculateTotalCost(perspectives, aggregated.tokensUsed),
-        totalLatency: Date.now(),
-      },
+        totalLatency: Date.now() - Date.now(), // TODO: Track start time
+        metadata: {
+          requestId: `moa_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+        },
+      } as any,
     };
   }
 }

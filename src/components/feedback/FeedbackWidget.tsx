@@ -121,7 +121,7 @@ export function FeedbackWidget() {
         device_info: deviceInfo,
       }
 
-      const { error: insertError } = await supabase.from('feedback').insert(feedbackData)
+      const { error: insertError } = await supabase.from('feedback').insert(feedbackData as any)
 
       if (insertError) {
         throw insertError

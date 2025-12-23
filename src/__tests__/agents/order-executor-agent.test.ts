@@ -216,7 +216,7 @@ function createTestOrderRequest(overrides: Partial<IOrderRequest> = {}): IOrderR
     takeProfit: { type: 'fixed_price', price: 160 },
     leverage: 1,
     ...overrides,
-  };
+  } as IOrderRequest;
 }
 
 // ============================================
@@ -232,7 +232,7 @@ describe('OrderExecutorAgent', () => {
     orderRepo = new MockOrderRepository();
     positionRepo = new MockPositionRepository();
 
-    agent = new OrderExecutorAgent(orderRepo as IOrderRepository, positionRepo as IPositionRepository, {
+    agent = new OrderExecutorAgent(orderRepo as unknown as IOrderRepository, positionRepo as unknown as IPositionRepository, {
       mode: 'simulation',
       simulationSlippagePercent: 0.1,
       simulationFeePercent: 0.1,
