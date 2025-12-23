@@ -62,3 +62,15 @@ export {
   ExchangeService,
   createExchangeService,
 } from './services/exchange-service.js';
+
+export {
+  type IRiskManagementService,
+  type IPositionSizeInput,
+  type IPositionSizeResult,
+  type ITradeValidationInput,
+  type ITradeValidationResult,
+  type IStopLossTakeProfitInput,
+  type IStopLossTakeProfitResult,
+  RiskManagementService,
+  createRiskManagementService,
+} from './services/risk-management-service.js';
