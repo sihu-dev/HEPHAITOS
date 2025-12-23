@@ -428,20 +428,32 @@ export class OrderExecutorAgent {
    * 모든 포지션 청산
    */
   async closeAllPositions(
-    currentPrices: Record<string, number>
-  ): Promise<IClosePositionResult[]> {
+    currentPrices: Record<string, number> | number
+  ): Promise<{ closed: number; failed: number; results: IClosePositionResult[] }> {
     const positions = await this.positionRepo.getOpenPositions();
     const results: IClosePositionResult[] = [];
+    let closed = 0;
+    let failed = 0;
+
+    // If single price provided, use it for all positions
+    const priceMap = typeof currentPrices === 'number'
+      ? Object.fromEntries(positions.map(p => [p.symbol, currentPrices]))
+      : currentPrices;
 
     for (const position of positions) {
-      const exitPrice = currentPrices[position.symbol];
+      const exitPrice = priceMap[position.symbol];
       if (exitPrice) {
-        const result = await this.closePosition(position.id, exitPrice);
-        results.push(result);
+        try {
+          const result = await this.closePosition(position.id, exitPrice);
+          results.push(result);
+          closed++;
+        } catch (error) {
+          failed++;
+        }
       }
     }
 
-    return results;
+    return { closed, failed, results };
   }
 
   /**

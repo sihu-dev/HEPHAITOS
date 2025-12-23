@@ -243,9 +243,11 @@ function createTestAsset(
 ): IAsset {
   return {
     symbol,
+    name: symbol, // Use symbol as name for test
     amount,
     price_usd: priceUsd,
     value_usd: amount * priceUsd,
+    change_24h: 0, // Default to 0 for tests
   };
 }
 
