@@ -5,7 +5,10 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import { safeLogger } from '@/lib/utils/safe-logger';
+import { safeLogger } from '@/lib/utils/safe-logger'
+import type { Database } from '@/lib/supabase/types'
+
+type UserProfileRow = Database['public']['Tables']['user_profiles']['Row']
 
 // 환경 설정: Supabase 사용 여부
 const USE_SUPABASE = process.env.NEXT_PUBLIC_USE_SUPABASE === 'true'
@@ -61,7 +64,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     .from('user_profiles')
     .select('*')
     .eq('user_id', userId)
-    .single()
+    .single<UserProfileRow>()
 
   if (error) {
     safeLogger.error('[UserProfileService] getUserProfile error:', error)
@@ -122,7 +125,7 @@ export async function completeOnboarding(
       onConflict: 'user_id',
     })
     .select()
-    .single()
+    .single<UserProfileRow>()
 
   if (error) {
     safeLogger.error('[UserProfileService] completeOnboarding error:', error)
@@ -250,7 +253,7 @@ export async function updateUserProfile(
     .update(updateData)
     .eq('user_id', userId)
     .select()
-    .single()
+    .single<UserProfileRow>()
 
   if (error) {
     safeLogger.error('[UserProfileService] updateUserProfile error:', error)
@@ -298,7 +301,7 @@ export async function getUserProfileClient(userId: string): Promise<UserProfile 
     .from('user_profiles')
     .select('*')
     .eq('user_id', userId)
-    .single()
+    .single<UserProfileRow>()
 
   if (error) {
     safeLogger.error('[UserProfileService] getUserProfileClient error:', error)
