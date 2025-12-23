@@ -22,6 +22,7 @@ import type {
   IRoundTrip,
   IResult,
   IPerformanceMetrics,
+  Timeframe,
 } from '@hephaitos/types';
 import type {
   IPriceDataService,
@@ -36,7 +37,7 @@ import type {
 class MockPriceDataService implements IPriceDataService {
   async getHistoricalPrices(
     symbol: string,
-    timeframe: string,
+    timeframe: Timeframe,
     startDate: string,
     endDate: string
   ) {
@@ -70,6 +71,8 @@ class MockPriceDataService implements IPriceDataService {
         symbol,
         timeframe,
         candles,
+        startTime: new Date(startDate).toISOString(),
+        endTime: new Date(endDate).toISOString(),
       },
       metadata: {
         timestamp: new Date().toISOString(),
@@ -81,11 +84,7 @@ class MockPriceDataService implements IPriceDataService {
   async getLatestPrice(symbol: string) {
     return {
       success: true,
-      data: {
-        symbol,
-        price: 50000,
-        timestamp: new Date().toISOString(),
-      },
+      data: 50000,
       metadata: {
         timestamp: new Date().toISOString(),
         duration_ms: 5,
@@ -94,19 +93,46 @@ class MockPriceDataService implements IPriceDataService {
   }
 
   async getLatestPrices(symbols: string[]) {
+    const priceMap = new Map<string, number>();
+    symbols.forEach(symbol => priceMap.set(symbol, 50000));
     return {
       success: true,
-      data: symbols.map((symbol) => ({
-        symbol,
-        price: 50000,
-        timestamp: new Date().toISOString(),
-      })),
+      data: priceMap,
       metadata: {
         timestamp: new Date().toISOString(),
         duration_ms: 10,
       },
     };
   }
+
+  async getOHLCV(symbol: string, timeframe: Timeframe, limit: number = 100) {
+    const candles: IOHLCV[] = [];
+    const now = Date.now();
+    let price = 50000;
+    
+    for (let i = 0; i < limit; i++) {
+      const change = (Math.random() - 0.5) * 1000;
+      candles.push({
+        timestamp: new Date(now - (limit - i) * 86400000).toISOString(),
+        open: price,
+        high: price + Math.random() * 200,
+        low: price - Math.random() * 200,
+        close: price + change,
+        volume: 1000000 + Math.random() * 500000,
+      });
+      price += change;
+    }
+    
+    return {
+      success: true,
+      data: candles,
+      metadata: {
+        timestamp: new Date().toISOString(),
+        duration_ms: 10,
+      },
+    };
+  }
+
 }
 
 class MockStrategyRepository implements IStrategyRepository {
@@ -122,6 +148,10 @@ class MockStrategyRepository implements IStrategyRepository {
         duration_ms: 5,
       },
     };
+  }
+
+  async create(strategy: IStrategy) {
+    return this.save(strategy);
   }
 
   async getById(id: string) {

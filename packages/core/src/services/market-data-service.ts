@@ -20,7 +20,11 @@ export interface ITickerInfo {
   high_24h: number;
   low_24h: number;
   volume_24h: number;
+  /** @deprecated Use volume_24h */
+  volume: number;
   price_change_24h: number;
+  /** @deprecated Use price_change_24h */
+  change_24h: number;
   price_change_percent_24h: number;
   updated_at: string;
 }
@@ -146,13 +150,17 @@ export class MarketDataService implements IMarketDataService {
       if (!ticker) {
         // Generate mock ticker
         const price = this.latestPrices.get(symbol) ?? 100;
+        const vol = 1000000;
+        const change = price * 0.02;
         ticker = {
           symbol,
           last_price: price,
           high_24h: price * 1.05,
           low_24h: price * 0.95,
-          volume_24h: 1000000,
-          price_change_24h: price * 0.02,
+          volume_24h: vol,
+          volume: vol, // Legacy alias
+          price_change_24h: change,
+          change_24h: change, // Legacy alias
           price_change_percent_24h: 2.0,
           updated_at: new Date().toISOString(),
         };
