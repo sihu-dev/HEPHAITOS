@@ -1,4 +1,5 @@
 // ============================================
+import { safeLogger } from '@/lib/utils/safe-logger'
 // AI 비용 추적 라이브러리
 // Loop 11: Observability
 // ============================================

@@ -1,4 +1,5 @@
 // ============================================
+import { safeLogger } from '@/lib/utils/safe-logger'
 // Celebrity Portfolio API Sources
 // SEC 13F, Congress Disclosure, Unusual Whales 연동
 // ============================================

@@ -1,4 +1,5 @@
 // ============================================
+import { safeLogger } from '@/lib/utils/safe-logger'
 // Sentry Error Monitoring
 // 프로덕션 에러 모니터링 및 성능 추적
 // ============================================
