@@ -106,7 +106,7 @@ export async function getStrategies(options?: {
   }
 
   return {
-    data: (data ?? []).map((row: any) => rowToStrategy(row as StrategyRow)),
+    data: (data ?? []).map((row) => rowToStrategy(row as StrategyRow)),
     total: count ?? 0,
   }
 }
@@ -258,7 +258,7 @@ export async function getStrategiesClient(options?: {
     return mockStrategies
   }
 
-  return (data ?? []).map((row: any) => rowToStrategy(row as StrategyRow))
+  return (data ?? []).map((row) => rowToStrategy(row as StrategyRow))
 }
 
 /**
