@@ -530,8 +530,8 @@ export class OrderExecutorAgent {
       canTrade,
       blockReason,
       openPositions: openPositionCount,
-      maxPositions: this.config.riskConfig.maxPositions,
-      maxDailyTrades: this.config.riskConfig.maxDailyTrades,
+      maxPositions: this.config.riskConfig.maxOpenPositions,
+      maxDailyTrades: this.config.riskConfig.dailyTradeLimit,
       isWithinLimits: canTrade && !dailyLimitReached,
     };
   }

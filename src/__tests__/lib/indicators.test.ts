@@ -13,9 +13,8 @@ import {
   atr,
   stochastic,
   calculateIndicator,
-  type IndicatorType,
 } from '@/lib/backtest/indicators'
-import type { OHLCV } from '@/types'
+import type { OHLCV, IndicatorType } from '@/types'
 
 describe('sma (Simple Moving Average)', () => {
   it('should calculate SMA correctly', () => {
