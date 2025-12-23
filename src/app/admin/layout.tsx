@@ -10,6 +10,10 @@ import type { User } from '@supabase/supabase-js';
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
 
+  if (!supabase) {
+    redirect('/auth/login?error=database_error');
+  }
+
   // 인증 확인
   const {
     data: { user },

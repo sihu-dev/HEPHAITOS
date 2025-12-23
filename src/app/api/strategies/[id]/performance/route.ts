@@ -15,6 +15,12 @@ async function GETHandler(
   try {
     const { id: strategyId } = await context.params;
     const supabase = await createServerSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: { code: 'SUPABASE_ERROR', message: 'Database connection failed' } },
+        { status: 500 }
+      )
+    }
 
     // 1. 집계 성과 조회 (Materialized View)
     interface StrategyPerformanceData {

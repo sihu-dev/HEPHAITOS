@@ -19,6 +19,12 @@ import { getUserProfile, updateUserProfile, type OnboardingData } from '@/lib/se
 export const GET = withApiMiddleware(
   async (request: NextRequest) => {
     const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: { code: 'SUPABASE_ERROR', message: 'Database connection failed' } },
+        { status: 500 }
+      )
+    }
     const {
       data: { user },
     } = await supabase.auth.getUser()
