@@ -17,6 +17,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BacktestAgent, createBacktestAgent } from '@/agents/backtest-agent';
 import type {
   IBacktestConfig,
+  IBacktestResult,
   IStrategy,
   IOHLCV,
   IRoundTrip,
