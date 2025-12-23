@@ -15,6 +15,7 @@ import {
   completeOnboarding,
   getUserProfile,
   saveOnboardingProgress,
+  type OnboardingData,
 } from '@/lib/services/user-profile'
 
 /**
@@ -77,15 +78,16 @@ export const POST = withApiMiddleware(
     safeLogger.info('[Onboarding API] Completing onboarding', { userId: user.id })
 
     // Map validation data to service layer format
-    const onboardingData = {
-      nickname: validation.data.investmentExperience, // Adjust mapping as needed
-      investmentStyle: validation.data.riskProfile,
-      experience: validation.data.investmentExperience,
+    // TODO: Fix mapping - nickname should not be investmentExperience
+    const onboardingData: OnboardingData = {
+      nickname: validation.data.investmentExperience, // TODO: Get actual nickname from validation
+      investmentStyle: validation.data.riskProfile as 'conservative' | 'moderate' | 'aggressive',
+      experience: validation.data.investmentExperience as 'beginner' | 'intermediate' | 'advanced',
       interests: validation.data.preferredSectors,
       painPoints: [],
     }
 
-    const profile = await completeOnboarding(user.id, onboardingData as any)
+    const profile = await completeOnboarding(user.id, onboardingData)
 
     return createApiResponse({
       message: '온보딩이 완료되었습니다',
