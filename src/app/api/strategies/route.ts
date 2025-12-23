@@ -25,6 +25,7 @@ export const dynamic = 'force-dynamic'
 async function getCurrentUserId(): Promise<string | null> {
   try {
     const supabase = await createServerSupabaseClient()
+    if (!supabase) return null
     const { data: { user } } = await supabase.auth.getUser()
     return user?.id ?? null
   } catch {

@@ -31,6 +31,12 @@ async function GETHandler(req: NextRequest) {
     const minBacktests = parseInt(searchParams.get('minBacktests') || '3');
 
     const supabase = await createServerSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: { code: 'SUPABASE_ERROR', message: 'Database connection failed' } },
+        { status: 500 }
+      )
+    }
 
     // Leaderboard entry type
     interface LeaderboardEntry {
