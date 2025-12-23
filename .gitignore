@@ -11,28 +11,34 @@ dist/
 
 # Testing
 coverage/
+playwright-report/
+test-results/
 
 # Environment
 .env
 .env.local
+.env*.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# MCP Settings (Contains API Keys)
+# MCP/Claude Settings
 .mcp.json
 *.local.md
 .claude/settings.local.json
+.claude-dev-helper/
+.playwright-mcp/
+.plugin-config/
 
 # Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # IDE
 .idea/
 .vscode/*.log
-.vscode/.ropeproject
 *.swp
 *.swo
 
@@ -50,6 +56,3 @@ next-env.d.ts
 # PWA
 public/sw.js
 public/workbox-*.js
-
-.vercel
-.env*.local
