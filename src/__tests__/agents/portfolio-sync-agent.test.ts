@@ -230,7 +230,7 @@ function createTestPortfolio(
     user_id: userId,
     exchange,
     assets: [],
-    last_synced_at: null,
+    last_synced_at: undefined,
     sync_status: 'pending',
     created_at: new Date().toISOString(),
   };

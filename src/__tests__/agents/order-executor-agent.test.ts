@@ -215,7 +215,6 @@ function createTestOrderRequest(overrides: Partial<IOrderRequest> = {}): IOrderR
     stopLoss: { type: 'fixed_price', price: 145 },
     takeProfit: { type: 'fixed_price', price: 160 },
     leverage: 1,
-    timestamp: new Date().toISOString(),
     ...overrides,
   };
 }

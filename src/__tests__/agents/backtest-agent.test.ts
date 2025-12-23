@@ -423,7 +423,6 @@ function createTestStrategy(): IStrategy {
       takeProfitPercent: 10,
       maxCapitalUsage: 100,
     },
-    status: 'active',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
