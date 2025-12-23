@@ -116,6 +116,53 @@ class MockPortfolioRepository implements IPortfolioRepository {
     };
   }
 
+  async create(input: any): Promise<IResult<IPortfolio>> {
+    const portfolio: IPortfolio = {
+      id: `portfolio-${Date.now()}`,
+      user_id: input.user_id,
+      exchange: input.exchange,
+      name: input.name,
+      assets: [],
+      total_value_usd: 0,
+      created_at: new Date().toISOString(),
+      synced_at: new Date().toISOString(),
+      sync_status: 'idle',
+    };
+    this.portfolios.set(portfolio.id, portfolio);
+    return {
+      success: true,
+      data: portfolio,
+      metadata: { timestamp: new Date().toISOString(), duration_ms: 0 },
+    };
+  }
+
+  async update(id: string, updates: Partial<IPortfolio>): Promise<IResult<IPortfolio>> {
+    const portfolio = this.portfolios.get(id);
+    if (!portfolio) {
+      return {
+        success: false,
+        error: new Error('Portfolio not found'),
+        metadata: { timestamp: new Date().toISOString(), duration_ms: 0 },
+      };
+    }
+    const updated = { ...portfolio, ...updates };
+    this.portfolios.set(id, updated);
+    return {
+      success: true,
+      data: updated,
+      metadata: { timestamp: new Date().toISOString(), duration_ms: 0 },
+    };
+  }
+
+  async delete(id: string): Promise<IResult<boolean>> {
+    const deleted = this.portfolios.delete(id);
+    return {
+      success: true,
+      data: deleted,
+      metadata: { timestamp: new Date().toISOString(), duration_ms: 0 },
+    };
+  }
+
   // Test helpers
   getSnapshots(): IPortfolioSnapshot[] {
     return this.snapshots;
