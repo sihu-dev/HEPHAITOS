@@ -1,8 +1,8 @@
 # TypeScript 타입 오류 분석 보고서
 
-**분석 일시**: 2025-12-23  
-**브랜치**: `claude/analyze-dev-progress-6fe0y`  
-**총 오류 수**: 300개
+**분석 일시**: 2025-12-23
+**브랜치**: `claude/analyze-dev-progress-6fe0y`
+**총 오류 수**: 219개 (초기 300개에서 81개 해결)
 
 ---
 
@@ -119,5 +119,61 @@ c302e81 - feat(api): apply P3 rate limiting to 32 endpoints
 
 ---
 
-**작성자**: Claude Code Agent  
-**문서 버전**: 1.0
+---
+
+## ✅ 진행 상황 (2025-12-23)
+
+### 해결된 오류 (81개)
+
+**1. 테스트 데이터 구조 수정**:
+- ✅ IAsset 필드 정리:
+  - 불필요한 `id`, `exchange`, `pnl_percent` 제거
+  - `currentPrice` → `price_usd` 변경
+  - `change_24h` 필드 추가
+- ✅ IPosition 필드 정리:
+  - snake_case → camelCase (`entry_price` → `entryPrice` 등)
+  - 필수 `status` 필드 추가 (`'open'`)
+  - `amount` → `quantity` 복원 (잘못된 변경 수정)
+  - `user_id` 필드 제거
+- ✅ IAssetBreakdown, ICreatePortfolioInput 등 기타 타입 수정
+
+**2. 수정된 파일**:
+- `packages/core/src/__tests__/portfolio-repository.test.ts`
+- `packages/core/src/__tests__/risk-management-service.test.ts`
+- `src/__tests__/agents/order-executor-agent.test.ts`
+
+### 남은 주요 오류 (219개)
+
+**카테고리별 분류**:
+1. **Mock 구현 signature 불일치** (~150개)
+   - `MockPriceDataService.getOHLCV` 시그니처
+   - `MockBacktestResultRepository` 메서드들
+   - `MockOrderRepository`, `MockPositionRepository`
+
+2. **타입 정의 누락/불일치** (~50개)
+   - `IGenerateReportInput` 미정의 (report-generation-service.test.ts)
+   - `IConditionGroup` 구조 불일치
+   - `IOrderExecution` 필드 누락 (`quantity`, `price`)
+   - `IPositionWithMeta` 필드 누락 (`exitTime`)
+   - `IRiskStatus` 필드 누락 (`openPositions`, `maxPositions`)
+   - `IStrategyComparison.results` 미정의
+
+3. **기타 타입 오류** (~19개)
+   - `IResult` 제네릭 인자 누락
+   - `OrderSide` vs `"long"` 비교 오류
+   - `IStopLossTakeProfitInput.amount` 필드 문제
+
+### 다음 단계
+
+1. **단기** (1-2시간):
+   - Mock 구현 시그니처 수정 (인터페이스와 일치하도록)
+   - 누락된 타입 정의 추가 (`IGenerateReportInput` 등)
+
+2. **중기** (1일):
+   - 전체 타입 시스템 검증
+   - Supabase 타입 재생성 (94개 테이블 반영)
+
+---
+
+**작성자**: Claude Code Agent
+**문서 버전**: 2.0 (2025-12-23 업데이트)
