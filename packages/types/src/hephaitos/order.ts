@@ -39,6 +39,10 @@ export interface IOrderRequest {
   stopPrice?: number;
   /** 타임인포스 */
   timeInForce?: TimeInForce;
+  /** 레버리지 */
+  leverage?: number;
+  /** 주문 금액 (수량 대신 사용 가능) */
+  amount?: number;
   /** 연결된 손절 주문 */
   stopLoss?: IStopLossOrder;
   /** 연결된 익절 주문 */

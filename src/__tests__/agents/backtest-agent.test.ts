@@ -262,9 +262,9 @@ class MockStrategyRepository implements IStrategyRepository {
 }
 
 class MockBacktestResultRepository implements IBacktestResultRepository {
-  private results: Map<string, IResult> = new Map();
+  private results: Map<string, IBacktestResult> = new Map();
 
-  async save(result: IResult) {
+  async save(result: IBacktestResult) {
     this.results.set(result.id, result);
     return {
       success: true,
