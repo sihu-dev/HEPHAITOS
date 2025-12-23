@@ -53,6 +53,10 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 
   const supabase = await createServerSupabaseClient()
 
+  if (!supabase) {
+    return mockProfiles.get(userId) ?? null
+  }
+
   const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
