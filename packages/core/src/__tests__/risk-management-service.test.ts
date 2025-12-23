@@ -257,15 +257,14 @@ describe('RiskManagementService', () => {
     it('should reject trade when max open positions reached', () => {
       const mockPositions: IPosition[] = Array(5).fill(null).map((_, i) => ({
         id: `pos-${i}`,
-        user_id: 'user1',
         symbol: 'AAPL',
         side: 'buy',
         quantity: 10,
-        entry_price: 150,
-        current_price: 151,
-        unrealized_pnl: 10,
-        unrealized_pnl_percent: 0.67,
-        opened_at: new Date().toISOString(),
+        entryPrice: 150,
+        currentPrice: 151,
+        unrealizedPnL: 10,
+        unrealizedPnLPercent: 0.67,
+        enteredAt: new Date().toISOString(),
       }));
 
       service.updateRiskStatus(mockPositions, 0, 0);
@@ -478,15 +477,15 @@ describe('RiskManagementService', () => {
       const positions: IPosition[] = [
         {
           id: 'pos1',
-          user_id: 'user1',
           symbol: 'AAPL',
           side: 'buy',
           quantity: 10,
-          entry_price: 150,
-          current_price: 155,
-          unrealized_pnl: 50,
-          unrealized_pnl_percent: 3.33,
-          opened_at: new Date().toISOString(),
+          entryPrice: 150,
+          currentPrice: 155,
+          unrealizedPnL: 50,
+          unrealizedPnLPercent: 3.33,
+          status: 'open',
+          enteredAt: new Date().toISOString(),
         },
       ];
 
@@ -504,15 +503,15 @@ describe('RiskManagementService', () => {
       const positions: IPosition[] = [
         {
           id: 'pos1',
-          user_id: 'user1',
           symbol: 'AAPL',
           side: 'buy',
           quantity: 10,
-          entry_price: 150,
-          current_price: 155,
-          unrealized_pnl: 50,
-          unrealized_pnl_percent: 3.33,
-          opened_at: new Date().toISOString(),
+          entryPrice: 150,
+          currentPrice: 155,
+          unrealizedPnL: 50,
+          unrealizedPnLPercent: 3.33,
+          status: 'open',
+          enteredAt: new Date().toISOString(),
         },
       ];
 
@@ -540,15 +539,14 @@ describe('RiskManagementService', () => {
     it('should block trading when max positions reached', () => {
       const positions: IPosition[] = Array(5).fill(null).map((_, i) => ({
         id: `pos-${i}`,
-        user_id: 'user1',
         symbol: 'AAPL',
         side: 'buy',
         quantity: 10,
-        entry_price: 150,
-        current_price: 151,
-        unrealized_pnl: 10,
-        unrealized_pnl_percent: 0.67,
-        opened_at: new Date().toISOString(),
+        entryPrice: 150,
+        currentPrice: 151,
+        unrealizedPnL: 10,
+        unrealizedPnLPercent: 0.67,
+        enteredAt: new Date().toISOString(),
       }));
 
       const result = service.updateRiskStatus(positions, 0, 0);

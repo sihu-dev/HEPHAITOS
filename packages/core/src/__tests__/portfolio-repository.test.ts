@@ -16,8 +16,8 @@ describe('PortfolioRepository', () => {
   describe('create', () => {
     it('should create a new portfolio', async () => {
       const input: ICreatePortfolioInput = {
-        user_id: 'user-123',
         exchange: 'binance',
+        user_id: 'test-user',
         name: 'My Binance Portfolio',
         api_key: 'test-key',
         api_secret: 'test-secret',
@@ -40,7 +40,7 @@ describe('PortfolioRepository', () => {
     it('should save a portfolio', async () => {
       const portfolio: IPortfolio = {
         id: 'portfolio-1',
-        user_id: 'user-123',
+        user_id: 'test-user',
         exchange: 'binance',
         name: 'Test Portfolio',
         assets: [],
@@ -60,8 +60,8 @@ describe('PortfolioRepository', () => {
   describe('getById', () => {
     it('should get portfolio by ID', async () => {
       const input: ICreatePortfolioInput = {
-        user_id: 'user-123',
         exchange: 'binance',
+        user_id: 'test-user',
         name: 'Test',
         api_key: 'key',
         api_secret: 'secret',
@@ -87,15 +87,15 @@ describe('PortfolioRepository', () => {
   describe('getByUserId', () => {
     it('should get portfolios by user ID', async () => {
       const input1: ICreatePortfolioInput = {
-        user_id: 'user-123',
         exchange: 'binance',
+        user_id: 'test-user',
         name: 'Portfolio 1',
         api_key: 'key1',
         api_secret: 'secret1',
       };
       const input2: ICreatePortfolioInput = {
-        user_id: 'user-123',
         exchange: 'upbit',
+        user_id: 'test-user',
         name: 'Portfolio 2',
         api_key: 'key2',
         api_secret: 'secret2',
@@ -116,8 +116,8 @@ describe('PortfolioRepository', () => {
   describe('update', () => {
     it('should update portfolio', async () => {
       const created = await repository.create({
-        user_id: 'user-123',
         exchange: 'binance',
+        user_id: 'test-user',
         name: 'Original Name',
         api_key: 'key',
         api_secret: 'secret',
@@ -145,8 +145,8 @@ describe('PortfolioRepository', () => {
   describe('delete', () => {
     it('should delete portfolio', async () => {
       const created = await repository.create({
-        user_id: 'user-123',
         exchange: 'binance',
+        user_id: 'test-user',
         name: 'To Delete',
         api_key: 'key',
         api_secret: 'secret',
@@ -166,8 +166,8 @@ describe('PortfolioRepository', () => {
   describe('updateAssets', () => {
     it('should update assets and calculate total value', async () => {
       const created = await repository.create({
-        user_id: 'user-123',
         exchange: 'binance',
+        user_id: 'test-user',
         name: 'Test',
         api_key: 'key',
         api_secret: 'secret',
@@ -176,28 +176,24 @@ describe('PortfolioRepository', () => {
 
       const assets = [
         {
-          id: 'asset-1',
           symbol: 'BTC',
           name: 'Bitcoin',
-          exchange: 'binance' as const,
-          quantity: 1,
-          avg_buy_price: 50000,
-          current_price: 55000,
+          amount: 1,
+          price_usd: 55000,
           value_usd: 55000,
-          pnl_usd: 5000,
-          pnl_percent: 10,
+          change_24h: 10,
+          avg_buy_price: 50000,
+          unrealized_pnl: 5000,
         },
         {
-          id: 'asset-2',
           symbol: 'ETH',
           name: 'Ethereum',
-          exchange: 'binance' as const,
-          quantity: 10,
-          avg_buy_price: 3000,
-          current_price: 3500,
+          amount: 10,
+          price_usd: 3500,
           value_usd: 35000,
-          pnl_usd: 5000,
-          pnl_percent: 16.67,
+          change_24h: 16.67,
+          avg_buy_price: 3000,
+          unrealized_pnl: 5000,
         },
       ];
 
@@ -219,11 +215,13 @@ describe('PortfolioRepository', () => {
         asset_breakdown: [
           {
             symbol: 'BTC',
+            amount: 1,
             value_usd: 60000,
             percentage: 60,
           },
           {
             symbol: 'ETH',
+            amount: 1,
             value_usd: 40000,
             percentage: 40,
           },

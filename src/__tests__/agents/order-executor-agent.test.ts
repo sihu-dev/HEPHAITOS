@@ -150,7 +150,7 @@ class MockPositionRepository {
     return position;
   }
 
-  async addPartialExit(positionId: string, price: number, quantity: number, timestamp: string): Promise<IPositionWithMeta> {
+  async addPartialExit(positionId: string, price: number, amount: number, timestamp: string): Promise<IPositionWithMeta> {
     const position = this.positions.get(positionId);
     if (!position) throw new Error(`Position ${positionId} not found`);
 
@@ -200,7 +200,7 @@ function createTestOrderRequest(overrides: Partial<IOrderRequest> = {}): IOrderR
     symbol: 'AAPL',
     side: 'buy',
     type: 'market',
-    quantity: 100,
+    amount: 100,
     price: 150,
     stopLoss: 145,
     takeProfit: 160,
@@ -297,7 +297,7 @@ describe('OrderExecutorAgent', () => {
     });
 
     it('should apply slippage in simulation mode', async () => {
-      const request = createTestOrderRequest({ price: 100, quantity: 100 });
+      const request = createTestOrderRequest({ price: 100, amount: 100 });
       const result = await agent.submitOrder(request);
 
       expect(result.success).toBe(true);
@@ -322,11 +322,11 @@ describe('OrderExecutorAgent', () => {
 
     it('should update existing position when adding to it', async () => {
       // First order
-      const request1 = createTestOrderRequest({ quantity: 100 });
+      const request1 = createTestOrderRequest({ amount: 100 });
       const result1 = await agent.submitOrder(request1);
 
       // Second order (same symbol, same side)
-      const request2 = createTestOrderRequest({ quantity: 50 });
+      const request2 = createTestOrderRequest({ amount: 50 });
       const result2 = await agent.submitOrder(request2);
 
       expect(result2.success).toBe(true);
@@ -398,7 +398,7 @@ describe('OrderExecutorAgent', () => {
   describe('Position Management', () => {
     it('should close position at market price', async () => {
       // Create position
-      const request = createTestOrderRequest({ price: 100, quantity: 100 });
+      const request = createTestOrderRequest({ price: 100, amount: 100 });
       await agent.submitOrder(request);
 
       // Close position
@@ -415,7 +415,7 @@ describe('OrderExecutorAgent', () => {
       const buyRequest = createTestOrderRequest({
         side: 'buy',
         price: 100,
-        quantity: 100
+        amount: 100
       });
       await agent.submitOrder(buyRequest);
 
@@ -429,13 +429,13 @@ describe('OrderExecutorAgent', () => {
 
     it('should support partial position exits', async () => {
       // Create position with 100 shares
-      const request = createTestOrderRequest({ price: 100, quantity: 100 });
+      const request = createTestOrderRequest({ price: 100, amount: 100 });
       await agent.submitOrder(request);
 
       // Close 50 shares
       const sellRequest = createTestOrderRequest({
         side: 'sell',
-        quantity: 50,
+        amount: 50,
         price: 110,
       });
       const result = await agent.submitOrder(sellRequest);
@@ -478,7 +478,7 @@ describe('OrderExecutorAgent', () => {
       // Buy at 100
       const request = createTestOrderRequest({
         price: 100,
-        quantity: 100,
+        amount: 100,
         stopLoss: 90,
       });
       await agent.submitOrder(request);
@@ -529,7 +529,7 @@ describe('OrderExecutorAgent', () => {
 
     it('should track risk status correctly', async () => {
       // Create position
-      const request = createTestOrderRequest({ price: 100, quantity: 100 });
+      const request = createTestOrderRequest({ price: 100, amount: 100 });
       await agent.submitOrder(request);
 
       const status = await agent.getRiskStatus();
@@ -551,7 +551,7 @@ describe('OrderExecutorAgent', () => {
       // Buy at 100 with SL at 95
       const request = createTestOrderRequest({
         price: 100,
-        quantity: 100,
+        amount: 100,
         stopLoss: 95,
       });
       await agent.submitOrder(request);
@@ -568,7 +568,7 @@ describe('OrderExecutorAgent', () => {
       // Buy at 100 with TP at 110
       const request = createTestOrderRequest({
         price: 100,
-        quantity: 100,
+        amount: 100,
         takeProfit: 110,
       });
       await agent.submitOrder(request);
@@ -585,7 +585,7 @@ describe('OrderExecutorAgent', () => {
       // Buy at 100 with SL at 95, TP at 110
       const request = createTestOrderRequest({
         price: 100,
-        quantity: 100,
+        amount: 100,
         stopLoss: 95,
         takeProfit: 110,
       });
@@ -604,7 +604,7 @@ describe('OrderExecutorAgent', () => {
       // Buy at 100 with 5% trailing stop
       const request = createTestOrderRequest({
         price: 100,
-        quantity: 100,
+        amount: 100,
         trailingStopPercent: 5,
       });
       await agent.submitOrder(request);
@@ -677,17 +677,17 @@ describe('OrderExecutorAgent', () => {
       // Create 2 winners (total +2000) and 1 loser (-500)
 
       await agent.submitOrder(createTestOrderRequest({
-        symbol: 'WIN1', price: 100, quantity: 100
+        symbol: 'WIN1', price: 100, amount: 100
       }));
       await agent.closePosition('WIN1', 110); // +1000
 
       await agent.submitOrder(createTestOrderRequest({
-        symbol: 'WIN2', price: 100, quantity: 100
+        symbol: 'WIN2', price: 100, amount: 100
       }));
       await agent.closePosition('WIN2', 110); // +1000
 
       await agent.submitOrder(createTestOrderRequest({
-        symbol: 'LOSS1', price: 100, quantity: 100
+        symbol: 'LOSS1', price: 100, amount: 100
       }));
       await agent.closePosition('LOSS1', 95); // -500
 
@@ -743,7 +743,7 @@ describe('OrderExecutorAgent', () => {
       const request = createTestOrderRequest({
         side: 'sell',
         price: 100,
-        quantity: 100,
+        amount: 100,
       });
       const result = await agent.submitOrder(request);
 
@@ -757,7 +757,7 @@ describe('OrderExecutorAgent', () => {
       await agent.submitOrder(createTestOrderRequest({
         side: 'sell',
         price: 100,
-        quantity: 100,
+        amount: 100,
       }));
 
       // Buy back at 90 (profit)
@@ -773,7 +773,7 @@ describe('OrderExecutorAgent', () => {
       await agent.submitOrder(createTestOrderRequest({
         side: 'sell',
         price: 100,
-        quantity: 100,
+        amount: 100,
         stopLoss: 105,
       }));
 
@@ -806,7 +806,7 @@ describe('OrderExecutorAgent', () => {
     });
 
     it('should validate order quantity is positive', async () => {
-      const request = createTestOrderRequest({ quantity: -100 });
+      const request = createTestOrderRequest({ amount: -100 });
       const result = await agent.submitOrder(request);
 
       expect(result.success).toBe(false);
@@ -834,7 +834,7 @@ describe('OrderExecutorAgent', () => {
       // 1. Submit order
       const buyResult = await agent.submitOrder(createTestOrderRequest({
         price: 100,
-        quantity: 100,
+        amount: 100,
         stopLoss: 95,
         takeProfit: 110,
       }));
@@ -854,7 +854,7 @@ describe('OrderExecutorAgent', () => {
       // 4. Partial exit
       const sellResult = await agent.submitOrder(createTestOrderRequest({
         side: 'sell',
-        quantity: 50,
+        amount: 50,
         price: 105,
       }));
       expect(sellResult.success).toBe(true);
