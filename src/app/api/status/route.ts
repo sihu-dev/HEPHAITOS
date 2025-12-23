@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,7 +17,7 @@ const supabase = createClient(
  * GET /api/status
  * 시스템 상태 조회 (Public)
  */
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'overview'
@@ -170,7 +171,7 @@ export async function GET(request: NextRequest) {
  * POST /api/status
  * 상태 관리 (Admin only)
  */
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   try {
     const body = await request.json()
     const { action } = body
@@ -320,3 +321,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

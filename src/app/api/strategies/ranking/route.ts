@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,7 +17,7 @@ const supabaseAdmin = createClient(
  * GET /api/strategies/ranking
  * 공개 전략 랭킹 조회
  */
-export async function GET(req: Request) {
+async function GETHandler(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
     const limit = parseInt(searchParams.get('limit') || '50')
@@ -40,3 +41,5 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'INTERNAL_SERVER_ERROR' }, { status: 500 })
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })

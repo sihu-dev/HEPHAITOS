@@ -8,6 +8,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { safeLogger } from '@/lib/utils/safe-logger'
 import { createAlpacaClient, type AlpacaConfig } from '@/lib/broker/alpaca-client'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +35,7 @@ const POPULAR_US_STOCKS = [
 // GET /api/stocks/us
 // ============================================
 
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'snapshot'
@@ -239,7 +240,7 @@ export async function GET(request: NextRequest) {
 // POST /api/stocks/us
 // ============================================
 
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   try {
     // 사용자 인증
     const cookieStore = await cookies()
@@ -535,3 +536,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

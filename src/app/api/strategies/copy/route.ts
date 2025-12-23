@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,7 +17,7 @@ const supabaseAdmin = createClient(
  * POST /api/strategies/copy
  * 공개 전략 복사
  */
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const { strategyId } = await req.json()
     const userId = await requireUserId(req)
@@ -47,3 +48,5 @@ async function requireUserId(req: Request): Promise<string> {
   if (!userId) throw new Error('UNAUTHORIZED')
   return userId
 }
+
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

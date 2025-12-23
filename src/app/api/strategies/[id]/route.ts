@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import type { Strategy, ApiResponse } from '@/types'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 import {
   findStrategyById,
   updateStrategy,
@@ -10,7 +11,7 @@ import {
 export const dynamic = 'force-dynamic'
 
 // GET /api/strategies/[id]
-export async function GET(
+async function GETHandler(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -54,7 +55,7 @@ export async function GET(
 }
 
 // PUT /api/strategies/[id]
-export async function PUT(
+async function PUTHandler(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -106,7 +107,7 @@ export async function PUT(
 }
 
 // DELETE /api/strategies/[id]
-export async function DELETE(
+async function DELETEHandler(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -146,7 +147,7 @@ export async function DELETE(
 }
 
 // PATCH /api/strategies/[id] - For partial updates (e.g., status change)
-export async function PATCH(
+async function PATCHHandler(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -203,3 +204,8 @@ export async function PATCH(
     )
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const PUT = withRateLimit(PUTHandler, { category: 'api' })
+export const DELETE = withRateLimit(DELETEHandler, { category: 'api' })
+export const PATCH = withRateLimit(PATCHHandler, { category: 'api' })

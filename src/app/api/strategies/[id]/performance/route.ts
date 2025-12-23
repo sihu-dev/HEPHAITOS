@@ -6,8 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
-export async function GET(
+async function GETHandler(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
@@ -118,3 +119,5 @@ export async function GET(
     );
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })

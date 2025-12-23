@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,7 +17,7 @@ const supabase = createClient(
  * POST /api/beta/invite
  * 초대코드 사용 및 크레딧 지급
  */
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   try {
     const body = await request.json()
     const { code, userId } = body
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
  * GET /api/beta/invite?code=XXXX
  * 초대코드 유효성 검증 (사용하지 않음)
  */
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
@@ -145,3 +146,6 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

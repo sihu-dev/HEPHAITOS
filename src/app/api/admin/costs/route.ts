@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
 import { requireAdminAuth } from '@/lib/api/middleware'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -68,7 +69,7 @@ interface Alert {
  * GET /api/admin/costs
  * 비용 데이터 조회
  */
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   // P0 FIX: Admin 인증 필수
   const authResult = await requireAdminAuth(request)
   if ('error' in authResult) {
@@ -239,7 +240,7 @@ export async function GET(request: NextRequest) {
  * POST /api/admin/costs
  * 비용 관련 액션
  */
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   // P0 FIX: Admin 인증 필수
   const authResult = await requireAdminAuth(request)
   if ('error' in authResult) {
@@ -372,3 +373,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

@@ -9,6 +9,7 @@ import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
 import { getSafetyConfig, type SafetyConfig } from '@/lib/safety/config'
 import { requireAdminAuth } from '@/lib/api/middleware'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,7 +35,7 @@ interface SafetyEventStats {
  * GET /api/admin/safety
  * 안전 정책 이벤트 통계 조회
  */
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   // P0 FIX: Admin 인증 필수
   const authResult = await requireAdminAuth(request)
   if ('error' in authResult) {
@@ -173,7 +174,7 @@ export async function GET(request: NextRequest) {
  * POST /api/admin/safety
  * 안전 정책 설정 업데이트
  */
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   // P0 FIX: Admin 인증 필수
   const authResult = await requireAdminAuth(request)
   if ('error' in authResult) {
@@ -228,3 +229,6 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

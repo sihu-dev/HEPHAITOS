@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 type SortBy = 'sharpe' | 'cagr' | 'return' | 'backtest_count';
 
@@ -16,7 +17,7 @@ interface LeaderboardQuery {
   minBacktests?: number;
 }
 
-export async function GET(req: NextRequest) {
+async function GETHandler(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
 
@@ -133,3 +134,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })

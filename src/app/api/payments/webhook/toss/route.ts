@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createHmac } from 'crypto'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,7 +19,7 @@ const supabaseAdmin = createClient(
  * POST /api/payments/webhook/toss
  * 토스페이먼츠 웹훅 수신
  */
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const body = await req.text()
     const signature = req.headers.get('toss-signature')
@@ -201,3 +202,5 @@ async function processRetryQueue(): Promise<{ processed: number; failed: number 
   safeLogger.info('[Toss Webhook] Retry queue processed', { processed, failed })
   return { processed, failed }
 }
+
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

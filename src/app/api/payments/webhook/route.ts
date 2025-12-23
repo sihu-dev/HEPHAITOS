@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getTossPaymentsClient } from '@/lib/payments/toss-payments'
 import { verifyWebhookSignature } from '@/lib/api/providers/toss-payments'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 // Webhook event types
 type WebhookEventType =
@@ -27,7 +28,7 @@ interface WebhookPayload {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   try {
     // Raw body와 signature 추출
     const rawBody = await request.text()
@@ -117,3 +118,5 @@ async function handleDepositCallback(data: WebhookPayload['data']) {
   safeLogger.info('[Webhook] Deposit callback:', data)
   // TODO: 가상계좌 입금 완료 처리
 }
+
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

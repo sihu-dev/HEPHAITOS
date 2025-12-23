@@ -6,12 +6,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 /**
  * POST /api/cs/refund
  * 환불 요청 생성 + Edge Function 트리거
  */
-export async function POST(req: NextRequest) {
+async function POSTHandler(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();
 
@@ -153,7 +154,7 @@ export async function POST(req: NextRequest) {
  * GET /api/cs/refund
  * 사용자의 환불 이력 조회
  */
-export async function GET(req: NextRequest) {
+async function GETHandler(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();
 
@@ -208,3 +209,6 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

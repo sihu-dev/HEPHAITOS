@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { safeLogger } from '@/lib/utils/safe-logger'
 import { requireAdminAuth } from '@/lib/api/middleware'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,7 +41,7 @@ interface FunnelCohort {
  * GET /api/admin/analytics/funnel
  * 전환율 퍼널 메트릭 조회
  */
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   // P0 FIX: Admin 인증 필수
   const authResult = await requireAdminAuth(request)
   if ('error' in authResult) {
@@ -201,3 +202,5 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
