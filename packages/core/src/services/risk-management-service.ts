@@ -168,6 +168,10 @@ export class RiskManagementService implements IRiskManagementService {
       availableMargin: this.config.accountEquity,
       dailyLimitReached: false,
       canTrade: true,
+      openPositions: 0,
+      maxPositions: this.config.maxOpenPositions,
+      maxDailyTrades: this.config.dailyTradeLimit,
+      isWithinLimits: true,
     };
   }
 
@@ -578,6 +582,10 @@ export class RiskManagementService implements IRiskManagementService {
         dailyLimitReached,
         canTrade,
         blockReason,
+        openPositions: openPositionCount,
+        maxPositions: this.config.maxOpenPositions,
+        maxDailyTrades: this.config.dailyTradeLimit,
+        isWithinLimits: canTrade && !dailyLimitReached,
       };
 
       return {

@@ -264,6 +264,7 @@ describe('RiskManagementService', () => {
         currentPrice: 151,
         unrealizedPnL: 10,
         unrealizedPnLPercent: 0.67,
+        status: 'open',
         enteredAt: new Date().toISOString(),
       }));
 
@@ -546,6 +547,7 @@ describe('RiskManagementService', () => {
         currentPrice: 151,
         unrealizedPnL: 10,
         unrealizedPnLPercent: 0.67,
+        status: 'open',
         enteredAt: new Date().toISOString(),
       }));
 
