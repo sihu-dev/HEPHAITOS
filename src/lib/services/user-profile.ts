@@ -55,9 +55,6 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
   }
 
   const supabase = await createServerSupabaseClient()
-    if (!supabase) {
-      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
-    }
 
   if (!supabase) {
     return mockProfiles.get(userId) ?? null
@@ -111,9 +108,9 @@ export async function completeOnboarding(
   }
 
   const supabase = await createServerSupabaseClient()
-    if (!supabase) {
-      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
-    }
+  if (!supabase) {
+    throw new Error('Database connection failed')
+  }
 
   // Upsert: 있으면 업데이트, 없으면 생성
   const { data: result, error } = await supabase
@@ -127,7 +124,7 @@ export async function completeOnboarding(
       pain_points: data.painPoints,
       onboarding_completed: true,
       onboarding_step: 6,
-    }, {
+    } as any, {
       onConflict: 'user_id',
     })
     .select()
@@ -200,9 +197,9 @@ export async function saveOnboardingProgress(
   }
 
   const supabase = await createServerSupabaseClient()
-    if (!supabase) {
-      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
-    }
+  if (!supabase) {
+    return
+  }
 
   const updateData: Record<string, unknown> = {
     onboarding_step: step,
@@ -219,7 +216,7 @@ export async function saveOnboardingProgress(
     .upsert({
       user_id: userId,
       ...updateData,
-    }, {
+    } as any, {
       onConflict: 'user_id',
     })
 
@@ -249,9 +246,9 @@ export async function updateUserProfile(
   }
 
   const supabase = await createServerSupabaseClient()
-    if (!supabase) {
-      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
-    }
+  if (!supabase) {
+    return null
+  }
 
   const updateData: Record<string, unknown> = {}
   if (updates.nickname) updateData.nickname = updates.nickname
@@ -262,7 +259,7 @@ export async function updateUserProfile(
 
   const { data, error } = await supabase
     .from('user_profiles')
-    .update(updateData)
+    .update(updateData as any)
     .eq('user_id', userId)
     .select()
     .single<UserProfileRow>()
@@ -308,6 +305,9 @@ export async function getUserProfileClient(userId: string): Promise<UserProfile 
   }
 
   const supabase = getSupabaseBrowserClient()
+  if (!supabase) {
+    return null
+  }
 
   const { data, error } = await supabase
     .from('user_profiles')
