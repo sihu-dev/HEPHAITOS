@@ -115,3 +115,17 @@ export {
   DEFAULT_RISK_CONFIG,
   DEFAULT_SIMULATION_CONFIG,
 } from './order.js';
+
+// User Types
+export {
+  type UserRole,
+  type UserStatus,
+  type IUser,
+  type IUserSettings,
+  type INotificationSettings,
+  type ITradingSettings,
+  type ICreateUserInput,
+  type IUpdateUserInput,
+  type IUserStats,
+  DEFAULT_USER_SETTINGS,
+} from './user.js';
