@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { aiReportGenerator } from '@/lib/ai'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
       data: analysis,
     })
   } catch (error) {
-    console.error('[API] Entry point analysis failed:', error)
+    safeLogger.error('[API] Entry point analysis failed:', error)
     return NextResponse.json(
       {
         success: false,

@@ -8,6 +8,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import Image from 'next/image'
 import {
+import { safeLogger } from '@/lib/utils/safe-logger';
   TrendingUp,
   Star,
   Download,
@@ -174,7 +175,7 @@ export default function StrategyMarketplace() {
         setStats(data.stats)
       }
     } catch (error) {
-      console.error('Failed to load marketplace data:', error)
+      safeLogger.error('Failed to load marketplace data:', error)
     } finally {
       setLoading(false)
     }
@@ -195,7 +196,7 @@ export default function StrategyMarketplace() {
         setListings(data.listings || [])
       }
     } catch (error) {
-      console.error('Search failed:', error)
+      safeLogger.error('Search failed:', error)
     } finally {
       setLoading(false)
     }

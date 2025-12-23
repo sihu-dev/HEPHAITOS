@@ -155,7 +155,7 @@ export class SECEdgarClient {
 
       return filings.slice(0, 10) // Return last 10 filings
     } catch (error) {
-      console.error('[SEC] Search 13F failed:', error)
+      safeLogger.error('[SEC] Search 13F failed:', error)
       return []
     }
   }
@@ -183,7 +183,7 @@ export class SECEdgarClient {
       const xml = await response.text()
       return this.parseXML13F(xml)
     } catch (error) {
-      console.error('[SEC] Get 13F holdings failed:', error)
+      safeLogger.error('[SEC] Get 13F holdings failed:', error)
       return []
     }
   }
@@ -273,14 +273,14 @@ export class CongressTradingClient {
       )
 
       if (!response.ok) {
-        console.warn('[Congress] API call failed, using mock data')
+        safeLogger.warn('[Congress] API call failed, using mock data')
         return this.getMockTrades(limit)
       }
 
       const data = await response.json()
       return data.map(this.parseQuiverTrade)
     } catch (error) {
-      console.error('[Congress] API error:', error)
+      safeLogger.error('[Congress] API error:', error)
       return this.getMockTrades(limit)
     }
   }
@@ -409,7 +409,7 @@ export class ARKInvestClient {
       const csv = await response.text()
       return this.parseCSV(csv)
     } catch (error) {
-      console.error('[ARK] Failed to get holdings:', error)
+      safeLogger.error('[ARK] Failed to get holdings:', error)
       return this.getMockARKHoldings(etf)
     }
   }

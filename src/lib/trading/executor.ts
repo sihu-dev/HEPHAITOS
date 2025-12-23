@@ -28,6 +28,7 @@ import { brokerManager } from '../broker'
 import { LegalCompliance } from '../agent/legal-compliance'
 import { riskProfiler, type UserRiskProfile } from '../agent/risk-profiler'
 import { logger, errorMetrics } from './logger'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -137,7 +138,7 @@ type ExecutorCallback = (event: ExecutorEvent) => void
  *
  * // 주문 실행 이벤트 구독
  * executor.on('order_filled', (event) => {
- *   console.log('주문 체결:', event.order);
+ *   safeLogger.info('주문 체결:', event.order);
  * });
  *
  * // 엔진 시작
@@ -248,12 +249,12 @@ export class TradeExecutor {
    *
    * try {
    *   await executor.start();
-   *   console.log('트레이딩 엔진 시작 완료');
+   *   safeLogger.info('트레이딩 엔진 시작 완료');
    * } catch (error) {
    *   if (error.message.includes('법률')) {
-   *     console.error('법률 준수 위반:', error.message);
+   *     safeLogger.error('법률 준수 위반:', error.message);
    *   } else if (error.message.includes('잔고')) {
-   *     console.error('잔고 부족:', error.message);
+   *     safeLogger.error('잔고 부족:', error.message);
    *   }
    * }
    * ```

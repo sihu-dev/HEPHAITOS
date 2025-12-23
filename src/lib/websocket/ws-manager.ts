@@ -5,6 +5,7 @@
 
 import type { WSMessage, WSSubscription, WSEventType, Ticker } from '@/lib/exchange/types'
 import type { ExchangeId } from '@/types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -75,7 +76,7 @@ export class WSManager {
       this.ws = new WebSocket(this.config.url)
       this.setupEventListeners()
     } catch (error) {
-      console.error('[WSManager] Connection error:', error)
+      safeLogger.error('[WSManager] Connection error:', error)
       this.handleReconnect()
     }
   }
@@ -115,7 +116,7 @@ export class WSManager {
     }
 
     this.ws.onerror = (error) => {
-      console.error('[WSManager] WebSocket error:', error)
+      safeLogger.error('[WSManager] WebSocket error:', error)
       this.config.onError(error)
     }
 
@@ -127,14 +128,14 @@ export class WSManager {
           this.dispatchToHandlers(message)
         }
       } catch (error) {
-        console.error('[WSManager] Message parse error:', error)
+        safeLogger.error('[WSManager] Message parse error:', error)
       }
     }
   }
 
   private handleReconnect(): void {
     if (this.reconnectCount >= this.config.reconnectAttempts) {
-      console.error('[WSManager] Max reconnection attempts reached')
+      safeLogger.error('[WSManager] Max reconnection attempts reached')
       return
     }
 
@@ -269,7 +270,7 @@ export class WSManager {
         timestamp: parsed.timestamp || parsed.T || Date.now(),
       }
     } catch {
-      console.warn('[WSManager] Failed to parse message:', data)
+      safeLogger.warn('[WSManager] Failed to parse message:', data)
       return null
     }
   }

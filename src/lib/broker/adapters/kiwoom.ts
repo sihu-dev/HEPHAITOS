@@ -5,6 +5,7 @@
 // ============================================
 
 import type {
+import { safeLogger } from '@/lib/utils/safe-logger';
   UnifiedBroker,
   BrokerId,
   BrokerCredentials,
@@ -166,7 +167,7 @@ export class KiwoomBroker implements UnifiedBroker {
         balance,
       }
     } catch (error) {
-      console.error('[KiwoomBroker] Connect error:', error)
+      safeLogger.error('[KiwoomBroker] Connect error:', error)
       return {
         success: false,
         message: '연결 실패',
@@ -686,7 +687,7 @@ export class KiwoomBroker implements UnifiedBroker {
   ): Promise<Array<{ code: string; name: string; market: string }>> {
     // 키움 OpenAPI에는 종목 검색 API가 제한적
     // 실제 구현시에는 별도 종목 마스터 데이터 사용 권장
-    console.warn('[KiwoomBroker] 종목 검색은 별도 종목 마스터 데이터 필요')
+    safeLogger.warn('[KiwoomBroker] 종목 검색은 별도 종목 마스터 데이터 필요')
     return []
   }
 
@@ -700,14 +701,14 @@ export class KiwoomBroker implements UnifiedBroker {
         this.wsConnection = new WebSocket(this.wsUrl)
 
         this.wsConnection.onopen = () => {
-          console.log('[KiwoomBroker] WebSocket connected')
+          safeLogger.info('[KiwoomBroker] WebSocket connected')
           this.reconnectAttempts = 0
           this.startHeartbeat()
           resolve()
         }
 
         this.wsConnection.onclose = (event) => {
-          console.log('[KiwoomBroker] WebSocket closed:', event.code)
+          safeLogger.info('[KiwoomBroker] WebSocket closed:', event.code)
           this.stopHeartbeat()
 
           if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
@@ -717,7 +718,7 @@ export class KiwoomBroker implements UnifiedBroker {
         }
 
         this.wsConnection.onerror = (error) => {
-          console.error('[KiwoomBroker] WebSocket error:', error)
+          safeLogger.error('[KiwoomBroker] WebSocket error:', error)
           reject(error)
         }
 
@@ -836,7 +837,7 @@ export class KiwoomBroker implements UnifiedBroker {
         this.orderCallbacks.forEach((cb) => cb(order))
       }
     } catch (error) {
-      console.error('[KiwoomBroker] WS message parse error:', error)
+      safeLogger.error('[KiwoomBroker] WS message parse error:', error)
     }
   }
 

@@ -5,6 +5,7 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // 환경 설정: Supabase 사용 여부
 const USE_SUPABASE = process.env.NEXT_PUBLIC_USE_SUPABASE === 'true'
@@ -59,7 +60,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     .single()
 
   if (error) {
-    console.error('[UserProfileService] getUserProfile error:', error)
+    safeLogger.error('[UserProfileService] getUserProfile error:', error)
     return mockProfiles.get(userId) ?? null
   }
 
@@ -120,7 +121,7 @@ export async function completeOnboarding(
     .single()
 
   if (error) {
-    console.error('[UserProfileService] completeOnboarding error:', error)
+    safeLogger.error('[UserProfileService] completeOnboarding error:', error)
     // Fallback to mock
     const profile: UserProfile = {
       id: `profile_${Date.now()}`,
@@ -207,7 +208,7 @@ export async function saveOnboardingProgress(
     })
 
   if (error) {
-    console.error('[UserProfileService] saveOnboardingProgress error:', error)
+    safeLogger.error('[UserProfileService] saveOnboardingProgress error:', error)
   }
 }
 
@@ -248,7 +249,7 @@ export async function updateUserProfile(
     .single()
 
   if (error) {
-    console.error('[UserProfileService] updateUserProfile error:', error)
+    safeLogger.error('[UserProfileService] updateUserProfile error:', error)
     return null
   }
 
@@ -296,7 +297,7 @@ export async function getUserProfileClient(userId: string): Promise<UserProfile 
     .single()
 
   if (error) {
-    console.error('[UserProfileService] getUserProfileClient error:', error)
+    safeLogger.error('[UserProfileService] getUserProfileClient error:', error)
     return null
   }
 

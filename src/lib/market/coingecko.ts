@@ -4,6 +4,7 @@
 // ============================================
 
 import type { MarketData } from '@/types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -95,7 +96,7 @@ export async function fetchCoinGeckoPrices(
       .join(',')
 
     if (!coinIds) {
-      console.warn('[CoinGecko] No valid coin IDs found for symbols:', symbols)
+      safeLogger.warn('[CoinGecko] No valid coin IDs found for symbols:', symbols)
       return getMockMarketData(symbols)
     }
 
@@ -109,7 +110,7 @@ export async function fetchCoinGeckoPrices(
     })
 
     if (!response.ok) {
-      console.warn('[CoinGecko] API error:', response.status)
+      safeLogger.warn('[CoinGecko] API error:', response.status)
       return getMockMarketData(symbols)
     }
 
@@ -141,7 +142,7 @@ export async function fetchCoinGeckoPrices(
 
     return result
   } catch (error) {
-    console.error('[CoinGecko] Fetch error:', error)
+    safeLogger.error('[CoinGecko] Fetch error:', error)
     return getMockMarketData(symbols)
   }
 }
@@ -173,7 +174,7 @@ export async function fetchCoinGeckoMarkets(
     })
 
     if (!response.ok) {
-      console.warn('[CoinGecko] Markets API error:', response.status)
+      safeLogger.warn('[CoinGecko] Markets API error:', response.status)
       return getMockMarketData(symbols)
     }
 
@@ -204,7 +205,7 @@ export async function fetchCoinGeckoMarkets(
 
     return result
   } catch (error) {
-    console.error('[CoinGecko] Markets fetch error:', error)
+    safeLogger.error('[CoinGecko] Markets fetch error:', error)
     return getMockMarketData(symbols)
   }
 }

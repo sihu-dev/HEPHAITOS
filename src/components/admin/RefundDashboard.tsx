@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface RefundRequest {
   id: string
@@ -142,7 +143,7 @@ export function RefundDashboard() {
       const abuseData = await abuseRes.json()
       setAbuseCandidates(abuseData.data || [])
     } catch (err) {
-      console.error('[Refund] Fetch error:', err)
+      safeLogger.error('[Refund] Fetch error:', err)
     } finally {
       setIsLoading(false)
     }
@@ -174,7 +175,7 @@ export function RefundDashboard() {
         fetchData()
       }
     } catch (err) {
-      console.error('[Refund] Action error:', err)
+      safeLogger.error('[Refund] Action error:', err)
     } finally {
       setProcessing(false)
     }

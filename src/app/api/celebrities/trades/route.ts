@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { celebrityPortfolioManager } from '@/lib/mirroring'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
       data: tradesWithCelebrity,
     })
   } catch (error) {
-    console.error('[API] Get celebrity trades failed:', error)
+    safeLogger.error('[API] Get celebrity trades failed:', error)
     return NextResponse.json(
       {
         success: false,

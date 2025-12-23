@@ -5,6 +5,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from './types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
@@ -19,7 +20,7 @@ export async function updateSession(request: NextRequest) {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     // Allow access without auth in development when Supabase is not configured
-    console.warn('Supabase not configured - skipping auth middleware')
+    safeLogger.warn('Supabase not configured - skipping auth middleware')
     return response
   }
 
@@ -76,7 +77,7 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   } catch (error) {
-    console.error('Supabase middleware error:', error)
+    safeLogger.error('Supabase middleware error:', error)
     // Continue without auth on error
   }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface FeatureFlag {
   key: string
@@ -96,7 +97,7 @@ export function useFeatureFlags() {
 
         if (error) {
           // Table doesn't exist yet, use defaults
-          console.log('[Feature Flags] Using default flags')
+          safeLogger.info('[Feature Flags] Using default flags')
           setIsLoading(false)
           return
         }
@@ -116,7 +117,7 @@ export function useFeatureFlags() {
 
         setIsLoading(false)
       } catch (err) {
-        console.error('[Feature Flags] Error fetching flags:', err)
+        safeLogger.error('[Feature Flags] Error fetching flags:', err)
         setIsLoading(false)
       }
     }

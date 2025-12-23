@@ -134,7 +134,7 @@ export async function checkTogetherAIHealth(): Promise<boolean> {
     );
     return result.text.toLowerCase().includes('ok');
   } catch (error) {
-    console.error('[Together AI] Health check failed:', error);
+    safeLogger.error('[Together AI] Health check failed:', error);
     return false;
   }
 }

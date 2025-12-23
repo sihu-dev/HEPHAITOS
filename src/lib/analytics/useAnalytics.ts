@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface AnalyticsEvent {
   event: string
@@ -50,7 +51,7 @@ async function saveEventToSupabase(
   } catch (error) {
     // 테이블이 없으면 조용히 실패 (마이그레이션 전)
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Analytics] Supabase save skipped:', error)
+      safeLogger.info('[Analytics] Supabase save skipped:', error)
     }
   }
 }
@@ -83,7 +84,7 @@ export function useAnalytics() {
 
     // Development 로그
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Analytics]', event, properties)
+      safeLogger.info('[Analytics]', event, properties)
     }
   }, [])
 
@@ -101,7 +102,7 @@ export function trackEvent(event: string, properties?: Record<string, unknown>) 
   }
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics]', event, properties)
+    safeLogger.info('[Analytics]', event, properties)
   }
 }
 

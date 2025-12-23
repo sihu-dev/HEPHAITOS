@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface ARPPUCohort {
   cohort_date: string
@@ -83,7 +84,7 @@ export function ARPPUDashboard() {
       })
     } catch (err) {
       setError('Failed to load ARPPU data')
-      console.error('[ARPPU] Fetch error:', err)
+      safeLogger.error('[ARPPU] Fetch error:', err)
     } finally {
       setIsLoading(false)
     }

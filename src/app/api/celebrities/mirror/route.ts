@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { celebrityPortfolioManager } from '@/lib/mirroring'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export const dynamic = 'force-dynamic'
 
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[API] Calculate mirror failed:', error)
+    safeLogger.error('[API] Calculate mirror failed:', error)
     return NextResponse.json(
       {
         success: false,
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
       message: 'Mirror configuration saved',
     })
   } catch (error) {
-    console.error('[API] Setup mirror failed:', error)
+    safeLogger.error('[API] Setup mirror failed:', error)
     return NextResponse.json(
       {
         success: false,
@@ -154,7 +155,7 @@ export async function PUT(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[API] Compare portfolios failed:', error)
+    safeLogger.error('[API] Compare portfolios failed:', error)
     return NextResponse.json(
       {
         success: false,

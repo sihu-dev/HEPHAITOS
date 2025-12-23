@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface SafetyStats {
   total_events: number
@@ -111,7 +112,7 @@ export function SafetyDashboard() {
       })
     } catch (err) {
       setError('Failed to load safety data')
-      console.error('[Safety] Fetch error:', err)
+      safeLogger.error('[Safety] Fetch error:', err)
     } finally {
       setIsLoading(false)
     }
@@ -137,7 +138,7 @@ export function SafetyDashboard() {
       const result = await res.json()
       setTestResult(result)
     } catch (err) {
-      console.error('[Safety] Test error:', err)
+      safeLogger.error('[Safety] Test error:', err)
     }
   }
 

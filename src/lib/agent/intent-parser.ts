@@ -19,6 +19,7 @@ import type {
 import type { IndicatorType } from '@/lib/backtest/types'
 import type { Timeframe } from '@/types'
 import { PARSING_EXAMPLES, buildFewShotPrompt, SYSTEM_PROMPT_INTENT_PARSER } from './prompts'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Constants - Korean to English Mappings
@@ -133,7 +134,7 @@ export class IntentParser {
       try {
         return await this.parseWithAI(normalizedInput)
       } catch (error) {
-        console.warn('[IntentParser] AI parsing failed, falling back to rules:', error)
+        safeLogger.warn('[IntentParser] AI parsing failed, falling back to rules:', error)
       }
     }
 

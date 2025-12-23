@@ -8,6 +8,7 @@
 
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface Perspective {
   id: string;
@@ -103,7 +104,7 @@ Format:
 
         return p;
       } catch (error) {
-        console.error(`[MoA PoC] ${p.name} 생성 실패:`, error);
+        safeLogger.error(`[MoA PoC] ${p.name} 생성 실패:`, error);
         p.output = `[생성 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}]`;
         p.latency = Date.now() - perspectiveStart;
         return p;

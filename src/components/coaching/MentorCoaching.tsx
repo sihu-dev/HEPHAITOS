@@ -8,6 +8,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import Image from 'next/image'
 import {
+import { safeLogger } from '@/lib/utils/safe-logger';
   User,
   Star,
   Clock,
@@ -138,7 +139,7 @@ export default function MentorCoaching() {
         setMentors(data.mentors || [])
       }
     } catch (error) {
-      console.error('Failed to load mentors:', error)
+      safeLogger.error('Failed to load mentors:', error)
     } finally {
       setLoading(false)
     }
@@ -157,7 +158,7 @@ export default function MentorCoaching() {
         setSessions(data.sessions || [])
       }
     } catch (error) {
-      console.error('Failed to load sessions:', error)
+      safeLogger.error('Failed to load sessions:', error)
     }
   }
 
@@ -514,7 +515,7 @@ function MentorDetailModal({
         setAvailability(data.slots || {})
       }
     } catch (error) {
-      console.error('Failed to load availability:', error)
+      safeLogger.error('Failed to load availability:', error)
     }
   }, [mentor.user_id])
 

@@ -6,6 +6,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useI18n } from '@/i18n/client'
 import { useFeatureFlags } from '@/lib/feature-flags/useFeatureFlags'
 import { clsx } from 'clsx'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface FeedbackData {
   type: 'bug' | 'feature' | 'improvement' | 'other'
@@ -108,7 +109,7 @@ export function FeedbackWidget() {
         setIsOpen(false)
       }, 2000)
     } catch (err) {
-      console.error('Feedback submission error:', err)
+      safeLogger.error('Feedback submission error:', err)
       setError(isKo ? '피드백 전송에 실패했습니다' : 'Failed to submit feedback')
     } finally {
       setIsSubmitting(false)

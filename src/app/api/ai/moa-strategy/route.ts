@@ -25,6 +25,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { MoAEngine } from '@/lib/moa/engine';
 import { getRequiredCredits } from '@/lib/credits/moa-pricing';
+import { safeLogger } from '@/lib/utils/safe-logger';
 // import { checkCreditBalance, deductCredits } from '@/lib/credits/balance';
 // import { createClient } from '@/lib/supabase/server';
 
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
     // });
 
     // Log for monitoring
-    console.log('[MoA API] Strategy generated:', {
+    safeLogger.info('[MoA API] Strategy generated:', {
       tier,
       perspectives: result.perspectives.length,
       validated: result.validated,
@@ -100,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    console.error('[MoA API] Error:', error);
+    safeLogger.error('[MoA API] Error:', error);
 
     return NextResponse.json(
       {

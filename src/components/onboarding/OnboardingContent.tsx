@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { useOnboarding, OnboardingData } from '@/hooks/use-onboarding'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // Force dynamic rendering
 
@@ -51,7 +52,7 @@ export function OnboardingContent() {
     acceptedDisclaimer?: boolean
   }) => {
     try {
-      console.log('[Onboarding] Completing...', data)
+      safeLogger.info('[Onboarding] Completing...', data)
 
       // 훅을 통해 완료 처리 (API + 로컬 스토리지)
       const success = await completeOnboarding({
@@ -72,7 +73,7 @@ export function OnboardingContent() {
         router.push('/dashboard')
       }
     } catch (error) {
-      console.error('[Onboarding] Error:', error)
+      safeLogger.error('[Onboarding] Error:', error)
     }
   }, [completeOnboarding, router])
 

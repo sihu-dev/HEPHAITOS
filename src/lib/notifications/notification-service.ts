@@ -4,6 +4,7 @@
 // ============================================
 
 import type {
+import { safeLogger } from '@/lib/utils/safe-logger';
   Notification,
   NotificationType,
   NotificationPriority,
@@ -71,7 +72,7 @@ class NotificationService {
       this.ws = new WebSocket(`${wsUrl}/notifications?userId=${userId}`)
       this.setupWebSocket()
     } catch (error) {
-      console.error('[NotificationService] Connection error:', error)
+      safeLogger.error('[NotificationService] Connection error:', error)
       this.handleReconnect()
     }
   }
@@ -92,7 +93,7 @@ class NotificationService {
     if (!this.ws) return
 
     this.ws.onopen = () => {
-      console.log('[NotificationService] Connected')
+      safeLogger.info('[NotificationService] Connected')
       this.reconnectAttempts = 0
       this.setConnected(true)
 
@@ -101,7 +102,7 @@ class NotificationService {
     }
 
     this.ws.onclose = (event) => {
-      console.log('[NotificationService] Disconnected:', event.code)
+      safeLogger.info('[NotificationService] Disconnected:', event.code)
       this.setConnected(false)
 
       if (event.code !== 1000) {
@@ -110,7 +111,7 @@ class NotificationService {
     }
 
     this.ws.onerror = (error) => {
-      console.error('[NotificationService] WebSocket error:', error)
+      safeLogger.error('[NotificationService] WebSocket error:', error)
     }
 
     this.ws.onmessage = (event) => {
@@ -118,21 +119,21 @@ class NotificationService {
         const message = JSON.parse(event.data) as WSNotificationMessage
         this.handleMessage(message)
       } catch (error) {
-        console.error('[NotificationService] Message parse error:', error)
+        safeLogger.error('[NotificationService] Message parse error:', error)
       }
     }
   }
 
   private handleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[NotificationService] Max reconnection attempts reached')
+      safeLogger.error('[NotificationService] Max reconnection attempts reached')
       return
     }
 
     this.reconnectAttempts++
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1)
 
-    console.log(`[NotificationService] Reconnecting in ${delay}ms... (attempt ${this.reconnectAttempts})`)
+    safeLogger.info(`[NotificationService] Reconnecting in ${delay}ms... (attempt ${this.reconnectAttempts})`)
 
     this.reconnectTimer = setTimeout(() => {
       if (this.userId) {
@@ -299,7 +300,7 @@ class NotificationService {
     try {
       localStorage.setItem('notification_settings', JSON.stringify(this.settings))
     } catch (error) {
-      console.warn('[NotificationService] Failed to save settings:', error)
+      safeLogger.warn('[NotificationService] Failed to save settings:', error)
     }
   }
 
@@ -310,7 +311,7 @@ class NotificationService {
         this.settings = { ...DEFAULT_SETTINGS, ...JSON.parse(saved) }
       }
     } catch (error) {
-      console.warn('[NotificationService] Failed to load settings:', error)
+      safeLogger.warn('[NotificationService] Failed to load settings:', error)
     }
   }
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface Strategy {
   id: string
@@ -54,11 +55,11 @@ export function useRealtimeStrategies(initialStrategies: Strategy[]) {
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           setIsConnected(true)
-          console.log('[Realtime] Connected to strategy_performance channel')
+          safeLogger.info('[Realtime] Connected to strategy_performance channel')
         }
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           setIsConnected(false)
-          console.error('[Realtime] Channel error or timeout')
+          safeLogger.error('[Realtime] Channel error or timeout')
         }
       })
 

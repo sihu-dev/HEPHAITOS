@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/Toast'
 import { DisclaimerInline } from '@/components/ui/Disclaimer'
 import { useI18n } from '@/i18n/client'
 import {
+import { safeLogger } from '@/lib/utils/safe-logger';
   SparklesIcon,
   ChartBarIcon,
   PlayIcon,
@@ -420,7 +421,7 @@ export function AiStrategyContent() {
         throw new Error(t('dashboard.aiStrategy.errors.noStrategy') as string)
       }
     } catch (error) {
-      console.error('[AIStrategy] Generation failed:', error)
+      safeLogger.error('[AIStrategy] Generation failed:', error)
       setGenerationStatus('error')
       showError(
         t('dashboard.aiStrategy.toast.error.title') as string,

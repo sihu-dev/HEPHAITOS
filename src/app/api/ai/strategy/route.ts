@@ -129,7 +129,7 @@ async function generateStrategyWithClaude(config: StrategyConfig): Promise<Gener
       }
     }
   } catch (parseError) {
-    console.error('[Claude] JSON parse error:', parseError)
+    safeLogger.error('[Claude] JSON parse error:', parseError)
   }
 
   // Fallback to mock if parsing fails

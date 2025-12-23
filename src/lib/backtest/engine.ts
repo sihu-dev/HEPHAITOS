@@ -53,8 +53,8 @@ import { calculateAdvancedMetrics, type AdvancedMetrics } from './advanced-metri
  * });
  *
  * const result = await engine.run(ohlcvData);
- * console.log(`총 수익률: ${result.metrics.totalReturn}%`);
- * console.log(`샤프 비율: ${result.metrics.sharpeRatio}`);
+ * safeLogger.info(`총 수익률: ${result.metrics.totalReturn}%`);
+ * safeLogger.info(`샤프 비율: ${result.metrics.sharpeRatio}`);
  * ```
  *
  * @important
@@ -263,14 +263,14 @@ export class BacktestEngine {
    * const result = await engine.run();
    *
    * // 결과 확인
-   * console.log('총 수익률:', result.metrics.totalReturn, '%');
-   * console.log('샤프 비율:', result.metrics.sharpeRatio);
-   * console.log('최대 낙폭:', result.metrics.maxDrawdown, '%');
-   * console.log('총 거래 수:', result.trades.length);
+   * safeLogger.info('총 수익률:', result.metrics.totalReturn, '%');
+   * safeLogger.info('샤프 비율:', result.metrics.sharpeRatio);
+   * safeLogger.info('최대 낙폭:', result.metrics.maxDrawdown, '%');
+   * safeLogger.info('총 거래 수:', result.trades.length);
    *
    * // 법률 준수 경고 확인
    * if (result.legalCompliance.warnings.length > 0) {
-   *   console.warn('법률 준수 경고:', result.legalCompliance.warnings);
+   *   safeLogger.warn('법률 준수 경고:', result.legalCompliance.warnings);
    * }
    * ```
    *

@@ -8,6 +8,7 @@ import { Redis } from 'ioredis'
 import { createClient } from '@supabase/supabase-js'
 import type { BacktestJob } from '@/types/queue'
 import type { BacktestJobData, BacktestResult } from './backtest-queue'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 const redis = new Redis(process.env.UPSTASH_REDIS_URL!, {
   maxRetriesPerRequest: null,
@@ -52,7 +53,7 @@ async function deductCredits(userId: string, credits: number, jobId: string): Pr
   })
 
   if (error) {
-    console.error('[Backtest Worker] Credit deduction failed:', error)
+    safeLogger.error('[Backtest Worker] Credit deduction failed:', error)
     throw new Error(`CREDIT_DEDUCTION_FAILED: ${error.message}`)
   }
 }
@@ -101,7 +102,7 @@ async function saveBacktestResult(
   }).eq('job_id', jobId)
 
   if (error) {
-    console.error('[Backtest Worker] Result save failed:', error)
+    safeLogger.error('[Backtest Worker] Result save failed:', error)
     throw new Error(`RESULT_SAVE_FAILED: ${error.message}`)
   }
 }
@@ -115,7 +116,7 @@ export const backtestWorker = new Worker<BacktestJobData, BacktestResult>(
     const { userId, strategyId, credits } = job.data
     const jobId = job.id!
 
-    console.log(`[Backtest Worker] Starting job ${jobId} for user ${userId}`)
+    safeLogger.info(`[Backtest Worker] Starting job ${jobId} for user ${userId}`)
 
     // 진행 상황 업데이트 + Realtime Broadcast
     await job.updateProgress(10)
@@ -127,7 +128,7 @@ export const backtestWorker = new Worker<BacktestJobData, BacktestResult>(
       await job.updateProgress(20)
       await broadcastProgress(jobId, 20, 'active', '데이터 로딩 중...')
     } catch (error) {
-      console.error('[Backtest Worker] Credit deduction error:', error)
+      safeLogger.error('[Backtest Worker] Credit deduction error:', error)
       await broadcastProgress(jobId, 0, 'failed', `크레딧 차감 실패: ${(error as Error).message}`)
       throw error // 재시도
     }
@@ -147,10 +148,10 @@ export const backtestWorker = new Worker<BacktestJobData, BacktestResult>(
       await job.updateProgress(100)
       await broadcastProgress(jobId, 100, 'completed', '완료!')
 
-      console.log(`[Backtest Worker] Job ${jobId} completed successfully`)
+      safeLogger.info(`[Backtest Worker] Job ${jobId} completed successfully`)
       return result
     } catch (error) {
-      console.error('[Backtest Worker] Backtest execution error:', error)
+      safeLogger.error('[Backtest Worker] Backtest execution error:', error)
 
       // 실패 시 잡 상태 업데이트
       await supabaseAdmin.from('backtest_jobs').update({
@@ -177,22 +178,22 @@ export const backtestWorker = new Worker<BacktestJobData, BacktestResult>(
  * Worker 이벤트 핸들러
  */
 backtestWorker.on('completed', (job) => {
-  console.log(`[Backtest Worker] Job ${job.id} completed with result:`, job.returnvalue)
+  safeLogger.info(`[Backtest Worker] Job ${job.id} completed with result:`, job.returnvalue)
 })
 
 backtestWorker.on('failed', (job, err) => {
-  console.error(`[Backtest Worker] Job ${job?.id} failed:`, err.message)
+  safeLogger.error(`[Backtest Worker] Job ${job?.id} failed:`, err.message)
 })
 
 backtestWorker.on('active', (job) => {
-  console.log(`[Backtest Worker] Job ${job.id} is now active`)
+  safeLogger.info(`[Backtest Worker] Job ${job.id} is now active`)
 })
 
 /**
  * Graceful shutdown
  */
 process.on('SIGTERM', async () => {
-  console.log('[Backtest Worker] Shutting down gracefully...')
+  safeLogger.info('[Backtest Worker] Shutting down gracefully...')
   await backtestWorker.close()
   process.exit(0)
 })

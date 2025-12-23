@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface RetentionCurvePoint {
   day_number: number
@@ -68,7 +69,7 @@ export function RetentionDashboard() {
       })
     } catch (err) {
       setError('Failed to load retention data')
-      console.error('[Retention] Fetch error:', err)
+      safeLogger.error('[Retention] Fetch error:', err)
     } finally {
       setIsLoading(false)
     }

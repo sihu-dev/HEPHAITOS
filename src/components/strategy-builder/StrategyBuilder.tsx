@@ -69,6 +69,7 @@ import { AIStrategyGenerator } from './AIStrategyGenerator'
 
 // i18n
 import { useI18n } from '@/i18n/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 const nodeTypes = {
   trigger: TriggerNode,
@@ -282,7 +283,7 @@ function StrategyBuilderInner() {
         setTimeout(() => setSaveStatus('idle'), 3000)
       }
     } catch (err) {
-      console.error('Save failed:', err)
+      safeLogger.error('Save failed:', err)
       setSaveStatus('error')
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
@@ -353,7 +354,7 @@ function StrategyBuilderInner() {
           clearHistory()
         }
       } catch (err) {
-        console.error('Import failed:', err)
+        safeLogger.error('Import failed:', err)
       }
     }
     input.click()

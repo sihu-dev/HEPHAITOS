@@ -16,6 +16,7 @@ import {
 import { DisclaimerInline, DisclaimerModal, TradeWarning } from '@/components/ui/Disclaimer'
 import { AIAnalysisButton } from '@/components/widgets/AIAnalysisWidget'
 import { useI18n } from '@/i18n/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 
 type TranslateFunction = (key: string) => string | string[] | Record<string, unknown>
@@ -486,7 +487,7 @@ export function MirroringContent() {
   }
 
   const handleMirrorConfirm = (amount: number) => {
-    console.log('Mirror confirmed:', { celebrity: selectedCelebrity, amount })
+    safeLogger.info('Mirror confirmed:', { celebrity: selectedCelebrity, amount })
     setShowMirrorModal(false)
     // TODO: Implement actual mirror setup with broker integration
   }

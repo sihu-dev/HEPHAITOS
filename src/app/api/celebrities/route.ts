@@ -6,6 +6,7 @@
 import { NextRequest } from 'next/server'
 import { celebrityPortfolioManager } from '@/lib/mirroring'
 import { jsonSuccess, notFoundError, internalError } from '@/lib/api-response'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     return jsonSuccess(celebritiesWithPerformance)
   } catch (error) {
-    console.error('[API] Get celebrities failed:', error)
+    safeLogger.error('[API] Get celebrities failed:', error)
     return internalError(
       error instanceof Error ? error.message : '셀러브리티 조회에 실패했습니다.'
     )

@@ -14,6 +14,7 @@
 
 import { generateText, streamText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // Together AI 모델 설정 (환경변수로 제어)
 const USE_TOGETHER_AI = process.env.NEXT_PUBLIC_USE_TOGETHER_AI === 'true';
@@ -272,7 +273,7 @@ export class MoAEngine {
             model: config.model,
           };
         } catch (error) {
-          console.error(`[MoA] ${config.name} 생성 실패:`, error);
+          safeLogger.error(`[MoA] ${config.name} 생성 실패:`, error);
           return {
             perspectiveId: config.id,
             name: config.name,
