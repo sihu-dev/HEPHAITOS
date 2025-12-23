@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { aiReportGenerator } from '@/lib/ai'
 import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic'
  * GET /api/ai/entry-point?symbol=005930
  * Analyze entry point for specific stock
  */
-export async function GET(request: NextRequest) {
+async function entryPointHandler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const symbol = searchParams.get('symbol')
@@ -45,3 +46,5 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withRateLimit(entryPointHandler, { category: 'ai' })

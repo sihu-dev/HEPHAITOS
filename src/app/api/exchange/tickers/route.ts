@@ -7,19 +7,11 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getExchange, type Ticker } from '@/lib/exchange'
 import type { ExchangeId } from '@/types'
-import { exchangeRateLimiter, getClientIP, createRateLimitResponse } from '@/lib/rate-limiter'
 import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 // GET /api/exchange/tickers?exchange=binance&symbols=BTC/USDT,ETH/USDT
-export async function GET(request: NextRequest) {
-  // Rate limiting
-  const clientIP = getClientIP(request)
-  const rateLimitResult = exchangeRateLimiter.check(`tickers:${clientIP}`)
-
-  if (!rateLimitResult.allowed) {
-    return createRateLimitResponse(rateLimitResult.retryAfter!)
-  }
-
+async function tickersHandler(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const exchangeId = searchParams.get('exchange') as ExchangeId
@@ -66,3 +58,5 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withRateLimit(tickersHandler, { category: 'exchange' })

@@ -8,9 +8,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getExchange } from '@/lib/exchange'
 import type { ExchangeId } from '@/types'
 import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 // GET /api/exchange/markets?exchange=binance
-export async function GET(request: NextRequest) {
+async function marketsHandler(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const exchangeId = searchParams.get('exchange') as ExchangeId
@@ -51,3 +52,5 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withRateLimit(marketsHandler, { category: 'exchange' })
