@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { Trade as SupabaseTrade } from '@/lib/supabase/types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface Trade {
   id: string
@@ -179,7 +180,7 @@ export function useTrades(options: UseTradesOptions = {}): UseTradesReturn {
         setTotalCount(0)
       }
     } catch (err) {
-      console.error('[useTrades] Fetch error:', err)
+      safeLogger.error('[useTrades] Fetch error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch trades'))
       setTrades(DEMO_TRADES)
       setTotalCount(DEMO_TRADES.length)

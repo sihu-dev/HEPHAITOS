@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -237,7 +238,7 @@ export function useCoachingSessions(options: UseCoachingSessionsOptions = {}): U
       const mentorList = mentorData as MentorRow[] | null
 
       if (mentorError) {
-        console.warn('[useCoachingSessions] Mentor fetch error:', mentorError)
+        safeLogger.warn('[useCoachingSessions] Mentor fetch error:', mentorError)
         setMentors(DEMO_MENTORS)
       } else if (mentorList && mentorList.length > 0) {
         const transformedMentors: Mentor[] = mentorList.map((m, index) => ({
@@ -292,7 +293,7 @@ export function useCoachingSessions(options: UseCoachingSessionsOptions = {}): U
       const sessionList = sessionData as SessionRow[] | null
 
       if (sessionError) {
-        console.warn('[useCoachingSessions] Session fetch error:', sessionError)
+        safeLogger.warn('[useCoachingSessions] Session fetch error:', sessionError)
         setLiveSessions(DEMO_SESSIONS)
       } else if (sessionList && sessionList.length > 0) {
         const transformedSessions: LiveSession[] = sessionList.map((s) => {
@@ -320,7 +321,7 @@ export function useCoachingSessions(options: UseCoachingSessionsOptions = {}): U
       setMessages(DEMO_MESSAGES)
 
     } catch (err) {
-      console.error('[useCoachingSessions] Error:', err)
+      safeLogger.error('[useCoachingSessions] Error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch coaching data'))
       setMentors(DEMO_MENTORS)
       setLiveSessions(DEMO_SESSIONS)

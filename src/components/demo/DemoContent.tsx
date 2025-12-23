@@ -19,6 +19,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useI18n } from '@/i18n/client'
 import { clsx } from 'clsx'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Interactive Demo Components
@@ -253,7 +254,7 @@ const MarketTicker = memo(function MarketTicker() {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch market data:', error)
+        safeLogger.error('Failed to fetch market data:', error)
       } finally {
         setIsLoading(false)
       }

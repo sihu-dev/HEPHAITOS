@@ -56,6 +56,7 @@ interface HoldingJson {
 // ============================================
 
 import { CHART_COLORS } from '@/constants/design-tokens'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 const COLORS = CHART_COLORS.palette
 
@@ -211,7 +212,7 @@ export function useHoldings(options: UseHoldingsOptions = {}): UseHoldingsReturn
 
       setHoldings(transformedHoldings)
     } catch (err) {
-      console.error('[useHoldings] Error:', err)
+      safeLogger.error('[useHoldings] Error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch holdings'))
       // Fallback to demo data on error
       setHoldings(DEMO_HOLDINGS)

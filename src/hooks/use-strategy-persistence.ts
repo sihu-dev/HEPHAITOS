@@ -8,6 +8,7 @@
 import { useState, useCallback } from 'react'
 import type { Node, Edge } from 'reactflow'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface StrategyGraph {
   nodes: Node[]
@@ -132,7 +133,7 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save strategy'
       setError(message)
-      console.error('Save strategy error:', err)
+      safeLogger.error('Save strategy error:', err)
       return null
     } finally {
       setIsSaving(false)
@@ -167,7 +168,7 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load strategy'
       setError(message)
-      console.error('Load strategy error:', err)
+      safeLogger.error('Load strategy error:', err)
       return null
     } finally {
       setIsLoading(false)
@@ -217,7 +218,7 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load strategies'
       setError(message)
-      console.error('Load user strategies error:', err)
+      safeLogger.error('Load user strategies error:', err)
       return []
     } finally {
       setIsLoading(false)

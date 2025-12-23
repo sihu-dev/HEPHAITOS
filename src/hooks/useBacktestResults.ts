@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface BacktestResult {
   id: string
@@ -208,7 +209,7 @@ export function useBacktestResults(options: UseBacktestResultsOptions = {}): Use
         setResults([])
       }
     } catch (err) {
-      console.error('[useBacktestResults] Fetch error:', err)
+      safeLogger.error('[useBacktestResults] Fetch error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch backtest results'))
       setResults(DEMO_RESULTS)
     } finally {

@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface DisclaimerVersion {
   id: string
@@ -55,7 +56,7 @@ export function ConsentContent() {
         .single()
 
       if (error) {
-        console.error('Failed to load disclaimer:', error)
+        safeLogger.error('Failed to load disclaimer:', error)
         return
       }
 

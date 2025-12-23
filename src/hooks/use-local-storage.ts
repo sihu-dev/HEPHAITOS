@@ -6,6 +6,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 type SetValue<T> = T | ((prevValue: T) => T)
 
@@ -30,7 +31,7 @@ export function useLocalStorage<T>(
         setStoredValue(JSON.parse(item))
       }
     } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error)
+      safeLogger.warn(`Error reading localStorage key "${key}":`, error)
     }
     setIsInitialized(true)
   }, [key])
@@ -42,7 +43,7 @@ export function useLocalStorage<T>(
     try {
       window.localStorage.setItem(key, JSON.stringify(storedValue))
     } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error)
+      safeLogger.warn(`Error setting localStorage key "${key}":`, error)
     }
   }, [key, storedValue, isInitialized])
 
@@ -53,7 +54,7 @@ export function useLocalStorage<T>(
         try {
           setStoredValue(JSON.parse(e.newValue))
         } catch (error) {
-          console.warn(`Error parsing localStorage value for "${key}":`, error)
+          safeLogger.warn(`Error parsing localStorage value for "${key}":`, error)
         }
       }
     }
@@ -76,7 +77,7 @@ export function useLocalStorage<T>(
       window.localStorage.removeItem(key)
       setStoredValue(initialValue)
     } catch (error) {
-      console.warn(`Error removing localStorage key "${key}":`, error)
+      safeLogger.warn(`Error removing localStorage key "${key}":`, error)
     }
   }, [key, initialValue])
 
@@ -97,7 +98,7 @@ export function getLocalStorageValue<T>(key: string, defaultValue: T): T {
     const item = window.localStorage.getItem(key)
     return item ? JSON.parse(item) : defaultValue
   } catch (error) {
-    console.warn(`Error reading localStorage key "${key}":`, error)
+    safeLogger.warn(`Error reading localStorage key "${key}":`, error)
     return defaultValue
   }
 }
@@ -115,7 +116,7 @@ export function setLocalStorageValue<T>(key: string, value: T): void {
   try {
     window.localStorage.setItem(key, JSON.stringify(value))
   } catch (error) {
-    console.warn(`Error setting localStorage key "${key}":`, error)
+    safeLogger.warn(`Error setting localStorage key "${key}":`, error)
   }
 }
 

@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { UserSettings as SupabaseUserSettings, Profile } from '@/lib/supabase/types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface UserSettings {
   // Profile
@@ -112,7 +113,7 @@ export function useUserSettings(): UseUserSettingsReturn {
         timezone: userSettings?.timezone || 'Asia/Seoul',
       })
     } catch (err) {
-      console.error('[useUserSettings] Fetch error:', err)
+      safeLogger.error('[useUserSettings] Fetch error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch settings'))
     } finally {
       setIsLoading(false)
@@ -169,7 +170,7 @@ export function useUserSettings(): UseUserSettingsReturn {
       setSettings(prev => ({ ...prev, ...updates }))
       return true
     } catch (err) {
-      console.error('[useUserSettings] Update error:', err)
+      safeLogger.error('[useUserSettings] Update error:', err)
       return false
     }
   }, [])
@@ -205,7 +206,7 @@ export function useUserSettings(): UseUserSettingsReturn {
       }))
       return true
     } catch (err) {
-      console.error('[useUserSettings] Profile update error:', err)
+      safeLogger.error('[useUserSettings] Profile update error:', err)
       return false
     }
   }, [])

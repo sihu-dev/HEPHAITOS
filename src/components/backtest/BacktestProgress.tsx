@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Progress } from '@/components/ui/progress';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface BacktestProgressProps {
   jobId: string;
@@ -48,7 +49,7 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
           (payload) => {
             const data = payload.new as any;
 
-            console.log('[BacktestProgress] Realtime update:', data);
+            safeLogger.info('[BacktestProgress] Realtime update:', data);
 
             setProgress(data.progress || 0);
             setStatus(data.status);
@@ -63,7 +64,7 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
           }
         )
         .subscribe((status) => {
-          console.log('[BacktestProgress] Realtime status:', status);
+          safeLogger.info('[BacktestProgress] Realtime status:', status);
         });
 
       // 2. Polling Fallback (Realtime 실패 시)
@@ -88,7 +89,7 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
             clearInterval(pollInterval);
           }
         } catch (error) {
-          console.error('[BacktestProgress] Polling error:', error);
+          safeLogger.error('[BacktestProgress] Polling error:', error);
         }
       }, 2000); // 2초마다 폴링
     };
