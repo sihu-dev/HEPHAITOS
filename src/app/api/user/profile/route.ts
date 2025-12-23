@@ -10,7 +10,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { withApiMiddleware, createApiResponse, validateRequestBody } from '@/lib/api/middleware'
 import { updateProfileSchema } from '@/lib/validations/user'
 import { safeLogger } from '@/lib/utils/safe-logger'
-import { getUserProfile, updateUserProfile } from '@/lib/services/user-profile'
+import { getUserProfile, updateUserProfile, type OnboardingData } from '@/lib/services/user-profile'
 
 /**
  * GET /api/user/profile
@@ -74,7 +74,15 @@ export const PATCH = withApiMiddleware(
 
     safeLogger.info('[Profile API] Updating profile', { userId: user.id })
 
-    const profile = await updateUserProfile(user.id, validation.data as any)
+    // TODO: Fix schema mismatch - updateProfileSchema uses different field names than OnboardingData
+    // Map UpdateProfileInput to Partial<OnboardingData>
+    const profileUpdates: Partial<OnboardingData> = {
+      ...(validation.data.displayName && { nickname: validation.data.displayName }),
+      ...(validation.data.riskProfile && { investmentStyle: validation.data.riskProfile }),
+      ...(validation.data.preferredSectors && { interests: validation.data.preferredSectors }),
+    }
+
+    const profile = await updateUserProfile(user.id, profileUpdates)
 
     if (!profile) {
       return createApiResponse({ error: 'Profile not found' }, { status: 404 })

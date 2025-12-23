@@ -90,9 +90,20 @@ function verifyTossSignature(body: string, signature: string | null): boolean {
 }
 
 /**
+ * Toss 웹훅 페이로드 타입
+ */
+interface TossWebhookPayload {
+  orderId: string;
+  status: string;
+  paymentKey: string;
+  totalAmount: number;
+  [key: string]: unknown; // 추가 필드 허용
+}
+
+/**
  * 웹훅 이벤트 처리
  */
-async function processWebhookEvent(eventId: string, payload: any): Promise<void> {
+async function processWebhookEvent(eventId: string, payload: TossWebhookPayload): Promise<void> {
   const { orderId, status, paymentKey, totalAmount } = payload
 
   // 결제 성공 이벤트만 처리

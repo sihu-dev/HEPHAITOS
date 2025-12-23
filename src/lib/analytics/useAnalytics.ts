@@ -17,6 +17,18 @@ declare global {
   }
 }
 
+// Supabase analytics_events 테이블 insert 타입
+interface AnalyticsEventInsert {
+  user_id: string | null
+  session_id: string
+  event_name: string
+  event_type: string
+  page_url: string | null
+  referrer: string | null
+  properties: Record<string, unknown>
+  user_agent: string | null
+}
+
 // 세션 ID 생성/재사용
 function getSessionId(): string {
   if (typeof window === 'undefined') return ''
@@ -38,7 +50,7 @@ async function saveEventToSupabase(
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    await supabase.from('analytics_events').insert({
+    const eventData: AnalyticsEventInsert = {
       user_id: user?.id || null,
       session_id: getSessionId(),
       event_name: event,
@@ -47,7 +59,9 @@ async function saveEventToSupabase(
       referrer: typeof document !== 'undefined' ? document.referrer : null,
       properties: properties || {},
       user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
-    } as any)
+    }
+
+    await supabase.from('analytics_events').insert(eventData)
   } catch (error) {
     // 테이블이 없으면 조용히 실패 (마이그레이션 전)
     if (process.env.NODE_ENV === 'development') {
