@@ -124,7 +124,7 @@ export async function getStrategyById(id: string): Promise<Strategy | null> {
 
   const supabase = await createServerSupabaseClient()
   if (!supabase) {
-    return { data: [], total: 0 }
+    return null
   }
   const strategiesQuery = createTypedStrategiesQuery(supabase)
 
@@ -157,7 +157,7 @@ export async function createStrategy(
 
   const supabase = await createServerSupabaseClient()
   if (!supabase) {
-    return { data: [], total: 0 }
+    throw new Error('Database connection failed')
   }
   const strategiesQuery = createTypedStrategiesQuery(supabase)
 
@@ -190,7 +190,7 @@ export async function updateStrategy(
 
   const supabase = await createServerSupabaseClient()
   if (!supabase) {
-    return { data: [], total: 0 }
+    return null
   }
   const strategiesQuery = createTypedStrategiesQuery(supabase)
 
@@ -221,7 +221,7 @@ export async function deleteStrategy(id: string): Promise<boolean> {
 
   const supabase = await createServerSupabaseClient()
   if (!supabase) {
-    return { data: [], total: 0 }
+    return false
   }
   const strategiesQuery = createTypedStrategiesQuery(supabase)
 
