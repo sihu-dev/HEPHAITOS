@@ -21,7 +21,9 @@ import type {
   IOrderExecution,
   OrderStatus,
   PositionStatus,
+  IRiskConfig,
 } from '@hephaitos/types';
+import { DEFAULT_RISK_CONFIG } from '@hephaitos/types';
 import type { IOrderRepository, IPositionRepository } from '@hephaitos/core';
 
 // ============================================
@@ -238,14 +240,12 @@ describe('OrderExecutorAgent', () => {
       simulationFeePercent: 0.1,
       simulationLatencyMs: 0, // No delay for tests
       riskConfig: {
-        maxPositionSize: 10,
+        ...DEFAULT_RISK_CONFIG,
+        maxOpenPositions: 10,
         maxLeverage: 3,
-        maxDailyLoss: 1000,
-        maxDailyTrades: 50,
-        requireStopLoss: true,
-        requireTakeProfit: false,
-        tradeOnMarketHoursOnly: false,
-      } as any,
+        dailyLossLimit: 10, // 10% of account
+        dailyTradeLimit: 50,
+      },
     });
   });
 
