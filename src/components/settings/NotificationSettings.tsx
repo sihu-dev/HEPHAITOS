@@ -103,7 +103,7 @@ export function NotificationSettings() {
                 >
                   <span
                     className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${
-                      enabled ? 'left-[18px] bg-[#7C8AEA]' : 'left-0.5 bg-white'
+                      enabled ? 'left-[18px] bg-[#7C8AEA]' : 'left-0.5 bg-white/[0.9]'
                     }`}
                   />
                 </button>

@@ -15,7 +15,7 @@ interface NodeCategory {
   id: string
   labelKey: string
   icon: React.ElementType
-  color: string
+  color: string // TODO: Migrate to design tokens (Tailwind CSS variables)
   nodes: {
     type: string
     labelKey: string
@@ -23,12 +23,14 @@ interface NodeCategory {
   }[]
 }
 
+// TODO: Replace hardcoded hex colors with design system tokens
+// See DESIGN_SYSTEM.md for approved color palette
 const nodeCategoryDefs: NodeCategory[] = [
   {
     id: 'triggers',
     labelKey: 'triggers',
     icon: BoltIcon,
-    color: '#F59E0B',
+    color: '#F59E0B', // Amber - TODO: Use design token
     nodes: [
       { type: 'trigger', labelKey: 'priceTrigger', descKey: 'priceTriggerDesc' },
       { type: 'trigger', labelKey: 'timeTrigger', descKey: 'timeTriggerDesc' },
@@ -39,7 +41,7 @@ const nodeCategoryDefs: NodeCategory[] = [
     id: 'indicators',
     labelKey: 'indicators',
     icon: PresentationChartLineIcon,
-    color: '#10B981',
+    color: '#10B981', // Green - TODO: Use design token
     nodes: [
       { type: 'indicator', labelKey: 'rsi', descKey: 'rsiDesc' },
       { type: 'indicator', labelKey: 'macd', descKey: 'macdDesc' },
@@ -53,7 +55,7 @@ const nodeCategoryDefs: NodeCategory[] = [
     id: 'conditions',
     labelKey: 'conditions',
     icon: ArrowsRightLeftIcon,
-    color: '#71717A',
+    color: '#71717A', // Gray - TODO: Use design token
     nodes: [
       { type: 'condition', labelKey: 'andCondition', descKey: 'andConditionDesc' },
       { type: 'condition', labelKey: 'orCondition', descKey: 'orConditionDesc' },
@@ -64,7 +66,7 @@ const nodeCategoryDefs: NodeCategory[] = [
     id: 'actions',
     labelKey: 'actions',
     icon: ShoppingCartIcon,
-    color: '#EF4444',
+    color: '#EF4444', // Red - TODO: Use design token
     nodes: [
       { type: 'action', labelKey: 'buyOrder', descKey: 'buyOrderDesc' },
       { type: 'action', labelKey: 'sellOrder', descKey: 'sellOrderDesc' },
@@ -76,7 +78,7 @@ const nodeCategoryDefs: NodeCategory[] = [
     id: 'risk',
     labelKey: 'risk',
     icon: ShieldCheckIcon,
-    color: '#8B5CF6',
+    color: '#8B5CF6', // Violet - TODO: Use design token
     nodes: [
       { type: 'risk', labelKey: 'stopLoss', descKey: 'stopLossDesc' },
       { type: 'risk', labelKey: 'takeProfit', descKey: 'takeProfitDesc' },
