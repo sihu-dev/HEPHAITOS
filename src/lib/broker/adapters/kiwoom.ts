@@ -4,8 +4,8 @@
 // https://openapi.kiwoom.com
 // ============================================
 
+import { safeLogger } from '@/lib/utils/safe-logger'
 import type {
-import { safeLogger } from '@/lib/utils/safe-logger';
   UnifiedBroker,
   BrokerId,
   BrokerCredentials,

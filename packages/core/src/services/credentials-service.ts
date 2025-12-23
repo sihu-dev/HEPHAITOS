@@ -35,8 +35,25 @@ export class CredentialsService implements ICredentialsService {
   private readonly masterKey: Buffer;
 
   constructor(masterKey?: string) {
-    // 마스터 키 설정 (환경변수 또는 기본값)
-    const key = masterKey || process.env.ENCRYPTION_MASTER_KEY || 'default-dev-key-change-in-prod';
+    // 마스터 키 설정 (환경변수 필수, 개발 모드만 기본값 허용)
+    let key = masterKey || process.env.ENCRYPTION_MASTER_KEY;
+
+    // Production에서는 반드시 ENCRYPTION_MASTER_KEY 환경변수 필요
+    if (!key) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(
+          'ENCRYPTION_MASTER_KEY environment variable is required in production. ' +
+          'Generate a secure key: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'base64\'))"'
+        );
+      }
+      // Development 전용 기본값 (보안 경고 포함)
+      key = 'dev-only-insecure-key-change-in-production-or-api-keys-will-leak';
+      if (typeof process !== 'undefined' && process.stderr) {
+        process.stderr.write(
+          '\x1b[33m[WARNING] Using insecure default encryption key. Set ENCRYPTION_MASTER_KEY in production!\x1b[0m\n'
+        );
+      }
+    }
 
     // 키를 32바이트로 정규화 (SHA-256 해시 사용하면 더 좋음)
     this.masterKey = Buffer.alloc(this.keyLength);

@@ -75,7 +75,7 @@ export class KISBroker implements UnifiedBroker {
   readonly brokerName = '한국투자증권'
 
   private baseUrl = 'https://openapi.koreainvestment.com:9443'
-  private wsUrl = 'ws://ops.koreainvestment.com:21000'
+  private wsUrl = 'wss://ops.koreainvestment.com:21000' // SECURITY: Use wss:// for encrypted WebSocket
   private accessToken: string | null = null
   private tokenExpiry: Date | null = null
   private credentials: BrokerCredentials | null = null

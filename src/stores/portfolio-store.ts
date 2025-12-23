@@ -2,8 +2,8 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import type { Portfolio, Position, Trade, MarketData } from '@/types'
 import { apiClient, getErrorMessage } from '@/lib/api-client'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import type {
-import { safeLogger } from '@/lib/utils/safe-logger';
   PortfolioStore,
   PortfolioStoreState,
   PortfolioStoreSyncActions,

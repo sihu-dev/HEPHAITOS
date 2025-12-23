@@ -10,8 +10,8 @@ import { AIGenerationFeedback, type AIGenerationStatus } from '@/components/ui/A
 import { useToast } from '@/components/ui/Toast'
 import { DisclaimerInline } from '@/components/ui/Disclaimer'
 import { useI18n } from '@/i18n/client'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import {
-import { safeLogger } from '@/lib/utils/safe-logger';
   SparklesIcon,
   ChartBarIcon,
   PlayIcon,

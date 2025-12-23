@@ -7,8 +7,8 @@
 
 import { useCallback, useState, useEffect } from 'react'
 import Image from 'next/image'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import {
-import { safeLogger } from '@/lib/utils/safe-logger';
   User,
   Star,
   Clock,

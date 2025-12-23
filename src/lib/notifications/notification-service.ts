@@ -3,8 +3,8 @@
 // 실시간 알림 관리 서비스
 // ============================================
 
+import { safeLogger } from '@/lib/utils/safe-logger'
 import type {
-import { safeLogger } from '@/lib/utils/safe-logger';
   Notification,
   NotificationType,
   NotificationPriority,

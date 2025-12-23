@@ -6,8 +6,8 @@
 // ============================================
 
 import { useState, useEffect } from 'react'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import {
-import { safeLogger } from '@/lib/utils/safe-logger';
   TrendingUp,
   TrendingDown,
   Search,

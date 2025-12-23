@@ -4,8 +4,8 @@
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import {
-import { safeLogger } from '@/lib/utils/safe-logger';
   PRICING_PLANS,
   type PlanType,
   type BillingCycle,
