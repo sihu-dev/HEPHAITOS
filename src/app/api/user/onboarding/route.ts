@@ -73,6 +73,9 @@ export const POST = withApiMiddleware(
     if ('error' in validation) return validation.error
 
     const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return createApiResponse({ error: 'Database connection failed' }, { status: 500 })
+    }
     const {
       data: { user },
     } = await supabase.auth.getUser()

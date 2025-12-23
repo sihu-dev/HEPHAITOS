@@ -163,6 +163,12 @@ async function POSTHandler(req: NextRequest) {
 async function GETHandler(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: { code: 'SUPABASE_ERROR', message: 'Database connection failed' } },
+        { status: 500 }
+      )
+    }
 
     // 1. 인증 확인
     const {
