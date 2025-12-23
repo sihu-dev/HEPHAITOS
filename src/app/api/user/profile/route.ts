@@ -1,4 +1,5 @@
 // ============================================
+import { NextResponse } from 'next/server'
 // User Profile API
 // GET: 프로필 조회
 // PATCH: 프로필 업데이트

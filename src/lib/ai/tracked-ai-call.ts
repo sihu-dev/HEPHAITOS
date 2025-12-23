@@ -191,6 +191,6 @@ export async function exampleUsage() {
   })
 
   safeLogger.info('Generated strategy:', result.content)
-  safeLogger.info('Cost:', result.costKRW, 'KRW')
-  safeLogger.info('Latency:', result.latencyMs, 'ms')
+  safeLogger.info(`Cost: ${result.costKRW} KRW`)
+  safeLogger.info(`Latency: ${result.latencyMs} ms`)
 }

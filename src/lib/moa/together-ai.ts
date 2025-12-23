@@ -1,5 +1,4 @@
 /**
-import { safeLogger } from '@/lib/utils/safe-logger'
  * Together AI Integration
  *
  * Open-source LLM provider for cost optimization
@@ -9,6 +8,8 @@ import { safeLogger } from '@/lib/utils/safe-logger'
  *
  * vs Claude Sonnet: $9 / 1M tokens (평균)
  */
+
+import { safeLogger } from '@/lib/utils/safe-logger'
 
 const TOGETHER_API_KEY = process.env.TOGETHER_API_KEY;
 const TOGETHER_BASE_URL = 'https://api.together.xyz/v1';

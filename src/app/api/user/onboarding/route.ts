@@ -1,4 +1,5 @@
 // ============================================
+import { NextResponse } from 'next/server'
 // User Onboarding API
 // POST: 온보딩 완료
 // GET: 온보딩 상태 조회

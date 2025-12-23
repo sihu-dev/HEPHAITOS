@@ -114,7 +114,7 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
         // Update existing strategy
         const { data, error: updateError } = await supabase
           .from('strategies')
-          .update(strategyData)
+          .update(strategyData as any)
           .eq('id', params.id)
           .eq('user_id', user.id)
           .select('id')
@@ -124,10 +124,10 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
         return (data as { id: string } | null)?.id || null
       } else {
         // Create new strategy
-        const { data, error: insertError } = await strategiesQuery.insert(strategyData)
+        const { data, error: insertError } = await strategiesQuery.insert(strategyData as any)
 
         if (insertError) throw insertError
-        return data?.id || null
+        return (data as { id: string } | null)?.id || null
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save strategy'

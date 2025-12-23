@@ -92,8 +92,7 @@ export function validateServerEnv(): ServerEnv {
   const result = serverEnvSchema.safeParse(process.env)
 
   if (!result.success) {
-    safeLogger.error('❌ Invalid server environment variables:')
-    safeLogger.error(result.error.flatten().fieldErrors)
+    safeLogger.error('❌ Invalid server environment variables:', result.error.flatten().fieldErrors)
 
     // Development에서는 경고만, Production에서는 에러
     if (process.env.NODE_ENV === 'production') {
@@ -121,8 +120,7 @@ export function validateClientEnv(): ClientEnv {
   const result = clientEnvSchema.safeParse(clientEnv)
 
   if (!result.success) {
-    safeLogger.error('❌ Invalid client environment variables:')
-    safeLogger.error(result.error.flatten().fieldErrors)
+    safeLogger.error('❌ Invalid client environment variables:', result.error.flatten().fieldErrors)
   }
 
   return result.data ?? (clientEnv as unknown as ClientEnv)

@@ -31,7 +31,7 @@ export function captureError(
     level?: 'critical' | 'high' | 'medium' | 'low'
   }
 ): string | undefined {
-  safeLogger.error('[Sentry disabled] Error:', error.message, context)
+  safeLogger.error('[Sentry disabled] Error:', { message: error.message, context })
   return undefined
 }
 

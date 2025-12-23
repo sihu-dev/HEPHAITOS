@@ -61,7 +61,7 @@ async function saveEventToSupabase(
       user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
     }
 
-    await supabase.from('analytics_events').insert(eventData)
+    await supabase.from('analytics_events').insert(eventData as any)
   } catch (error) {
     // 테이블이 없으면 조용히 실패 (마이그레이션 전)
     if (process.env.NODE_ENV === 'development') {
@@ -98,7 +98,7 @@ export function useAnalytics() {
 
     // Development 로그
     if (process.env.NODE_ENV === 'development') {
-      safeLogger.info('[Analytics]', event, properties)
+      safeLogger.info('[Analytics]', { event, properties })
     }
   }, [])
 
@@ -116,7 +116,7 @@ export function trackEvent(event: string, properties?: Record<string, unknown>) 
   }
 
   if (process.env.NODE_ENV === 'development') {
-    safeLogger.info('[Analytics]', event, properties)
+    safeLogger.info('[Analytics]', { event, properties })
   }
 }
 
