@@ -55,6 +55,9 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
   }
 
   const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
+    }
 
   if (!supabase) {
     return mockProfiles.get(userId) ?? null
@@ -108,6 +111,9 @@ export async function completeOnboarding(
   }
 
   const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
+    }
 
   // Upsert: 있으면 업데이트, 없으면 생성
   const { data: result, error } = await supabase
@@ -194,6 +200,9 @@ export async function saveOnboardingProgress(
   }
 
   const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
+    }
 
   const updateData: Record<string, unknown> = {
     onboarding_step: step,
@@ -240,6 +249,9 @@ export async function updateUserProfile(
   }
 
   const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
+    }
 
   const updateData: Record<string, unknown> = {}
   if (updates.nickname) updateData.nickname = updates.nickname

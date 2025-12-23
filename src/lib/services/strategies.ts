@@ -73,6 +73,9 @@ export async function getStrategies(options?: {
   }
 
   const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
+    }
   const strategiesQuery = createTypedStrategiesQuery(supabase)
 
   let query = supabase
@@ -120,6 +123,9 @@ export async function getStrategyById(id: string): Promise<Strategy | null> {
   }
 
   const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
+    }
   const strategiesQuery = createTypedStrategiesQuery(supabase)
 
   const { data, error } = await strategiesQuery.selectById(id)
@@ -150,6 +156,9 @@ export async function createStrategy(
   }
 
   const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
+    }
   const strategiesQuery = createTypedStrategiesQuery(supabase)
 
   const { data, error } = await strategiesQuery.insert({
@@ -180,6 +189,9 @@ export async function updateStrategy(
   }
 
   const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
+    }
   const strategiesQuery = createTypedStrategiesQuery(supabase)
 
   const updateData: Database['public']['Tables']['strategies']['Update'] = {}
@@ -208,6 +220,9 @@ export async function deleteStrategy(id: string): Promise<boolean> {
   }
 
   const supabase = await createServerSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: new Error('Database connection failed'), metadata: { timestamp: new Date().toISOString(), duration_ms: 0 } }
+    }
   const strategiesQuery = createTypedStrategiesQuery(supabase)
 
   const { error } = await strategiesQuery.delete(id)
