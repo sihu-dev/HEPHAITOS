@@ -48,3 +48,17 @@ export {
   CredentialsService,
   createCredentialsService,
 } from './services/credentials-service.js';
+
+export {
+  type IExchangeService,
+  type IBrokerCredentials,
+  type IConnectionResult,
+  type IBalance,
+  type IHolding,
+  type IOrderRequest,
+  type IOrderResult,
+  type OrderStatus,
+  type BrokerProvider,
+  ExchangeService,
+  createExchangeService,
+} from './services/exchange-service.js';
