@@ -212,8 +212,8 @@ function createTestOrderRequest(overrides: Partial<IOrderRequest> = {}): IOrderR
     type: 'market',
     amount: 100,
     price: 150,
-    stopLoss: 145,
-    takeProfit: 160,
+    stopLoss: { type: 'fixed_price', price: 145 },
+    takeProfit: { type: 'fixed_price', price: 160 },
     trailingStopPercent: undefined,
     leverage: 1,
     timestamp: new Date().toISOString(),
@@ -489,7 +489,7 @@ describe('OrderExecutorAgent', () => {
       const request = createTestOrderRequest({
         price: 100,
         amount: 100,
-        stopLoss: 90,
+        stopLoss: { type: 'fixed_price', price: 90 },
       });
       await agent.submitOrder(request);
 
@@ -562,7 +562,7 @@ describe('OrderExecutorAgent', () => {
       const request = createTestOrderRequest({
         price: 100,
         amount: 100,
-        stopLoss: 95,
+        stopLoss: { type: 'fixed_price', price: 95 },
       });
       await agent.submitOrder(request);
 
@@ -579,7 +579,7 @@ describe('OrderExecutorAgent', () => {
       const request = createTestOrderRequest({
         price: 100,
         amount: 100,
-        takeProfit: 110,
+        takeProfit: { type: 'fixed_price', price: 110 },
       });
       await agent.submitOrder(request);
 
@@ -596,8 +596,8 @@ describe('OrderExecutorAgent', () => {
       const request = createTestOrderRequest({
         price: 100,
         amount: 100,
-        stopLoss: 95,
-        takeProfit: 110,
+        stopLoss: { type: 'fixed_price', price: 95 },
+        takeProfit: { type: 'fixed_price', price: 110 },
       });
       await agent.submitOrder(request);
 
@@ -784,7 +784,7 @@ describe('OrderExecutorAgent', () => {
         side: 'sell',
         price: 100,
         amount: 100,
-        stopLoss: 105,
+        stopLoss: { type: 'fixed_price', price: 105 },
       }));
 
       // Price rises to 106
@@ -845,8 +845,8 @@ describe('OrderExecutorAgent', () => {
       const buyResult = await agent.submitOrder(createTestOrderRequest({
         price: 100,
         amount: 100,
-        stopLoss: 95,
-        takeProfit: 110,
+        stopLoss: { type: 'fixed_price', price: 95 },
+        takeProfit: { type: 'fixed_price', price: 110 },
       }));
       expect(buyResult.success).toBe(true);
 

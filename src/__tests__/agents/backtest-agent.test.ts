@@ -389,26 +389,32 @@ function createTestStrategy(): IStrategy {
     type: 'momentum',
     symbols: ['BTC/USDT'],
     timeframe: '1d',
-    entryConditions: [
-      {
-        id: 'entry-1',
-        type: 'indicator',
-        indicator: 'rsi',
-        period: 14,
-        operator: 'lt',
-        value: 30,
-      },
-    ],
-    exitConditions: [
-      {
-        id: 'exit-1',
-        type: 'indicator',
-        indicator: 'rsi',
-        period: 14,
-        operator: 'gt',
-        value: 70,
-      },
-    ],
+    entryConditions: {
+      logic: 'and',
+      conditions: [
+        {
+          left: {
+            type: 'rsi',
+            period: 14,
+          },
+          operator: 'lt',
+          right: 30,
+        },
+      ],
+    },
+    exitConditions: {
+      logic: 'and',
+      conditions: [
+        {
+          left: {
+            type: 'rsi',
+            period: 14,
+          },
+          operator: 'gt',
+          right: 70,
+        },
+      ],
+    },
     positionSizing: {
       type: 'fixed_percent',
       percent: 10,
