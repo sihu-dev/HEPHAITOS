@@ -115,9 +115,9 @@ function createRateLimitErrorResponse(result: RateLimitResult): NextResponse {
  * ```
  */
 export function withRateLimit<T extends NextRequest>(
-  handler: (request: T, context?: unknown) => Promise<NextResponse | Response>,
+  handler: (request: T, context?: any) => Promise<NextResponse | Response>,
   options: RateLimitOptions = {}
-): (request: T, context?: unknown) => Promise<NextResponse | Response> {
+): (request: T, context?: any) => Promise<NextResponse | Response> {
   const {
     category = 'api',
     customLimiter,
