@@ -129,3 +129,13 @@ export {
   type IUserStats,
   DEFAULT_USER_SETTINGS,
 } from './user.js';
+
+// Transaction Types
+export {
+  type TransactionType,
+  type ITransaction,
+  type ICreateTransactionInput,
+  type ITransactionFilter,
+  type ITransactionStats,
+  type IDailyTransactionSummary,
+} from './transaction.js';
