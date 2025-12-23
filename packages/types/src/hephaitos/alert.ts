@@ -3,7 +3,7 @@
  * L0 (Atoms) - 알림/알람 타입 정의
  */
 
-import type { Timestamp } from './common.js';
+import type { Timestamp } from '../common.js';
 
 export type AlertType = 'price' | 'order_fill' | 'position_change' | 'risk_limit' | 'system';
 export type AlertStatus = 'active' | 'triggered' | 'cancelled';

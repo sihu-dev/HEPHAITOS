@@ -3,6 +3,7 @@
  * L2 (Cells) - 전략 저장소
  */
 
+import { randomUUID } from 'node:crypto';
 import type {
   IStrategy,
   ICreateStrategyInput,
@@ -72,7 +73,7 @@ export class InMemoryStrategyRepository implements IStrategyRepository {
     try {
       const strategy: IStrategy = {
         ...input,
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         metadata: {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -231,7 +232,7 @@ export class InMemoryStrategyRepository implements IStrategyRepository {
       }
       const duplicated: IStrategy = {
         ...original,
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         name: newName,
         metadata: {
           createdAt: new Date().toISOString(),

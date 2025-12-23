@@ -3,7 +3,8 @@
  * L0 (Atoms) - 거래 내역 타입 정의
  */
 
-import type { Timestamp, OrderSide, OrderType, OrderStatus } from './trade.js';
+import type { Timestamp } from '../common.js';
+import type { OrderSide, OrderType, OrderStatus } from './trade.js';
 
 /**
  * 거래 타입

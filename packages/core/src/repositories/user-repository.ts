@@ -3,6 +3,7 @@
  * L2 (Cells) - 사용자 데이터 저장소
  */
 
+import { randomUUID } from 'node:crypto';
 import type {
   IResult,
   IUser,
@@ -97,7 +98,7 @@ export class InMemoryUserRepository implements IUserRepository {
 
       const now = new Date().toISOString();
       const user: IUser = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         email: input.email,
         username: input.username,
         full_name: input.full_name,

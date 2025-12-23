@@ -536,7 +536,7 @@ export class RiskManagementService implements IRiskManagementService {
       // 포지션 통계 계산
       const openPositionCount = positions.length;
       const totalMarginUsed = positions.reduce((sum, pos) => {
-        return sum + (Math.abs(pos.quantity * pos.entry_price) / this.config.defaultLeverage);
+        return sum + (Math.abs(pos.quantity * pos.entryPrice) / this.config.defaultLeverage);
       }, 0);
 
       // 현재 자본금 (초기 자본 + 일일 손익)

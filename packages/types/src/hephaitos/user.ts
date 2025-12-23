@@ -3,7 +3,7 @@
  * L0 (Atoms) - 사용자 관련 타입 정의
  */
 
-import type { Timestamp } from './common.js';
+import type { Timestamp } from '../common.js';
 
 /**
  * 사용자 역할

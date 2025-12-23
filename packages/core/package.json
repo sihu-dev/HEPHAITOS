@@ -21,6 +21,8 @@
     "@hephaitos/utils": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.0.0"
   }
 }

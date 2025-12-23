@@ -92,3 +92,40 @@ export {
   RiskManagementService,
   createRiskManagementService,
 } from './services/risk-management-service.js';
+
+export {
+  type IMarketDataService,
+  type ITickerInfo,
+  type PriceCallback,
+  MarketDataService,
+  createMarketDataService,
+} from './services/market-data-service.js';
+
+export {
+  type IReportGenerationService,
+  type ReportType,
+  type ReportFormat,
+  type IGenerateReportInput,
+  type IGeneratedReport,
+  ReportGenerationService,
+  createReportGenerationService,
+} from './services/report-generation-service.js';
+
+export {
+  type INotificationService,
+  type NotificationChannel,
+  type ISendNotificationInput,
+  type ISentNotification,
+  NotificationService,
+  createNotificationService,
+} from './services/notification-service.js';
+
+export {
+  type IAnalyticsService,
+  type ITradingStats,
+  type ISymbolStats,
+  type ITimebasedStats,
+  type IPortfolioAnalysis,
+  AnalyticsService,
+  createAnalyticsService,
+} from './services/analytics-service.js';

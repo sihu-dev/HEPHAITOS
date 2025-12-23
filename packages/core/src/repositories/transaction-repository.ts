@@ -3,6 +3,7 @@
  * L2 (Cells) - 거래 내역 저장소
  */
 
+import { randomUUID } from 'node:crypto';
 import type {
   IResult,
   ITransaction,
@@ -56,7 +57,7 @@ export class InMemoryTransactionRepository implements ITransactionRepository {
     try {
       const now = new Date().toISOString();
       const transaction: ITransaction = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         ...input,
         executed_at: now,
         created_at: now,

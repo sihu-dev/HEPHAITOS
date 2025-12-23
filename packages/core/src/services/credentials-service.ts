@@ -3,7 +3,7 @@
  * L2 (Cells) - API 자격증명 암호화/복호화 서비스
  */
 
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import type {
   IExchangeCredentials,
   IEncryptedCredentials,

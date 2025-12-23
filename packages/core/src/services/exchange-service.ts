@@ -132,60 +132,52 @@ export class ExchangeService implements IExchangeService {
 
   async connect(credentials: IBrokerCredentials): Promise<IResult<IConnectionResult>> {
     const startTime = Date.now();
-    try {
-      // UnifiedBrokerV2는 브라우저 환경에서 사용 불가 (Node.js only)
-      // 실제 구현 시 동적 import 사용
-      const { UnifiedBrokerV2 } = await import('../../lib/broker/unified-broker-v2.js') as { UnifiedBrokerV2: unknown };
 
-      // TODO: UnifiedBrokerV2 타입을 @hephaitos/types로 마이그레이션 후 제대로 타이핑
-      this.broker = new (UnifiedBrokerV2 as never)(
-        {
-          provider: credentials.provider,
-          apiKey: credentials.apiKey,
-          apiSecret: credentials.apiSecret,
-          accountNumber: credentials.accountNumber,
-          isPaper: credentials.isPaper,
-        },
-        undefined
-      );
+    // TODO: UnifiedBrokerV2를 packages/core로 이동하거나 별도 패키지로 분리 필요
+    // 현재는 Mock 구현 - 실제 broker 연동 필요
+    return {
+      success: false,
+      error: new Error('ExchangeService.connect() not yet implemented - UnifiedBrokerV2 integration pending'),
+      metadata: {
+        timestamp: new Date().toISOString(),
+        duration_ms: Date.now() - startTime,
+      },
+    };
 
-      const result = await (this.broker as never).connect();
-
-      if (!result.success) {
-        return {
-          success: false,
-          error: new Error(result.error?.message || 'Connection failed'),
-          metadata: {
-            timestamp: new Date().toISOString(),
-            duration_ms: Date.now() - startTime,
-          },
-        };
-      }
-
-      this.credentials = credentials;
-
-      return {
-        success: true,
-        data: {
-          provider: credentials.provider,
-          accountId: result.accountId,
-          latency: result.latency,
-        },
-        metadata: {
-          timestamp: new Date().toISOString(),
-          duration_ms: Date.now() - startTime,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error : new Error(String(error)),
-        metadata: {
-          timestamp: new Date().toISOString(),
-          duration_ms: Date.now() - startTime,
-        },
-      };
-    }
+    // 아래 코드는 UnifiedBrokerV2가 패키지에 포함되면 활성화
+    // try {
+    //   const { UnifiedBrokerV2 } = await import('unified-broker-v2');
+    //   this.broker = new UnifiedBrokerV2({
+    //     provider: credentials.provider,
+    //     apiKey: credentials.apiKey,
+    //     apiSecret: credentials.apiSecret,
+    //     accountNumber: credentials.accountNumber,
+    //     isPaper: credentials.isPaper,
+    //   });
+    //   const result = await this.broker.connect();
+    //   this.credentials = credentials;
+    //   return {
+    //     success: true,
+    //     data: {
+    //       provider: credentials.provider,
+    //       accountId: result.accountId,
+    //       latency: result.latency,
+    //     },
+    //     metadata: {
+    //       timestamp: new Date().toISOString(),
+    //       duration_ms: Date.now() - startTime,
+    //     },
+    //   };
+    // } catch (error) {
+    //   return {
+    //     success: false,
+    //     error: error instanceof Error ? error : new Error(String(error)),
+    //     metadata: {
+    //       timestamp: new Date().toISOString(),
+    //       duration_ms: Date.now() - startTime,
+    //     },
+    //   };
+    // }
   }
 
   async disconnect(): Promise<IResult<void>> {
@@ -202,7 +194,7 @@ export class ExchangeService implements IExchangeService {
         };
       }
 
-      await (this.broker as never).disconnect();
+      // TODO: await this.broker.disconnect();
       this.broker = null;
       this.credentials = null;
 
@@ -240,7 +232,7 @@ export class ExchangeService implements IExchangeService {
         };
       }
 
-      const result = await (this.broker as never).getBalance();
+      const result = // TODO: await this.broker.getBalance();
 
       if (!result.success) {
         return {
@@ -293,7 +285,7 @@ export class ExchangeService implements IExchangeService {
         };
       }
 
-      const result = await (this.broker as never).getHoldings();
+      const result = // TODO: await this.broker.getHoldings();
 
       if (!result.success) {
         return {
@@ -340,7 +332,7 @@ export class ExchangeService implements IExchangeService {
         };
       }
 
-      const result = await (this.broker as never).submitOrder(request);
+      const result = // TODO: await this.broker.submitOrder(request);
 
       if (!result.success) {
         return {
@@ -393,7 +385,7 @@ export class ExchangeService implements IExchangeService {
         };
       }
 
-      const result = await (this.broker as never).cancelOrder(orderId);
+      const result = // TODO: await this.broker.cancelOrder(orderId);
 
       if (!result.success) {
         return {
@@ -440,7 +432,7 @@ export class ExchangeService implements IExchangeService {
         };
       }
 
-      const result = await (this.broker as never).getOrderStatus(orderId);
+      const result = // TODO: await this.broker.getOrderStatus(orderId);
 
       if (!result.success) {
         return {
@@ -487,7 +479,7 @@ export class ExchangeService implements IExchangeService {
         };
       }
 
-      const result = await (this.broker as never).healthCheck();
+      const result = // TODO: await this.broker.healthCheck();
 
       return {
         success: true,

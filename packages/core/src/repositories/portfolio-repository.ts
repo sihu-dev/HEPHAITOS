@@ -3,6 +3,7 @@
  * L2 (Cells) - 포트폴리오 저장소
  */
 
+import { randomUUID } from 'node:crypto';
 import type {
   IPortfolio,
   IPortfolioSnapshot,
@@ -76,7 +77,7 @@ export class InMemoryPortfolioRepository implements IPortfolioRepository {
     try {
       const now = new Date().toISOString();
       const portfolio: IPortfolio = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         user_id: input.user_id,
         exchange: input.exchange,
         name: input.name,

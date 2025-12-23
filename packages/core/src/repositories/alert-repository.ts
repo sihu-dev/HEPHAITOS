@@ -3,6 +3,7 @@
  * L2 (Cells) - 알림 저장소
  */
 
+import { randomUUID } from 'node:crypto';
 import type { IResult, IAlert, ICreateAlertInput } from '@hephaitos/types';
 
 export interface IAlertRepository {
@@ -20,7 +21,7 @@ export class InMemoryAlertRepository implements IAlertRepository {
   async create(input: ICreateAlertInput): Promise<IResult<IAlert>> {
     const now = new Date().toISOString();
     const alert: IAlert = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       ...input,
       status: 'active',
       created_at: now,
