@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export async function GET(
   req: NextRequest,
@@ -33,7 +34,7 @@ export async function GET(
     }).single();
 
     if (aggError) {
-      console.error('[Strategy Performance] Aggregate error:', aggError);
+      safeLogger.error('[Strategy Performance] Aggregate error:', aggError);
       return NextResponse.json(
         {
           success: false,
@@ -69,7 +70,7 @@ export async function GET(
       .limit(20);
 
     if (historyError) {
-      console.error('[Strategy Performance] History error:', historyError);
+      safeLogger.error('[Strategy Performance] History error:', historyError);
     }
 
     // 3. 응답
@@ -104,7 +105,7 @@ export async function GET(
       }
     );
   } catch (error) {
-    console.error('[Strategy Performance] Error:', error);
+    safeLogger.error('[Strategy Performance] Error:', error);
     return NextResponse.json(
       {
         success: false,

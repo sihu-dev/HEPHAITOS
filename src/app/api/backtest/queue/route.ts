@@ -122,7 +122,7 @@ export async function POST(req: Request) {
     })
 
     if (rpcErr) {
-      console.error('[Backtest Queue] Job creation error:', rpcErr)
+      safeLogger.error('[Backtest Queue] Job creation error:', rpcErr)
       return NextResponse.json({ error: 'JOB_CREATION_FAILED' }, { status: 500 })
     }
 
@@ -132,7 +132,7 @@ export async function POST(req: Request) {
       message: '백테스트가 큐에 추가되었습니다. 잠시 후 결과를 확인하세요.',
     })
   } catch (error) {
-    console.error('[Backtest Queue] POST error:', error)
+    safeLogger.error('[Backtest Queue] POST error:', error)
     return NextResponse.json(
       { error: 'INTERNAL_SERVER_ERROR' },
       { status: 500 }
@@ -182,7 +182,7 @@ export async function GET(req: Request) {
       completedAt: job.completed_at,
     })
   } catch (error) {
-    console.error('[Backtest Queue] GET error:', error)
+    safeLogger.error('[Backtest Queue] GET error:', error)
     return NextResponse.json({ error: 'INTERNAL_SERVER_ERROR' }, { status: 500 })
   }
 }

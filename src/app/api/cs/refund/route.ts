@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 /**
  * POST /api/cs/refund
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (eligibleError) {
-      console.error('[Refund API] Eligibility check error:', eligibleError);
+      safeLogger.error('[Refund API] Eligibility check error:', eligibleError);
       return NextResponse.json(
         {
           success: false,
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (createError) {
-      console.error('[Refund API] Create error:', createError);
+      safeLogger.error('[Refund API] Create error:', createError);
       return NextResponse.json(
         {
           success: false,
@@ -123,7 +124,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (functionError) {
-      console.error('[Refund API] Edge Function error:', functionError);
+      safeLogger.error('[Refund API] Edge Function error:', functionError);
       // Edge Function 실패해도 요청은 생성됨 (나중에 수동 처리 가능)
     }
 
@@ -137,7 +138,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Refund API] POST error:', error);
+    safeLogger.error('[Refund API] POST error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -180,7 +181,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (historyError) {
-      console.error('[Refund API] History error:', historyError);
+      safeLogger.error('[Refund API] History error:', historyError);
       return NextResponse.json(
         {
           success: false,
@@ -197,7 +198,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Refund API] GET error:', error);
+    safeLogger.error('[Refund API] GET error:', error);
     return NextResponse.json(
       {
         success: false,
