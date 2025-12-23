@@ -35,7 +35,7 @@ export function createTypedStrategiesQuery(supabase: SupabaseClient<Database>) {
     insert(strategy: Database['public']['Tables']['strategies']['Insert']) {
       return supabase
         .from('strategies')
-        .insert(strategy)
+        .insert(strategy as never)
         .select()
         .single();
     },
@@ -43,7 +43,7 @@ export function createTypedStrategiesQuery(supabase: SupabaseClient<Database>) {
     update(id: string, updates: Database['public']['Tables']['strategies']['Update']) {
       return supabase
         .from('strategies')
-        .update(updates)
+        .update(updates as never)
         .eq('id', id)
         .select()
         .single();
@@ -64,13 +64,13 @@ export function createTypedStrategiesQuery(supabase: SupabaseClient<Database>) {
 export function createTypedRPC(supabase: SupabaseClient<Database>) {
   return {
     async getStrategyPerformance(strategyId: string) {
-      return supabase.rpc('get_strategy_performance', {
+      return (supabase.rpc as any)('get_strategy_performance', {
         p_strategy_id: strategyId,
       }).single();
     },
 
     async checkRefundEligibility(userId: string) {
-      return supabase.rpc('check_refund_eligibility', {
+      return (supabase.rpc as any)('check_refund_eligibility', {
         p_user_id: userId,
       });
     },
@@ -81,7 +81,7 @@ export function createTypedRPC(supabase: SupabaseClient<Database>) {
       amount: number;
       reason?: string;
     }) {
-      return supabase.rpc('create_refund_request', {
+      return (supabase.rpc as any)('create_refund_request', {
         p_user_id: params.userId,
         p_payment_id: params.paymentId,
         p_amount: params.amount,
@@ -90,7 +90,7 @@ export function createTypedRPC(supabase: SupabaseClient<Database>) {
     },
 
     async getUserRefundHistory(userId: string) {
-      return supabase.rpc('get_user_refund_history', {
+      return (supabase.rpc as any)('get_user_refund_history', {
         p_user_id: userId,
       });
     },
@@ -101,7 +101,7 @@ export function createTypedRPC(supabase: SupabaseClient<Database>) {
       paidAmount: number;
       raw: unknown;
     }) {
-      return supabase.rpc('grant_credits_for_paid_order', {
+      return (supabase.rpc as any)('grant_credits_for_paid_order', {
         p_order_id: params.orderId,
         p_payment_key: params.paymentKey,
         p_paid_amount: params.paidAmount,
@@ -110,14 +110,14 @@ export function createTypedRPC(supabase: SupabaseClient<Database>) {
     },
 
     async scheduleWebhookRetry(eventId: string, error: string) {
-      return supabase.rpc('schedule_webhook_retry', {
+      return (supabase.rpc as any)('schedule_webhook_retry', {
         p_event_id: eventId,
         p_error: error,
       });
     },
 
     async getPendingWebhookRetries(limit: number) {
-      return supabase.rpc('get_pending_webhook_retries', {
+      return (supabase.rpc as any)('get_pending_webhook_retries', {
         p_limit: limit,
       });
     },
@@ -131,7 +131,7 @@ export function createTypedRPC(supabase: SupabaseClient<Database>) {
       endDate: string;
       symbol: string;
     }) {
-      return supabase.rpc('create_backtest_job', {
+      return (supabase.rpc as any)('create_backtest_job', {
         p_user_id: params.userId,
         p_strategy_id: params.strategyId,
         p_job_id: params.jobId,
