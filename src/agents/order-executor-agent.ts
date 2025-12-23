@@ -517,6 +517,10 @@ export class OrderExecutorAgent {
       dailyLimitReached,
       canTrade,
       blockReason,
+      openPositions: openPositionCount,
+      maxPositions: this.config.riskConfig.maxPositions,
+      maxDailyTrades: this.config.riskConfig.maxDailyTrades,
+      isWithinLimits: canTrade && !dailyLimitReached,
     };
   }
 
@@ -546,6 +550,9 @@ export class OrderExecutorAgent {
       avgSlippage: this.config.simulationSlippagePercent, // 시뮬레이션에서는 설정값
       totalFees: 0, // 별도 집계 필요
       avgLatencyMs: this.config.simulationLatencyMs,
+      winningTrades: 0, // TODO: 포지션 데이터에서 계산
+      losingTrades: 0, // TODO: 포지션 데이터에서 계산
+      winRate: 0, // TODO: 포지션 데이터에서 계산
       bySymbol: {},
     };
   }
@@ -619,6 +626,8 @@ export class OrderExecutorAgent {
       executedPrice,
       latencyMs: this.config.simulationLatencyMs,
       executedAt: new Date().toISOString(),
+      quantity: trade.quantity,
+      price: trade.price,
     };
   }
 
