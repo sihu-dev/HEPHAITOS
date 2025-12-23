@@ -41,6 +41,12 @@ export {
   createUserRepository,
 } from './repositories/user-repository.js';
 
+export {
+  type ITransactionRepository,
+  InMemoryTransactionRepository,
+  createTransactionRepository,
+} from './repositories/transaction-repository.js';
+
 // Services
 export {
   type IPriceDataQuery,
