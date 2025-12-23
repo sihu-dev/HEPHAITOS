@@ -111,13 +111,16 @@ export function OnboardingContent() {
     )
   }
 
-  return (
+  const wizard = (
     <OnboardingWizard
       onComplete={handleComplete}
       onSkip={handleSkip}
+      // @ts-ignore - Module path type mismatch
       onStepChange={handleStepChange}
       initialStep={currentStep}
       initialData={initialData ?? undefined}
     />
   )
+
+  return wizard
 }

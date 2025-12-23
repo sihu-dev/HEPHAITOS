@@ -388,6 +388,7 @@ describe('calculateIndicator', () => {
   })
 
   it('should return closes for unknown indicator type', () => {
+    // @ts-expect-error - Testing invalid indicator type
     const result = calculateIndicator('unknown' as IndicatorType, candles, {})
 
     expect(result.values).toEqual(candles.map(c => c.close))

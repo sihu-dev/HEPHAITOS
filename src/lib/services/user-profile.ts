@@ -259,7 +259,8 @@ export async function updateUserProfile(
 
   const { data, error } = await supabase
     .from('user_profiles')
-    .update(updateData as unknown as any)
+    // @ts-ignore - Supabase generated types conflict
+    .update(updateData)
     .eq('user_id', userId)
     .select()
     .single<UserProfileRow>()

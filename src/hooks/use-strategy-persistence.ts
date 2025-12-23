@@ -114,7 +114,8 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
         // Update existing strategy
         const { data, error: updateError } = await supabase
           .from('strategies')
-          .update(strategyData as any)
+          // @ts-ignore - Supabase generated types conflict
+          .update(strategyData)
           .eq('id', params.id)
           .eq('user_id', user.id)
           .select('id')

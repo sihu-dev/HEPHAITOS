@@ -232,20 +232,20 @@ describe('OrderExecutorAgent', () => {
     orderRepo = new MockOrderRepository();
     positionRepo = new MockPositionRepository();
 
-    agent = new OrderExecutorAgent(orderRepo as unknown as IOrderRepository, positionRepo as unknown as IPositionRepository, {
+    agent = new OrderExecutorAgent(orderRepo, positionRepo, {
       mode: 'simulation',
       simulationSlippagePercent: 0.1,
       simulationFeePercent: 0.1,
       simulationLatencyMs: 0, // No delay for tests
       riskConfig: {
-        maxPositions: 10,
+        maxPositionSize: 10,
         maxLeverage: 3,
         maxDailyLoss: 1000,
         maxDailyTrades: 50,
         requireStopLoss: true,
         requireTakeProfit: false,
         tradeOnMarketHoursOnly: false,
-      },
+      } as any,
     });
   });
 
