@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ReportGenerationService } from '../services/report-generation-service.js';
-import type { IGenerateReportInput, IBacktestResult } from '@hephaitos/types';
+import { ReportGenerationService, type IGenerateReportInput } from '../services/report-generation-service.js';
+import type { IBacktestResult } from '@hephaitos/types';
 
 describe('ReportGenerationService', () => {
   let service: ReportGenerationService;

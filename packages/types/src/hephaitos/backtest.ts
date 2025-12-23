@@ -263,6 +263,8 @@ export interface IStrategyComparison {
   };
   /** 전략별 요약 */
   summaries: IBacktestSummary[];
+  /** 백테스트 결과 목록 */
+  results?: IBacktestResult[];
   /** 순위 (지표별) */
   rankings: {
     byReturn: string[];

@@ -182,6 +182,8 @@ export interface IPositionWithMeta extends IPosition {
   /** 최고/최저 도달가 */
   peakPrice?: number;
   troughPrice?: number;
+  /** 청산 시간 (편의 필드, closedAt과 동일) */
+  exitTime?: string;
   /** MAE (Maximum Adverse Excursion) */
   mae: number;
   /** MFE (Maximum Favorable Excursion) */
@@ -200,6 +202,8 @@ export interface IPartialExitRecord {
   exitedAt: string;
   /** 익절가 */
   exitPrice: number;
+  /** 익절가 (편의 필드, exitPrice와 동일) */
+  price: number;
   /** 청산 수량 */
   quantity: number;
   /** 실현 손익 */
@@ -275,6 +279,14 @@ export interface IRiskStatus {
   canTrade: boolean;
   /** 거래 불가 사유 */
   blockReason?: string;
+  /** 현재 열린 포지션 수 (편의 필드, openPositionCount와 동일) */
+  openPositions: number;
+  /** 최대 포지션 수 */
+  maxPositions: number;
+  /** 최대 일일 거래 횟수 */
+  maxDailyTrades: number;
+  /** 리스크 한도 내 여부 */
+  isWithinLimits: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -326,6 +338,14 @@ export interface IExecutionStats {
   totalFees: number;
   /** 평균 체결 지연 (ms) */
   avgLatencyMs: number;
+  /** 승리 거래 수 */
+  winningTrades: number;
+  /** 손실 거래 수 */
+  losingTrades: number;
+  /** 승률 (0-1) */
+  winRate: number;
+  /** 총 손익 */
+  totalPnL?: number;
   /** 심볼별 통계 */
   bySymbol: Record<string, {
     orders: number;
