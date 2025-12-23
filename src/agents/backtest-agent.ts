@@ -150,7 +150,8 @@ export class BacktestAgent {
           strategy,
           backtestConfig.initialCapital,
           backtestConfig.feeRate,
-          backtestConfig.slippage
+          backtestConfig.slippage,
+          symbol
         );
 
       result.trades = trades;
@@ -218,7 +219,8 @@ export class BacktestAgent {
     strategy: IStrategy,
     initialCapital: number,
     feeRate: number,
-    slippage: number
+    slippage: number,
+    symbol: string
   ): Promise<{
     trades: IRoundTrip[];
     equityCurve: IEquityPoint[];
@@ -235,6 +237,7 @@ export class BacktestAgent {
       entryPrice: number;
       entryTrade: ITrade;
       enteredAt: string;
+      entryBarIndex: number;
     } | null = null;
 
     let peakCapital = initialCapital;
@@ -294,7 +297,7 @@ export class BacktestAgent {
           const exitTrade: ITrade = {
             id: crypto.randomUUID(),
             orderId: crypto.randomUUID(),
-            symbol: 'SYMBOL', // TODO: 동적으로 처리
+            symbol,
             side: 'sell',
             quantity: position.quantity,
             price: exitPrice,
@@ -307,7 +310,7 @@ export class BacktestAgent {
           // 라운드 트립 생성
           const roundTrip: IRoundTrip = {
             id: crypto.randomUUID(),
-            symbol: 'SYMBOL',
+            symbol,
             side: 'buy',
             entryTrade: position.entryTrade,
             exitTrade,
@@ -326,7 +329,7 @@ export class BacktestAgent {
             holdingPeriodMs:
               new Date(candle.timestamp).getTime() -
               new Date(position.enteredAt).getTime(),
-            holdingPeriodBars: 0, // TODO: 계산
+            holdingPeriodBars: i - position.entryBarIndex,
             enteredAt: position.enteredAt,
             exitedAt: candle.timestamp,
           };
@@ -367,7 +370,7 @@ export class BacktestAgent {
             const entryTrade: ITrade = {
               id: crypto.randomUUID(),
               orderId: crypto.randomUUID(),
-              symbol: 'SYMBOL',
+              symbol,
               side: 'buy',
               quantity,
               price: entryPrice,
@@ -387,6 +390,7 @@ export class BacktestAgent {
               entryPrice,
               entryTrade,
               enteredAt: candle.timestamp,
+              entryBarIndex: i,
             };
           }
         }
@@ -403,7 +407,7 @@ export class BacktestAgent {
       const exitTrade: ITrade = {
         id: crypto.randomUUID(),
         orderId: crypto.randomUUID(),
-        symbol: 'SYMBOL',
+        symbol,
         side: 'sell',
         quantity: position.quantity,
         price: exitPrice,
@@ -415,7 +419,7 @@ export class BacktestAgent {
 
       const roundTrip: IRoundTrip = {
         id: crypto.randomUUID(),
-        symbol: 'SYMBOL',
+        symbol,
         side: 'buy',
         entryTrade: position.entryTrade,
         exitTrade,
@@ -434,7 +438,7 @@ export class BacktestAgent {
         holdingPeriodMs:
           new Date(lastCandle.timestamp).getTime() -
           new Date(position.enteredAt).getTime(),
-        holdingPeriodBars: 0,
+        holdingPeriodBars: (candles.length - 1) - position.entryBarIndex,
         enteredAt: position.enteredAt,
         exitedAt: lastCandle.timestamp,
       };
