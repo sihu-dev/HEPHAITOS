@@ -5,7 +5,7 @@
 // Loop 21: 멘토 코칭 정식 런칭
 // ============================================
 
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useMemo, memo } from 'react'
 import Image from 'next/image'
 import {
   User,
@@ -148,7 +148,7 @@ export default function MentorCoaching() {
     loadData()
   }, [loadData])
 
-  const loadMySessions = async () => {
+  const loadMySessions = useCallback(async () => {
     try {
       // TODO: 실제 userId 사용
       const response = await fetch('/api/coaching?type=my_sessions&userId=current-user')
@@ -159,13 +159,21 @@ export default function MentorCoaching() {
     } catch (error) {
       console.error('Failed to load sessions:', error)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (activeTab === 'my_sessions') {
       loadMySessions()
     }
-  }, [activeTab])
+  }, [activeTab, loadMySessions])
+
+  const filteredMentors = useMemo(() => {
+    return mentors.filter((m) =>
+      !searchQuery ||
+      m.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [mentors, searchQuery])
 
   return (
     <div className="min-h-screen bg-[#0D0D0F] text-white p-6">
@@ -253,13 +261,7 @@ export default function MentorCoaching() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4">
-                  {mentors
-                    .filter((m) =>
-                      !searchQuery ||
-                      m.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      m.title.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                    .map((mentor) => (
+                  {filteredMentors.map((mentor) => (
                       <MentorCard
                         key={mentor.user_id}
                         mentor={mentor}
@@ -327,7 +329,7 @@ export default function MentorCoaching() {
 // Sub Components
 // ============================================
 
-function TabButton({
+const TabButton = memo(function TabButton({
   children,
   active,
   onClick,
@@ -348,9 +350,9 @@ function TabButton({
       {children}
     </button>
   )
-}
+})
 
-function MentorCard({
+const MentorCard = memo(function MentorCard({
   mentor,
   onClick,
 }: {
@@ -426,9 +428,9 @@ function MentorCard({
       </div>
     </div>
   )
-}
+})
 
-function SessionCard({ session }: { session: Session }) {
+const SessionCard = memo(function SessionCard({ session }: { session: Session }) {
   const statusColors: Record<string, string> = {
     scheduled: 'text-blue-400',
     confirmed: 'text-green-400',
@@ -492,7 +494,7 @@ function SessionCard({ session }: { session: Session }) {
       )}
     </div>
   )
-}
+})
 
 function MentorDetailModal({
   mentor,
@@ -522,7 +524,7 @@ function MentorDetailModal({
     loadAvailability()
   }, [loadAvailability])
 
-  const handleBook = async () => {
+  const handleBook = useCallback(async () => {
     if (!selectedSlot) return
 
     setBooking(true)
@@ -551,7 +553,7 @@ function MentorDetailModal({
     } finally {
       setBooking(false)
     }
-  }
+  }, [selectedSlot, mentor.user_id, topic, onClose])
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
@@ -706,7 +708,7 @@ function BecomeMentorSection() {
   })
   const [submitting, setSubmitting] = useState(false)
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     if (!formData.displayName || !formData.title) {
       alert('이름과 직함은 필수입니다')
       return
@@ -736,7 +738,7 @@ function BecomeMentorSection() {
     } finally {
       setSubmitting(false)
     }
-  }
+  }, [formData])
 
   return (
     <div className="max-w-2xl mx-auto">

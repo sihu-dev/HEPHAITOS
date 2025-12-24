@@ -5,7 +5,7 @@
 // Loop 20: 전략 마켓플레이스 v1
 // ============================================
 
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect, useMemo, memo } from 'react'
 import Image from 'next/image'
 import {
   TrendingUp,
@@ -184,7 +184,7 @@ export default function StrategyMarketplace() {
     loadData()
   }, [loadData])
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return
 
     setLoading(true)
@@ -199,7 +199,7 @@ export default function StrategyMarketplace() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [searchQuery])
 
   return (
     <div className="min-h-screen bg-[#0D0D0F] text-white p-6">
@@ -427,7 +427,7 @@ export default function StrategyMarketplace() {
 // Sub Components
 // ============================================
 
-function StatsCard({
+const StatsCard = memo(function StatsCard({
   label,
   value,
   suffix,
@@ -450,9 +450,9 @@ function StatsCard({
       </div>
     </div>
   )
-}
+})
 
-function TabButton({
+const TabButton = memo(function TabButton({
   children,
   active,
   onClick,
@@ -473,9 +473,9 @@ function TabButton({
       {children}
     </button>
   )
-}
+})
 
-function StrategyCard({
+const StrategyCard = memo(function StrategyCard({
   listing,
   onClick,
 }: {
@@ -575,9 +575,9 @@ function StrategyCard({
       </div>
     </div>
   )
-}
+})
 
-function FeaturedCard({
+const FeaturedCard = memo(function FeaturedCard({
   listing,
   onClick,
 }: {
@@ -630,9 +630,9 @@ function FeaturedCard({
       </div>
     </div>
   )
-}
+})
 
-function CreatorCard({ creator, rank }: { creator: Creator; rank: number }) {
+const CreatorCard = memo(function CreatorCard({ creator, rank }: { creator: Creator; rank: number }) {
   return (
     <div className="flex items-center gap-4 p-4 bg-white/5 rounded-lg border border-white/10">
       <div className="w-10 text-center">
@@ -685,7 +685,7 @@ function CreatorCard({ creator, rank }: { creator: Creator; rank: number }) {
       </button>
     </div>
   )
-}
+})
 
 function StrategyDetailModal({
   listing,
@@ -696,7 +696,7 @@ function StrategyDetailModal({
 }) {
   const [purchasing, setPurchasing] = useState(false)
 
-  const handlePurchase = async () => {
+  const handlePurchase = useCallback(async () => {
     setPurchasing(true)
     try {
       const response = await fetch('/api/marketplace', {
@@ -721,7 +721,7 @@ function StrategyDetailModal({
     } finally {
       setPurchasing(false)
     }
-  }
+  }, [listing.id, onClose])
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">

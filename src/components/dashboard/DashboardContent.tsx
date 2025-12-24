@@ -80,14 +80,14 @@ export function DashboardContent() {
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
       {/* Background Effects */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#5E6AD2]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between animate-fade-in">
+        <header className="flex items-center justify-between animate-fade-in">
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold text-white">Dashboard</h1>
@@ -100,12 +100,13 @@ export function DashboardContent() {
               Real-time portfolio monitoring and strategy management
             </p>
           </div>
-        </div>
+        </header>
 
         {/* Hero Section - Portfolio Value (Real-time) */}
-        <div
+        <section
           className="card-cinematic p-8 animate-fade-in"
           style={{ animationDelay: '100ms' }}
+          aria-label="Portfolio overview"
         >
           <PortfolioHero
             totalValue={portfolio.totalValue}
@@ -113,12 +114,13 @@ export function DashboardContent() {
             changePercent={portfolio.changePercent}
             sparklineData={portfolio.sparklineData}
           />
-        </div>
+        </section>
 
         {/* Quick Actions Bar */}
-        <div
+        <nav
           className="grid grid-cols-2 lg:grid-cols-4 gap-3 animate-fade-in"
           style={{ animationDelay: '200ms' }}
+          aria-label="Quick actions"
         >
           {quickActions.map((action, index) => (
             <Link
@@ -139,7 +141,7 @@ export function DashboardContent() {
                 action.highlight
                   ? 'bg-[#5E6AD2]/20 group-hover:bg-[#5E6AD2]/30'
                   : 'bg-white/[0.06] group-hover:bg-white/[0.12]'
-              )}>
+              )} aria-hidden="true">
                 <action.icon className={clsx(
                   'w-5 h-5 transition-colors',
                   action.highlight
@@ -163,12 +165,12 @@ export function DashboardContent() {
                 action.highlight
                   ? 'bg-[#5E6AD2]/20 text-[#7C8AEA]'
                   : 'bg-white/[0.06] text-zinc-500'
-              )}>
+              )} aria-hidden="true">
                 {action.shortcut}
               </kbd>
             </Link>
           ))}
-        </div>
+        </nav>
 
         {/* Main Content Grid */}
         <div
@@ -176,8 +178,8 @@ export function DashboardContent() {
           style={{ animationDelay: '300ms' }}
         >
           {/* Left Column - Active Strategies (55%) */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="card-cinematic p-5">
+          <section className="lg:col-span-7 space-y-6" aria-label="Active strategies and recent activity">
+            <article className="card-cinematic p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-base font-semibold text-white">Active Strategies</h2>
                 <Link
@@ -188,33 +190,33 @@ export function DashboardContent() {
                 </Link>
               </div>
               <ActiveStrategies />
-            </div>
+            </article>
 
             {/* Recent Activity */}
-            <div>
+            <article>
               <h2 className="text-base font-semibold text-white mb-4">Recent Activity</h2>
               <RecentActivity />
-            </div>
-          </div>
+            </article>
+          </section>
 
           {/* Right Column - Performance & Market (45%) */}
-          <div className="lg:col-span-5 space-y-6">
-            <div>
-              <h2 className="text-base font-semibold text-white mb-4">Performance</h2>
+          <aside className="lg:col-span-5 space-y-6" aria-label="Performance metrics and market overview">
+            <section aria-labelledby="performance-heading">
+              <h2 id="performance-heading" className="text-base font-semibold text-white mb-4">Performance</h2>
               <PerformanceMetrics />
-            </div>
+            </section>
 
-            <div>
-              <h2 className="text-base font-semibold text-white mb-4">Market Overview</h2>
+            <section aria-labelledby="market-heading">
+              <h2 id="market-heading" className="text-base font-semibold text-white mb-4">Market Overview</h2>
               <MarketOverview />
-            </div>
-          </div>
+            </section>
+          </aside>
         </div>
 
         {/* Disclaimer */}
-        <div className="animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <aside className="animate-fade-in" style={{ animationDelay: '400ms' }} aria-label="Legal disclaimer">
           <DisclaimerInline />
-        </div>
+        </aside>
       </div>
     </div>
   )

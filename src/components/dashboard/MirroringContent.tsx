@@ -1,7 +1,7 @@
 'use client'
 
 
-import { useState } from 'react'
+import { useState, useCallback, useMemo, memo } from 'react'
 import { clsx } from 'clsx'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -64,7 +64,7 @@ const CopyIcon = () => (
 // Type Badge Component
 // ============================================
 
-function TypeBadge({ type, t }: { type: CelebrityProfile['type']; t: TranslateFunction }) {
+const TypeBadge = memo(function TypeBadge({ type, t }: { type: CelebrityProfile['type']; t: TranslateFunction }) {
   const styles = {
     politician: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
     investor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -77,13 +77,13 @@ function TypeBadge({ type, t }: { type: CelebrityProfile['type']; t: TranslateFu
       {t(`dashboard.mirroring.types.${type}`) as string}
     </span>
   )
-}
+})
 
 // ============================================
 // Celebrity Card Component
 // ============================================
 
-function CelebrityCard({
+const CelebrityCard = memo(function CelebrityCard({
   celebrity,
   portfolio,
   isSelected,
@@ -151,13 +151,13 @@ function CelebrityCard({
       </div>
     </button>
   )
-}
+})
 
 // ============================================
 // Portfolio Detail Component
 // ============================================
 
-function PortfolioDetail({
+const PortfolioDetail = memo(function PortfolioDetail({
   celebrity,
   portfolio,
   onMirror,
@@ -266,9 +266,9 @@ function PortfolioDetail({
       </div>
     </div>
   )
-}
+})
 
-function StatCard({ label, value, positive }: { label: string; value: string; positive: boolean }) {
+const StatCard = memo(function StatCard({ label, value, positive }: { label: string; value: string; positive: boolean }) {
   return (
     <div className="p-3 rounded-lg border border-white/[0.06]">
       <p className="text-xs text-zinc-400 mb-1">{label}</p>
@@ -287,13 +287,13 @@ function StatCard({ label, value, positive }: { label: string; value: string; po
       </div>
     </div>
   )
-}
+})
 
 // ============================================
 // Recent Trades Component
 // ============================================
 
-function RecentTrades({ trades, t }: { trades: TradeActivity[]; t: TranslateFunction }) {
+const RecentTrades = memo(function RecentTrades({ trades, t }: { trades: TradeActivity[]; t: TranslateFunction }) {
   return (
     <div className="space-y-3">
       <h3 className="text-sm text-white font-medium">{t('dashboard.mirroring.recentTrades.title') as string}</h3>
@@ -361,7 +361,7 @@ function RecentTrades({ trades, t }: { trades: TradeActivity[]; t: TranslateFunc
       )}
     </div>
   )
-}
+})
 
 // ============================================
 // Mirror Setup Modal Component
@@ -382,9 +382,12 @@ function MirrorSetupModal({
 }) {
   const [amount, setAmount] = useState<string>('1000000')
 
-  const mirrorPortfolio = celebrityPortfolioManager.calculateMirrorPortfolio(
-    celebrity.id,
-    parseInt(amount) || 0
+  const mirrorPortfolio = useMemo(() =>
+    celebrityPortfolioManager.calculateMirrorPortfolio(
+      celebrity.id,
+      parseInt(amount) || 0
+    ),
+    [celebrity.id, amount]
   )
 
   return (
@@ -461,35 +464,42 @@ export function MirroringContent() {
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false)
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
 
-  const celebrities = celebrityPortfolioManager.getCelebrities()
-  const recentTrades = celebrityPortfolioManager.getAllRecentTrades(5)
+  const celebrities = useMemo(() => celebrityPortfolioManager.getCelebrities(), [])
+  const recentTrades = useMemo(() => celebrityPortfolioManager.getAllRecentTrades(5), [])
 
-  const selectedCelebrityData = selectedCelebrity
-    ? celebrityPortfolioManager.getCelebrity(selectedCelebrity)
-    : null
-  const selectedPortfolio = selectedCelebrity
-    ? celebrityPortfolioManager.getPortfolio(selectedCelebrity)
-    : null
+  const selectedCelebrityData = useMemo(() =>
+    selectedCelebrity
+      ? celebrityPortfolioManager.getCelebrity(selectedCelebrity)
+      : null,
+    [selectedCelebrity]
+  )
 
-  const handleMirrorStart = () => {
+  const selectedPortfolio = useMemo(() =>
+    selectedCelebrity
+      ? celebrityPortfolioManager.getPortfolio(selectedCelebrity)
+      : null,
+    [selectedCelebrity]
+  )
+
+  const handleMirrorStart = useCallback(() => {
     if (!disclaimerAccepted) {
       setShowDisclaimerModal(true)
       return
     }
     setShowMirrorModal(true)
-  }
+  }, [disclaimerAccepted])
 
-  const handleDisclaimerAccept = () => {
+  const handleDisclaimerAccept = useCallback(() => {
     setDisclaimerAccepted(true)
     setShowDisclaimerModal(false)
     setShowMirrorModal(true)
-  }
+  }, [])
 
-  const handleMirrorConfirm = (amount: number) => {
+  const handleMirrorConfirm = useCallback((amount: number) => {
     console.log('Mirror confirmed:', { celebrity: selectedCelebrity, amount })
     setShowMirrorModal(false)
     // TODO: Implement actual mirror setup with broker integration
-  }
+  }, [selectedCelebrity])
 
   return (
     <div className="space-y-8">

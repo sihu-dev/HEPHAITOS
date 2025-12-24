@@ -328,10 +328,10 @@ export function PortfolioContent() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <header className="flex items-center justify-between">
         <div>
           <h1 className="text-base font-medium text-white flex items-center gap-2">
-            <ChartPieIcon className="w-5 h-5 text-[#7C8AEA]" />
+            <ChartPieIcon className="w-5 h-5 text-[#7C8AEA]" aria-hidden="true" />
             포트폴리오
           </h1>
           <p className="text-sm text-zinc-400 mt-0.5">자산 현황 및 성과 분석</p>
@@ -340,15 +340,16 @@ export function PortfolioContent() {
           type="button"
           onClick={handleRefresh}
           disabled={isLoading}
+          aria-label="포트폴리오 새로고침"
           className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-50 rounded-lg transition-colors"
         >
-          <ArrowPathIcon className={clsx('w-4 h-4', isLoading && 'animate-spin')} />
+          <ArrowPathIcon className={clsx('w-4 h-4', isLoading && 'animate-spin')} aria-hidden="true" />
           새로고침
         </button>
-      </div>
+      </header>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4" aria-label="포트폴리오 통계">
         {isLoading ? (
           <>
             {[...Array(4)].map((_, i) => (
@@ -394,17 +395,18 @@ export function PortfolioContent() {
             />
           </>
         )}
-      </div>
+      </section>
 
       {/* Equity Chart */}
-      <motion.div
+      <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06]"
+        aria-label="자산 추이 차트"
       >
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-sm font-medium text-white">자산 추이</h2>
+            <h2 className="text-sm font-medium text-white" id="equity-chart-heading">자산 추이</h2>
             <p className="text-xs text-zinc-500">최근 30일</p>
           </div>
           <div className="flex items-center gap-2">
@@ -433,14 +435,17 @@ export function PortfolioContent() {
             데이터가 없습니다
           </div>
         )}
-      </motion.div>
+      </motion.section>
 
       {/* Tab Navigation */}
-      <div className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-lg w-fit">
+      <nav className="flex items-center gap-1 p-1 bg-white/[0.03] rounded-lg w-fit" role="tablist" aria-label="포트폴리오 보기 옵션">
         {tabs.map(tab => (
           <button
             key={tab.id}
             type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-controls={`${tab.id}-panel`}
             onClick={() => setActiveTab(tab.id as typeof activeTab)}
             className={clsx(
               'flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg transition-all',
@@ -449,38 +454,41 @@ export function PortfolioContent() {
                 : 'text-zinc-500 hover:text-zinc-300'
             )}
           >
-            <tab.icon className="w-4 h-4" />
+            <tab.icon className="w-4 h-4" aria-hidden="true" />
             {tab.label}
           </button>
         ))}
-      </div>
+      </nav>
 
       {/* Tab Content */}
       <AnimatePresence mode="wait">
         {activeTab === 'holdings' && (
-          <motion.div
+          <motion.section
             key="holdings"
+            id="holdings-panel"
+            role="tabpanel"
+            aria-labelledby="holdings"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             className="grid lg:grid-cols-3 gap-6"
           >
             {/* Holdings Grid */}
-            <div className="lg:col-span-2 grid sm:grid-cols-2 gap-4">
+            <div className="lg:col-span-2 grid sm:grid-cols-2 gap-4" role="list" aria-label="보유 자산 목록">
               {holdings.map(holding => (
                 <HoldingCard key={holding.symbol} holding={holding} />
               ))}
             </div>
 
             {/* Allocation */}
-            <div className="space-y-4">
-              <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                <h3 className="text-sm font-medium text-white mb-4">자산 배분</h3>
+            <aside className="space-y-4" aria-label="자산 배분 및 섹터 분포">
+              <section className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                <h3 className="text-sm font-medium text-white mb-4" id="allocation-heading">자산 배분</h3>
                 <AllocationPieChart holdings={holdings} />
-              </div>
+              </section>
 
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                <h3 className="text-sm font-medium text-white mb-3">섹터 분포</h3>
+              <section className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                <h3 className="text-sm font-medium text-white mb-3" id="sector-heading">섹터 분포</h3>
                 <div className="space-y-2">
                   {sectorData.map(sector => (
                     <div key={sector.name} className="flex items-center justify-between">
@@ -497,14 +505,17 @@ export function PortfolioContent() {
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          </motion.div>
+              </section>
+            </aside>
+          </motion.section>
         )}
 
         {activeTab === 'performance' && (
-          <motion.div
+          <motion.section
             key="performance"
+            id="performance-panel"
+            role="tabpanel"
+            aria-labelledby="performance"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
@@ -540,9 +551,9 @@ export function PortfolioContent() {
               description="투자금 대비 수익"
               status={stats.totalProfitPercent > 20 ? 'good' : stats.totalProfitPercent > 0 ? 'neutral' : 'warning'}
             />
-            <div className="p-4 rounded-xl bg-[#5E6AD2]/10 border border-[#5E6AD2]/20">
+            <article className="p-4 rounded-xl bg-[#5E6AD2]/10 border border-[#5E6AD2]/20">
               <div className="flex items-center gap-2 mb-2">
-                <SparklesIcon className="w-4 h-4 text-[#7C8AEA]" />
+                <SparklesIcon className="w-4 h-4 text-[#7C8AEA]" aria-hidden="true" />
                 <span className="text-xs text-[#7C8AEA]">AI 분석</span>
               </div>
               <p className="text-sm text-white mb-1">포트폴리오 건강도</p>
@@ -550,13 +561,16 @@ export function PortfolioContent() {
                 현재 포트폴리오는 양호한 샤프 비율을 보이고 있으며,
                 크립토 자산 비중이 높아 변동성이 다소 큽니다.
               </p>
-            </div>
-          </motion.div>
+            </article>
+          </motion.section>
         )}
 
         {activeTab === 'history' && (
-          <motion.div
+          <motion.section
             key="history"
+            id="history-panel"
+            role="tabpanel"
+            aria-labelledby="history"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
@@ -568,7 +582,7 @@ export function PortfolioContent() {
                 전체 보기
               </button>
             </div>
-            <div>
+            <div role="list" aria-label="거래 내역">
               {transactions.length > 0 ? (
                 transactions.map(tx => (
                   <TransactionItem key={tx.id} tx={tx} />
@@ -579,12 +593,14 @@ export function PortfolioContent() {
                 </div>
               )}
             </div>
-          </motion.div>
+          </motion.section>
         )}
       </AnimatePresence>
 
       {/* Disclaimer */}
-      <DisclaimerInline />
+      <aside aria-label="법적 고지">
+        <DisclaimerInline />
+      </aside>
     </div>
   )
 }

@@ -6,7 +6,7 @@
 // HEPHAITOS LEARN 기능
 // ============================================
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, memo } from 'react'
 import {
   ComputerDesktopIcon,
   ArrowsPointingOutIcon,
@@ -298,7 +298,7 @@ export function ScreenShareWidget({
 // Simulated Chart
 // ============================================
 
-function SimulatedChart({ screenState, isPaused }: { screenState: ScreenState; isPaused: boolean }) {
+const SimulatedChart = memo(function SimulatedChart({ screenState, isPaused }: { screenState: ScreenState; isPaused: boolean }) {
   const [chartData, setChartData] = useState<number[]>([])
 
   useEffect(() => {
@@ -356,13 +356,13 @@ function SimulatedChart({ screenState, isPaused }: { screenState: ScreenState; i
       <text x="20" y="48" fontSize="11" fill="#71717a">{screenState.chartTimeframe}</text>
     </svg>
   )
-}
+})
 
 // ============================================
 // Mentor Cursor
 // ============================================
 
-function MentorCursor({ position }: { position: { x: number; y: number } }) {
+const MentorCursor = memo(function MentorCursor({ position }: { position: { x: number; y: number } }) {
   return (
     <div
       className="absolute pointer-events-none transition-all duration-100"
@@ -378,13 +378,13 @@ function MentorCursor({ position }: { position: { x: number; y: number } }) {
       </div>
     </div>
   )
-}
+})
 
 // ============================================
 // Annotation Marker
 // ============================================
 
-function AnnotationMarker({ annotation }: { annotation: Annotation }) {
+const AnnotationMarker = memo(function AnnotationMarker({ annotation }: { annotation: Annotation }) {
   return (
     <div
       className="absolute pointer-events-none"
@@ -411,6 +411,6 @@ function AnnotationMarker({ annotation }: { annotation: Annotation }) {
       )}
     </div>
   )
-}
+})
 
 export default ScreenShareWidget

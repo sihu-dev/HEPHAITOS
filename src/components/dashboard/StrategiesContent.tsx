@@ -52,9 +52,9 @@ export function StrategiesContent() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <article className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <header className="flex items-center justify-between">
         <div>
           <h1 className="text-[24px] font-medium text-white mb-2">
             {t('dashboard.strategies.title') as string}
@@ -79,17 +79,20 @@ export function StrategiesContent() {
             {t('dashboard.strategies.newStrategy') as string}
           </Link>
         </div>
-      </div>
+      </header>
 
       {/* Divider */}
-      <div className="h-px bg-white/[0.06]" />
+      <hr className="h-px bg-white/[0.06] border-0" />
 
       {/* Filter Tabs */}
-      <div className="flex gap-2">
+      <nav className="flex gap-2" role="tablist" aria-label="전략 필터">
         {(['all', 'running', 'paused', 'draft'] as const).map((f) => (
           <button
             key={f}
             type="button"
+            role="tab"
+            aria-selected={filter === f}
+            aria-controls={`${f}-strategies`}
             onClick={() => setFilter(f)}
             className={clsx(
               'px-3 py-1.5 rounded text-xs transition-colors',
@@ -109,18 +112,18 @@ export function StrategiesContent() {
             ).length})`}
           </button>
         ))}
-      </div>
+      </nav>
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="space-y-3">
+        <section className="space-y-3" aria-label="전략 목록 로딩 중">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="skeleton-shimmer h-24 rounded-xl" />
+            <div key={i} className="skeleton-shimmer h-24 rounded-xl" role="status" aria-label="로딩 중" />
           ))}
-        </div>
+        </section>
       ) : filteredStrategies.length === 0 ? (
         /* Empty State */
-        <div className="border border-white/[0.06] rounded-xl p-12 text-center">
+        <section className="border border-white/[0.06] rounded-xl p-12 text-center" aria-label="전략 없음">
           <div className="w-16 h-16 rounded-xl bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
             <SparklesIcon className="w-8 h-8 text-zinc-500" />
           </div>
@@ -139,17 +142,18 @@ export function StrategiesContent() {
             <PlusIcon className="w-4 h-4" />
             {t('dashboard.strategies.createStrategy') as string}
           </Link>
-        </div>
+        </section>
       ) : (
         /* Strategy List */
-        <div className="space-y-3">
+        <section className="space-y-3" role="list" aria-label="전략 목록">
           {filteredStrategies.map((strategy, index) => {
             const isRunning = strategy.status === 'running'
             const isProfitable = (strategy.performance?.totalReturn || 0) >= 0
 
             return (
-              <div
+              <article
                 key={strategy.id}
+                role="listitem"
                 className={clsx(
                   'relative flex items-center justify-between p-4 rounded-xl',
                   'border border-white/[0.06] bg-white/[0.02]',
@@ -161,14 +165,15 @@ export function StrategiesContent() {
               >
                 {/* Status Glow */}
                 {isRunning && (
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" aria-hidden="true" />
                 )}
 
-                <div className="relative flex items-center gap-4">
+                <header className="relative flex items-center gap-4">
                   {/* Play/Pause Button */}
                   <button
                     type="button"
                     onClick={() => handleToggleStatus(strategy)}
+                    aria-label={isRunning ? '전략 일시정지' : '전략 실행'}
                     className={clsx(
                       'relative w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300',
                       'border backdrop-blur-lg',
@@ -179,16 +184,16 @@ export function StrategiesContent() {
                   >
                     {isRunning ? (
                       <>
-                        <PauseIcon className="w-4 h-4" />
-                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
+                        <PauseIcon className="w-4 h-4" aria-hidden="true" />
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" aria-hidden="true" />
                       </>
                     ) : (
-                      <PlayIcon className="w-4 h-4" />
+                      <PlayIcon className="w-4 h-4" aria-hidden="true" />
                     )}
                   </button>
 
                   {/* Strategy Info */}
-                  <div>
+                  <div role="group" aria-label="전략 정보">
                     <div className="flex items-center gap-2 mb-1">
                       <Link
                         href={`/dashboard/strategies/${strategy.id}`}
@@ -221,10 +226,10 @@ export function StrategiesContent() {
                       <span>{formatDate(strategy.updatedAt)}</span>
                     </div>
                   </div>
-                </div>
+                </header>
 
                 {/* Performance & Actions */}
-                <div className="flex items-center gap-4">
+                <footer className="flex items-center gap-4">
                   {strategy.performance && (
                     <div className="text-right">
                       <div className={clsx(
@@ -239,33 +244,36 @@ export function StrategiesContent() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <nav className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" aria-label="전략 액션">
                     <Link
                       href={`/dashboard/backtest?strategy=${strategy.id}`}
+                      aria-label="백테스트 실행"
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-colors"
                     >
-                      <ChartBarIcon className="w-4 h-4" />
+                      <ChartBarIcon className="w-4 h-4" aria-hidden="true" />
                     </Link>
                     <button
                       type="button"
                       onClick={() => handleDelete(strategy.id)}
+                      aria-label="전략 삭제"
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                     >
-                      <TrashIcon className="w-4 h-4" />
+                      <TrashIcon className="w-4 h-4" aria-hidden="true" />
                     </button>
                     <button
                       type="button"
+                      aria-label="더 보기"
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/[0.06] transition-colors"
                     >
-                      <EllipsisHorizontalIcon className="w-5 h-5" />
+                      <EllipsisHorizontalIcon className="w-5 h-5" aria-hidden="true" />
                     </button>
-                  </div>
-                </div>
-              </div>
+                  </nav>
+                </footer>
+              </article>
             )
           })}
-        </div>
+        </section>
       )}
-    </div>
+    </article>
   )
 }

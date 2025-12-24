@@ -67,18 +67,18 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-label="성과 지표 로딩 중">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="skeleton-shimmer h-24 rounded-xl" />
+          <div key={i} className="skeleton-shimmer h-24 rounded-xl" role="status" aria-label="로딩 중" />
         ))}
-      </div>
+      </section>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <section className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-label="성과 지표">
       {metrics.map((metric, index) => (
-        <div
+        <article
           key={metric.label}
           className="animate-fade-in"
           style={{ animationDelay: `${index * 100}ms` }}
@@ -93,8 +93,8 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
             variant={metric.variant}
             size="sm"
           />
-        </div>
+        </article>
       ))}
-    </div>
+    </section>
   )
 })

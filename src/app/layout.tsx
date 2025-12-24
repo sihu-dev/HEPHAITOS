@@ -74,11 +74,11 @@ export default function RootLayout({
         <div className="noise-overlay" aria-hidden="true" />
 
         {/* Main Content */}
-        <div className="relative z-10 min-h-screen">
+        <main id="main-content" className="relative z-10 min-h-screen">
           <Providers>
             {children}
           </Providers>
-        </div>
+        </main>
       </body>
     </html>
   )
