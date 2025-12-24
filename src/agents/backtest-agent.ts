@@ -43,12 +43,40 @@ import {
 } from '@hephaitos/utils';
 
 /**
- * 에이전트 설정
+ * 백테스트 에이전트 설정
+ *
+ * @description 백테스트 실행 중 이벤트와 진행 상황을 모니터링하기 위한 콜백 설정
  */
 export interface IBacktestAgentConfig {
-  /** 진행 상황 콜백 */
+  /**
+   * 진행 상황 콜백
+   *
+   * @description 백테스트 진행률을 추적하기 위한 콜백 함수
+   * @param progress - 진행률 (0-100)
+   * @param message - 현재 단계 메시지
+   *
+   * @example
+   * ```typescript
+   * onProgress: (progress, message) => {
+   *   console.log(`${progress}%: ${message}`);
+   * }
+   * ```
+   */
   onProgress?: (progress: number, message: string) => void;
-  /** 거래 발생 콜백 */
+
+  /**
+   * 거래 발생 콜백
+   *
+   * @description 백테스트 중 거래가 발생할 때마다 호출되는 콜백 함수
+   * @param trade - 완료된 라운드 트립 거래 정보
+   *
+   * @example
+   * ```typescript
+   * onTrade: (trade) => {
+   *   console.log(`거래 완료: ${trade.symbol}, 손익: ${trade.netPnL}`);
+   * }
+   * ```
+   */
   onTrade?: (trade: IRoundTrip) => void;
 }
 
@@ -61,6 +89,30 @@ export class BacktestAgent {
   private resultRepo: IBacktestResultRepository;
   private config: IBacktestAgentConfig;
 
+  /**
+   * BacktestAgent 생성자
+   *
+   * @description 백테스트 에이전트를 초기화합니다. 가격 데이터, 전략, 결과 저장소를 주입받아
+   * 트레이딩 전략의 과거 성과를 시뮬레이션합니다.
+   *
+   * @param priceDataService - 과거 가격 데이터 제공 서비스
+   * @param strategyRepo - 전략 저장소
+   * @param resultRepo - 백테스트 결과 저장소
+   * @param config - 백테스트 설정 (진행 상황 및 거래 콜백)
+   *
+   * @example
+   * ```typescript
+   * const agent = new BacktestAgent(
+   *   priceDataService,
+   *   strategyRepo,
+   *   resultRepo,
+   *   {
+   *     onProgress: (p, msg) => console.log(`${p}%: ${msg}`),
+   *     onTrade: (trade) => console.log('거래:', trade.netPnL)
+   *   }
+   * );
+   * ```
+   */
   constructor(
     priceDataService: IPriceDataService,
     strategyRepo: IStrategyRepository,
@@ -75,6 +127,37 @@ export class BacktestAgent {
 
   /**
    * 백테스트 실행
+   *
+   * @description 주어진 설정으로 백테스트를 실행합니다. 전략을 로드하고 과거 데이터로 시뮬레이션하여
+   * 성과 지표를 계산합니다. 22개의 성과 지표를 포함한 상세한 결과를 반환합니다.
+   *
+   * @param backtestConfig - 백테스트 설정 (전략 ID, 기간, 초기 자본, 수수료 등)
+   * @returns 백테스트 결과 (거래 내역, 자산 곡선, 성과 지표 등)
+   *
+   * @throws {Error} 전략을 찾을 수 없을 때
+   * @throws {Error} 가격 데이터 로드 실패 시
+   * @throws {Error} 충분한 데이터가 없을 때 (최소 50개 캔들 필요)
+   *
+   * @example
+   * ```typescript
+   * const result = await agent.runBacktest({
+   *   id: 'bt-1',
+   *   strategyId: 'strat-123',
+   *   startDate: '2023-01-01',
+   *   endDate: '2023-12-31',
+   *   timeframe: '1h',
+   *   initialCapital: 10000,
+   *   feeRate: 0.1,
+   *   slippage: 0.05,
+   *   symbols: ['BTC/USD']
+   * });
+   *
+   * if (result.success) {
+   *   console.log('총 수익률:', result.data.metrics.totalReturn);
+   *   console.log('샤프 비율:', result.data.metrics.sharpeRatio);
+   *   console.log('거래 수:', result.data.trades.length);
+   * }
+   * ```
    */
   async runBacktest(
     backtestConfig: IBacktestConfig
@@ -548,6 +631,31 @@ export class BacktestAgent {
 
   /**
    * 결과 분석 (인사이트 생성)
+   *
+   * @description 백테스트 결과를 분석하여 주요 인사이트를 생성합니다.
+   * 수익률, 샤프 비율, 최대 낙폭, 승률, 손익비 등을 자동으로 평가합니다.
+   *
+   * @param resultId - 분석할 백테스트 결과 ID
+   * @returns 인사이트 목록
+   *
+   * @throws {Error} 결과를 찾을 수 없을 때
+   *
+   * @example
+   * ```typescript
+   * const analysis = await agent.analyzeResult('bt-result-123');
+   *
+   * if (analysis.success) {
+   *   analysis.data.insights.forEach(insight => {
+   *     console.log(insight);
+   *   });
+   * }
+   *
+   * // 출력 예시:
+   * // ✅ 총 수익률 25.30% 달성
+   * // ✅ 샤프 비율 1.85 - 양호한 리스크 대비 수익
+   * // ✅ 승률 58.5%
+   * // ⚠️ 최대 낙폭 22.10% - 높은 리스크
+   * ```
    */
   async analyzeResult(
     resultId: string
@@ -624,6 +732,26 @@ export class BacktestAgent {
 
   /**
    * 전략 비교
+   *
+   * @description 여러 백테스트 결과를 비교하여 최적의 전략을 찾습니다.
+   * 수익률, 샤프 비율, 최대 낙폭 등 주요 지표를 나란히 비교합니다.
+   *
+   * @param backtestIds - 비교할 백테스트 결과 ID 목록
+   * @returns 전략 비교 결과
+   *
+   * @example
+   * ```typescript
+   * const comparison = await agent.compareStrategies([
+   *   'bt-result-1',
+   *   'bt-result-2',
+   *   'bt-result-3'
+   * ]);
+   *
+   * if (comparison.success) {
+   *   console.log('최고 수익률:', comparison.data.bestByReturn);
+   *   console.log('최고 샤프:', comparison.data.bestBySharpe);
+   * }
+   * ```
    */
   async compareStrategies(
     backtestIds: string[]
@@ -633,6 +761,23 @@ export class BacktestAgent {
 
   /**
    * 최근 백테스트 목록 조회
+   *
+   * @description 최근에 실행된 백테스트 결과 목록을 조회합니다.
+   * 요약 정보만 포함되어 빠르게 조회할 수 있습니다.
+   *
+   * @param limit - 조회할 최대 개수 (기본값: 저장소 기본값)
+   * @returns 백테스트 요약 목록
+   *
+   * @example
+   * ```typescript
+   * const recent = await agent.getRecentResults(10);
+   *
+   * if (recent.success) {
+   *   recent.data.forEach(summary => {
+   *     console.log(`${summary.strategyName}: ${summary.totalReturn}%`);
+   *   });
+   * }
+   * ```
    */
   async getRecentResults(limit?: number): Promise<IResult<IBacktestSummary[]>> {
     return this.resultRepo.listRecent(limit);
@@ -641,6 +786,31 @@ export class BacktestAgent {
 
 /**
  * 백테스트 에이전트 팩토리
+ *
+ * @description BacktestAgent 인스턴스를 생성하는 팩토리 함수입니다.
+ *
+ * @param priceDataService - 과거 가격 데이터 제공 서비스
+ * @param strategyRepo - 전략 저장소
+ * @param resultRepo - 백테스트 결과 저장소
+ * @param config - 백테스트 설정 (선택사항)
+ * @returns BacktestAgent 인스턴스
+ *
+ * @example
+ * ```typescript
+ * const agent = createBacktestAgent(
+ *   priceDataService,
+ *   strategyRepository,
+ *   resultRepository,
+ *   {
+ *     onProgress: (progress, msg) => {
+ *       console.log(`백테스트 진행: ${progress}% - ${msg}`);
+ *     },
+ *     onTrade: (trade) => {
+ *       console.log(`거래 체결: ${trade.symbol} ${trade.netPnL > 0 ? '이익' : '손실'}`);
+ *     }
+ *   }
+ * );
+ * ```
  */
 export function createBacktestAgent(
   priceDataService: IPriceDataService,

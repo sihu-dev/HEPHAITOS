@@ -91,6 +91,33 @@ export class KISBroker implements UnifiedBroker {
   // Authentication
   // ============================================
 
+  /**
+   * 한국투자증권 API 연결
+   *
+   * @description OAuth 토큰을 발급받고 WebSocket 승인키를 획득하여 연결을 수립합니다.
+   * 연결 확인을 위해 잔고 조회를 수행합니다.
+   *
+   * @param credentials - API 인증 정보 (apiKey, apiSecret, accountNumber)
+   * @returns 연결 결과 (성공 여부, 메시지, 잔고 정보)
+   *
+   * @throws {Error} 토큰 발급 실패 시
+   * @throws {Error} 계좌 조회 실패 시
+   *
+   * @example
+   * ```typescript
+   * const result = await broker.connect({
+   *   apiKey: 'your-app-key',
+   *   apiSecret: 'your-app-secret',
+   *   accountNumber: '12345678-01',
+   *   accountType: 'real'
+   * });
+   *
+   * if (result.success) {
+   *   console.log('연결 성공!');
+   *   console.log('잔고:', result.balance);
+   * }
+   * ```
+   */
   async connect(credentials: BrokerCredentials): Promise<ConnectionResult> {
     try {
       this.credentials = credentials
@@ -140,6 +167,18 @@ export class KISBroker implements UnifiedBroker {
     }
   }
 
+  /**
+   * 연결 해제
+   *
+   * @description 토큰을 무효화하고 WebSocket 연결을 종료합니다.
+   * 모든 구독과 콜백을 정리합니다.
+   *
+   * @example
+   * ```typescript
+   * await broker.disconnect();
+   * console.log('연결이 종료되었습니다');
+   * ```
+   */
   async disconnect(): Promise<void> {
     this.accessToken = null
     this.tokenExpiry = null
@@ -153,10 +192,43 @@ export class KISBroker implements UnifiedBroker {
     this.orderCallbacks.clear()
   }
 
+  /**
+   * 연결 상태 확인
+   *
+   * @description 현재 연결되어 있고 토큰이 유효한지 확인합니다.
+   *
+   * @returns 연결 상태 (true: 연결됨, false: 연결 끊김 또는 토큰 만료)
+   *
+   * @example
+   * ```typescript
+   * if (broker.isConnected()) {
+   *   console.log('API 사용 가능');
+   * } else {
+   *   await broker.connect(credentials);
+   * }
+   * ```
+   */
   isConnected(): boolean {
     return this.accessToken !== null && this.tokenExpiry !== null && new Date() < this.tokenExpiry
   }
 
+  /**
+   * 토큰 갱신
+   *
+   * @description 만료된 토큰을 갱신합니다. 기존 인증 정보로 재연결을 시도합니다.
+   *
+   * @returns 갱신 성공 여부
+   *
+   * @example
+   * ```typescript
+   * if (!broker.isConnected()) {
+   *   const refreshed = await broker.refreshToken();
+   *   if (!refreshed) {
+   *     console.error('토큰 갱신 실패');
+   *   }
+   * }
+   * ```
+   */
   async refreshToken(): Promise<boolean> {
     if (!this.credentials) return false
     const result = await this.connect(this.credentials)
@@ -367,6 +439,26 @@ export class KISBroker implements UnifiedBroker {
   // Account Queries
   // ============================================
 
+  /**
+   * 계좌 잔고 조회
+   *
+   * @description 현재 계좌의 총 자산, 예수금, 주식 평가액, 손익 등을 조회합니다.
+   *
+   * @returns 잔고 정보 (총자산, 현금, 주식 가치, 손익률 등)
+   *
+   * @throws {Error} 연결되지 않았을 때
+   * @throws {Error} API 요청 실패 시
+   *
+   * @example
+   * ```typescript
+   * const balance = await broker.getBalance();
+   *
+   * console.log('총 자산:', balance.totalAssets.toLocaleString(), 'KRW');
+   * console.log('예수금:', balance.cash.toLocaleString(), 'KRW');
+   * console.log('주식 평가액:', balance.stocksValue.toLocaleString(), 'KRW');
+   * console.log('수익률:', balance.profitRate.toFixed(2), '%');
+   * ```
+   */
   async getBalance(): Promise<Balance> {
     const [accountNo, productCode] = this.getAccountParts()
 
@@ -406,6 +498,28 @@ export class KISBroker implements UnifiedBroker {
     }
   }
 
+  /**
+   * 보유 종목 조회
+   *
+   * @description 현재 보유 중인 모든 주식 종목과 수량, 평가액, 손익을 조회합니다.
+   *
+   * @returns 보유 종목 목록
+   *
+   * @throws {Error} 연결되지 않았을 때
+   * @throws {Error} API 요청 실패 시
+   *
+   * @example
+   * ```typescript
+   * const holdings = await broker.getHoldings();
+   *
+   * holdings.forEach(holding => {
+   *   console.log(`${holding.stockName}(${holding.stockCode})`);
+   *   console.log(`  수량: ${holding.quantity}주`);
+   *   console.log(`  평가액: ${holding.value.toLocaleString()}원`);
+   *   console.log(`  손익: ${holding.profit.toLocaleString()}원 (${holding.profitRate}%)`);
+   * });
+   * ```
+   */
   async getHoldings(): Promise<Holding[]> {
     const [accountNo, productCode] = this.getAccountParts()
 
@@ -625,6 +739,41 @@ export class KISBroker implements UnifiedBroker {
   // Order Execution
   // ============================================
 
+  /**
+   * 주문 제출
+   *
+   * @description 매수 또는 매도 주문을 제출합니다. 지정가/시장가 주문을 지원합니다.
+   *
+   * @param request - 주문 요청 정보 (종목코드, 매수/매도, 수량, 가격 등)
+   * @returns 주문 결과 (성공 여부, 주문 번호)
+   *
+   * @throws {Error} 연결되지 않았을 때
+   * @throws {Error} 주문 실패 시
+   *
+   * @example
+   * ```typescript
+   * // 지정가 매수 주문
+   * const buyResult = await broker.submitOrder({
+   *   stockCode: '005930',  // 삼성전자
+   *   side: 'buy',
+   *   type: 'limit',
+   *   quantity: 10,
+   *   price: 70000
+   * });
+   *
+   * if (buyResult.success) {
+   *   console.log('주문 번호:', buyResult.orderId);
+   * }
+   *
+   * // 시장가 매도 주문
+   * const sellResult = await broker.submitOrder({
+   *   stockCode: '005930',
+   *   side: 'sell',
+   *   type: 'market',
+   *   quantity: 5
+   * });
+   * ```
+   */
   async submitOrder(request: OrderRequest): Promise<OrderResult> {
     const [accountNo, productCode] = this.getAccountParts()
     const isRealTrading = this.credentials?.accountType !== 'paper'
@@ -798,6 +947,25 @@ export class KISBroker implements UnifiedBroker {
   // Convenience Methods
   // ============================================
 
+  /**
+   * 매수 주문 (간편 메서드)
+   *
+   * @description 주식을 매수합니다. 가격을 지정하면 지정가, 생략하면 시장가로 주문합니다.
+   *
+   * @param stockCode - 종목 코드
+   * @param quantity - 수량
+   * @param price - 주문 가격 (선택사항, 미지정 시 시장가)
+   * @returns 주문 결과
+   *
+   * @example
+   * ```typescript
+   * // 시장가 매수
+   * await broker.buy('005930', 10);
+   *
+   * // 지정가 매수
+   * await broker.buy('005930', 10, 70000);
+   * ```
+   */
   async buy(stockCode: string, quantity: number, price?: number): Promise<OrderResult> {
     return this.submitOrder({
       stockCode,
@@ -808,6 +976,25 @@ export class KISBroker implements UnifiedBroker {
     })
   }
 
+  /**
+   * 매도 주문 (간편 메서드)
+   *
+   * @description 주식을 매도합니다. 가격을 지정하면 지정가, 생략하면 시장가로 주문합니다.
+   *
+   * @param stockCode - 종목 코드
+   * @param quantity - 수량
+   * @param price - 주문 가격 (선택사항, 미지정 시 시장가)
+   * @returns 주문 결과
+   *
+   * @example
+   * ```typescript
+   * // 시장가 매도
+   * await broker.sell('005930', 10);
+   *
+   * // 지정가 매도
+   * await broker.sell('005930', 10, 72000);
+   * ```
+   */
   async sell(stockCode: string, quantity: number, price?: number): Promise<OrderResult> {
     return this.submitOrder({
       stockCode,
@@ -836,6 +1023,28 @@ export class KISBroker implements UnifiedBroker {
   // Real-time Data Subscriptions
   // ============================================
 
+  /**
+   * 실시간 시세 구독
+   *
+   * @description 특정 종목의 실시간 호가를 구독합니다. WebSocket을 통해 체결가가 변경될 때마다
+   * 콜백이 호출됩니다.
+   *
+   * @param stockCode - 구독할 종목 코드
+   * @param callback - 시세 수신 시 호출될 콜백 함수
+   * @returns 구독 해제 함수
+   *
+   * @example
+   * ```typescript
+   * const unsubscribe = broker.subscribeQuote('005930', (quote) => {
+   *   console.log('삼성전자 현재가:', quote.currentPrice);
+   *   console.log('전일대비:', quote.change, '(', quote.changeRate, '%)');
+   *   console.log('거래량:', quote.volume);
+   * });
+   *
+   * // 나중에 구독 해제
+   * unsubscribe();
+   * ```
+   */
   subscribeQuote(stockCode: string, callback: QuoteCallback): () => void {
     // 콜백 등록
     if (!this.quoteCallbacks.has(stockCode)) {
@@ -896,6 +1105,27 @@ export class KISBroker implements UnifiedBroker {
   // Market Data
   // ============================================
 
+  /**
+   * 현재 시세 조회
+   *
+   * @description 종목의 현재 시세 정보를 조회합니다. (현재가, 시고저, 거래량 등)
+   *
+   * @param stockCode - 조회할 종목 코드
+   * @returns 시세 정보
+   *
+   * @throws {Error} 연결되지 않았을 때
+   * @throws {Error} API 요청 실패 시
+   *
+   * @example
+   * ```typescript
+   * const quote = await broker.getQuote('005930');
+   *
+   * console.log('종목명:', quote.stockName);
+   * console.log('현재가:', quote.currentPrice.toLocaleString(), '원');
+   * console.log('시가:', quote.open, '고가:', quote.high, '저가:', quote.low);
+   * console.log('거래량:', quote.volume.toLocaleString(), '주');
+   * ```
+   */
   async getQuote(stockCode: string): Promise<Quote> {
     interface KISQuoteResponse {
       output: {
@@ -934,6 +1164,27 @@ export class KISBroker implements UnifiedBroker {
     }
   }
 
+  /**
+   * 종목 검색
+   *
+   * @description 종목 코드 또는 종목명으로 검색하여 관련 종목 목록을 반환합니다.
+   * API 실패 시 주요 종목 데이터베이스를 사용합니다.
+   *
+   * @param keyword - 검색 키워드 (종목 코드 또는 종목명)
+   * @returns 검색 결과 (최대 20개)
+   *
+   * @example
+   * ```typescript
+   * // 종목명으로 검색
+   * const results = await broker.searchStock('삼성');
+   * results.forEach(stock => {
+   *   console.log(`${stock.name}(${stock.code}) - ${stock.market}`);
+   * });
+   *
+   * // 종목 코드로 검색
+   * const samsung = await broker.searchStock('005930');
+   * ```
+   */
   async searchStock(keyword: string): Promise<Array<{ code: string; name: string; market: string }>> {
     interface KISSearchResponse {
       rt_cd: string
@@ -1067,6 +1318,25 @@ export class KISBroker implements UnifiedBroker {
 
 /**
  * KIS Broker 팩토리 함수
+ *
+ * @description 한국투자증권 브로커 인스턴스를 생성합니다.
+ *
+ * @returns KISBroker 인스턴스
+ *
+ * @example
+ * ```typescript
+ * const broker = createKISBroker();
+ *
+ * await broker.connect({
+ *   apiKey: process.env.KIS_APP_KEY!,
+ *   apiSecret: process.env.KIS_APP_SECRET!,
+ *   accountNumber: process.env.KIS_ACCOUNT!,
+ *   accountType: 'real'
+ * });
+ *
+ * const balance = await broker.getBalance();
+ * console.log('계좌 잔고:', balance);
+ * ```
  */
 export function createKISBroker(): KISBroker {
   return new KISBroker()

@@ -47,8 +47,8 @@ const nextConfig = {
   },
   // TypeScript strict mode
   typescript: {
-    // Ignore build errors for MVP (remove in production)
-    ignoreBuildErrors: true,
+    // Strict build errors enabled for type safety
+    ignoreBuildErrors: false,
   },
   // ESLint - ignore during builds to avoid circular reference issues
   eslint: {

@@ -88,7 +88,15 @@ export const GET = withApiMiddleware(
       investedValue: portfolioData.invested_value || mockPortfolio.investedValue,
       totalPnl: portfolioData.total_pnl || mockPortfolio.totalPnl,
       totalPnlPercent: portfolioData.total_pnl_percent || mockPortfolio.totalPnlPercent,
-      positions: positions?.map(p => ({
+      positions: positions?.map((p: {
+        symbol: string
+        amount: number
+        avg_price: number
+        current_price: number
+        value: number
+        pnl: number
+        pnl_percent: number
+      }) => ({
         symbol: p.symbol,
         amount: p.amount,
         avgPrice: p.avg_price,

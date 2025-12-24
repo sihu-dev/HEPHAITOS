@@ -201,6 +201,32 @@ export class OrderExecutorAgent {
   private dailyTradeCount: number = 0;
   private dailyStartDate: string = '';
 
+  /**
+   * OrderExecutorAgent 생성자
+   *
+   * @description 주문 실행 에이전트를 초기화합니다. 시뮬레이션, 페이퍼, 실거래 모드를 지원하며,
+   * 리스크 관리와 포지션 추적을 담당합니다.
+   *
+   * @param orderRepo - 주문 저장소 (주문 생성, 조회, 업데이트)
+   * @param positionRepo - 포지션 저장소 (포지션 추적 및 관리)
+   * @param config - 실행 설정 (선택사항)
+   *
+   * @example
+   * ```typescript
+   * const executor = new OrderExecutorAgent(
+   *   orderRepository,
+   *   positionRepository,
+   *   {
+   *     mode: 'simulation',
+   *     riskConfig: {
+   *       maxOpenPositions: 5,
+   *       dailyTradeLimit: 20,
+   *       accountEquity: 10000
+   *     }
+   *   }
+   * );
+   * ```
+   */
   constructor(
     orderRepo: IOrderRepository,
     positionRepo: IPositionRepository,
@@ -226,7 +252,32 @@ export class OrderExecutorAgent {
 
   /**
    * 주문 제출
-   * P1 FIX: Mutex로 동일 심볼 동시 주문 방지
+   *
+   * @description 새 주문을 제출하고 검증 후 실행합니다. 시뮬레이션 모드에서는 즉시 체결되며,
+   * 리스크 한도와 포지션 제한을 검증합니다. Mutex를 사용하여 동일 심볼에 대한 동시 주문을 방지합니다.
+   *
+   * @param request - 주문 요청 정보 (심볼, 방향, 수량, 가격 등)
+   * @returns 주문 제출 결과 (성공 여부, 주문 객체, 포지션 정보)
+   *
+   * @throws {Error} 일일 거래 한도 초과 시
+   * @throws {Error} 일일 손실 한도 도달 시
+   * @throws {Error} 리스크 검증 실패 시
+   *
+   * @example
+   * ```typescript
+   * const result = await executor.submitOrder({
+   *   symbol: 'AAPL',
+   *   side: 'buy',
+   *   type: 'limit',
+   *   quantity: 100,
+   *   price: 150.0
+   * });
+   *
+   * if (result.success) {
+   *   console.log('주문 ID:', result.order?.id);
+   *   console.log('포지션:', result.position);
+   * }
+   * ```
    */
   async submitOrder(request: IOrderRequest): Promise<IOrderSubmitResult> {
     // P1 FIX: 심볼 잠금 획득
@@ -316,6 +367,19 @@ export class OrderExecutorAgent {
 
   /**
    * 주문 취소
+   *
+   * @description 대기 중인 주문을 취소합니다. 이미 체결되었거나 취소된 주문은 취소할 수 없습니다.
+   *
+   * @param orderId - 취소할 주문 ID
+   * @returns 취소 성공 여부 (true: 성공, false: 주문을 찾을 수 없거나 이미 체결/취소됨)
+   *
+   * @example
+   * ```typescript
+   * const cancelled = await executor.cancelOrder('ord-123456');
+   * if (cancelled) {
+   *   console.log('주문이 취소되었습니다');
+   * }
+   * ```
    */
   async cancelOrder(orderId: string): Promise<boolean> {
     const order = await this.orderRepo.getOrderById(orderId);
@@ -335,6 +399,20 @@ export class OrderExecutorAgent {
 
   /**
    * 미체결 주문 조회
+   *
+   * @description 현재 대기 중인 모든 주문을 조회합니다. 심볼을 지정하면 해당 심볼의 주문만 반환합니다.
+   *
+   * @param symbol - 필터링할 심볼 (선택사항, 미지정 시 모든 심볼)
+   * @returns 미체결 주문 목록
+   *
+   * @example
+   * ```typescript
+   * // 모든 미체결 주문 조회
+   * const allOrders = await executor.getOpenOrders();
+   *
+   * // 특정 심볼의 미체결 주문만 조회
+   * const btcOrders = await executor.getOpenOrders('BTC/USD');
+   * ```
    */
   async getOpenOrders(symbol?: string): Promise<IOrderWithMeta[]> {
     return this.orderRepo.getOpenOrders(symbol);
@@ -346,6 +424,20 @@ export class OrderExecutorAgent {
 
   /**
    * 포지션 조회
+   *
+   * @description 특정 심볼의 현재 포지션을 조회합니다.
+   *
+   * @param symbol - 조회할 심볼
+   * @returns 포지션 정보 (없으면 null)
+   *
+   * @example
+   * ```typescript
+   * const position = await executor.getPosition('ETH/USD');
+   * if (position) {
+   *   console.log('진입가:', position.entryPrice);
+   *   console.log('현재 손익:', position.unrealizedPnL);
+   * }
+   * ```
    */
   async getPosition(symbol: string): Promise<IPositionWithMeta | null> {
     return this.positionRepo.getPositionBySymbol(symbol);
@@ -353,6 +445,18 @@ export class OrderExecutorAgent {
 
   /**
    * 열린 포지션 목록
+   *
+   * @description 현재 열려있는 모든 포지션을 조회합니다.
+   *
+   * @returns 열린 포지션 목록
+   *
+   * @example
+   * ```typescript
+   * const positions = await executor.getOpenPositions();
+   * positions.forEach(pos => {
+   *   console.log(`${pos.symbol}: ${pos.unrealizedPnL} USD`);
+   * });
+   * ```
    */
   async getOpenPositions(): Promise<IPositionWithMeta[]> {
     return this.positionRepo.getOpenPositions();
@@ -360,7 +464,25 @@ export class OrderExecutorAgent {
 
   /**
    * 포지션 청산
-   * P1 FIX: Mutex로 동일 심볼 동시 청산 방지
+   *
+   * @description 특정 포지션을 청산합니다. 슬리피지가 적용되며, Mutex를 사용하여 동일 심볼에 대한
+   * 동시 청산을 방지합니다. 청산 후 실현 손익이 일일 PnL에 반영됩니다.
+   *
+   * @param positionId - 청산할 포지션 ID
+   * @param exitPrice - 청산 가격
+   * @returns 청산 결과 (성공 여부, 포지션 정보, 실현 손익)
+   *
+   * @throws {Error} 포지션을 찾을 수 없을 때
+   * @throws {Error} 이미 청산된 포지션일 때
+   *
+   * @example
+   * ```typescript
+   * const result = await executor.closePosition('pos-123', 155.50);
+   * if (result.success) {
+   *   console.log('실현 손익:', result.realizedPnL);
+   *   console.log('청산 완료:', result.position);
+   * }
+   * ```
    */
   async closePosition(
     positionId: string,
@@ -426,6 +548,25 @@ export class OrderExecutorAgent {
 
   /**
    * 모든 포지션 청산
+   *
+   * @description 열려있는 모든 포지션을 일괄 청산합니다. 각 심볼에 대해 현재 가격이 필요합니다.
+   *
+   * @param currentPrices - 각 심볼의 현재 가격 (심볼을 키로 하는 객체)
+   * @returns 각 포지션의 청산 결과 배열
+   *
+   * @example
+   * ```typescript
+   * const results = await executor.closeAllPositions({
+   *   'BTC/USD': 42000,
+   *   'ETH/USD': 2200,
+   *   'AAPL': 150.5
+   * });
+   *
+   * const totalPnL = results
+   *   .filter(r => r.success)
+   *   .reduce((sum, r) => sum + (r.realizedPnL || 0), 0);
+   * console.log('총 실현 손익:', totalPnL);
+   * ```
    */
   async closeAllPositions(
     currentPrices: Record<string, number>
@@ -446,6 +587,20 @@ export class OrderExecutorAgent {
 
   /**
    * 가격 업데이트 (실시간 PnL 계산용)
+   *
+   * @description 심볼의 현재 가격을 업데이트하여 실시간 미실현 손익을 계산합니다.
+   * 추적 손절(trailing stop)이 설정된 경우 자동으로 손절가를 조정합니다.
+   *
+   * @param symbol - 업데이트할 심볼
+   * @param currentPrice - 현재 가격
+   *
+   * @example
+   * ```typescript
+   * // 실시간 시세 수신 시 호출
+   * websocket.on('price', (data) => {
+   *   await executor.updatePrice(data.symbol, data.price);
+   * });
+   * ```
    */
   async updatePrice(symbol: string, currentPrice: number): Promise<void> {
     await this.positionRepo.updateCurrentPrice(symbol, currentPrice);
@@ -474,6 +629,24 @@ export class OrderExecutorAgent {
 
   /**
    * 리스크 상태 조회
+   *
+   * @description 현재 리스크 상태를 조회합니다. 일일 손익, 거래 횟수, 포지션 수 등을 확인하고
+   * 거래 가능 여부를 판단합니다.
+   *
+   * @returns 리스크 상태 정보 (자산, 손익, 한도 도달 여부, 거래 가능 여부 등)
+   *
+   * @example
+   * ```typescript
+   * const risk = await executor.getRiskStatus();
+   *
+   * if (!risk.canTrade) {
+   *   console.log('거래 불가:', risk.blockReason);
+   * }
+   *
+   * console.log('현재 자산:', risk.currentEquity);
+   * console.log('일일 손익:', risk.dailyPnL);
+   * console.log('일일 거래 수:', risk.dailyTradeCount);
+   * ```
    */
   async getRiskStatus(): Promise<IRiskStatus> {
     this.checkDailyReset();
@@ -526,6 +699,20 @@ export class OrderExecutorAgent {
 
   /**
    * 실행 통계 조회
+   *
+   * @description 주문 실행 통계를 조회합니다. 총 주문 수, 체결률, 슬리피지, 수수료 등의 정보를 제공합니다.
+   *
+   * @returns 실행 통계 (주문 수, 체결률, 평균 슬리피지, 레이턴시 등)
+   *
+   * @example
+   * ```typescript
+   * const stats = await executor.getExecutionStats();
+   *
+   * console.log('총 주문:', stats.totalOrders);
+   * console.log('체결률:', stats.fillRate.toFixed(2) + '%');
+   * console.log('평균 슬리피지:', stats.avgSlippage + '%');
+   * console.log('평균 레이턴시:', stats.avgLatencyMs + 'ms');
+   * ```
    */
   async getExecutionStats(): Promise<IExecutionStats> {
     const counts = await this.orderRepo.countOrdersByStatus();
@@ -740,6 +927,29 @@ export class OrderExecutorAgent {
 
 /**
  * 주문 실행 에이전트 팩토리
+ *
+ * @description OrderExecutorAgent 인스턴스를 생성하는 팩토리 함수입니다.
+ *
+ * @param orderRepo - 주문 저장소
+ * @param positionRepo - 포지션 저장소
+ * @param config - 실행 설정 (선택사항)
+ * @returns OrderExecutorAgent 인스턴스
+ *
+ * @example
+ * ```typescript
+ * const executor = createOrderExecutorAgent(
+ *   orderRepository,
+ *   positionRepository,
+ *   {
+ *     mode: 'paper',
+ *     riskConfig: {
+ *       maxOpenPositions: 3,
+ *       dailyTradeLimit: 10,
+ *       accountEquity: 5000
+ *     }
+ *   }
+ * );
+ * ```
  */
 export function createOrderExecutorAgent(
   orderRepo: IOrderRepository,

@@ -21,16 +21,13 @@ import {
 describe('calculateAssetPnL', () => {
   it('should calculate profit for an asset', () => {
     const asset: IAsset = {
-      id: '1',
-      user_id: 'user1',
-      exchange_id: 'exchange1',
       symbol: 'AAPL',
+      name: 'Apple Inc.',
       amount: 10,
+      price_usd: 110,
       value_usd: 1100,
+      change_24h: 0,
       avg_buy_price: 100,
-      last_synced_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     const result = calculateAssetPnL(asset);
@@ -42,16 +39,13 @@ describe('calculateAssetPnL', () => {
 
   it('should calculate loss for an asset', () => {
     const asset: IAsset = {
-      id: '1',
-      user_id: 'user1',
-      exchange_id: 'exchange1',
       symbol: 'AAPL',
+      name: 'Apple Inc.',
       amount: 10,
+      price_usd: 90,
       value_usd: 900,
+      change_24h: 0,
       avg_buy_price: 100,
-      last_synced_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     const result = calculateAssetPnL(asset);
@@ -63,16 +57,13 @@ describe('calculateAssetPnL', () => {
 
   it('should handle asset with no average buy price', () => {
     const asset: IAsset = {
-      id: '1',
-      user_id: 'user1',
-      exchange_id: 'exchange1',
       symbol: 'BTC',
+      name: 'Bitcoin',
       amount: 1,
+      price_usd: 50000,
       value_usd: 50000,
+      change_24h: 0,
       avg_buy_price: undefined,
-      last_synced_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     const result = calculateAssetPnL(asset);
@@ -84,16 +75,13 @@ describe('calculateAssetPnL', () => {
 
   it('should handle zero value asset', () => {
     const asset: IAsset = {
-      id: '1',
-      user_id: 'user1',
-      exchange_id: 'exchange1',
       symbol: 'DEAD',
+      name: 'Dead Coin',
       amount: 100,
+      price_usd: 0,
       value_usd: 0,
+      change_24h: -100,
       avg_buy_price: 10,
-      last_synced_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     const result = calculateAssetPnL(asset);
@@ -105,16 +93,13 @@ describe('calculateAssetPnL', () => {
 
   it('should handle fractional amounts', () => {
     const asset: IAsset = {
-      id: '1',
-      user_id: 'user1',
-      exchange_id: 'exchange1',
       symbol: 'ETH',
+      name: 'Ethereum',
       amount: 2.5,
+      price_usd: 2100,
       value_usd: 5250,
+      change_24h: 0,
       avg_buy_price: 2000,
-      last_synced_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     const result = calculateAssetPnL(asset);
@@ -133,28 +118,22 @@ describe('calculatePortfolioPnL', () => {
   it('should calculate total portfolio PnL', () => {
     const assets: IAsset[] = [
       {
-        id: '1',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'AAPL',
+        name: 'Apple Inc.',
         amount: 10,
+        price_usd: 110,
         value_usd: 1100,
+        change_24h: 0,
         avg_buy_price: 100,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
       {
-        id: '2',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'GOOGL',
+        name: 'Google',
         amount: 5,
+        price_usd: 180,
         value_usd: 900,
+        change_24h: 0,
         avg_buy_price: 200,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
     ];
 
@@ -168,28 +147,22 @@ describe('calculatePortfolioPnL', () => {
   it('should calculate portfolio profit', () => {
     const assets: IAsset[] = [
       {
-        id: '1',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'AAPL',
+        name: 'Apple Inc.',
         amount: 10,
+        price_usd: 120,
         value_usd: 1200,
+        change_24h: 0,
         avg_buy_price: 100,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
       {
-        id: '2',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'GOOGL',
+        name: 'Google',
         amount: 5,
+        price_usd: 220,
         value_usd: 1100,
+        change_24h: 0,
         avg_buy_price: 200,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
     ];
 
@@ -211,28 +184,22 @@ describe('calculatePortfolioPnL', () => {
   it('should skip assets without avg_buy_price in cost basis', () => {
     const assets: IAsset[] = [
       {
-        id: '1',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'AAPL',
+        name: 'Apple Inc.',
         amount: 10,
+        price_usd: 110,
         value_usd: 1100,
+        change_24h: 0,
         avg_buy_price: 100,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
       {
-        id: '2',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'AIRDROP',
+        name: 'Airdrop Token',
         amount: 100,
+        price_usd: 5,
         value_usd: 500,
+        change_24h: 0,
         avg_buy_price: undefined,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
     ];
 
@@ -246,28 +213,22 @@ describe('calculatePortfolioPnL', () => {
   it('should handle portfolio with losses', () => {
     const assets: IAsset[] = [
       {
-        id: '1',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'AAPL',
+        name: 'Apple Inc.',
         amount: 10,
+        price_usd: 80,
         value_usd: 800,
+        change_24h: 0,
         avg_buy_price: 100,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
       {
-        id: '2',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'GOOGL',
+        name: 'Google',
         amount: 5,
+        price_usd: 150,
         value_usd: 750,
+        change_24h: 0,
         avg_buy_price: 200,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
     ];
 
@@ -287,18 +248,18 @@ describe('calculateSnapshotReturn', () => {
   it('should calculate positive return between snapshots', () => {
     const startSnapshot: IPortfolioSnapshot = {
       id: '1',
-      user_id: 'user1',
+      portfolio_id: 'portfolio1',
       total_value_usd: 10000,
+      asset_breakdown: [],
       recorded_at: new Date('2024-01-01').toISOString(),
-      created_at: new Date().toISOString(),
     };
 
     const endSnapshot: IPortfolioSnapshot = {
       id: '2',
-      user_id: 'user1',
+      portfolio_id: 'portfolio1',
       total_value_usd: 11000,
+      asset_breakdown: [],
       recorded_at: new Date('2024-01-31').toISOString(),
-      created_at: new Date().toISOString(),
     };
 
     const result = calculateSnapshotReturn(startSnapshot, endSnapshot);
@@ -311,18 +272,18 @@ describe('calculateSnapshotReturn', () => {
   it('should calculate negative return between snapshots', () => {
     const startSnapshot: IPortfolioSnapshot = {
       id: '1',
-      user_id: 'user1',
+      portfolio_id: 'portfolio1',
       total_value_usd: 10000,
+      asset_breakdown: [],
       recorded_at: new Date('2024-01-01').toISOString(),
-      created_at: new Date().toISOString(),
     };
 
     const endSnapshot: IPortfolioSnapshot = {
       id: '2',
-      user_id: 'user1',
+      portfolio_id: 'portfolio1',
       total_value_usd: 9000,
+      asset_breakdown: [],
       recorded_at: new Date('2024-01-31').toISOString(),
-      created_at: new Date().toISOString(),
     };
 
     const result = calculateSnapshotReturn(startSnapshot, endSnapshot);
@@ -333,18 +294,18 @@ describe('calculateSnapshotReturn', () => {
   it('should handle zero return', () => {
     const startSnapshot: IPortfolioSnapshot = {
       id: '1',
-      user_id: 'user1',
+      portfolio_id: 'portfolio1',
       total_value_usd: 10000,
+      asset_breakdown: [],
       recorded_at: new Date('2024-01-01').toISOString(),
-      created_at: new Date().toISOString(),
     };
 
     const endSnapshot: IPortfolioSnapshot = {
       id: '2',
-      user_id: 'user1',
+      portfolio_id: 'portfolio1',
       total_value_usd: 10000,
+      asset_breakdown: [],
       recorded_at: new Date('2024-01-31').toISOString(),
-      created_at: new Date().toISOString(),
     };
 
     const result = calculateSnapshotReturn(startSnapshot, endSnapshot);
@@ -355,18 +316,18 @@ describe('calculateSnapshotReturn', () => {
   it('should handle zero start value', () => {
     const startSnapshot: IPortfolioSnapshot = {
       id: '1',
-      user_id: 'user1',
+      portfolio_id: 'portfolio1',
       total_value_usd: 0,
+      asset_breakdown: [],
       recorded_at: new Date('2024-01-01').toISOString(),
-      created_at: new Date().toISOString(),
     };
 
     const endSnapshot: IPortfolioSnapshot = {
       id: '2',
-      user_id: 'user1',
+      portfolio_id: 'portfolio1',
       total_value_usd: 10000,
+      asset_breakdown: [],
       recorded_at: new Date('2024-01-31').toISOString(),
-      created_at: new Date().toISOString(),
     };
 
     const result = calculateSnapshotReturn(startSnapshot, endSnapshot);
@@ -385,31 +346,31 @@ describe('calculatePeriodReturns', () => {
     const snapshots: IPortfolioSnapshot[] = [
       {
         id: '1',
-        user_id: 'user1',
+        portfolio_id: 'portfolio1',
         total_value_usd: 10000,
+        asset_breakdown: [],
         recorded_at: new Date('2024-01-01T00:00:00Z').toISOString(),
-        created_at: now.toISOString(),
       },
       {
         id: '2',
-        user_id: 'user1',
+        portfolio_id: 'portfolio1',
         total_value_usd: 10500,
+        asset_breakdown: [],
         recorded_at: new Date('2024-12-23T00:00:00Z').toISOString(),
-        created_at: now.toISOString(),
       },
       {
         id: '3',
-        user_id: 'user1',
+        portfolio_id: 'portfolio1',
         total_value_usd: 10800,
+        asset_breakdown: [],
         recorded_at: new Date('2024-12-17T00:00:00Z').toISOString(),
-        created_at: now.toISOString(),
       },
       {
         id: '4',
-        user_id: 'user1',
+        portfolio_id: 'portfolio1',
         total_value_usd: 10200,
+        asset_breakdown: [],
         recorded_at: new Date('2024-11-24T00:00:00Z').toISOString(),
-        created_at: now.toISOString(),
       },
     ];
 
@@ -438,10 +399,10 @@ describe('calculatePeriodReturns', () => {
     const snapshots: IPortfolioSnapshot[] = [
       {
         id: '1',
-        user_id: 'user1',
+        portfolio_id: 'portfolio1',
         total_value_usd: 5000,
+        asset_breakdown: [],
         recorded_at: new Date('2024-01-01T00:00:00Z').toISOString(),
-        created_at: now.toISOString(),
       },
     ];
 
@@ -457,10 +418,10 @@ describe('calculatePeriodReturns', () => {
     const snapshots: IPortfolioSnapshot[] = [
       {
         id: '1',
-        user_id: 'user1',
+        portfolio_id: 'portfolio1',
         total_value_usd: 0,
+        asset_breakdown: [],
         recorded_at: new Date('2024-01-01T00:00:00Z').toISOString(),
-        created_at: now.toISOString(),
       },
     ];
 
@@ -617,16 +578,13 @@ describe('calculateMaxDrawdown', () => {
 describe('PnL Edge Cases', () => {
   it('should handle very small asset values', () => {
     const asset: IAsset = {
-      id: '1',
-      user_id: 'user1',
-      exchange_id: 'exchange1',
       symbol: 'SHIB',
+      name: 'Shiba Inu',
       amount: 1000000,
+      price_usd: 0.00000001,
       value_usd: 0.01,
+      change_24h: 0,
       avg_buy_price: 0.00001,
-      last_synced_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     const result = calculateAssetPnL(asset);
@@ -638,16 +596,13 @@ describe('PnL Edge Cases', () => {
   it('should handle very large portfolio values', () => {
     const assets: IAsset[] = [
       {
-        id: '1',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'BTC',
+        name: 'Bitcoin',
         amount: 1000,
+        price_usd: 50000,
         value_usd: 50000000,
+        change_24h: 0,
         avg_buy_price: 40000,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
     ];
 
@@ -660,16 +615,13 @@ describe('PnL Edge Cases', () => {
 
   it('should maintain precision with many decimal places', () => {
     const asset: IAsset = {
-      id: '1',
-      user_id: 'user1',
-      exchange_id: 'exchange1',
       symbol: 'ETH',
+      name: 'Ethereum',
       amount: 3.14159265,
+      price_usd: 2100,
       value_usd: 6597.345,
+      change_24h: 0,
       avg_buy_price: 2100.123456,
-      last_synced_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     const result = calculateAssetPnL(asset);
@@ -680,28 +632,22 @@ describe('PnL Edge Cases', () => {
   it('should handle mixed profit and loss in portfolio', () => {
     const assets: IAsset[] = [
       {
-        id: '1',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'WINNER',
+        name: 'Winner Coin',
         amount: 10,
+        price_usd: 200,
         value_usd: 2000,
+        change_24h: 0,
         avg_buy_price: 100,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
       {
-        id: '2',
-        user_id: 'user1',
-        exchange_id: 'exchange1',
         symbol: 'LOSER',
+        name: 'Loser Coin',
         amount: 10,
+        price_usd: 50,
         value_usd: 500,
+        change_24h: 0,
         avg_buy_price: 100,
-        last_synced_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       },
     ];
 

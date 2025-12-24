@@ -19,8 +19,17 @@ import type { UnifiedBroker } from '@/lib/broker/types'
 describe.skip('Trade Executor E2E - SKIPPED (implementation not complete)', () => {})
 
 // Mock Exchange for testing
+interface MockOrder {
+  id: string
+  symbol: string
+  side: 'buy' | 'sell'
+  amount: number
+  price: number
+  timestamp: Date
+}
+
 class MockExchange implements IExchange {
-  public orders: any[] = []
+  public orders: MockOrder[] = []
   public balance = { USDT: 100000, BTC: 0 }
   public currentPrice = 50000
 
@@ -374,7 +383,7 @@ describe.skip('Trade Executor E2E', () => {
         },
       })
 
-      const events: any[] = []
+      const events: unknown[] = []
 
       executor.onEvent((event) => {
         events.push(event)

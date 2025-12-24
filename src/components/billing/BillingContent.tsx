@@ -43,10 +43,17 @@ const mockSubscription = {
 // Refund Request Section Component
 // ============================================
 
+interface RefundPreview {
+  usage_rate: number
+  refund_amount: number
+  eligible: boolean
+  message?: string
+}
+
 function RefundRequestSection() {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [refundReason, setRefundReason] = useState('')
-  const [refundPreview, setRefundPreview] = useState<any>(null)
+  const [refundPreview, setRefundPreview] = useState<RefundPreview | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [notification, setNotification] = useState<{
     type: 'success' | 'error'

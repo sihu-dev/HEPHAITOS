@@ -72,7 +72,8 @@ export async function getStrategies(options?: {
   }
 
   const supabase = await createServerSupabaseClient()
-  
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase as any)
     .from('strategies')
     .select('*', { count: 'exact' })
@@ -124,7 +125,8 @@ export async function getStrategyById(id: string): Promise<Strategy | null> {
   }
 
   const supabase = await createServerSupabaseClient()
-  
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('strategies')
     .select('*')
@@ -157,7 +159,8 @@ export async function createStrategy(
   }
 
   const supabase = await createServerSupabaseClient()
-  
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('strategies')
     .insert({
@@ -202,6 +205,7 @@ export async function updateStrategy(
   if (updates.config !== undefined) updateData.config = updates.config
   if (updates.performance !== undefined) updateData.performance = updates.performance
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('strategies')
     .update(updateData)
@@ -227,7 +231,8 @@ export async function deleteStrategy(id: string): Promise<boolean> {
   }
 
   const supabase = await createServerSupabaseClient()
-  
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from('strategies')
     .delete()
@@ -265,6 +270,7 @@ export async function getStrategiesClient(options?: {
     return mockStrategies
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase as any)
     .from('strategies')
     .select('*')
