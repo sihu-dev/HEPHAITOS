@@ -1,2 +1,10 @@
 packages:
-  - "packages/*"
+  - packages/*
+
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - esbuild
+  - msgpackr-extract
+  - sharp
+  - unrs-resolver
