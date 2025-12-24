@@ -23,10 +23,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { MoAEngine } from '@/lib/moa/engine';
 import { getRequiredCredits } from '@/lib/credits/moa-pricing';
-// import { checkCreditBalance, deductCredits } from '@/lib/credits/balance';
-// import { createClient } from '@/lib/supabase/server';
+import { spendCredits, InsufficientCreditsError, getCreditBalance } from '@/lib/credits/spend-helper';
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // Request validation schema
 const MoARequestSchema = z.object({
@@ -52,45 +54,89 @@ export async function POST(request: NextRequest) {
 
     const { prompt, tier } = validation.data;
 
-    // TODO: User authentication (현재는 스킵)
-    // const supabase = createClient();
-    // const {
-    //   data: { user },
-    //   error: authError,
-    // } = await supabase.auth.getUser();
-    //
-    // if (authError || !user) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
+    // 사용자 인증
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          },
+        },
+      }
+    );
 
-    // TODO: Credit balance check (현재는 스킵)
-    // const requiredCredits = getRequiredCredits(tier);
-    // const balance = await checkCreditBalance(user.id);
-    //
-    // if (balance < requiredCredits) {
-    //   return NextResponse.json(
-    //     {
-    //       error: 'Insufficient credits',
-    //       required: requiredCredits,
-    //       balance,
-    //     },
-    //     { status: 402 }
-    //   );
-    // }
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+    }
+
+    // 크레딧 잔액 확인
+    const requiredCredits = getRequiredCredits(tier);
+    const balance = await getCreditBalance(user.id);
+
+    if (balance < requiredCredits) {
+      safeLogger.warn('[MoA API] Insufficient credits', {
+        userId: user.id,
+        required: requiredCredits,
+        balance,
+      });
+      return NextResponse.json(
+        {
+          error: 'INSUFFICIENT_CREDITS',
+          message: '크레딧이 부족합니다',
+          required: requiredCredits,
+          balance,
+        },
+        { status: 402 }
+      );
+    }
+
+    // 크레딧 차감 (ai_strategy 카테고리 사용)
+    try {
+      await spendCredits({
+        userId: user.id,
+        feature: 'ai_strategy',
+        amount: requiredCredits,
+        metadata: {
+          tier,
+          promptLength: prompt.length,
+        },
+      });
+    } catch (error) {
+      if (error instanceof InsufficientCreditsError) {
+        return NextResponse.json(
+          {
+            error: 'INSUFFICIENT_CREDITS',
+            message: '크레딧이 부족합니다',
+            required: error.required,
+            current: error.current,
+          },
+          { status: 402 }
+        );
+      }
+      safeLogger.error('[MoA API] Credit spend failed', { error });
+      return NextResponse.json(
+        { error: '크레딧 처리 중 오류가 발생했습니다' },
+        { status: 500 }
+      );
+    }
 
     // Generate strategy using MoA Engine
     const engine = new MoAEngine();
     const result = await engine.generateStrategy(prompt, tier);
 
-    // TODO: Deduct credits (현재는 스킵)
-    // await deductCredits(user.id, requiredCredits, {
-    //   feature: 'moa_strategy',
-    //   tier,
-    //   requestId: result.metadata.requestId,
-    // });
-
     // Log for monitoring
-    console.log('[MoA API] Strategy generated:', {
+    safeLogger.info('[MoA API] Strategy generated', {
+      userId: user.id,
       tier,
       perspectives: result.perspectives.length,
       validated: result.validated,
