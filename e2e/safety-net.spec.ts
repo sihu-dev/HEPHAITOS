@@ -4,18 +4,26 @@
 // ============================================
 
 import { test, expect } from '@playwright/test'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy-load Supabase client to avoid module-level errors
+function getSupabaseAdmin(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) {
+    throw new Error('Missing Supabase environment variables for E2E tests')
+  }
+  return createClient(url, key)
+}
 
 test.describe('Safety Net - Legal Compliance', () => {
   let testUserId: string
   let testToken: string
+  let supabaseAdmin: SupabaseClient
 
   test.beforeEach(async () => {
+    supabaseAdmin = getSupabaseAdmin()
+
     const { data: user, error } = await supabaseAdmin.auth.admin.createUser({
       email: `test-${Date.now()}@example.com`,
       password: 'testpass123',

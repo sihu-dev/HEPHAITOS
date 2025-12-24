@@ -4,19 +4,27 @@
 // ============================================
 
 import { test, expect } from '@playwright/test'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { createHmac, randomUUID } from 'crypto'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy-load Supabase client to avoid module-level errors
+function getSupabaseAdmin(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) {
+    throw new Error('Missing Supabase environment variables for E2E tests')
+  }
+  return createClient(url, key)
+}
 
 test.describe('Payment Idempotency', () => {
   let testUserId: string
   let testOrderId: string
+  let supabaseAdmin: SupabaseClient
 
   test.beforeEach(async () => {
+    supabaseAdmin = getSupabaseAdmin()
+
     // 테스트 사용자 생성
     const { data: user, error } = await supabaseAdmin.auth.admin.createUser({
       email: `test-${Date.now()}@example.com`,
@@ -37,7 +45,7 @@ test.describe('Payment Idempotency', () => {
 
   test.afterEach(async () => {
     // 테스트 데이터 정리
-    if (testUserId) {
+    if (testUserId && supabaseAdmin) {
       await supabaseAdmin.auth.admin.deleteUser(testUserId)
     }
   })
