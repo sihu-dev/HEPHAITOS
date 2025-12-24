@@ -144,16 +144,26 @@ async function handlePaymentStatusChanged(data: WebhookPayload['data']) {
     safeLogger.error('[Webhook] Failed to update payment_orders', { error: updateError })
   }
 
-  // 2. 상태별 처리
+  // 2. 상태별 처리 (mapped status 사용)
   switch (payment.status) {
-    case 'DONE':
-      await handlePaymentCompleted(payment)
+    case 'completed':
+      await handlePaymentCompleted({
+        orderId: payment.orderId,
+        paymentKey: payment.paymentKey,
+        totalAmount: payment.amount,
+        approvedAt: payment.approvedAt,
+      })
       break
-    case 'CANCELED':
-      await handlePaymentCanceled(payment)
+    case 'cancelled':
+      await handlePaymentCanceled({
+        orderId: payment.orderId,
+        paymentKey: payment.paymentKey,
+      })
       break
-    case 'PARTIAL_CANCELED':
-      await handlePartialRefund(payment)
+    case 'refunded':
+      await handlePartialRefund({
+        orderId: payment.orderId,
+      })
       break
     default:
       safeLogger.info('[Webhook] Unhandled payment status', { status: payment.status })
