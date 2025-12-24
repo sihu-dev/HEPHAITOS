@@ -53,7 +53,7 @@ const StrategyRow = memo(function StrategyRow({ strategy, t, index, onToggle }: 
   const tradesLabel = t('dashboard.components.activeStrategies.trades') as string
 
   return (
-    <div
+    <article
       className={clsx(
         'relative flex items-center justify-between p-4 -mx-1 rounded-xl',
         'transition-all duration-300 group',
@@ -61,6 +61,7 @@ const StrategyRow = memo(function StrategyRow({ strategy, t, index, onToggle }: 
         'animate-fade-in'
       )}
       style={{ animationDelay: `${index * 100}ms` }}
+      aria-label={`${strategy.name} strategy, ${isRunning ? 'running' : 'paused'}, ${isProfitable ? 'profit' : 'loss'} ${Math.abs(strategy.pnl).toFixed(1)}%`}
     >
       {/* Status Glow */}
       {isRunning && (
@@ -80,16 +81,17 @@ const StrategyRow = memo(function StrategyRow({ strategy, t, index, onToggle }: 
               : 'bg-white/[0.04] border-white/[0.08] text-zinc-400 hover:bg-white/[0.08] hover:text-white'
           )}
           aria-label={isRunning
-            ? t('dashboard.components.activeStrategies.pause') as string
-            : t('dashboard.components.activeStrategies.resume') as string}
+            ? (t('dashboard.components.activeStrategies.pause') as string + ` ${strategy.name}`)
+            : (t('dashboard.components.activeStrategies.resume') as string + ` ${strategy.name}`)}
+          aria-pressed={isRunning}
         >
           {isRunning ? (
             <>
-              <PauseIcon className="w-4 h-4" />
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
+              <PauseIcon className="w-4 h-4" aria-hidden="true" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" aria-hidden="true" />
             </>
           ) : (
-            <PlayIcon className="w-4 h-4" />
+            <PlayIcon className="w-4 h-4" aria-hidden="true" />
           )}
         </button>
 
@@ -139,12 +141,12 @@ const StrategyRow = memo(function StrategyRow({ strategy, t, index, onToggle }: 
             'text-zinc-500 hover:text-white hover:bg-white/[0.06]',
             'opacity-0 group-hover:opacity-100 transition-all duration-200'
           )}
-          aria-label={t('dashboard.components.activeStrategies.menu') as string}
+          aria-label={`${t('dashboard.components.activeStrategies.menu') as string} for ${strategy.name}`}
         >
-          <EllipsisHorizontalIcon className="w-5 h-5" />
+          <EllipsisHorizontalIcon className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
-    </div>
+    </article>
   )
 })
 
@@ -229,7 +231,14 @@ export const ActiveStrategies = memo(function ActiveStrategies({ showEmpty = fal
   }
 
   return (
-    <div ref={containerRef} className="space-y-1">
+    <section
+      ref={containerRef}
+      className="space-y-1"
+      role="region"
+      aria-live="polite"
+      aria-atomic="false"
+      aria-label="Active trading strategies"
+    >
       {strategies.map((strategy, index) => (
         <StrategyRow
           key={strategy.id}
@@ -239,6 +248,6 @@ export const ActiveStrategies = memo(function ActiveStrategies({ showEmpty = fal
           onToggle={handleToggle}
         />
       ))}
-    </div>
+    </section>
   )
 })

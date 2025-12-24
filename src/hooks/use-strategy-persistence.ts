@@ -7,7 +7,9 @@
 
 import { useState, useCallback } from 'react'
 import type { Node, Edge } from 'reactflow'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import type { Database } from '@/lib/supabase/types'
 
 interface StrategyGraph {
   nodes: Node[]
@@ -107,7 +109,8 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
       }
 
       if (params.id && !params.id.startsWith('local_')) {
-        // Update existing strategy (type-cast for missing database types)
+        // Update existing strategy
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error: updateError } = await (supabase as any)
           .from('strategies')
           .update(strategyData)
@@ -119,7 +122,8 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
         if (updateError) throw updateError
         return (data as { id: string } | null)?.id || null
       } else {
-        // Create new strategy (type-cast for missing database types)
+        // Create new strategy
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data, error: insertError } = await (supabase as any)
           .from('strategies')
           .insert(strategyData)

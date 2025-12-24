@@ -26,24 +26,28 @@ interface StatCardProps {
 
 const StatCard = memo(function StatCard({ stat, label }: StatCardProps) {
   const isPositive = stat.change >= 0
+  const formattedValue = stat.format === 'currency' ? formatCurrency(stat.value) : `${stat.value}%`;
 
   return (
-    <div className="space-y-1">
+    <article className="space-y-1" aria-label={`${label}: ${formattedValue}`}>
       <span className="text-sm text-zinc-400">{label}</span>
-      <div className="text-base font-medium text-white">
-        {stat.format === 'currency' ? formatCurrency(stat.value) : `${stat.value}%`}
+      <div className="text-base font-medium text-white" aria-label={formattedValue}>
+        {formattedValue}
       </div>
       <div className="flex items-center gap-1">
         {isPositive ? (
-          <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-emerald-500" />
+          <ArrowTrendingUpIcon className="w-3.5 h-3.5 text-emerald-500" aria-hidden="true" />
         ) : (
-          <ArrowTrendingDownIcon className="w-3.5 h-3.5 text-red-500" />
+          <ArrowTrendingDownIcon className="w-3.5 h-3.5 text-red-500" aria-hidden="true" />
         )}
-        <span className={`text-xs ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+        <span
+          className={`text-xs ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}
+          aria-label={`${isPositive ? 'up' : 'down'} ${Math.abs(stat.change)} percent`}
+        >
           {isPositive ? '+' : ''}{stat.change}%
         </span>
       </div>
-    </div>
+    </article>
   )
 })
 
@@ -54,9 +58,15 @@ export const PortfolioOverview = memo(function PortfolioOverview() {
   const { t } = useI18n()
 
   return (
-    <div className="space-y-6">
+    <section className="space-y-6" aria-label="Portfolio Overview">
       {/* Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div
+        className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+        role="region"
+        aria-live="polite"
+        aria-atomic="false"
+        aria-label="Portfolio statistics"
+      >
         {statsConfig.map((stat) => (
           <StatCard
             key={stat.labelKey}
@@ -67,12 +77,17 @@ export const PortfolioOverview = memo(function PortfolioOverview() {
       </div>
 
       {/* Chart */}
-      <div className="h-32 flex items-end gap-[2px]">
+      <div
+        className="h-32 flex items-end gap-[2px]"
+        role="img"
+        aria-label="Portfolio performance chart"
+      >
         {chartData.map((height, i) => (
           <div
             key={i}
             className="flex-1 bg-zinc-800 hover:bg-zinc-700 transition-colors rounded-sm"
             style={{ height: `${height}%` }}
+            aria-hidden="true"
           />
         ))}
       </div>
@@ -80,6 +95,6 @@ export const PortfolioOverview = memo(function PortfolioOverview() {
         <span>{t('dashboard.components.portfolioOverview.chartStart') as string}</span>
         <span>{t('dashboard.components.portfolioOverview.chartEnd') as string}</span>
       </div>
-    </div>
+    </section>
   )
 })

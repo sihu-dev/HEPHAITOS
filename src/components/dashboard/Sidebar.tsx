@@ -155,13 +155,15 @@ export const Sidebar = memo(function Sidebar() {
         key={item.href}
         href={item.href}
         title={label}
+        aria-label={label}
+        aria-current={isActive ? 'page' : undefined}
         className={`flex items-center gap-2 px-2 py-1.5 rounded text-sm transition-colors mb-px ${
           isActive
             ? 'text-white bg-white/[0.08]'
             : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04]'
         } ${isCollapsed ? 'justify-center' : ''}`}
       >
-        <item.icon className="w-4 h-4 flex-shrink-0" />
+        <item.icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
         {!isCollapsed && <span>{label}</span>}
       </Link>
     )
@@ -184,6 +186,8 @@ export const Sidebar = memo(function Sidebar() {
     <>
       {/* Desktop Sidebar */}
       <aside
+        role="navigation"
+        aria-label={t('dashboard.sidebar.mainNavigation') as string}
         className={`fixed left-0 top-0 h-screen bg-[#0D0D0F] border-r border-white/[0.06] z-40 transition-all duration-200 hidden lg:flex flex-col ${
           isCollapsed ? 'w-14' : 'w-52'
         }`}
@@ -217,11 +221,12 @@ export const Sidebar = memo(function Sidebar() {
         <div className="px-2 py-2">
           <Link
             href="/dashboard/strategy-builder"
+            aria-label={t('dashboard.sidebar.buildMyStrategy') as string}
             className={`flex items-center gap-2 px-2 py-2 rounded text-sm bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-colors ${
               isCollapsed ? 'justify-center' : ''
             }`}
           >
-            <PlusIcon className="w-4 h-4" />
+            <PlusIcon className="w-4 h-4" aria-hidden="true" />
             {!isCollapsed && <span>{t('dashboard.sidebar.buildMyStrategy')}</span>}
           </Link>
         </div>
@@ -266,14 +271,14 @@ export const Sidebar = memo(function Sidebar() {
 
         {/* Progress Indicator (접히지 않았을 때만) */}
         {!isCollapsed && (
-          <div className="px-3 py-3 border-t border-white/[0.06]">
+          <div className="px-3 py-3 border-t border-white/[0.06]" role="region" aria-label="Learning journey progress">
             <div className="text-[10px] text-zinc-400 mb-2">{t('dashboard.myJourney')}</div>
-            <div className="flex gap-1">
-              <div className="flex-1 h-1 rounded-full bg-emerald-500/30" title="COPY" />
-              <div className="flex-1 h-1 rounded-full bg-blue-500/30" title="LEARN" />
-              <div className="flex-1 h-1 rounded-full bg-amber-500/30" title="BUILD" />
+            <div className="flex gap-1" role="group" aria-label="Journey stages">
+              <div className="flex-1 h-1 rounded-full bg-emerald-500/30" title="COPY" aria-label="COPY stage" />
+              <div className="flex-1 h-1 rounded-full bg-blue-500/30" title="LEARN" aria-label="LEARN stage" />
+              <div className="flex-1 h-1 rounded-full bg-amber-500/30" title="BUILD" aria-label="BUILD stage" />
             </div>
-            <div className="flex justify-between mt-1 text-[9px] text-zinc-400">
+            <div className="flex justify-between mt-1 text-[9px] text-zinc-400" aria-hidden="true">
               <span>COPY</span>
               <span>LEARN</span>
               <span>BUILD</span>
@@ -283,23 +288,28 @@ export const Sidebar = memo(function Sidebar() {
 
         {/* Bottom Navigation */}
         <div className="px-2 py-2 border-t border-white/[0.06]">
-          {bottomNavItemsConfig.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2 px-2 py-1.5 rounded text-sm text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04] transition-colors mb-px ${
-                isCollapsed ? 'justify-center' : ''
-              }`}
-            >
-              <item.icon className="w-4 h-4 flex-shrink-0" />
-              {!isCollapsed && <span>{t(`dashboard.sidebar.${item.labelKey}`)}</span>}
-            </Link>
-          ))}
+          {bottomNavItemsConfig.map((item) => {
+            const label = t(`dashboard.sidebar.${item.labelKey}`) as string;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-label={label}
+                className={`flex items-center gap-2 px-2 py-1.5 rounded text-sm text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.04] transition-colors mb-px ${
+                  isCollapsed ? 'justify-center' : ''
+                }`}
+              >
+                <item.icon className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
+                {!isCollapsed && <span>{label}</span>}
+              </Link>
+            );
+          })}
         </div>
       </aside>
 
       {/* Mobile Bottom Navigation - COPY/LEARN/BUILD 핵심만 */}
       <nav
+        role="navigation"
         className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#0D0D0F] border-t border-white/[0.06]"
         aria-label={t('dashboard.sidebar.mobileNavigation') as string}
       >
@@ -307,61 +317,71 @@ export const Sidebar = memo(function Sidebar() {
           {/* 대시보드 */}
           <Link
             href="/dashboard"
+            aria-label={t('dashboard.sidebar.home') as string}
+            aria-current={pathname === '/dashboard' ? 'page' : undefined}
             className={`flex flex-col items-center gap-0.5 px-3 py-2 ${
               pathname === '/dashboard' ? 'text-white' : 'text-zinc-400'
             }`}
           >
-            <Squares2X2Icon className="w-5 h-5" />
+            <Squares2X2Icon className="w-5 h-5" aria-hidden="true" />
             <span className="text-[10px]">{t('dashboard.sidebar.home')}</span>
           </Link>
 
           {/* COPY */}
           <Link
             href="/dashboard/mirroring"
+            aria-label="COPY"
+            aria-current={pathname?.includes('mirroring') || pathname?.includes('compare') ? 'page' : undefined}
             className={`flex flex-col items-center gap-0.5 px-3 py-2 ${
               pathname?.includes('mirroring') || pathname?.includes('compare')
                 ? 'text-emerald-400'
                 : 'text-zinc-400'
             }`}
           >
-            <UsersIcon className="w-5 h-5" />
+            <UsersIcon className="w-5 h-5" aria-hidden="true" />
             <span className="text-[10px]">COPY</span>
           </Link>
 
           {/* LEARN */}
           <Link
             href="/dashboard/coaching"
+            aria-label="LEARN"
+            aria-current={pathname?.includes('coaching') || pathname?.includes('ai-strategy') ? 'page' : undefined}
             className={`flex flex-col items-center gap-0.5 px-3 py-2 ${
               pathname?.includes('coaching') || pathname?.includes('ai-strategy')
                 ? 'text-blue-400'
                 : 'text-zinc-400'
             }`}
           >
-            <AcademicCapIcon className="w-5 h-5" />
+            <AcademicCapIcon className="w-5 h-5" aria-hidden="true" />
             <span className="text-[10px]">LEARN</span>
           </Link>
 
           {/* BUILD */}
           <Link
             href="/dashboard/strategy-builder"
+            aria-label="BUILD"
+            aria-current={pathname?.includes('strategy-builder') || pathname?.includes('backtest') ? 'page' : undefined}
             className={`flex flex-col items-center gap-0.5 px-3 py-2 ${
               pathname?.includes('strategy-builder') || pathname?.includes('backtest')
                 ? 'text-amber-400'
                 : 'text-zinc-400'
             }`}
           >
-            <SparklesIcon className="w-5 h-5" />
+            <SparklesIcon className="w-5 h-5" aria-hidden="true" />
             <span className="text-[10px]">BUILD</span>
           </Link>
 
           {/* 설정 */}
           <Link
             href="/dashboard/settings"
+            aria-label={t('dashboard.sidebar.settings') as string}
+            aria-current={pathname?.includes('settings') ? 'page' : undefined}
             className={`flex flex-col items-center gap-0.5 px-3 py-2 ${
               pathname?.includes('settings') ? 'text-white' : 'text-zinc-400'
             }`}
           >
-            <Cog6ToothIcon className="w-5 h-5" />
+            <Cog6ToothIcon className="w-5 h-5" aria-hidden="true" />
             <span className="text-[10px]">{t('dashboard.sidebar.settings')}</span>
           </Link>
         </div>

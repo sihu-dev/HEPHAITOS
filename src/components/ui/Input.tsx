@@ -15,6 +15,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   leftIcon?: React.ReactNode
   rightIcon?: React.ReactNode
   variant?: 'default' | 'glass'
+  'aria-label'?: string
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -28,7 +29,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       rightIcon,
       type = 'text',
       disabled,
+      required,
       id: propId,
+      'aria-label': ariaLabel,
       ...props
     },
     ref
@@ -46,12 +49,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             className="block text-xs text-zinc-400 mb-1.5"
           >
             {label}
+            {required && <span className="text-red-400 ml-1" aria-label="required">*</span>}
           </label>
         )}
 
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" aria-hidden="true">
               {leftIcon}
             </div>
           )}
@@ -61,6 +65,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={type}
             disabled={disabled}
+            required={required}
+            aria-label={ariaLabel || label}
+            aria-required={required}
             {...(error && { 'aria-invalid': true })}
             aria-describedby={
               error ? errorId : hint ? hintId : undefined
@@ -82,7 +89,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           />
 
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500" aria-hidden="true">
               {rightIcon}
             </div>
           )}

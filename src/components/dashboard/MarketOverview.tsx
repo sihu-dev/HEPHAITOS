@@ -54,13 +54,18 @@ const MarketRow = memo(function MarketRow({
         'animate-fade-in'
       )}
       style={{ animationDelay: `${index * 50}ms` }}
+      role="article"
+      aria-label={`${market.name} price ${market.price}`}
     >
       {/* Symbol & Name */}
       <div className="flex items-center gap-3">
-        <div className={clsx(
-          'w-8 h-8 rounded-lg flex items-center justify-center',
-          'bg-white/[0.06] text-xs font-bold text-white'
-        )}>
+        <div
+          className={clsx(
+            'w-8 h-8 rounded-lg flex items-center justify-center',
+            'bg-white/[0.06] text-xs font-bold text-white'
+          )}
+          aria-hidden="true"
+        >
           {market.symbol.slice(0, 2)}
         </div>
         <div>
@@ -83,11 +88,11 @@ const MarketRow = memo(function MarketRow({
           isPositive ? 'text-emerald-400' : 'text-red-400'
         )}>
           {isPositive ? (
-            <ArrowTrendingUpIcon className="w-3 h-3" />
+            <ArrowTrendingUpIcon className="w-3 h-3" aria-hidden="true" />
           ) : (
-            <ArrowTrendingDownIcon className="w-3 h-3" />
+            <ArrowTrendingDownIcon className="w-3 h-3" aria-hidden="true" />
           )}
-          <span className="tabular-nums">
+          <span className="tabular-nums" aria-label={`${isPositive ? 'up' : 'down'} ${Math.abs(market.change).toFixed(2)} percent`}>
             {isPositive ? '+' : ''}{market.change.toFixed(2)}%
           </span>
         </div>
@@ -149,7 +154,11 @@ export const MarketOverview = memo(function MarketOverview() {
   }, [])
 
   return (
-    <div ref={containerRef} className="card-cinematic p-4">
+    <section
+      ref={containerRef}
+      className="card-cinematic p-4"
+      aria-label="Market Overview"
+    >
       {/* Header - Live indicator shows WebSocket connection status */}
       <div className="flex items-center justify-end mb-4">
         <LiveIndicator
@@ -159,8 +168,14 @@ export const MarketOverview = memo(function MarketOverview() {
         />
       </div>
 
-      {/* Market List */}
-      <div className="space-y-1">
+      {/* Market List - aria-live for real-time price updates */}
+      <div
+        className="space-y-1"
+        role="region"
+        aria-live="polite"
+        aria-atomic="false"
+        aria-label="Live market prices"
+      >
         {markets.map((market, index) => (
           <MarketRow key={market.symbol} market={market} index={index} />
         ))}
@@ -168,10 +183,14 @@ export const MarketOverview = memo(function MarketOverview() {
 
       {/* Footer */}
       <div className="mt-4 pt-3 border-t border-white/[0.06]">
-        <button className="w-full text-center text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+        <button
+          type="button"
+          className="w-full text-center text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+          aria-label="View all markets"
+        >
           View All Markets →
         </button>
       </div>
-    </div>
+    </section>
   )
 })

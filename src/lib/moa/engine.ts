@@ -54,6 +54,13 @@ interface MoAEngineResult {
   };
 }
 
+// Stream event types for generateStrategyStream
+type StreamEvent =
+  | { type: 'perspective'; data: PerspectiveOutput }
+  | { type: 'aggregation'; data: { status: string } | { text: string; tokensUsed: number } }
+  | { type: 'validation'; data: { validated: boolean; issues: string[] } }
+  | { type: 'complete'; data: { totalCost: number; totalLatency: number } }
+
 /**
  * 4-Persona Configuration
  */
@@ -544,10 +551,7 @@ OUTPUT FORMAT (Korean):
   async *generateStrategyStream(
     userPrompt: string,
     tier: 'draft' | 'refined' | 'comprehensive' = 'refined'
-  ): AsyncGenerator<{
-    type: 'perspective' | 'aggregation' | 'validation' | 'complete';
-    data: any;
-  }> {
+  ): AsyncGenerator<StreamEvent> {
     // Layer 1: Perspectives (순차적으로 스트리밍)
     const perspectivesToUse =
       tier === 'draft'

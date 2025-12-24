@@ -5,6 +5,8 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/lib/supabase/types'
 
 // 환경 설정: Supabase 사용 여부
 const USE_SUPABASE = process.env.NEXT_PUBLIC_USE_SUPABASE === 'true'
@@ -35,6 +37,33 @@ export interface OnboardingData {
   painPoints: string[]
 }
 
+// Database row type for user_profiles table
+interface UserProfileRow {
+  id: string
+  user_id: string
+  nickname: string
+  investment_style: 'conservative' | 'moderate' | 'aggressive'
+  experience: 'beginner' | 'intermediate' | 'advanced'
+  interests: string[]
+  pain_points: string[]
+  onboarding_completed: boolean
+  onboarding_step: number
+  created_at: string
+  updated_at: string
+}
+
+// Update data type for database operations
+interface UserProfileUpdateData {
+  user_id?: string
+  nickname?: string
+  investment_style?: 'conservative' | 'moderate' | 'aggressive'
+  experience?: 'beginner' | 'intermediate' | 'advanced'
+  interests?: string[]
+  pain_points?: string[]
+  onboarding_completed?: boolean
+  onboarding_step?: number
+}
+
 // Mock 데이터 저장소
 const mockProfiles: Map<string, UserProfile> = new Map()
 
@@ -52,8 +81,8 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 
   const supabase = await createServerSupabaseClient()
 
-  const { data, error } = await (supabase as any)
-    .from('user_profiles')
+  const { data, error } = await (supabase as unknown as SupabaseClient<Database>)
+    .from('user_profiles' as never)
     .select('*')
     .eq('user_id', userId)
     .single()
@@ -63,18 +92,19 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     return mockProfiles.get(userId) ?? null
   }
 
-  return data ? {
-    id: data.id,
-    userId: data.user_id,
-    nickname: data.nickname,
-    investmentStyle: data.investment_style,
-    experience: data.experience,
-    interests: data.interests ?? [],
-    painPoints: data.pain_points ?? [],
-    onboardingCompleted: data.onboarding_completed ?? false,
-    onboardingStep: data.onboarding_step ?? 0,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+  const row = data as unknown as UserProfileRow
+  return row ? {
+    id: row.id,
+    userId: row.user_id,
+    nickname: row.nickname,
+    investmentStyle: row.investment_style,
+    experience: row.experience,
+    interests: row.interests ?? [],
+    painPoints: row.pain_points ?? [],
+    onboardingCompleted: row.onboarding_completed ?? false,
+    onboardingStep: row.onboarding_step ?? 0,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
   } : null
 }
 
@@ -102,6 +132,7 @@ export async function completeOnboarding(
   const supabase = await createServerSupabaseClient()
 
   // Upsert: 있으면 업데이트, 없으면 생성
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: result, error } = await (supabase as any)
     .from('user_profiles')
     .upsert({
@@ -135,18 +166,19 @@ export async function completeOnboarding(
     return profile
   }
 
+  const row = result as unknown as UserProfileRow
   return {
-    id: result.id,
-    userId: result.user_id,
-    nickname: result.nickname,
-    investmentStyle: result.investment_style,
-    experience: result.experience,
-    interests: result.interests ?? [],
-    painPoints: result.pain_points ?? [],
-    onboardingCompleted: result.onboarding_completed,
-    onboardingStep: result.onboarding_step,
-    createdAt: new Date(result.created_at),
-    updatedAt: new Date(result.updated_at),
+    id: row.id,
+    userId: row.user_id,
+    nickname: row.nickname,
+    investmentStyle: row.investment_style,
+    experience: row.experience,
+    interests: row.interests ?? [],
+    painPoints: row.pain_points ?? [],
+    onboardingCompleted: row.onboarding_completed,
+    onboardingStep: row.onboarding_step,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
   }
 }
 
@@ -187,7 +219,7 @@ export async function saveOnboardingProgress(
 
   const supabase = await createServerSupabaseClient()
 
-  const updateData: Record<string, any> = {
+  const updateData: UserProfileUpdateData = {
     onboarding_step: step,
   }
 
@@ -197,6 +229,7 @@ export async function saveOnboardingProgress(
   if (partialData.interests) updateData.interests = partialData.interests
   if (partialData.painPoints) updateData.pain_points = partialData.painPoints
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from('user_profiles')
     .upsert({
@@ -233,13 +266,14 @@ export async function updateUserProfile(
 
   const supabase = await createServerSupabaseClient()
 
-  const updateData: Record<string, any> = {}
+  const updateData: UserProfileUpdateData = {}
   if (updates.nickname) updateData.nickname = updates.nickname
   if (updates.investmentStyle) updateData.investment_style = updates.investmentStyle
   if (updates.experience) updateData.experience = updates.experience
   if (updates.interests) updateData.interests = updates.interests
   if (updates.painPoints) updateData.pain_points = updates.painPoints
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('user_profiles')
     .update(updateData)
@@ -252,18 +286,19 @@ export async function updateUserProfile(
     return null
   }
 
-  return data ? {
-    id: data.id,
-    userId: data.user_id,
-    nickname: data.nickname,
-    investmentStyle: data.investment_style,
-    experience: data.experience,
-    interests: data.interests ?? [],
-    painPoints: data.pain_points ?? [],
-    onboardingCompleted: data.onboarding_completed,
-    onboardingStep: data.onboarding_step,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+  const row = data as unknown as UserProfileRow
+  return row ? {
+    id: row.id,
+    userId: row.user_id,
+    nickname: row.nickname,
+    investmentStyle: row.investment_style,
+    experience: row.experience,
+    interests: row.interests ?? [],
+    painPoints: row.pain_points ?? [],
+    onboardingCompleted: row.onboarding_completed,
+    onboardingStep: row.onboarding_step,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
   } : null
 }
 
@@ -289,8 +324,8 @@ export async function getUserProfileClient(userId: string): Promise<UserProfile 
 
   const supabase = getSupabaseBrowserClient()
 
-  const { data, error } = await (supabase as any)
-    .from('user_profiles')
+  const { data, error } = await (supabase as unknown as SupabaseClient<Database>)
+    .from('user_profiles' as never)
     .select('*')
     .eq('user_id', userId)
     .single()
@@ -300,17 +335,18 @@ export async function getUserProfileClient(userId: string): Promise<UserProfile 
     return null
   }
 
-  return data ? {
-    id: data.id,
-    userId: data.user_id,
-    nickname: data.nickname,
-    investmentStyle: data.investment_style,
-    experience: data.experience,
-    interests: data.interests ?? [],
-    painPoints: data.pain_points ?? [],
-    onboardingCompleted: data.onboarding_completed,
-    onboardingStep: data.onboarding_step,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+  const row = data as unknown as UserProfileRow
+  return row ? {
+    id: row.id,
+    userId: row.user_id,
+    nickname: row.nickname,
+    investmentStyle: row.investment_style,
+    experience: row.experience,
+    interests: row.interests ?? [],
+    painPoints: row.pain_points ?? [],
+    onboardingCompleted: row.onboarding_completed,
+    onboardingStep: row.onboarding_step,
+    createdAt: new Date(row.created_at),
+    updatedAt: new Date(row.updated_at),
   } : null
 }

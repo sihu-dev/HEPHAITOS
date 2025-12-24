@@ -14,6 +14,16 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Toss webhook payload type
+interface TossWebhookPayload {
+  eventId?: string
+  orderId: string
+  status: string
+  paymentKey?: string
+  totalAmount?: number
+  [key: string]: unknown
+}
+
 /**
  * POST /api/payments/webhook/toss
  * 토스페이먼츠 웹훅 수신
@@ -92,7 +102,7 @@ function verifyTossSignature(body: string, signature: string | null): boolean {
 /**
  * 웹훅 이벤트 처리
  */
-async function processWebhookEvent(eventId: string, payload: any): Promise<void> {
+async function processWebhookEvent(eventId: string, payload: TossWebhookPayload): Promise<void> {
   const { orderId, status, paymentKey, totalAmount } = payload
 
   // 결제 성공 이벤트만 처리
@@ -161,6 +171,15 @@ async function processWebhookEvent(eventId: string, payload: any): Promise<void>
   }
 }
 
+// Type for pending webhook retry records
+interface PendingWebhookRetry {
+  event_id: string
+  provider: string
+  order_id: string
+  payload: TossWebhookPayload
+  retry_count: number
+}
+
 /**
  * 재시도 대상 웹훅 처리 (Cron Job용)
  * Note: 별도 cron route에서 import하여 사용
@@ -178,7 +197,7 @@ async function processRetryQueue(): Promise<{ processed: number; failed: number 
   let processed = 0
   let failed = 0
 
-  for (const event of pendingRetries) {
+  for (const event of pendingRetries as unknown as PendingWebhookRetry[]) {
     try {
       await processWebhookEvent(event.event_id, event.payload)
       processed++
