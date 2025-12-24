@@ -14,7 +14,9 @@ test.describe('Copy Trading', () => {
     // URL 확인 (리다이렉트될 수 있음)
     const url = page.url()
     expect(url.includes('copy-trading') || url.includes('dashboard')).toBeTruthy()
-    await expect(page.locator('main, body')).toBeVisible()
+    // main 요소 확인 (body는 항상 존재하므로 main 우선)
+    const mainContent = page.locator('main#main-content, main').first()
+    await expect(mainContent).toBeVisible()
   })
 
   test('should show celebrity list', async ({ page }) => {

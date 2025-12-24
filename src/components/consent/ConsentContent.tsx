@@ -6,9 +6,9 @@
 // GPT V1 피드백 P0-4: 만 19세 + 면책조항 동의 페이지
 // ============================================
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient, SupabaseClient } from '@supabase/ssr'
 
 interface DisclaimerVersion {
   id: string
@@ -25,6 +25,26 @@ interface ConsentState {
   birthDay: string
 }
 
+// 기본 면책조항 (Supabase 연결 없을 때 사용)
+const DEFAULT_DISCLAIMER: DisclaimerVersion = {
+  id: 'default',
+  version: '1.0.0',
+  title: 'HEPHAITOS 투자 면책조항',
+  content: `## 투자 위험 고지
+본 서비스는 투자 교육 및 정보 제공 목적으로만 제공됩니다.
+
+### 주요 안내사항
+- 본 서비스는 투자 조언이 아닙니다
+- 모든 투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다
+- 과거 성과가 미래 수익을 보장하지 않습니다
+- 투자에는 원금 손실 위험이 있습니다
+
+### 면책사항
+1. HEPHAITOS는 투자 결과에 대해 어떠한 책임도 지지 않습니다
+2. 제공되는 정보의 정확성을 보장하지 않습니다
+3. 시스템 장애로 인한 손실에 대해 책임지지 않습니다`,
+}
+
 export function ConsentContent() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -38,14 +58,25 @@ export function ConsentContent() {
     birthDay: '',
   })
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  // Supabase 클라이언트 생성 (환경 변수가 없으면 null)
+  const supabase = useMemo<SupabaseClient | null>(() => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !key) {
+      return null
+    }
+    return createBrowserClient(url, key)
+  }, [])
 
   // 면책조항 로드
   useEffect(() => {
     async function loadDisclaimer() {
+      // Supabase가 없으면 기본 면책조항 사용
+      if (!supabase) {
+        setDisclaimer(DEFAULT_DISCLAIMER)
+        return
+      }
+
       const { data, error } = await supabase
         .from('disclaimer_versions')
         .select('id, version, title, content')
@@ -56,6 +87,8 @@ export function ConsentContent() {
 
       if (error) {
         console.error('Failed to load disclaimer:', error)
+        // DB 오류 시에도 기본 면책조항 사용
+        setDisclaimer(DEFAULT_DISCLAIMER)
         return
       }
 
@@ -91,6 +124,12 @@ export function ConsentContent() {
     setLoading(true)
 
     try {
+      // Supabase가 없으면 로그인 페이지로 리다이렉트
+      if (!supabase) {
+        router.push('/auth/login?redirect=/consent')
+        return
+      }
+
       // 사용자 확인
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
