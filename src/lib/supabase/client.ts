@@ -3,6 +3,7 @@
 // ============================================
 
 import { createBrowserClient } from '@supabase/ssr'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from './types'
 
 // Check if Supabase environment variables are configured
@@ -11,7 +12,7 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export const isSupabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY)
 
-export function createClient() {
+export function createClient(): SupabaseClient<Database> | null {
   if (!isSupabaseConfigured) {
     // Return null when Supabase is not configured
     // This allows the app to run without Supabase for development/demo
@@ -24,9 +25,9 @@ export function createClient() {
 }
 
 // Singleton client for client components
-let browserClient: ReturnType<typeof createClient> | undefined
+let browserClient: SupabaseClient<Database> | null | undefined
 
-export function getSupabaseBrowserClient() {
+export function getSupabaseBrowserClient(): SupabaseClient<Database> | null {
   if (browserClient === undefined) {
     browserClient = createClient()
   }

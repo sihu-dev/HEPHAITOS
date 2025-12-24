@@ -388,8 +388,8 @@ describe('calculateIndicator', () => {
   })
 
   it('should return closes for unknown indicator type', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = calculateIndicator('unknown' as any, candles, {})
+    type IndicatorType = Parameters<typeof calculateIndicator>[0]
+    const result = calculateIndicator('unknown' as IndicatorType, candles, {})
 
     expect(result.values).toEqual(candles.map(c => c.close))
   })

@@ -844,6 +844,118 @@ export interface Database {
           updated_at?: string
         }
       }
+
+      // User Profiles
+      user_profiles: {
+        Row: {
+          id: string
+          user_id: string
+          nickname: string
+          investment_style: 'conservative' | 'moderate' | 'aggressive'
+          experience: 'beginner' | 'intermediate' | 'advanced'
+          interests: string[]
+          pain_points: string[]
+          onboarding_completed: boolean
+          onboarding_step: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          nickname: string
+          investment_style?: 'conservative' | 'moderate' | 'aggressive'
+          experience?: 'beginner' | 'intermediate' | 'advanced'
+          interests?: string[]
+          pain_points?: string[]
+          onboarding_completed?: boolean
+          onboarding_step?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          nickname?: string
+          investment_style?: 'conservative' | 'moderate' | 'aggressive'
+          experience?: 'beginner' | 'intermediate' | 'advanced'
+          interests?: string[]
+          pain_points?: string[]
+          onboarding_completed?: boolean
+          onboarding_step?: number
+          updated_at?: string
+        }
+      }
+
+      // Feedback
+      feedback: {
+        Row: {
+          id: string
+          user_id: string | null
+          email: string | null
+          type: 'bug' | 'feature' | 'improvement' | 'other'
+          category: 'ux' | 'performance' | 'content' | 'technical' | 'other'
+          severity: 'low' | 'medium' | 'high' | 'critical'
+          page_url: string
+          title: string
+          description: string
+          browser_info: Json | null
+          device_info: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          email?: string | null
+          type: 'bug' | 'feature' | 'improvement' | 'other'
+          category: 'ux' | 'performance' | 'content' | 'technical' | 'other'
+          severity: 'low' | 'medium' | 'high' | 'critical'
+          page_url: string
+          title: string
+          description: string
+          browser_info?: Json | null
+          device_info?: Json | null
+          created_at?: string
+        }
+        Update: {
+          type?: 'bug' | 'feature' | 'improvement' | 'other'
+          category?: 'ux' | 'performance' | 'content' | 'technical' | 'other'
+          severity?: 'low' | 'medium' | 'high' | 'critical'
+          title?: string
+          description?: string
+        }
+      }
+
+      // Analytics Events
+      analytics_events: {
+        Row: {
+          id: string
+          user_id: string | null
+          session_id: string
+          event_name: string
+          event_type: string
+          page_url: string | null
+          referrer: string | null
+          properties: Json
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          session_id: string
+          event_name: string
+          event_type: string
+          page_url?: string | null
+          referrer?: string | null
+          properties?: Json
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          event_name?: string
+          event_type?: string
+          properties?: Json
+        }
+      }
     }
 
     Views: {

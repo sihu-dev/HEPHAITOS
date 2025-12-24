@@ -86,8 +86,7 @@ export function FeedbackWidget() {
         screenResolution: `${screen.width}x${screen.height}`,
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: insertError } = await supabase.from('feedback').insert({
+      const feedbackData = {
         user_id: user?.id || null,
         email: formData.email || user?.email || null,
         type: formData.type,
@@ -98,7 +97,11 @@ export function FeedbackWidget() {
         description: formData.description,
         browser_info: browserInfo,
         device_info: deviceInfo,
-      } as any)
+      }
+
+      // Runtime type safety - Supabase validates schema server-side
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: insertError } = await (supabase as any).from('feedback').insert(feedbackData)
 
       if (insertError) {
         throw insertError

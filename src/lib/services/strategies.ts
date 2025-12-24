@@ -73,8 +73,7 @@ export async function getStrategies(options?: {
 
   const supabase = await createServerSupabaseClient()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any)
+  let query = supabase
     .from('strategies')
     .select('*', { count: 'exact' })
 
@@ -126,8 +125,7 @@ export async function getStrategyById(id: string): Promise<Strategy | null> {
 
   const supabase = await createServerSupabaseClient()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('strategies')
     .select('*')
     .eq('id', id)
@@ -160,16 +158,19 @@ export async function createStrategy(
 
   const supabase = await createServerSupabaseClient()
 
+  const insertData = {
+    user_id: strategy.userId,
+    name: strategy.name,
+    description: strategy.description ?? null,
+    status: strategy.status ?? 'draft',
+    config: strategy.config ?? {},
+  }
+
+  // Runtime type safety - Supabase validates schema server-side
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('strategies')
-    .insert({
-      user_id: strategy.userId,
-      name: strategy.name,
-      description: strategy.description ?? null,
-      status: strategy.status ?? 'draft',
-      config: strategy.config ?? {},
-    })
+    .insert(insertData)
     .select()
     .single()
 
@@ -197,14 +198,15 @@ export async function updateStrategy(
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  const updateData: Record<string, string | null | StrategyConfig | StrategyPerformance | Strategy['status']> = {}
+
+  const updateData: Record<string, unknown> = {}
   if (updates.name !== undefined) updateData.name = updates.name
   if (updates.description !== undefined) updateData.description = updates.description
   if (updates.status !== undefined) updateData.status = updates.status
   if (updates.config !== undefined) updateData.config = updates.config
   if (updates.performance !== undefined) updateData.performance = updates.performance
 
+  // Runtime type safety - Supabase validates schema server-side
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('strategies')
@@ -232,6 +234,7 @@ export async function deleteStrategy(id: string): Promise<boolean> {
 
   const supabase = await createServerSupabaseClient()
 
+  // Runtime type safety - Supabase validates schema server-side
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from('strategies')
@@ -270,8 +273,7 @@ export async function getStrategiesClient(options?: {
     return mockStrategies
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let query = (supabase as any)
+  let query = supabase
     .from('strategies')
     .select('*')
     .order('updated_at', { ascending: false })

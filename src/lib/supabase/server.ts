@@ -3,11 +3,12 @@
 // ============================================
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from './types'
 
 // Server client with user session (for authenticated routes)
-export async function createServerSupabaseClient() {
+export async function createServerSupabaseClient(): Promise<SupabaseClient<Database>> {
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
@@ -38,9 +39,9 @@ export async function createServerSupabaseClient() {
 }
 
 // Singleton admin client (bypasses RLS)
-let adminClient: ReturnType<typeof createServerClient<Database>> | null = null
+let adminClient: SupabaseClient<Database> | null = null
 
-export function createAdminClient() {
+export function createAdminClient(): SupabaseClient<Database> {
   if (!adminClient) {
     adminClient = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

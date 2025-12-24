@@ -5,8 +5,6 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/lib/supabase/types'
 
 // 환경 설정: Supabase 사용 여부
 const USE_SUPABASE = process.env.NEXT_PUBLIC_USE_SUPABASE === 'true'
@@ -81,8 +79,10 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 
   const supabase = await createServerSupabaseClient()
 
-  const { data, error } = await (supabase as unknown as SupabaseClient<Database>)
-    .from('user_profiles' as never)
+  // Runtime type safety - Supabase validates schema server-side
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('user_profiles')
     .select('*')
     .eq('user_id', userId)
     .single()
@@ -132,19 +132,22 @@ export async function completeOnboarding(
   const supabase = await createServerSupabaseClient()
 
   // Upsert: 있으면 업데이트, 없으면 생성
+  const upsertData = {
+    user_id: userId,
+    nickname: data.nickname,
+    investment_style: data.investmentStyle,
+    experience: data.experience,
+    interests: data.interests,
+    pain_points: data.painPoints,
+    onboarding_completed: true,
+    onboarding_step: 6,
+  }
+
+  // Runtime type safety - Supabase validates schema server-side
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: result, error } = await (supabase as any)
     .from('user_profiles')
-    .upsert({
-      user_id: userId,
-      nickname: data.nickname,
-      investment_style: data.investmentStyle,
-      experience: data.experience,
-      interests: data.interests,
-      pain_points: data.painPoints,
-      onboarding_completed: true,
-      onboarding_step: 6,
-    }, {
+    .upsert(upsertData, {
       onConflict: 'user_id',
     })
     .select()
@@ -229,13 +232,17 @@ export async function saveOnboardingProgress(
   if (partialData.interests) updateData.interests = partialData.interests
   if (partialData.painPoints) updateData.pain_points = partialData.painPoints
 
+  const upsertData = {
+    user_id: userId,
+    nickname: updateData.nickname || '',
+    ...updateData,
+  }
+
+  // Runtime type safety - Supabase validates schema server-side
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from('user_profiles')
-    .upsert({
-      user_id: userId,
-      ...updateData,
-    }, {
+    .upsert(upsertData, {
       onConflict: 'user_id',
     })
 
@@ -266,13 +273,14 @@ export async function updateUserProfile(
 
   const supabase = await createServerSupabaseClient()
 
-  const updateData: UserProfileUpdateData = {}
+  const updateData: Record<string, unknown> = {}
   if (updates.nickname) updateData.nickname = updates.nickname
   if (updates.investmentStyle) updateData.investment_style = updates.investmentStyle
   if (updates.experience) updateData.experience = updates.experience
   if (updates.interests) updateData.interests = updates.interests
   if (updates.painPoints) updateData.pain_points = updates.painPoints
 
+  // Runtime type safety - Supabase validates schema server-side
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any)
     .from('user_profiles')
@@ -324,8 +332,10 @@ export async function getUserProfileClient(userId: string): Promise<UserProfile 
 
   const supabase = getSupabaseBrowserClient()
 
-  const { data, error } = await (supabase as unknown as SupabaseClient<Database>)
-    .from('user_profiles' as never)
+  // Runtime type safety - Supabase validates schema server-side
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from('user_profiles')
     .select('*')
     .eq('user_id', userId)
     .single()

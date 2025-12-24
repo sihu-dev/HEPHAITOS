@@ -7,9 +7,7 @@
 
 import { useState, useCallback } from 'react'
 import type { Node, Edge } from 'reactflow'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import type { Database } from '@/lib/supabase/types'
 
 interface StrategyGraph {
   nodes: Node[]
@@ -43,8 +41,8 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
     setError(null)
 
     try {
-      const supabase = getSupabaseBrowserClient()
-      if (!supabase) {
+      const supabaseClient = getSupabaseBrowserClient()
+      if (!supabaseClient) {
         // Fallback to localStorage when Supabase is not available
         const localStrategies = JSON.parse(localStorage.getItem('hephaitos_strategies') || '[]')
         const strategyId = params.id || `local_${Date.now()}`
@@ -64,6 +62,9 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
         localStorage.setItem('hephaitos_strategies', JSON.stringify(localStrategies))
         return strategyId
       }
+
+      // Type assertion after null check
+      const supabase = supabaseClient
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -91,11 +92,11 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
       }
 
       // Save to Supabase
-      const strategyData = {
+      const baseData = {
         user_id: user.id,
         name: params.name,
         description: params.description || null,
-        graph: params.graph as unknown,
+        graph: params.graph,
         config: {
           symbols: [],
           timeframe: '1h',
@@ -104,34 +105,39 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
           riskManagement: {},
           allocation: 10,
         },
-        status: 'draft' as const,
-        updated_at: new Date().toISOString(),
+        status: 'draft',
       }
+
+      // Runtime type safety - Supabase validates schema server-side
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const db = supabase as any
 
       if (params.id && !params.id.startsWith('local_')) {
         // Update existing strategy
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: updateError } = await (supabase as any)
+        const updateData = {
+          ...baseData,
+          updated_at: new Date().toISOString(),
+        }
+        const { data, error: updateError } = await db
           .from('strategies')
-          .update(strategyData)
+          .update(updateData)
           .eq('id', params.id)
           .eq('user_id', user.id)
           .select('id')
           .single()
 
         if (updateError) throw updateError
-        return (data as { id: string } | null)?.id || null
+        return data?.id || null
       } else {
         // Create new strategy
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: insertError } = await (supabase as any)
+        const { data, error: insertError } = await db
           .from('strategies')
-          .insert(strategyData)
+          .insert(baseData)
           .select('id')
           .single()
 
         if (insertError) throw insertError
-        return (data as { id: string } | null)?.id || null
+        return data?.id || null
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save strategy'
