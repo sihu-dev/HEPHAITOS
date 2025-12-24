@@ -10,9 +10,25 @@ import { createClient } from '@/lib/supabase/client';
 import { Progress } from '@/components/ui/progress';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
+interface BacktestResult {
+  totalReturn?: number;
+  sharpeRatio?: number;
+  maxDrawdown?: number;
+  winRate?: number;
+  error?: string;
+}
+
+interface BacktestJobRow {
+  job_id: string;
+  progress: number;
+  status: 'pending' | 'active' | 'completed' | 'failed';
+  message: string;
+  result: BacktestResult | null;
+}
+
 interface BacktestProgressProps {
   jobId: string;
-  onComplete?: (result: any) => void;
+  onComplete?: (result: BacktestResult) => void;
   onError?: (error: string) => void;
 }
 
@@ -20,7 +36,7 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<'pending' | 'active' | 'completed' | 'failed'>('pending');
   const [message, setMessage] = useState('대기 중...');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<BacktestResult | null>(null);
 
   const supabase = createClient();
 
@@ -46,7 +62,7 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
             filter: `job_id=eq.${jobId}`,
           },
           (payload) => {
-            const data = payload.new as any;
+            const data = payload.new as BacktestJobRow;
 
             console.log('[BacktestProgress] Realtime update:', data);
 
@@ -56,7 +72,7 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
 
             if (data.status === 'completed') {
               setResult(data.result);
-              onComplete?.(data.result);
+              if (data.result) onComplete?.(data.result);
             } else if (data.status === 'failed') {
               onError?.(data.result?.error || '알 수 없는 오류');
             }

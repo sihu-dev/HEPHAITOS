@@ -103,7 +103,7 @@ export async function getStrategies(options?: {
   }
 
   return {
-    data: (data ?? []).map((row: any) => rowToStrategy(row as StrategyRow)),
+    data: (data ?? []).map((row: StrategyRow) => rowToStrategy(row)),
     total: count ?? 0,
   }
 }
@@ -184,7 +184,7 @@ export async function updateStrategy(
 
   const supabase = await createServerSupabaseClient()
   
-  const updateData: Record<string, any> = {}
+  const updateData: Record<string, string | null | StrategyConfig | StrategyPerformance | Strategy['status']> = {}
   if (updates.name !== undefined) updateData.name = updates.name
   if (updates.description !== undefined) updateData.description = updates.description
   if (updates.status !== undefined) updateData.status = updates.status
@@ -267,7 +267,7 @@ export async function getStrategiesClient(options?: {
     return mockStrategies
   }
 
-  return (data ?? []).map((row: any) => rowToStrategy(row as StrategyRow))
+  return (data ?? []).map((row: StrategyRow) => rowToStrategy(row))
 }
 
 /**

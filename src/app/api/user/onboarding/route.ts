@@ -85,7 +85,7 @@ export const POST = withApiMiddleware(
       painPoints: [],
     }
 
-    const profile = await completeOnboarding(user.id, onboardingData as any)
+    const profile = await completeOnboarding(user.id, onboardingData)
 
     return createApiResponse({
       message: '온보딩이 완료되었습니다',

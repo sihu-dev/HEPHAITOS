@@ -81,9 +81,30 @@ export function OnboardingContent() {
     router.push('/dashboard')
   }, [skipOnboarding, router])
 
-  const handleStepChange = useCallback((step: number, data: Partial<OnboardingData>) => {
-    // 스텝 변경 시 진행 상태 자동 저장
-    saveProgress(step, data as any)
+  // Type-safe callback that accommodates OnboardingWizard's local type definition
+  const handleStepChange = useCallback((step: number, data: Partial<{
+    nickname: string
+    investmentStyle: 'conservative' | 'moderate' | 'aggressive' | ''
+    interests: string[]
+    experience: 'beginner' | 'intermediate' | 'advanced' | ''
+    acceptedDisclaimer: boolean
+    painPoints: string[]
+  }>) => {
+    // 스텝 변경 시 진행 상태 자동 저장 (filter out empty string values)
+    const filteredData: Partial<OnboardingData> = {}
+    if (data.nickname) filteredData.nickname = data.nickname
+    // Filter out empty strings that are valid in Wizard but not in OnboardingData
+    if (data.investmentStyle) {
+      filteredData.investmentStyle = data.investmentStyle as OnboardingData['investmentStyle']
+    }
+    if (data.experience) {
+      filteredData.experience = data.experience as OnboardingData['experience']
+    }
+    if (data.interests) filteredData.interests = data.interests
+    if (data.painPoints) filteredData.painPoints = data.painPoints
+    if (data.acceptedDisclaimer !== undefined) filteredData.acceptedDisclaimer = data.acceptedDisclaimer
+
+    saveProgress(step, filteredData)
   }, [saveProgress])
 
   // 로딩 중
@@ -114,7 +135,7 @@ export function OnboardingContent() {
     <OnboardingWizard
       onComplete={handleComplete}
       onSkip={handleSkip}
-      onStepChange={handleStepChange as any}
+      onStepChange={handleStepChange}
       initialStep={currentStep}
       initialData={initialData ?? undefined}
     />
