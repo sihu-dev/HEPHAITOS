@@ -8,7 +8,8 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserClient, SupabaseClient } from '@supabase/ssr'
+import { createBrowserClient } from '@supabase/ssr'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 interface DisclaimerVersion {
   id: string
