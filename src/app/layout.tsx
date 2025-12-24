@@ -1,15 +1,11 @@
 import type { Metadata } from 'next'
-import { Inter, IBM_Plex_Mono } from 'next/font/google'
 import { Suspense } from 'react'
 import '@/styles/globals.css'
 import { Providers } from './providers'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['latin'],
-  variable: '--font-ibm-plex-mono',
-})
+// Using system fonts for offline/sandbox build compatibility
+// TODO: Re-enable Google Fonts (Inter, IBM Plex Mono) when network is available
+const fontClasses = 'font-sans'
 
 export const metadata: Metadata = {
   title: {
@@ -62,7 +58,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko" className="dark">
-      <body className={`${inter.variable} ${ibmPlexMono.variable} antialiased`}>
+      <body className={`${fontClasses} antialiased`}>
         {/* Skip to main content link for keyboard users */}
         <a
           href="#main-content"
