@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useState, useMemo, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import ReactFlow, {
   Background,
   Controls,
@@ -64,11 +65,14 @@ import {
   type ValidationResult,
 } from '@/lib/strategy-validation'
 
-// Strategy Generator
-import { AIStrategyGenerator } from './AIStrategyGenerator'
-
 // i18n
 import { useI18n } from '@/i18n/client'
+
+// Dynamic import for AIStrategyGenerator (includes framer-motion) to reduce bundle size
+const AIStrategyGenerator = dynamic(
+  () => import('./AIStrategyGenerator').then(m => ({ default: m.AIStrategyGenerator })),
+  { ssr: false }
+)
 
 const nodeTypes = {
   trigger: TriggerNode,

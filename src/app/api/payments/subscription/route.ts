@@ -4,6 +4,7 @@
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import {
   PRICING_PLANS,
   type PlanType,
@@ -48,7 +49,7 @@ export async function GET() {
       },
     })
   } catch (error) {
-    console.error('[Subscription GET] Error:', error)
+    safeLogger.error('[Subscription GET] Error retrieving subscription', { error })
     return NextResponse.json(
       { error: '구독 정보 조회 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
       message: '결제를 진행해주세요.',
     })
   } catch (error) {
-    console.error('[Subscription POST] Error:', error)
+    safeLogger.error('[Subscription POST] Error changing subscription', { error })
     return NextResponse.json(
       { error: '구독 변경 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -127,7 +128,7 @@ export async function DELETE() {
       currentPeriodEnd: mockSubscription.currentPeriodEnd,
     })
   } catch (error) {
-    console.error('[Subscription DELETE] Error:', error)
+    safeLogger.error('[Subscription DELETE] Error canceling subscription', { error })
     return NextResponse.json(
       { error: '구독 취소 중 오류가 발생했습니다.' },
       { status: 500 }

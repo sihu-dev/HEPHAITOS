@@ -62,10 +62,13 @@ export const GET = withApiMiddleware(
       return createApiResponse(mockPortfolio)
     }
 
-    // Try to fetch real portfolio data from Supabase
+    // Optimized: Fetch portfolio with positions in a single query using join
     const { data: portfolioData, error: portfolioError } = await supabase
       .from('portfolios')
-      .select('*')
+      .select(`
+        *,
+        positions (*)
+      `)
       .eq('user_id', user.id)
       .single()
 
@@ -75,11 +78,8 @@ export const GET = withApiMiddleware(
       return createApiResponse(mockPortfolio)
     }
 
-    // Fetch positions for this portfolio
-    const { data: positions } = await supabase
-      .from('positions')
-      .select('*')
-      .eq('portfolio_id', portfolioData.id)
+    // Extract positions from the joined data
+    const positions = portfolioData.positions
 
     // Transform to Portfolio type
     const portfolio: Portfolio = {

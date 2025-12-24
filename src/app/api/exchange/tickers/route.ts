@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
       tickerMap[ticker.symbol] = ticker
     })
 
+    // Add cache headers to reduce repeated requests (5 second cache)
     return NextResponse.json({
       success: true,
       data: {
@@ -49,6 +50,10 @@ export async function GET(request: NextRequest) {
         tickers: tickerMap,
         count: tickers.length,
         timestamp: Date.now(),
+      },
+    }, {
+      headers: {
+        'Cache-Control': 'public, max-age=5, s-maxage=5, stale-while-revalidate=10',
       },
     })
   } catch (error) {

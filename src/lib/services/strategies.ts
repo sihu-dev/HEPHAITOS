@@ -3,6 +3,7 @@
 // Supabase 연동 + Mock 데이터 fallback
 // ============================================
 
+import { safeLogger } from '@/lib/utils/safe-logger'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { Strategy, StrategyConfig, StrategyPerformance } from '@/types'
@@ -94,7 +95,13 @@ export async function getStrategies(options?: {
   const { data, error, count } = await query
 
   if (error) {
-    console.error('[StrategyService] getStrategies error:', error)
+    safeLogger.error('[StrategyService] getStrategies error', {
+      error,
+      userId,
+      status,
+      page,
+      limit,
+    })
     // Fallback to mock - but prevent infinite loop
     let filtered = [...mockStrategies]
     if (userId) filtered = filtered.filter(s => s.userId === userId)
@@ -125,7 +132,7 @@ export async function getStrategyById(id: string): Promise<Strategy | null> {
     .single()
 
   if (error) {
-    console.error('[StrategyService] getStrategyById error:', error)
+    safeLogger.error('[StrategyService] getStrategyById error', { error, id })
     return mockStrategies.find(s => s.id === id) ?? null
   }
 
@@ -164,7 +171,11 @@ export async function createStrategy(
     .single()
 
   if (error) {
-    console.error('[StrategyService] createStrategy error:', error)
+    safeLogger.error('[StrategyService] createStrategy error', {
+      error,
+      strategyName: strategy.name,
+      userId: strategy.userId,
+    })
     throw new Error('전략 생성에 실패했습니다')
   }
 
@@ -199,10 +210,11 @@ export async function updateStrategy(
     .single()
 
   if (error) {
-    console.error('[StrategyService] updateStrategy error:', error)
+    safeLogger.error('[StrategyService] updateStrategy error', { error, id, updates })
     return updateMockStrategy(id, updates)
   }
 
+  safeLogger.info('[StrategyService] Strategy updated', { id })
   return data ? rowToStrategy(data as StrategyRow) : null
 }
 
@@ -222,10 +234,11 @@ export async function deleteStrategy(id: string): Promise<boolean> {
     .eq('id', id)
 
   if (error) {
-    console.error('[StrategyService] deleteStrategy error:', error)
+    safeLogger.error('[StrategyService] deleteStrategy error', { error, id })
     return deleteMockStrategy(id)
   }
 
+  safeLogger.info('[StrategyService] Strategy deleted', { id })
   return true
 }
 
@@ -263,7 +276,11 @@ export async function getStrategiesClient(options?: {
   const { data, error } = await query
 
   if (error) {
-    console.error('[StrategyService] getStrategiesClient error:', error)
+    safeLogger.error('[StrategyService] getStrategiesClient error', {
+      error,
+      userId: options?.userId,
+      status: options?.status,
+    })
     return mockStrategies
   }
 

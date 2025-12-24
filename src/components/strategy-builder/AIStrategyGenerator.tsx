@@ -5,7 +5,7 @@
 // Pain Point 기반: "코딩 없이 자연어로 전략 생성"
 // ============================================
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   SparklesIcon,
@@ -81,7 +81,7 @@ const PAIN_SOLUTION_MESSAGE = {
 // Main Component
 // ============================================
 
-export function AIStrategyGenerator({
+export const AIStrategyGenerator = memo(function AIStrategyGenerator({
   isOpen,
   onClose,
   onApply,
@@ -390,7 +390,7 @@ export function AIStrategyGenerator({
       </motion.div>
     </AnimatePresence>
   )
-}
+})
 
 // ============================================
 // Helper: Convert API Response to ReactFlow
@@ -541,5 +541,3 @@ function convertToReactFlow(
     ],
   }
 }
-
-export default AIStrategyGenerator

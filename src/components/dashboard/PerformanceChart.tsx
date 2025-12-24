@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { PresentationChartLineIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/i18n/client'
@@ -29,6 +29,23 @@ export function PerformanceChart() {
   const { t, locale } = useI18n()
   const [selectedRange, setSelectedRange] = useState('1M')
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null)
+
+  // Memoize expensive SVG path calculations
+  const { areaPath, linePath } = useMemo(() => {
+    const points = chartData.map((d, i) => {
+      const x = (i / (chartData.length - 1)) * 100
+      const y = 160 - ((d.value - minValue) / (maxValue - minValue)) * 160
+      return { x, y }
+    })
+
+    const pathPoints = points.map(p => `L ${p.x} ${p.y}`).join(' ')
+    const startY = 160 - ((chartData[0].value - minValue) / (maxValue - minValue)) * 160
+
+    return {
+      areaPath: `M 0 ${startY} ${pathPoints} L 100 160 L 0 160 Z`,
+      linePath: `M 0 ${startY} ${pathPoints}`,
+    }
+  }, [])
 
   return (
     <div className="border border-white/[0.06] rounded-lg overflow-hidden">
@@ -95,30 +112,13 @@ export function PerformanceChart() {
 
             {/* Area Fill */}
             <path
-              d={`
-                M 0 ${160 - ((chartData[0].value - minValue) / (maxValue - minValue)) * 160}
-                ${chartData.map((d, i) => {
-                  const x = (i / (chartData.length - 1)) * 100
-                  const y = 160 - ((d.value - minValue) / (maxValue - minValue)) * 160
-                  return `L ${x} ${y}`
-                }).join(' ')}
-                L 100 160
-                L 0 160
-                Z
-              `}
+              d={areaPath}
               fill="url(#chartGradient)"
             />
 
             {/* Line */}
             <path
-              d={`
-                M 0 ${160 - ((chartData[0].value - minValue) / (maxValue - minValue)) * 160}
-                ${chartData.map((d, i) => {
-                  const x = (i / (chartData.length - 1)) * 100
-                  const y = 160 - ((d.value - minValue) / (maxValue - minValue)) * 160
-                  return `L ${x} ${y}`
-                }).join(' ')}
-              `}
+              d={linePath}
               fill="none"
               stroke="rgba(255, 255, 255, 0.4)"
               strokeWidth="1.5"

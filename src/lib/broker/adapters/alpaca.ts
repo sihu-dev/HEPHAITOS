@@ -4,6 +4,7 @@
 // https://alpaca.markets
 // ============================================
 
+import { safeLogger } from '@/lib/utils/safe-logger'
 import type {
   UnifiedBroker,
   BrokerId,
@@ -162,7 +163,7 @@ export class AlpacaBroker implements UnifiedBroker {
         balance,
       }
     } catch (error) {
-      console.error('[AlpacaBroker] Connect failed:', error)
+      safeLogger.error('[AlpacaBroker] Connect failed', { error })
       return {
         success: false,
         message: '연결 실패',
@@ -428,7 +429,7 @@ export class AlpacaBroker implements UnifiedBroker {
 
   private connectWebSocket(symbol: string): void {
     // TODO: Implement Alpaca WebSocket connection
-    console.log(`[AlpacaBroker] WebSocket subscription for ${symbol}`)
+    safeLogger.debug('[AlpacaBroker] WebSocket subscription requested', { symbol })
   }
 
   subscribeOrders(callback: OrderCallback): () => void {
