@@ -104,9 +104,7 @@ describe('Strategy Validation Schemas', () => {
       expect(result.success).toBe(true)
     })
 
-    // Note: This test is skipped due to Zod v4 z.record() incompatibility issue
-    // The conditionSchema uses z.record() which has issues in Zod v4
-    it.skip('should accept condition with params', () => {
+    it('should accept condition with params', () => {
       const condition = {
         id: '1',
         indicator: 'RSI',
@@ -116,6 +114,7 @@ describe('Strategy Validation Schemas', () => {
       }
 
       const result = conditionSchema.safeParse(condition)
+      // Params are optional in schema, validation should pass
       expect(result.success).toBe(true)
     })
 
