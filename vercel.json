@@ -4,6 +4,26 @@
     {
       "path": "/api/cron/daily-summary",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/batch-backtest?action=submit",
+      "schedule": "0 22 * * *"
+    },
+    {
+      "path": "/api/cron/batch-backtest?action=retrieve",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/batch-analysis?action=submit",
+      "schedule": "0 22 * * *"
+    },
+    {
+      "path": "/api/cron/batch-analysis?action=retrieve",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/poll-batch-results",
+      "schedule": "*/15 * * * *"
     }
   ]
 }

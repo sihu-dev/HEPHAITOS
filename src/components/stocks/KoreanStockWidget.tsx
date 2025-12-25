@@ -185,12 +185,12 @@ export default function KoreanStockWidget() {
   }
 
   return (
-    <div className="bg-[#0D0D0F] text-white rounded-xl border border-white/10 overflow-hidden">
+    <div className="bg-background-primary text-white rounded-xl border border-white/10 overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold flex items-center gap-2">
-            <Activity className="w-5 h-5 text-[#5E6AD2]" />
+            <Activity className="w-5 h-5 text-primary" />
             한국 주식
           </h2>
           <button
@@ -287,12 +287,12 @@ export default function KoreanStockWidget() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder="종목 코드 (예: 005930)"
-                  className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5E6AD2] text-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary text-sm"
                 />
               </div>
               <button
                 onClick={handleSearch}
-                className="px-4 py-2 bg-[#5E6AD2] text-white rounded-lg hover:bg-[#4E5AC2] transition-colors text-sm"
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4E5AC2] transition-colors text-sm"
               >
                 검색
               </button>
@@ -331,7 +331,7 @@ function TabButton({
       onClick={onClick}
       className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
         active
-          ? 'bg-[#5E6AD2] text-white'
+          ? 'bg-primary text-white'
           : 'bg-white/5 text-gray-400 hover:text-white'
       }`}
     >
@@ -343,7 +343,7 @@ function TabButton({
 function LoadingSpinner() {
   return (
     <div className="flex items-center justify-center py-8">
-      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#5E6AD2]" />
+      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
     </div>
   )
 }

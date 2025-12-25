@@ -175,7 +175,7 @@ export function AIStrategyGenerator({
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-2xl mx-4 bg-[#0D0D0F] border border-white/[0.06] rounded-xl overflow-hidden shadow-2xl"
+          className="w-full max-w-2xl mx-4 bg-background-primary border border-white/[0.06] rounded-xl overflow-hidden shadow-2xl"
         >
           {/* Header - Pain Point 강조 */}
           <div className="px-6 py-4 border-b border-white/[0.06]">

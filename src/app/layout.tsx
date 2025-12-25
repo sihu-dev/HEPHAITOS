@@ -17,27 +17,61 @@ export const metadata: Metadata = {
     template: '%s | HEPHAITOS',
   },
   description: '코딩 없이, 나만의 트레이딩 시스템을 만드세요. 데이터 기반 전략 빌더로 백테스트부터 실전 운용까지.',
-  keywords: ['트레이딩', '투자', '전략', '빌더', '노코드', '백테스트', '자동매매', 'trading', 'strategy'],
+  keywords: ['트레이딩', '투자', '전략', '빌더', '노코드', '백테스트', '자동매매', 'trading', 'strategy', 'algorithmic trading', 'backtesting', 'strategy builder'],
   authors: [{ name: 'HEPHAITOS', url: 'https://hephaitos.io' }],
   creator: 'HEPHAITOS',
   publisher: 'HEPHAITOS',
   metadataBase: new URL('https://hephaitos.io'),
+  alternates: {
+    canonical: '/',
+    languages: {
+      'ko-KR': '/ko',
+      'en-US': '/en',
+    },
+  },
   icons: {
     icon: '/favicon.svg',
     apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: 'cover',
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0D0D0F' },
+    { media: '(prefers-color-scheme: light)', color: '#0D0D0F' },
+  ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'HEPHAITOS',
+  },
   openGraph: {
-    title: 'HEPHAITOS - 트레이딩 시스템 빌더',
-    description: '코딩 없이, 나만의 트레이딩 시스템을 만드세요.',
+    title: 'HEPHAITOS - AI Trading Strategy Builder',
+    description: 'Build, test, and deploy automated trading strategies without coding. From backtesting to live trading.',
     type: 'website',
     locale: 'ko_KR',
     siteName: 'HEPHAITOS',
+    url: 'https://hephaitos.io',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'HEPHAITOS - Trading Strategy Builder',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'HEPHAITOS - 트레이딩 시스템 빌더',
-    description: '코딩 없이, 나만의 트레이딩 시스템을 만드세요.',
+    title: 'HEPHAITOS - AI Trading Strategy Builder',
+    description: 'Build automated trading strategies without coding',
+    images: ['/twitter-image.png'],
+    creator: '@hephaitos_io',
   },
   robots: {
     index: true,
@@ -53,6 +87,7 @@ export const metadata: Metadata = {
   verification: {
     google: 'google-site-verification-code',
   },
+  category: 'finance',
 }
 
 export default function RootLayout({

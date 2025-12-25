@@ -21,6 +21,7 @@ import {
   AcademicCapIcon,
   BeakerIcon,
   ChatBubbleLeftRightIcon,
+  QueueListIcon,
 } from '@heroicons/react/24/outline'
 import { useI18n } from '@/i18n/client'
 
@@ -87,6 +88,13 @@ const mainNavItemsConfig = [
     icon: BeakerIcon,
     labelKey: 'backtest',
     href: '/dashboard/backtest',
+    stage: 'BUILD',
+    stageColor: 'amber',
+  },
+  {
+    icon: QueueListIcon,
+    labelKey: 'backtestQueue',
+    href: '/dashboard/queue',
     stage: 'BUILD',
     stageColor: 'amber',
   },
@@ -184,7 +192,7 @@ export const Sidebar = memo(function Sidebar() {
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen bg-[#0D0D0F] border-r border-white/[0.06] z-40 transition-all duration-200 hidden lg:flex flex-col ${
+        className={`fixed left-0 top-0 h-screen bg-background-primary border-r border-white/[0.06] z-40 transition-all duration-200 hidden lg:flex flex-col ${
           isCollapsed ? 'w-14' : 'w-52'
         }`}
       >
@@ -300,7 +308,7 @@ export const Sidebar = memo(function Sidebar() {
 
       {/* Mobile Bottom Navigation - COPY/LEARN/BUILD 핵심만 */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[#0D0D0F] border-t border-white/[0.06]"
+        className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-background-primary border-t border-white/[0.06]"
         aria-label={t('dashboard.sidebar.mobileNavigation') as string}
       >
         <div className="flex items-center justify-around h-14">

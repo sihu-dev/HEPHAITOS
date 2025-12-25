@@ -46,7 +46,7 @@ async function saveEventToSupabase(
       referrer: typeof document !== 'undefined' ? document.referrer : null,
       properties: properties || {},
       user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
-    } as any)
+    })
   } catch (error) {
     // 테이블이 없으면 조용히 실패 (마이그레이션 전)
     if (process.env.NODE_ENV === 'development') {

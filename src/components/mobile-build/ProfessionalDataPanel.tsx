@@ -141,8 +141,8 @@ export function ProfessionalDataPanel({
 
         {/* 상세 통계 */}
         {backtestResults && (
-          <div className="mt-4 p-3 bg-[#5E6AD2]/10 border border-[#5E6AD2]/20 rounded-lg">
-            <h4 className="text-xs font-semibold text-[#5E6AD2] mb-3">상세 통계</h4>
+          <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+            <h4 className="text-xs font-semibold text-primary mb-3">상세 통계</h4>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-zinc-400">총 거래 횟수</span>
@@ -216,7 +216,7 @@ export function ProfessionalDataPanel({
                 <h4 className="text-xs font-semibold text-amber-400 mb-1">투자 유의사항</h4>
                 <p className="text-xs text-zinc-400">
                   과거 성과는 미래 수익을 보장하지 않습니다.
-                  실전 투자 전 반드시 소액으로 테스트하세요.
+                  실전 투자 전 소액으로 테스트하는 것을 권장합니다.
                 </p>
               </div>
             </div>
@@ -227,7 +227,7 @@ export function ProfessionalDataPanel({
       {/* 하단 액션 버튼 */}
       {backtestResults && (
         <div className="flex-shrink-0 p-3 border-t border-white/[0.06] space-y-2">
-          <button className="w-full py-2 bg-[#5E6AD2] text-white text-xs font-medium rounded-lg hover:bg-[#7C8AEA] transition-all flex items-center justify-center gap-2">
+          <button className="w-full py-2 bg-primary text-white text-xs font-medium rounded-lg hover:bg-[#7C8AEA] transition-all flex items-center justify-center gap-2">
             <span>📊</span>
             <span>상세 리포트 보기</span>
           </button>

@@ -71,8 +71,8 @@ export async function getStrategies(options?: {
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  let query = (supabase as any)
+
+  let query = supabase
     .from('strategies')
     .select('*', { count: 'exact' })
 
@@ -117,8 +117,8 @@ export async function getStrategyById(id: string): Promise<Strategy | null> {
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('strategies')
     .select('*')
     .eq('id', id)
@@ -150,8 +150,8 @@ export async function createStrategy(
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  const { data, error } = await (supabase as any)
+
+  const { data, error } = await supabase
     .from('strategies')
     .insert({
       user_id: strategy.userId,
@@ -191,7 +191,7 @@ export async function updateStrategy(
   if (updates.config !== undefined) updateData.config = updates.config
   if (updates.performance !== undefined) updateData.performance = updates.performance
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('strategies')
     .update(updateData)
     .eq('id', id)
@@ -215,8 +215,8 @@ export async function deleteStrategy(id: string): Promise<boolean> {
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  const { error } = await (supabase as any)
+
+  const { error } = await supabase
     .from('strategies')
     .delete()
     .eq('id', id)
@@ -252,7 +252,7 @@ export async function getStrategiesClient(options?: {
     return mockStrategies
   }
 
-  let query = (supabase as any)
+  let query = supabase
     .from('strategies')
     .select('*')
     .order('updated_at', { ascending: false })

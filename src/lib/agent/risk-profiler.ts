@@ -310,7 +310,7 @@ export class RiskProfiler {
       }
 
       if (positionSize > 20 && positionSize <= 50) {
-        warnings.push('포지션 크기가 20%를 초과합니다. 분산 투자를 고려하세요')
+        warnings.push('포지션 크기가 20%를 초과합니다. 분산 투자를 고려할 수 있습니다')
       }
     }
 

@@ -78,14 +78,14 @@ export const POST = withApiMiddleware(
 
     // Map validation data to service layer format
     const onboardingData = {
-      nickname: validation.data.investmentExperience, // Adjust mapping as needed
+      nickname: user.email?.split('@')[0] || 'User', // Use email prefix or default
       investmentStyle: validation.data.riskProfile,
       experience: validation.data.investmentExperience,
       interests: validation.data.preferredSectors,
       painPoints: [],
     }
 
-    const profile = await completeOnboarding(user.id, onboardingData as any)
+    const profile = await completeOnboarding(user.id, onboardingData)
 
     return createApiResponse({
       message: '온보딩이 완료되었습니다',

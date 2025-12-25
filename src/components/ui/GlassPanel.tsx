@@ -31,7 +31,7 @@ const intensityStyles: Record<GlassIntensity, string> = {
 
 const variantStyles: Record<GlassVariant, string> = {
   neutral: '',
-  primary: 'bg-[#5E6AD2]/[0.08]',
+  primary: 'bg-primary/[0.08]',
   profit: 'bg-emerald-500/[0.08]',
   loss: 'bg-red-500/[0.08]',
 }
@@ -62,7 +62,7 @@ const glowStyles: Record<GlassVariant, string> = {
 
 const borderStyles: Record<GlassVariant, string> = {
   neutral: 'border-white/[0.06]',
-  primary: 'border-[#5E6AD2]/20',
+  primary: 'border-primary/20',
   profit: 'border-emerald-500/20',
   loss: 'border-red-500/20',
 }

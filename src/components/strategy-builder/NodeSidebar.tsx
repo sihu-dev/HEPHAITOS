@@ -121,7 +121,7 @@ export const NodeSidebar = memo(function NodeSidebar({ onAddNode }: NodeSidebarP
   }
 
   return (
-    <div className="w-56 bg-[#0D0D0F] border-r border-white/[0.06] overflow-y-auto">
+    <div className="w-56 bg-background-primary border-r border-white/[0.06] overflow-y-auto">
       {/* Header */}
       <div className="px-3 py-3 border-b border-white/[0.06]">
         <h2 className="text-sm font-medium text-white">{t('dashboard.nodeSidebar.title') as string}</h2>

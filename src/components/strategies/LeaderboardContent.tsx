@@ -13,7 +13,7 @@ export function LeaderboardContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0D0D0F] p-6">
+    <div className="min-h-screen bg-background-primary p-6">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold text-white mb-6">전략 리더보드</h1>
         
@@ -24,7 +24,7 @@ export function LeaderboardContent() {
               onClick={() => setTimeframe(tf)}
               className={`px-3 py-1.5 rounded text-sm ${
                 timeframe === tf
-                  ? 'bg-[#5E6AD2] text-white'
+                  ? 'bg-primary text-white'
                   : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
               }`}
             >

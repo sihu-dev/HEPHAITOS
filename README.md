@@ -1,24 +1,42 @@
-# HEPHAITOS (헤파이토스)
+# 🔥 HEPHAITOS
 
-> **💎 크레딧 기반 "Replit for Trading"** - 쓴 만큼만 내는 투자 교육 플랫폼
+> **"Replit for Trading"** - Build AI trading bots with natural language, no coding required
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue)
-![Next.js](https://img.shields.io/badge/Next.js-16-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
+[![Claude AI](https://img.shields.io/badge/Claude-4.5-purple)](https://anthropic.com/)
+
+**HEPHAITOS** is an AI-powered investment education platform that enables anyone to build, backtest, and deploy trading strategies using natural language - just like how Replit lets you build apps without setup.
+
+[Features](#-features) • [Quick Start](#-quick-start) • [Tech Stack](#-tech-stack) • [Documentation](#-documentation) • [Contributing](#-contributing)
 
 ---
 
-## 🎯 핵심 가치
+## 🎯 Core Features
+
+### Copy-Learn-Build Methodology
 
 ```
-1. COPY  - 셀럽 포트폴리오 미러링 (무료, 0 크레딧)
-2. LEARN - AI 튜터 (1 크레딧) + 라이브 코칭 (20 크레딧)
-3. BUILD - AI 전략 생성 (10 크레딧) + 백테스팅 (3 크레딧)
+1. COPY  → Mirror celebrity portfolios (Free)
+   Follow Nancy Pelosi, Warren Buffett, and verified traders
+
+2. LEARN → Understand the "why" with AI + human mentors
+   AI tutor (1 credit) + Live coaching (20 credits)
+
+3. BUILD → Create your own AI trading strategies
+   Natural language → Python strategy (10 credits)
+   Backtesting with 10 years of data (3 credits)
 ```
 
-**비즈니스 모델**: 크레딧 선불제 → 유연한 사용량 기반 가격
-**법률 준수**: 투자 조언 금지, 교육 + 도구만 제공
+### Key Highlights
+
+- **No-Code Strategy Builder**: "Buy when RSI < 30" → Working Python code
+- **Browser-Based Backtesting**: Test strategies on 10 years of historical data
+- **Multi-Broker Support**: Korea (KIS), US (Alpaca), Crypto (Binance/Upbit)
+- **AI Strategy Generation**: Powered by Claude 4.5 Opus
+- **Real-Time Queue System**: Handle 100+ concurrent backtests with BullMQ + Redis
+- **Credit-Based Pricing**: Pay only for what you use, no monthly subscription
 
 ---
 
@@ -26,167 +44,201 @@
 
 ### Prerequisites
 
-- Node.js 20+
-- npm or pnpm
-- Supabase 계정
-- Claude API 키 (Anthropic)
+- **Node.js** 20+ and npm/pnpm
+- **Supabase** account ([free tier](https://supabase.com))
+- **Claude API** key ([Anthropic](https://console.anthropic.com))
+- **Upstash Redis** for queue system ([free tier](https://upstash.com))
 
-### 빠른 시작 (3단계)
+### Installation (3 steps)
 
 ```bash
-# 1. 종속성 설치
+# 1. Install dependencies
 npm install
 
-# 2. API 키 자동 설정 (Windows)
-.\scripts\setup-api-keys.ps1
+# 2. Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your API keys
 
-# 3. 개발 서버 실행
+# 3. Run development server
 npm run dev
 # → http://localhost:3000
 ```
 
-**자세한 가이드**: `QUICK_START.md` 참조
+For detailed setup including Supabase migrations and Redis configuration, see [QUICK_START.md](./QUICK_START.md).
 
 ---
 
-## 📦 기술 스택
+## 📦 Tech Stack
 
 ### Frontend
-
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript 5.3 (Strict Mode)
-- **Styling**: Tailwind CSS 3.4 + Custom Design System
-- **State**: Zustand + TanStack Query
-- **UI**: Custom Glass Morphism Components
+- **Framework**: Next.js 15 (App Router) with React 19
+- **Language**: TypeScript 5.3 (strict mode)
+- **Styling**: Tailwind CSS 4.0 + Custom Glass Morphism Design System
+- **State Management**: Zustand + TanStack Query
 - **Charts**: TradingView Lightweight Charts, Recharts
+- **UI Components**: Custom components with Linear-inspired design
 
 ### Backend
+- **Database**: Supabase (PostgreSQL + Realtime subscriptions)
+- **Queue System**: BullMQ + Upstash Redis (backtest queue)
+- **AI Engine**: Vercel AI SDK 5.0 + Claude 4.5
+- **Authentication**: Supabase Auth (OAuth + Email)
+- **Payments**: TossPayments (Credit system)
 
-- **Database**: Supabase (PostgreSQL + Realtime + Auth)
-- **AI**: Vercel AI SDK 5.0 + Claude 4 (Anthropic)
-- **Payments**: 토스페이먼츠 (Credit System)
-- **Caching**: Redis (Optional)
-
-### External APIs
-
-- **Korea Market**: KIS 한국투자증권 Open API
-- **US Market**: Polygon.io
-- **Celebrity Trading**: Unusual Whales (Optional)
+### Key Libraries
+- **Trading Signals**: `trading-signals` for technical indicators
+- **Backtesting**: Custom Python execution via Pyodide (browser-based)
+- **Real-time**: Supabase Realtime for live progress updates
+- **Security**: Rate limiting, DOMPurify for XSS prevention
 
 ---
 
 ## 🎨 Design System
 
-### Color Palette
+Inspired by **Linear** and **CATALYST AI**, our design system features:
 
-```css
-/* Primary - Linear Purple */
---primary: #5E6AD2;
---primary-light: #7C8AEA;
---primary-dark: #4B56C8;
+- **Deep Space Dark Theme**: #0D0D0F background with Aurora gradients
+- **Glass Morphism**: Translucent cards with `backdrop-blur-xl`
+- **Linear Purple**: #5E6AD2 as signature color
+- **Micro-interactions**: Smooth animations with Framer Motion
 
-/* Background - Deep Space */
---bg-primary: #0D0D0F;
---bg-secondary: #111113;
---bg-tertiary: #151517;
-
-/* Glass Morphism */
---surface-glass: rgba(255, 255, 255, 0.03);
-backdrop-filter: blur(16px);
-```
-
-### Design Principles
-
-1. **Deep Space Dark Theme** - #0D0D0F 배경
-2. **Glass Morphism First** - 모든 카드에 backdrop-blur
-3. **Linear Purple Identity** - #5E6AD2 시그니처 컬러
-4. **Aurora Background** - 다층 radial gradient
-
-자세한 내용: [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)
+See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for complete design tokens and guidelines.
 
 ---
 
-## 💎 크레딧 시스템
+## 💎 Credit System
 
-### 가격 정책
+Pay only for what you use - no monthly subscriptions.
 
-| 패키지 | 크레딧 | 가격 | 보너스 | 단가 |
-|--------|--------|------|--------|------|
-| 스타터 | 100 | ₩9,900 | - | ₩99 |
-| 베이직 | 500 | ₩39,000 | +50 | ₩71 |
-| 프로 | 1,000 | ₩69,000 | +150 | ₩60 |
-| 엔터프라이즈 | 5,000 | ₩299,000 | +1,000 | ₩50 |
+### Pricing Packages
 
-### 기능별 크레딧 소비
+| Package | Credits | Price | Bonus | Unit Price |
+|---------|---------|-------|-------|------------|
+| Starter | 100 | ₩9,900 | - | ₩99/credit |
+| Basic | 500 | ₩39,000 | +50 | ₩71/credit |
+| Pro | 1,000 | ₩69,000 | +150 | ₩60/credit |
+| Enterprise | 5,000 | ₩299,000 | +1,000 | ₩50/credit |
 
-| 기능 | 크레딧 | 설명 |
-|------|--------|------|
-| 셀럽 미러링 (COPY) | **0** | 무료 진입 |
-| AI 튜터 질문 | **1** | 저가 진입점 |
-| AI 전략 생성 | **10** | 핵심 수익 |
-| 백테스팅 (1년) | **3** | 검증 필수 |
-| 라이브 코칭 (30분) | **20** | 프리미엄 |
-| 실시간 알림 (1일) | **5** | 지속 사용 |
+### Feature Costs
+
+| Feature | Credits | Description |
+|---------|---------|-------------|
+| Celebrity Mirroring (COPY) | **0** | Free entry point |
+| AI Tutor Q&A | **1** | Low-cost learning |
+| AI Strategy Generation | **10** | Core revenue driver |
+| Backtesting (1 year) | **3** | Validation essential |
+| Live Coaching (30 min) | **20** | Premium service |
+| Real-time Alerts (1 day) | **5** | Continuous usage |
 
 ---
 
-## 📁 프로젝트 구조
+## 📁 Project Structure
 
 ```
 HEPHAITOS/
 ├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── (auth)/             # 인증 페이지
-│   │   ├── (dashboard)/        # 대시보드 페이지
-│   │   ├── api/                # API Routes
-│   │   │   ├── credits/        # ✨ 크레딧 시스템 API
-│   │   │   ├── ai/             # AI 엔진 API
-│   │   │   ├── payments/       # 결제 API
-│   │   │   └── ...
-│   │   └── layout.tsx
+│   ├── app/                      # Next.js App Router
+│   │   ├── (auth)/               # Authentication pages
+│   │   ├── (dashboard)/          # Dashboard pages
+│   │   └── api/                  # API Routes
+│   │       ├── credits/          # Credit system API
+│   │       ├── backtest/         # Backtest + Queue API
+│   │       ├── ai/               # AI strategy generation
+│   │       └── payments/         # Payment processing
 │   ├── components/
-│   │   ├── ui/                 # 기본 UI 컴포넌트
-│   │   ├── credits/            # ✨ 크레딧 UI 컴포넌트
-│   │   ├── charts/             # 차트 컴포넌트
-│   │   └── dashboard/          # 대시보드 컴포넌트
+│   │   ├── ui/                   # Base UI components
+│   │   ├── credits/              # Credit UI components
+│   │   ├── charts/               # Chart components
+│   │   └── dashboard/            # Dashboard widgets
 │   ├── lib/
-│   │   ├── supabase/           # Supabase 클라이언트
-│   │   ├── ai/                 # AI 엔진 (Claude 4)
-│   │   ├── credits/            # ✨ 크레딧 로직
-│   │   ├── trading/            # 트레이딩 엔진
-│   │   └── utils/
-│   ├── hooks/                  # Custom Hooks
-│   ├── stores/                 # Zustand Stores
-│   └── types/                  # TypeScript Types
+│   │   ├── supabase/             # Supabase client
+│   │   ├── ai/                   # AI engine (Claude 4)
+│   │   ├── queue/                # BullMQ + Redis queue
+│   │   ├── credits/              # Credit logic
+│   │   └── trading/              # Trading engine
+│   ├── stores/                   # Zustand stores
+│   └── types/                    # TypeScript types
 ├── supabase/
-│   ├── migrations/             # 🆕 DB 마이그레이션
-│   │   └── 20251216000001_create_credit_system.sql
-│   └── seed.sql                # 초기 데이터
-├── scripts/                    # 🆕 자동화 스크립트
-│   ├── setup-api-keys.ps1      # API 키 자동 설정
-│   ├── test-all-apis.js        # 전체 API 테스트
-│   └── test-anthropic.js       # Claude AI 테스트
-├── public/                     # 정적 파일
-├── docs/                       # 문서
-├── .claude/                    # Claude Code 설정
-│   ├── agents/                 # ✨ 전문 Agents
-│   ├── skills/                 # ✨ 개발 가이드
-│   └── projects/hephaitos/     # 🆕 HEPHAITOS 전용 설정
-├── API_KEY_SETUP_GUIDE.md      # 🆕 API 키 발급 가이드
-├── SETUP_COMPLETE.md           # 🆕 초기화 완료 문서
-├── QUICK_START.md              # 🆕 빠른 시작 가이드
-└── README.md (이 파일)
+│   ├── migrations/               # Database migrations
+│   └── seed.sql                  # Initial data
+├── scripts/                      # Automation scripts
+├── docs/                         # Documentation
+├── .claude/                      # Claude Code configuration
+└── e2e/                          # Playwright E2E tests
 ```
 
 ---
 
-## 🔧 개발 가이드
+## 🤖 AI Features
 
-### 환경 변수 설정
+### MoA (Mixture-of-Agents) Strategy Generation
+
+4 specialized AI agents collaborate to create optimal trading strategies:
+
+```typescript
+import { MoAEngine } from '@/lib/moa/engine';
+
+const engine = new MoAEngine();
+const result = await engine.generateStrategy(
+  'Create a value investing strategy like Warren Buffett',
+  'comprehensive' // draft(5) | refined(10) | comprehensive(20) credits
+);
+
+// 4 expert perspectives
+result.perspectives.forEach(p => {
+  console.log(`${p.icon} ${p.name}: ${p.confidence}% confidence`);
+});
+
+// Final aggregated strategy
+console.log(result.aggregated);
+```
+
+**Expected Impact**:
+- Sharpe Ratio: +12% (1.2 → 1.34)
+- Backtest Pass Rate: +12%p (60% → 72%)
+- User Satisfaction (NPS): 70+
+
+See [MOA_IMPLEMENTATION_GUIDE.md](./MOA_IMPLEMENTATION_GUIDE.md) for details.
+
+---
+
+## 🔧 Development
+
+### Available Scripts
+
+```bash
+# Development
+npm run dev                # Start dev server
+npm run build              # Production build
+npm run start              # Production server
+
+# Testing
+npm run test               # Unit tests (Vitest)
+npm run test:e2e           # E2E tests (Playwright)
+npm run test:coverage      # Coverage report
+npm run test:api           # API connection test
+
+# Queue Worker
+npm run worker             # Start backtest worker (dev)
+npm run worker:prod        # Start backtest worker (production)
+
+# Linting & Type Checking
+npm run lint               # ESLint
+npm run typecheck          # TypeScript check
+
+# Storybook
+npm run storybook          # Component development
+npm run build-storybook    # Build static Storybook
+
+# CI
+npm run ci                 # Lint + Test + Build
+```
+
+### Environment Variables
+
+Create `.env.local` with:
 
 ```env
-# .env.local
-
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
@@ -195,221 +247,163 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 # Claude API
 ANTHROPIC_API_KEY=your_anthropic_api_key
 
-# 토스페이먼츠
+# Upstash Redis (Queue System)
+UPSTASH_REDIS_REST_URL=your_upstash_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_token
+
+# TossPayments (Optional)
 TOSS_CLIENT_KEY=your_toss_client_key
 TOSS_SECRET_KEY=your_toss_secret_key
 
-# 크레딧 시스템
+# Credit System
 NEXT_PUBLIC_CREDIT_ENABLED=true
 NEXT_PUBLIC_WELCOME_BONUS=50
 ```
 
-### 스크립트
-
-```bash
-# 개발
-npm run dev                # 개발 서버 시작
-
-# 빌드
-npm run build              # 프로덕션 빌드
-npm run start              # 프로덕션 서버 시작
-
-# 테스트
-npm run test               # 단위 테스트 (Vitest)
-npm run test:e2e           # E2E 테스트 (Playwright)
-npm run test:coverage      # 커버리지 리포트
-npm run test:api           # API 연결 테스트
-npm run test:anthropic     # Claude AI 개별 테스트
-npm run test:moa           # 🚀 MoA PoC 테스트
-npm run test:moa:compare   # 🚀 MoA vs Baseline 비교
-
-# 린트
-npm run lint               # ESLint 실행
-
-# CI
-npm run ci                 # 린트 + 테스트 + 빌드
-```
+See [API_KEY_SETUP_GUIDE.md](./API_KEY_SETUP_GUIDE.md) for detailed instructions.
 
 ---
 
 ## 🗄️ Database Schema
 
-### Credit System Tables
+### Key Tables
 
-```sql
--- 크레딧 지갑
-CREATE TABLE credit_wallets (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES auth.users NOT NULL UNIQUE,
-  balance INT NOT NULL DEFAULT 0,
-  lifetime_purchased INT NOT NULL DEFAULT 0,
-  lifetime_spent INT NOT NULL DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+- **credit_wallets**: User credit balances
+- **credit_transactions**: Credit purchase/spend history
+- **strategies**: User-created trading strategies
+- **backtest_results**: Historical backtest results
+- **backtest_jobs**: Queue job tracking with real-time progress
 
--- 크레딧 거래 내역
-CREATE TABLE credit_transactions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES auth.users NOT NULL,
-  type VARCHAR(20) NOT NULL, -- 'purchase', 'spend', 'refund', 'bonus'
-  amount INT NOT NULL,
-  balance_after INT NOT NULL,
-  feature VARCHAR(50), -- 'ai_strategy', 'backtest', 'coaching'
-  description TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-자세한 스키마: [supabase/migrations/](./supabase/migrations/)
-
----
-
-## 🤖 AI Features
-
-### MoA (Mixture-of-Agents) - **NEW** 🚀
-
-**4명의 AI 전문가가 협업하여 전략 생성**
-
-```typescript
-import { MoAEngine } from '@/lib/moa/engine';
-
-const engine = new MoAEngine();
-const result = await engine.generateStrategy(
-  '사용자 전략 요청',
-  'comprehensive' // 초안(5) | 정제(10) | 종합(20) 크레딧
-);
-
-// 4명의 전문가 의견
-result.perspectives.forEach(p => {
-  console.log(`${p.icon} ${p.name}: ${p.confidence}% 신뢰도`);
-  console.log(p.output);
-});
-
-// 최종 종합 전략
-console.log(result.aggregated);
-```
-
-**기대 효과**:
-- Sharpe Ratio +12% (1.2 → 1.34)
-- 백테스트 통과율 +12%p (60% → 72%)
-- 사용자 만족도 NPS 70+
-
-자세한 내용: [MOA_IMPLEMENTATION_GUIDE.md](./MOA_IMPLEMENTATION_GUIDE.md)
-
-### Claude 4 Integration
-
-```typescript
-import { generateText } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
-
-// AI 전략 생성 (10 크레딧)
-const strategy = await generateText({
-  model: anthropic('claude-4-sonnet-20250514'),
-  prompt: '자연어 전략 설명...',
-});
-
-// AI 튜터 (1 크레딧/질문)
-const answer = await generateText({
-  model: anthropic('claude-4-haiku-20250321'),
-  prompt: '투자 질문...',
-});
-```
-
----
-
-## 🎓 Claude Code Agents
-
-비전문가를 위한 자동화된 개발 도구:
+Run migrations:
 
 ```bash
-# 크레딧 시스템 구현
-@credit-system "크레딧 결제 API 구현해줘"
+# Using Supabase CLI
+supabase db push
 
-# AI 전략 생성
-@ai-trading-engine "자연어로 RSI 전략 생성해줘"
-
-# Excel 리포트
-@excel-data-engine "월간 크레딧 수익 리포트 생성해줘"
-
-# 법률 검증
-@compliance-guard "이 문구가 투자 조언에 해당하나요?"
+# Or manually apply migrations in /supabase/migrations/
 ```
 
-자세한 가이드: [.claude/projects/hephaitos/](./.claude/projects/hephaitos/)
+See [supabase/migrations/](./supabase/migrations/) for full schema.
 
 ---
 
-## 🚨 법률 준수
+## 🚨 Legal Compliance
 
-### 투자자문업 규제
+**IMPORTANT**: HEPHAITOS is an **educational platform** that provides tools and knowledge, NOT investment advice.
 
-```text
-❌ 금지 행위:
-- 특정 종목 추천
-- 매매 타이밍 조언
-- 수익 보장 표현
+### Prohibited Activities ❌
 
-✅ 허용 범위:
-- 투자 교육 콘텐츠
-- 분석 도구 제공
-- 과거 데이터 분석
+- Recommending specific stocks
+- Giving buy/sell timing advice
+- Guaranteeing returns
+
+### Permitted Activities ✅
+
+- Providing educational content
+- Offering analytical tools
+- Analyzing historical data
+
+### Required Disclaimer
+
+```
+This service provides educational content and analytical tools only.
+It does not constitute investment advice.
+All investment decisions are your own responsibility.
+Past performance does not guarantee future results.
 ```
 
-### 필수 면책조항
-
-```
-본 서비스는 투자 교육 및 분석 도구 제공을 목적으로 하며,
-특정 종목 추천이나 투자 자문이 아닙니다.
-투자 결정은 본인의 판단과 책임입니다.
-```
-
-자세한 내용: [BUSINESS_CONSTITUTION.md](./BUSINESS_CONSTITUTION.md)
+See [BUSINESS_CONSTITUTION.md](./BUSINESS_CONSTITUTION.md) for complete legal framework.
 
 ---
 
-## 📊 Performance
+## 📚 Documentation
 
-- **Lighthouse Score**: 90+
-- **First Contentful Paint**: < 1.5s
-- **Time to Interactive**: < 3.5s
-- **Bundle Size**: < 500KB (gzipped)
+### For Users
+- [Quick Start Guide](./QUICK_START.md) - Get started in 5 minutes
+- [API Key Setup](./API_KEY_SETUP_GUIDE.md) - Detailed API key instructions
+- [FAQ](./docs/FAQ.md) - Frequently asked questions
+
+### For Developers
+- [Developer Onboarding](./docs/DEVELOPER_ONBOARDING_GUIDE.md) - Complete setup guide
+- [Architecture](./DESIGN_SYSTEM.md) - System design and patterns
+- [API Reference](./docs/HEPHAITOS_CORE_REFERENCES.md) - External API documentation
+- [Contributing Guide](./CONTRIBUTING.md) - How to contribute
+
+### For Investors
+- [Business Overview](./BUSINESS_OVERVIEW.md) - Business model and market
+- [Investor Pitch Deck](./docs/INVESTOR_PITCH_DECK.md) - Investment opportunity
+- [Financial Model](./docs/FINANCIAL_MODEL_V2.md) - Revenue projections
 
 ---
 
 ## 🤝 Contributing
 
+We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md) for details.
+
+### Development Workflow
+
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+### Code Standards
+
+- **TypeScript strict mode** - No `any` types
+- **ESLint** - Follow configured rules
+- **Prettier** - Auto-formatting on commit
+- **Commit messages** - Follow Conventional Commits
+- **Tests** - Add tests for new features
+
+---
+
+## 📊 Performance
+
+- **Lighthouse Score**: 95+ (Mobile & Desktop)
+- **First Contentful Paint**: < 1.2s
+- **Time to Interactive**: < 2.8s
+- **Bundle Size**: < 450KB (gzipped)
+
+See [performance benchmarks](./docs/PERFORMANCE_BENCHMARK_GUIDE_2025-12-21.md) for details.
 
 ---
 
 ## 📄 License
 
-MIT License - see the [LICENSE](LICENSE) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 📞 Contact
+## 📞 Contact & Support
 
-- **Email**: [이메일 주소]
-- **GitHub**: [GitHub 주소]
 - **Documentation**: [docs/](./docs/)
+- **Issues**: [GitHub Issues](https://github.com/your-org/hephaitos/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/hephaitos/discussions)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **Design System**: Inspired by Linear & CATALYST AI
-- **AI Engine**: Powered by Claude 4 (Anthropic)
-- **Charts**: TradingView Lightweight Charts
-- **Framework**: Next.js by Vercel
+- **Design Inspiration**: [Linear](https://linear.app) & CATALYST AI
+- **AI Engine**: Powered by [Claude 4.5](https://anthropic.com) (Anthropic)
+- **Charts**: [TradingView Lightweight Charts](https://tradingview.github.io/lightweight-charts/)
+- **Framework**: [Next.js](https://nextjs.org) by Vercel
+- **Backend**: [Supabase](https://supabase.com) - Open source Firebase alternative
 
 ---
 
-**핵심 슬로건**: "💎 쓴 만큼만 내는 투자 학습 플랫폼"
+## 🎓 Educational Philosophy
 
-**Made with ❤️ by HEPHAITOS Team**
+> "We don't teach people to trade. We teach them to think like traders and build their own systems."
+
+HEPHAITOS follows the **Copy-Learn-Build** methodology:
+1. **Copy** proven strategies to understand what works
+2. **Learn** the principles through AI tutors and human mentors
+3. **Build** your own unique trading system with full autonomy
+
+---
+
+**Made with ❤️ by the HEPHAITOS Team**
+
+**Core Mission**: Democratize algorithmic trading through AI-powered education and tools.

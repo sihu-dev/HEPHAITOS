@@ -35,3 +35,12 @@ export {
   type PortfolioComparisonResult,
   type MirrorOpportunityAlert,
 } from './trade-analyzer'
+
+export {
+  ContextManager,
+  getContextManager,
+  createContextManager,
+  type ContextManagerConfig,
+  type PrioritizedData,
+  type TokenEstimate,
+} from './context-manager'

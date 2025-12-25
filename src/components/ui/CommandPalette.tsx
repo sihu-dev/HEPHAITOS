@@ -365,13 +365,13 @@ export function CommandPalette() {
                           'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg',
                           'transition-colors text-left',
                           isSelected
-                            ? 'bg-[#5E6AD2]/20 text-white'
+                            ? 'bg-primary/20 text-white'
                             : 'text-zinc-300 hover:bg-white/[0.04]'
                         )}
                       >
                         <div className={clsx(
                           'w-8 h-8 rounded-lg flex items-center justify-center',
-                          isSelected ? 'bg-[#5E6AD2]/30' : 'bg-white/[0.06]'
+                          isSelected ? 'bg-primary/30' : 'bg-white/[0.06]'
                         )}>
                           <cmd.icon className={clsx(
                             'w-4 h-4',
@@ -392,7 +392,7 @@ export function CommandPalette() {
                                 className={clsx(
                                   'px-1.5 py-0.5 rounded text-[10px] font-mono',
                                   isSelected
-                                    ? 'bg-[#5E6AD2]/30 text-[#7C8AEA]'
+                                    ? 'bg-primary/30 text-[#7C8AEA]'
                                     : 'bg-zinc-800 text-zinc-500'
                                 )}
                               >

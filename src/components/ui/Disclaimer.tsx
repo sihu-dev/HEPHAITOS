@@ -2,6 +2,7 @@
 
 import { AlertTriangle, Info, X } from 'lucide-react'
 import { useState } from 'react'
+import DOMPurify from 'isomorphic-dompurify'
 import { cn } from '@/lib/utils'
 import { useI18n } from '@/i18n/client'
 
@@ -147,7 +148,7 @@ export function DisclaimerModal({ isOpen, onAccept, className }: DisclaimerModal
             {Array.isArray(modalPoints) && modalPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
                 <span className="text-amber-500 mt-1">•</span>
-                <span dangerouslySetInnerHTML={{ __html: point }} />
+                <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(point) }} />
               </li>
             ))}
           </ul>

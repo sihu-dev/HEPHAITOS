@@ -8,7 +8,7 @@ import { memo } from 'react'
  */
 export const AuroraBackground = memo(function AuroraBackground() {
   return (
-    <div className="fixed inset-0 -z-10 bg-[#0A0A0A]">
+    <div className="fixed inset-0 -z-10 bg-background-secondary">
       {/* Subtle Grid Pattern */}
       <div
         className="absolute inset-0 bg-[linear-gradient(to_right,#18181b_1px,transparent_1px),linear-gradient(to_bottom,#18181b_1px,transparent_1px)] bg-[size:64px_64px]"

@@ -1,0 +1,262 @@
+import { Meta, ColorPalette, ColorItem } from '@storybook/blocks'
+
+<Meta title="Design System/Tokens" />
+
+# Design Tokens
+
+HEPHAITOS 디자인 시스템의 모든 토큰은 **Tailwind CSS**와 **CSS Custom Properties**로 정의되어 있습니다.
+
+---
+
+## 🎨 Color Palette
+
+### Primary Colors
+
+<ColorPalette>
+  <ColorItem
+    title="Primary"
+    subtitle="Brand color"
+    colors={{
+      'Primary 50': '#F0F1FA',
+      'Primary 100': '#E0E3F5',
+      'Primary 500': '#5E6AD2',
+      'Primary 600': '#4B56C8',
+      'Primary 700': '#3A44A8',
+      'Primary Light': '#7C8AEA',
+    }}
+  />
+</ColorPalette>
+
+### Background
+
+<ColorPalette>
+  <ColorItem
+    title="Background"
+    subtitle="Surface colors"
+    colors={{
+      'BG Primary': '#0D0D0F',
+      'BG Secondary': '#111113',
+      'BG Tertiary': '#151517',
+      'BG Elevated': '#1A1A1D',
+      'BG Hover': '#1E1E21',
+    }}
+  />
+</ColorPalette>
+
+### Text
+
+<ColorPalette>
+  <ColorItem
+    title="Text"
+    subtitle="Typography colors"
+    colors={{
+      'Text Primary': '#FFFFFF',
+      'Text Secondary': '#A1A1AA',
+      'Text Tertiary': '#71717A',
+      'Text Muted': '#52525B',
+      'Text Disabled': '#3F3F46',
+    }}
+  />
+</ColorPalette>
+
+### Status
+
+<ColorPalette>
+  <ColorItem
+    title="Success"
+    subtitle="Positive states"
+    colors={{
+      Success: '#22C55E',
+      'Success BG': 'rgba(34,197,94,0.1)',
+    }}
+  />
+  <ColorItem
+    title="Warning"
+    subtitle="Caution states"
+    colors={{
+      Warning: '#F59E0B',
+      'Warning BG': 'rgba(245,158,11,0.1)',
+    }}
+  />
+  <ColorItem
+    title="Error"
+    subtitle="Negative states"
+    colors={{
+      Error: '#EF4444',
+      'Error BG': 'rgba(239,68,68,0.1)',
+    }}
+  />
+  <ColorItem
+    title="Info"
+    subtitle="Informative states"
+    colors={{
+      Info: '#3B82F6',
+      'Info BG': 'rgba(59,130,246,0.1)',
+    }}
+  />
+</ColorPalette>
+
+### Trading
+
+<ColorPalette>
+  <ColorItem
+    title="Trading"
+    subtitle="Financial colors"
+    colors={{
+      Profit: '#22C55E',
+      Loss: '#EF4444',
+      'Profit BG': 'rgba(34,197,94,0.1)',
+      'Loss BG': 'rgba(239,68,68,0.1)',
+    }}
+  />
+</ColorPalette>
+
+---
+
+## 📐 Typography
+
+### Font Families
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `font-sans` | Inter | 일반 텍스트 |
+| `font-mono` | JetBrains Mono | 코드, 숫자 |
+
+### Font Sizes
+
+| Token | Size | Line Height | Usage |
+|-------|------|-------------|-------|
+| `text-xs` | 12px | 16px | 캡션, 라벨 |
+| `text-sm` | 14px | 20px | 보조 텍스트 |
+| `text-base` | 16px | 24px | 본문 |
+| `text-lg` | 18px | 28px | 서브헤딩 |
+| `text-xl` | 20px | 28px | 헤딩 |
+| `text-2xl` | 24px | 32px | 섹션 헤딩 |
+| `text-3xl` | 30px | 36px | 페이지 타이틀 |
+
+---
+
+## 🎭 Glass Effects
+
+### Glass Variants
+
+```css
+/* Light */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Strong */
+.glass-strong {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Ultra */
+.glass-ultra {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+```
+
+---
+
+## 📏 Spacing
+
+### Spacing Scale
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `space-1` | 4px | 최소 간격 |
+| `space-2` | 8px | 아이템 간격 |
+| `space-3` | 12px | 섹션 내부 |
+| `space-4` | 16px | 섹션 간격 |
+| `space-5` | 20px | 컴포넌트 패딩 |
+| `space-6` | 24px | 카드 패딩 |
+| `space-8` | 32px | 섹션 구분 |
+| `space-10` | 40px | 큰 여백 |
+| `space-12` | 48px | 페이지 여백 |
+
+---
+
+## 🎬 Animations
+
+### Duration
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `duration-75` | 75ms | 즉각 반응 |
+| `duration-150` | 150ms | 기본 hover |
+| `duration-300` | 300ms | 전환 효과 |
+| `duration-500` | 500ms | 부드러운 전환 |
+
+### Easing
+
+```css
+/* Default */
+transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+/* In */
+transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+
+/* Out */
+transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+```
+
+---
+
+## 🔍 Border Radius
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `rounded-sm` | 2px | 작은 요소 |
+| `rounded` | 4px | 버튼, 입력 |
+| `rounded-md` | 6px | 카드 내부 |
+| `rounded-lg` | 8px | 모달, 패널 |
+| `rounded-xl` | 12px | 카드, 섹션 |
+| `rounded-2xl` | 16px | 큰 카드 |
+
+---
+
+## 📦 Usage
+
+### Tailwind Config
+
+```typescript
+// tailwind.config.ts
+export default {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '#5E6AD2',
+          light: '#7C8AEA',
+          // ...
+        },
+        // ...
+      },
+    },
+  },
+}
+```
+
+### CSS Variables
+
+```css
+/* globals.css */
+:root {
+  --primary: #5e6ad2;
+  --primary-light: #7c8aea;
+  --bg-primary: #0d0d0f;
+  /* ... */
+}
+```
+
+---
+
+**Updated**: 2025-12-21
+**Version**: 2.0

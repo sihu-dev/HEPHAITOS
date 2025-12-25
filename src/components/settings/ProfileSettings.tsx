@@ -100,7 +100,7 @@ export function ProfileSettings() {
           ) : (
             <div className="flex items-center gap-3 p-3 bg-white/[0.02] rounded border border-white/[0.06]">
               <div className={`w-8 h-8 rounded flex items-center justify-center ${
-                settings.plan === 'pro' ? 'bg-[#5E6AD2]/20' :
+                settings.plan === 'pro' ? 'bg-primary/20' :
                 settings.plan === 'enterprise' ? 'bg-amber-500/20' :
                 'bg-white/[0.06]'
               }`}>

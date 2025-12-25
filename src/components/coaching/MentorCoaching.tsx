@@ -168,7 +168,7 @@ export default function MentorCoaching() {
   }, [activeTab])
 
   return (
-    <div className="min-h-screen bg-[#0D0D0F] text-white p-6">
+    <div className="min-h-screen bg-background-primary text-white p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -202,7 +202,7 @@ export default function MentorCoaching() {
                   onClick={() => setSelectedSpecialty(null)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     !selectedSpecialty
-                      ? 'bg-[#5E6AD2] text-white'
+                      ? 'bg-primary text-white'
                       : 'text-gray-400 hover:bg-white/5'
                   }`}
                 >
@@ -215,7 +215,7 @@ export default function MentorCoaching() {
                     onClick={() => setSelectedSpecialty(id)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                       selectedSpecialty === id
-                        ? 'bg-[#5E6AD2] text-white'
+                        ? 'bg-primary text-white'
                         : 'text-gray-400 hover:bg-white/5'
                     }`}
                   >
@@ -237,14 +237,14 @@ export default function MentorCoaching() {
                     placeholder="멘토 검색..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5E6AD2]"
+                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
 
               {loading ? (
                 <div className="flex items-center justify-center h-64">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5E6AD2]" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                 </div>
               ) : mentors.length === 0 ? (
                 <div className="text-center py-16 text-gray-400">
@@ -281,7 +281,7 @@ export default function MentorCoaching() {
                 <p>예약된 세션이 없습니다</p>
                 <button
                   onClick={() => setActiveTab('browse')}
-                  className="mt-4 px-4 py-2 bg-[#5E6AD2] text-white rounded-lg hover:bg-[#4E5AC2] transition-colors"
+                  className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#4E5AC2] transition-colors"
                 >
                   멘토 찾아보기
                 </button>
@@ -341,7 +341,7 @@ function TabButton({
       onClick={onClick}
       className={`px-4 py-3 border-b-2 transition-colors ${
         active
-          ? 'border-[#5E6AD2] text-white'
+          ? 'border-primary text-white'
           : 'border-transparent text-gray-400 hover:text-white'
       }`}
     >
@@ -360,11 +360,11 @@ function MentorCard({
   return (
     <div
       onClick={onClick}
-      className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-[#5E6AD2]/50 cursor-pointer transition-all"
+      className="p-4 bg-white/5 rounded-lg border border-white/10 hover:border-primary/50 cursor-pointer transition-all"
     >
       {/* Header */}
       <div className="flex items-start gap-3 mb-3">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center overflow-hidden">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center overflow-hidden">
           {mentor.avatar_url ? (
             <Image src={mentor.avatar_url} alt={`${mentor.display_name} 프로필 이미지`} width={48} height={48} className="w-full h-full object-cover" />
           ) : (
@@ -378,7 +378,7 @@ function MentorCard({
               <CheckCircle2 className="w-4 h-4 text-blue-400" />
             )}
             {mentor.is_featured && (
-              <span className="px-2 py-0.5 bg-[#5E6AD2] text-xs rounded-full">추천</span>
+              <span className="px-2 py-0.5 bg-primary text-xs rounded-full">추천</span>
             )}
           </div>
           <p className="text-sm text-gray-400">{mentor.title}</p>
@@ -420,7 +420,7 @@ function MentorCard({
           <Clock className="w-4 h-4" />
           <span>{mentor.session_duration}분</span>
         </div>
-        <div className="font-semibold text-[#5E6AD2]">
+        <div className="font-semibold text-primary">
           {mentor.hourly_rate_credits} 크레딧
         </div>
       </div>
@@ -449,7 +449,7 @@ function SessionCard({ session }: { session: Session }) {
     <div className="p-4 bg-white/5 rounded-lg border border-white/10">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center">
             <User className="w-5 h-5" />
           </div>
           <div>
@@ -478,7 +478,7 @@ function SessionCard({ session }: { session: Session }) {
       )}
 
       {session.status === 'confirmed' && session.meeting_url && (
-        <button className="w-full py-2 bg-[#5E6AD2] text-white rounded-lg hover:bg-[#4E5AC2] transition-colors flex items-center justify-center gap-2">
+        <button className="w-full py-2 bg-primary text-white rounded-lg hover:bg-[#4E5AC2] transition-colors flex items-center justify-center gap-2">
           <Video className="w-4 h-4" />
           세션 참가하기
         </button>
@@ -558,7 +558,7 @@ function MentorDetailModal({
       <div className="bg-[#1A1A1F] rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-white/10">
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#5E6AD2] to-purple-500 flex items-center justify-center overflow-hidden">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center overflow-hidden">
               {mentor.avatar_url ? (
                 <Image src={mentor.avatar_url} alt={`${mentor.display_name} 프로필 이미지`} width={64} height={64} className="w-full h-full object-cover" />
               ) : (
@@ -645,7 +645,7 @@ function MentorDetailModal({
                           onClick={() => setSelectedSlot(slot)}
                           className={`px-3 py-1 rounded-lg text-sm transition-colors ${
                             selectedSlot?.id === slot.id
-                              ? 'bg-[#5E6AD2] text-white'
+                              ? 'bg-primary text-white'
                               : 'bg-white/10 hover:bg-white/20'
                           }`}
                         >
@@ -667,7 +667,7 @@ function MentorDetailModal({
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="멘토에게 질문하고 싶은 내용이나 배우고 싶은 주제를 입력하세요..."
-                className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5E6AD2] resize-none h-24"
+                className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary resize-none h-24"
               />
             </div>
           )}
@@ -676,7 +676,7 @@ function MentorDetailModal({
           <div className="flex items-center justify-between pt-4 border-t border-white/10">
             <div>
               <div className="text-sm text-gray-400">세션 비용</div>
-              <div className="text-xl font-bold text-[#5E6AD2]">
+              <div className="text-xl font-bold text-primary">
                 {mentor.hourly_rate_credits} 크레딧
                 <span className="text-sm text-gray-400 ml-2">/ {mentor.session_duration}분</span>
               </div>
@@ -684,7 +684,7 @@ function MentorDetailModal({
             <button
               onClick={handleBook}
               disabled={!selectedSlot || booking}
-              className="px-6 py-3 bg-[#5E6AD2] text-white rounded-lg hover:bg-[#4E5AC2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-[#4E5AC2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <Calendar className="w-5 h-5" />
               {booking ? '예약 중...' : '세션 예약하기'}
@@ -742,7 +742,7 @@ function BecomeMentorSection() {
     <div className="max-w-2xl mx-auto">
       <div className="p-6 bg-white/5 rounded-xl border border-white/10">
         <div className="text-center mb-6">
-          <Award className="w-12 h-12 mx-auto text-[#5E6AD2] mb-3" />
+          <Award className="w-12 h-12 mx-auto text-primary mb-3" />
           <h2 className="text-xl font-bold mb-2">HEPHAITOS 멘토가 되세요</h2>
           <p className="text-gray-400">
             전문 지식을 공유하고 수익을 창출하세요. 80%의 수익 분배를 제공합니다.
@@ -757,7 +757,7 @@ function BecomeMentorSection() {
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
               placeholder="멘토로 표시될 이름"
-              className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5E6AD2]"
+              className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
             />
           </div>
 
@@ -768,7 +768,7 @@ function BecomeMentorSection() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="예: 전업 트레이더 10년차, 전 증권사 애널리스트"
-              className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5E6AD2]"
+              className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
             />
           </div>
 
@@ -778,7 +778,7 @@ function BecomeMentorSection() {
               value={formData.bio}
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               placeholder="본인을 소개해주세요..."
-              className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5E6AD2] resize-none h-24"
+              className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary resize-none h-24"
             />
           </div>
 
@@ -796,7 +796,7 @@ function BecomeMentorSection() {
                   }}
                   className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 transition-colors ${
                     formData.specialties.includes(id)
-                      ? 'bg-[#5E6AD2] text-white'
+                      ? 'bg-primary text-white'
                       : 'bg-white/10 hover:bg-white/20'
                   }`}
                 >
@@ -814,14 +814,14 @@ function BecomeMentorSection() {
               value={formData.experienceYears}
               onChange={(e) => setFormData({ ...formData, experienceYears: e.target.value })}
               placeholder="투자/트레이딩 경력"
-              className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#5E6AD2]"
+              className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
             />
           </div>
 
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full py-3 bg-[#5E6AD2] text-white rounded-lg hover:bg-[#4E5AC2] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3 bg-primary text-white rounded-lg hover:bg-[#4E5AC2] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {submitting ? '제출 중...' : '멘토 신청하기'}
           </button>

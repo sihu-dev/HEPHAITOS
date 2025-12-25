@@ -36,6 +36,43 @@
   },
   "cleanupPeriodDays": 14,
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-start.sh",
+            "timeout": 30000,
+            "description": "세션 시작 시 환경 자동 설정"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit(.env)|Edit(**/*.pem)|Edit(**/secrets/**)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '❌ 민감한 파일 수정 차단' && exit 1",
+            "timeout": 1000,
+            "description": "민감 파일 보호"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash(rm -rf:*)|Bash(sudo:*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '❌ 위험한 명령어 차단' && exit 1",
+            "timeout": 1000,
+            "description": "위험 명령어 차단"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
@@ -43,12 +80,33 @@
           {
             "type": "command",
             "command": "npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true",
-            "timeout": 10000
+            "timeout": 10000,
+            "description": "자동 포맷팅"
           },
           {
             "type": "command",
-            "command": "python3 /home/sihu2129/HEPHAITOS/.claude/hooks/audit-check.py",
-            "timeout": 5000
+            "command": "~/.claude/hooks/legal-check.sh \"$CLAUDE_FILE_PATH\"",
+            "timeout": 5000,
+            "description": "법률 준수 자동 검사"
+          },
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/type-check-file.sh \"$CLAUDE_FILE_PATH\"",
+            "timeout": 15000,
+            "description": "수정 파일 타입 체크"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/stop-next-task.sh",
+            "timeout": 5000,
+            "description": "다음 작업 자동 제안"
           }
         ]
       }
@@ -58,7 +116,14 @@
     "opus-auditor": {
       "model": "opus",
       "autoTrigger": true,
-      "triggers": ["검수", "리뷰", "audit", "검토", "품질 확인"]
+      "triggers": ["검수", "리뷰", "audit", "검토", "품질 확인"],
+      "description": "Opus 4.5 기반 전체 프로젝트 검수"
+    },
+    "type-checker": {
+      "model": "sonnet",
+      "autoTrigger": true,
+      "triggers": ["타입", "type", "TypeScript", "tsc"],
+      "description": "TypeScript strict mode 전문 분석"
     }
   }
 }

@@ -97,7 +97,7 @@ export function FeedbackWidget() {
         description: formData.description,
         browser_info: browserInfo,
         device_info: deviceInfo,
-      } as any)
+      })
 
       if (insertError) {
         throw insertError
@@ -123,7 +123,7 @@ export function FeedbackWidget() {
         className={clsx(
           'fixed bottom-6 right-6 z-40',
           'w-14 h-14 rounded-full',
-          'bg-[#5E6AD2] hover:bg-[#4B56C8]',
+          'bg-primary hover:bg-[#4B56C8]',
           'text-white shadow-xl hover:shadow-2xl',
           'transition-all duration-300',
           'flex items-center justify-center',
@@ -289,7 +289,7 @@ export function FeedbackWidget() {
                     disabled={isSubmitting}
                     className={clsx(
                       'w-full h-10 rounded-md text-sm font-medium transition-colors',
-                      'bg-[#5E6AD2] hover:bg-[#4B56C8] text-white',
+                      'bg-primary hover:bg-[#4B56C8] text-white',
                       'disabled:opacity-50 disabled:cursor-not-allowed'
                     )}
                   >

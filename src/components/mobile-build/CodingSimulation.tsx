@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { CHART_COLORS } from "@/constants/design-tokens"
 import ReactFlow, {
   Node,
   Edge,
@@ -31,7 +32,7 @@ const STRATEGY_NODES = [
     label: '📝 자연어 입력',
     description: '사용자 전략 요청',
     position: { x: 50, y: 50 },
-    color: '#5E6AD2',
+    color: CHART_COLORS.primary,
   },
   {
     id: 'analyze',
@@ -156,7 +157,7 @@ export function CodingSimulation({ isActive, progress, userPrompt }: CodingSimul
       ...edge,
       animated: idx === nodeIndex - 1,
       style: {
-        stroke: idx === nodeIndex - 1 ? '#5E6AD2' : '#374151',
+        stroke: idx === nodeIndex - 1 ? CHART_COLORS.primary : '#374151',
         strokeWidth: idx === nodeIndex - 1 ? 3 : 2,
       },
     }))
@@ -190,7 +191,7 @@ export function CodingSimulation({ isActive, progress, userPrompt }: CodingSimul
 
   if (!isActive && !userPrompt) {
     return (
-      <div className="h-full flex items-center justify-center bg-[#0D0D0F]">
+      <div className="h-full flex items-center justify-center bg-background-primary">
         <div className="text-center px-6">
           <div className="text-6xl mb-4">🎨</div>
           <h3 className="text-lg font-semibold text-white mb-2">
@@ -207,7 +208,7 @@ export function CodingSimulation({ isActive, progress, userPrompt }: CodingSimul
   }
 
   return (
-    <div className="h-full bg-[#0D0D0F] relative">
+    <div className="h-full bg-background-primary relative">
       {/* ReactFlow 캔버스 */}
       <ReactFlow
         nodes={nodes}
@@ -227,7 +228,7 @@ export function CodingSimulation({ isActive, progress, userPrompt }: CodingSimul
           <div className="p-4 bg-[#111113]/90 backdrop-blur-lg border border-white/[0.06] rounded-xl">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-[#5E6AD2] rounded-full animate-pulse" />
+                <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                 <h3 className="text-sm font-semibold text-white">
                   알고리즘 구축 중... ({progress}%)
                 </h3>
@@ -268,7 +269,7 @@ export function CodingSimulation({ isActive, progress, userPrompt }: CodingSimul
           <p className="text-xs text-zinc-400 mb-2">노드 색상:</p>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-[#5E6AD2]" />
+              <div className="w-3 h-3 rounded-full bg-primary" />
               <span className="text-xs text-zinc-400">현재 진행 중</span>
             </div>
             <div className="flex items-center gap-2">

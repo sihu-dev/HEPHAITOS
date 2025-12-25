@@ -388,7 +388,7 @@ describe('calculateIndicator', () => {
   })
 
   it('should return closes for unknown indicator type', () => {
-    const result = calculateIndicator('unknown' as any, candles, {})
+    const result = calculateIndicator('unknown' as unknown as Parameters<typeof calculateIndicator>[0], candles, {})
 
     expect(result.values).toEqual(candles.map(c => c.close))
   })

@@ -107,8 +107,8 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
       }
 
       if (params.id && !params.id.startsWith('local_')) {
-        // Update existing strategy (type-cast for missing database types)
-        const { data, error: updateError } = await (supabase as any)
+        // Update existing strategy
+        const { data, error: updateError } = await supabase
           .from('strategies')
           .update(strategyData)
           .eq('id', params.id)
@@ -119,8 +119,8 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
         if (updateError) throw updateError
         return (data as { id: string } | null)?.id || null
       } else {
-        // Create new strategy (type-cast for missing database types)
-        const { data, error: insertError } = await (supabase as any)
+        // Create new strategy
+        const { data, error: insertError } = await supabase
           .from('strategies')
           .insert(strategyData)
           .select('id')

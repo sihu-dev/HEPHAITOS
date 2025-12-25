@@ -529,6 +529,7 @@
       "strategyBuilder": "Strategy Builder",
       "aiAgent": "AI Agent",
       "backtest": "Backtest",
+      "backtestQueue": "Backtest Queue",
       "portfolio": "Portfolio",
       "tradeHistory": "Trade History",
       "settings": "Settings",
@@ -1699,8 +1700,8 @@
       },
       "units": {
         "hours": "h",
-        "times": "",
-        "count": ""
+        "times": "times",
+        "count": "count"
       }
     },
     "onboarding": {

@@ -6,6 +6,8 @@
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { addBacktestJob, getJobStatus } from '@/lib/queue/backtest-queue'
 import { spendCredits, InsufficientCreditsError } from '@/lib/credits/spend-helper'
 import { safeLogger } from '@/lib/utils/safe-logger'
@@ -188,12 +190,33 @@ export async function GET(req: Request) {
 }
 
 /**
- * 사용자 인증 (TODO: 실제 구현)
+ * 사용자 인증 (Supabase Auth)
  */
 async function requireUserId(req: Request): Promise<string> {
-  const userId = req.headers.get('x-user-id')
-  if (!userId) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options)
+          })
+        },
+      },
+    }
+  )
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    safeLogger.warn('[Backtest Queue] Unauthorized access attempt')
     throw new Error('UNAUTHORIZED')
   }
-  return userId
+
+  return user.id
 }

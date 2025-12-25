@@ -1,6 +1,7 @@
 'use client'
 
-import { memo, useMemo, useState, useCallback } from 'react'
+import { memo, useMemo, useState, useCallback, useRef } from 'react'
+import { CHART_COLORS } from "@/constants/design-tokens"
 import {
   AreaChart,
   Area,
@@ -22,66 +23,180 @@ import {
   PresentationChartLineIcon,
   CalendarIcon,
 } from '@heroicons/react/24/outline'
+import html2canvas from 'html2canvas'
+import { ChartAnalysisPanel } from '@/components/charts/ChartAnalysisPanel'
 import type { BacktestResult, BacktestTrade, PortfolioSnapshot } from '@/lib/backtest'
+import type { ChartAnalysisResponse } from '@/types'
 
 interface BacktestChartProps {
   result: BacktestResult
+  symbol?: string
   className?: string
 }
 
 type ChartType = 'equity' | 'drawdown' | 'trades' | 'monthly'
 
-export const BacktestChart = memo(function BacktestChart({ result, className = '' }: BacktestChartProps) {
+export const BacktestChart = memo(function BacktestChart({ result, symbol = 'BACKTEST', className = '' }: BacktestChartProps) {
+  const chartContainerRef = useRef<HTMLDivElement>(null)
   const [chartType, setChartType] = useState<ChartType>('equity')
+
+  // AI Analysis state
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false)
+  const [analysisResult, setAnalysisResult] = useState<ChartAnalysisResponse | null>(null)
+  const [showAnalysisPanel, setShowAnalysisPanel] = useState<boolean>(false)
 
   const handleChartTypeChange = useCallback((type: ChartType) => {
     setChartType(type)
   }, [])
 
+  // ============================================
+  // AI Chart Analysis Functions
+  // ============================================
+
+  /**
+   * 차트를 캡처하여 base64 이미지로 변환
+   */
+  const captureChart = useCallback(async (): Promise<string> => {
+    if (!chartContainerRef.current) {
+      throw new Error('Chart container not found')
+    }
+
+    try {
+      const canvas = await html2canvas(chartContainerRef.current, {
+        backgroundColor: '#0D0D0F',
+        scale: 2, // Higher quality
+        logging: false,
+      })
+
+      return canvas.toDataURL('image/png')
+    } catch (error) {
+      console.error('[BacktestChart] Failed to capture chart:', error)
+      throw new Error('차트 캡처에 실패했습니다')
+    }
+  }, [])
+
+  /**
+   * AI 차트 분석 실행
+   */
+  const handleAIAnalysis = useCallback(async () => {
+    try {
+      setIsAnalyzing(true)
+      setShowAnalysisPanel(true)
+
+      // Capture chart
+      const chartImage = await captureChart()
+
+      // Call API
+      const response = await fetch('/api/ai/chart-analysis', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chartImage,
+          symbol,
+          timeframe: 'backtest',
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('AI 분석 요청에 실패했습니다')
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.data) {
+        setAnalysisResult(data.data)
+      } else {
+        throw new Error(data.error?.message || 'AI 분석에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('[BacktestChart] AI analysis failed:', error)
+      alert(error instanceof Error ? error.message : 'AI 분석에 실패했습니다')
+      setShowAnalysisPanel(false)
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }, [captureChart, symbol])
+
+  /**
+   * 분석 패널 닫기
+   */
+  const handleCloseAnalysis = useCallback(() => {
+    setShowAnalysisPanel(false)
+  }, [])
+
   return (
-    <div className={`border border-white/[0.06] rounded-lg ${className}`}>
+    <div className={`relative border border-white/[0.06] rounded-lg ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
         <h3 className="text-sm font-medium text-white">차트 분석</h3>
-        <div className="flex gap-1">
-          <ChartTypeButton
-            type="equity"
-            current={chartType}
-            onClick={handleChartTypeChange}
-            icon={PresentationChartLineIcon}
-            label="자산"
-          />
-          <ChartTypeButton
-            type="drawdown"
-            current={chartType}
-            onClick={handleChartTypeChange}
-            icon={ArrowTrendingDownIcon}
-            label="낙폭"
-          />
-          <ChartTypeButton
-            type="trades"
-            current={chartType}
-            onClick={handleChartTypeChange}
-            icon={ChartBarIcon}
-            label="거래"
-          />
-          <ChartTypeButton
-            type="monthly"
-            current={chartType}
-            onClick={handleChartTypeChange}
-            icon={CalendarIcon}
-            label="월별"
-          />
+        <div className="flex gap-2">
+          {/* AI Analysis Button */}
+          <button
+            onClick={handleAIAnalysis}
+            disabled={isAnalyzing}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded text-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="AI 차트 분석"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            {isAnalyzing ? '분석중...' : 'AI 분석'}
+          </button>
+
+          <div className="w-px h-full bg-white/[0.06]" />
+
+          {/* Chart Type Buttons */}
+          <div className="flex gap-1">
+            <ChartTypeButton
+              type="equity"
+              current={chartType}
+              onClick={handleChartTypeChange}
+              icon={PresentationChartLineIcon}
+              label="자산"
+            />
+            <ChartTypeButton
+              type="drawdown"
+              current={chartType}
+              onClick={handleChartTypeChange}
+              icon={ArrowTrendingDownIcon}
+              label="낙폭"
+            />
+            <ChartTypeButton
+              type="trades"
+              current={chartType}
+              onClick={handleChartTypeChange}
+              icon={ChartBarIcon}
+              label="거래"
+            />
+            <ChartTypeButton
+              type="monthly"
+              current={chartType}
+              onClick={handleChartTypeChange}
+              icon={CalendarIcon}
+              label="월별"
+            />
+          </div>
         </div>
       </div>
 
       {/* Chart Area */}
-      <div className="p-4">
+      <div ref={chartContainerRef} className="p-4">
         {chartType === 'equity' && <EquityCurve snapshots={result.equityCurve} trades={result.trades} />}
         {chartType === 'drawdown' && <DrawdownChart snapshots={result.equityCurve} />}
         {chartType === 'trades' && <TradesChart trades={result.trades} />}
         {chartType === 'monthly' && <MonthlyReturnsChart snapshots={result.equityCurve} />}
       </div>
+
+      {/* AI Analysis Panel */}
+      {showAnalysisPanel && (
+        <ChartAnalysisPanel
+          analysis={analysisResult}
+          isLoading={isAnalyzing}
+          onClose={handleCloseAnalysis}
+        />
+      )}
     </div>
   )
 })
@@ -544,7 +659,7 @@ const MonthlyReturnsChart = memo(function MonthlyReturnsChart({ snapshots }: Mon
             <Line
               type="monotone"
               dataKey="return"
-              stroke="#5E6AD2"
+              stroke={CHART_COLORS.primary}
               strokeWidth={2}
               dot={false}
             />

@@ -62,7 +62,7 @@ const StickyCTA = nextDynamic(
 
 export function HomeContent() {
   return (
-    <main className="relative bg-[#0D0D0F]">
+    <main className="relative bg-background-primary">
       <Navbar />
 
       {/* Supabase Style Hero - Centered, Bold, Minimal */}

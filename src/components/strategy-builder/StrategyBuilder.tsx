@@ -70,6 +70,12 @@ import { AIStrategyGenerator } from './AIStrategyGenerator'
 // i18n
 import { useI18n } from '@/i18n/client'
 
+// Disclaimer
+import { DisclaimerInline } from '@/components/ui/Disclaimer'
+
+// Design Tokens
+import { CHART_COLORS } from '@/constants/design-tokens'
+
 const nodeTypes = {
   trigger: TriggerNode,
   condition: ConditionNode,
@@ -81,10 +87,10 @@ const nodeTypes = {
 const defaultEdgeOptions = {
   type: 'smoothstep',
   animated: true,
-  style: { stroke: '#5E6AD2', strokeWidth: 2 },
+  style: { stroke: CHART_COLORS.primary, strokeWidth: 2 },
   markerEnd: {
     type: MarkerType.ArrowClosed,
-    color: '#5E6AD2',
+    color: CHART_COLORS.primary,
   },
 }
 
@@ -413,7 +419,7 @@ function StrategyBuilderInner() {
       case 'trigger':
         return '#F59E0B'
       case 'condition':
-        return '#5E6AD2'
+        return CHART_COLORS.primary
       case 'indicator':
         return '#10B981'
       case 'action':
@@ -446,7 +452,7 @@ function StrategyBuilderInner() {
           defaultEdgeOptions={defaultEdgeOptions}
           isValidConnection={isValidConnectionHandler}
           fitView
-          className="bg-[#0D0D0F]"
+          className="bg-background-primary"
           proOptions={{ hideAttribution: true }}
         >
           <Background color="#27272a" gap={20} size={1} />
@@ -474,14 +480,14 @@ function StrategyBuilderInner() {
             <button
               type="button"
               onClick={() => setShowAIGenerator(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-[#5E6AD2]/20 hover:bg-[#5E6AD2]/30 border border-[#5E6AD2]/30 rounded-lg text-[#7C8AEA] hover:text-[#9AA5EF] transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-lg text-[#7C8AEA] hover:text-[#9AA5EF] transition-colors"
               aria-label={t('dashboard.strategyBuilder.aiGenerate') as string}
               title={t('dashboard.strategyBuilder.aiGenerateTitle') as string}
             >
               <SparklesIcon className="w-4 h-4" />
               <span className="text-xs font-medium hidden sm:inline">{t('dashboard.strategyBuilder.aiGenerate') as string}</span>
             </button>
-            <div className="px-3 py-1.5 bg-[#0D0D0F] border border-white/[0.06] rounded">
+            <div className="px-3 py-1.5 bg-background-primary border border-white/[0.06] rounded">
               <label htmlFor="strategy-name" className="sr-only">{t('dashboard.strategyBuilder.strategyName') as string}</label>
               <input
                 id="strategy-name"
@@ -572,7 +578,7 @@ function StrategyBuilderInner() {
 
           {/* Bottom Toolbar */}
           <Panel position="bottom-center" className="flex items-center gap-2">
-            <div className="p-1 bg-[#0D0D0F] border border-white/[0.06] rounded flex items-center gap-1">
+            <div className="p-1 bg-background-primary border border-white/[0.06] rounded flex items-center gap-1">
               <button
                 type="button"
                 onClick={handleUndo}
@@ -794,6 +800,11 @@ function StrategyBuilderInner() {
         onClose={() => setShowAIGenerator(false)}
         onApply={handleAIStrategyApply}
       />
+
+      {/* 면책조항 */}
+      <div className="absolute bottom-4 left-4 right-4 z-10">
+        <DisclaimerInline />
+      </div>
     </div>
   )
 }

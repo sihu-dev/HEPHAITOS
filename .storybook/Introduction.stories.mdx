@@ -1,0 +1,124 @@
+import { Meta } from '@storybook/blocks'
+
+<Meta title="Introduction/Welcome" />
+
+# HEPHAITOS Design System
+
+> **Linear-inspired Dark Theme** for Trading Terminal
+
+HEPHAITOS의 디자인 시스템은 **Linear**의 세련된 디자인 언어를 계승하여,
+트레이딩 터미널에 최적화된 다크 테마를 제공합니다.
+
+---
+
+## 🎨 Design Principles
+
+### 1. Deep Space Dark Theme
+- 배경: `#0D0D0F` (거의 순수 검정)
+- 모든 UI는 다크 모드 전용
+- Aurora 그라디언트 효과로 생동감 부여
+
+### 2. Glass Morphism First
+- 반투명 배경 + backdrop-blur
+- 부드러운 테두리로 경계 정의
+- 계층적 깊이감 표현
+
+### 3. Minimal Color Palette
+- Primary: `#5E6AD2` (Linear Purple)
+- Accent: `#7C8AEA` (Light Purple)
+- Status: Green (#22C55E) / Red (#EF4444)
+
+### 4. Accessibility First
+- WCAG 2.1 AA 준수
+- 모든 버튼 44px 이상 (터치 타겟)
+- 명확한 포커스 표시자
+
+---
+
+## 📦 Component Library
+
+### Core Components
+- **Button** - 5가지 variant, 4가지 size
+- **Card** - 7가지 variant (Glass, Elevated, Interactive 등)
+- **Input** - 아이콘 지원, 에러/힌트 표시
+- **Badge** - 8가지 variant (Profit/Loss 포함)
+- **Modal** - 5가지 size, 키보드 네비게이션
+- **Tabs** - 3가지 variant (Default, Pills, Underline)
+
+### Specialized Components
+- **GlassPanel** - 4가지 강도 (Light → Ultra)
+- **MetricCard** - 통계 표시용 카드
+- **DataTable** - 정렬, 필터링 지원
+- **TradingChart** - TradingView Lightweight Charts 래퍼
+
+---
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+pnpm add clsx tailwind-merge
+```
+
+### Basic Usage
+
+```tsx
+import { Button, Card, Input } from '@/components/ui'
+
+export default function MyComponent() {
+  return (
+    <Card variant="glass" padding="lg">
+      <h1 className="text-xl font-semibold text-white">
+        Trading Dashboard
+      </h1>
+      <Input
+        label="Strategy Name"
+        placeholder="Enter name..."
+      />
+      <Button variant="primary" fullWidth>
+        Create Strategy
+      </Button>
+    </Card>
+  )
+}
+```
+
+---
+
+## 🎯 Design Tokens
+
+모든 컴포넌트는 **CSS Custom Properties**와 **Tailwind Tokens**을 사용합니다.
+
+### Colors
+```css
+/* Primary */
+--primary: #5E6AD2;
+--primary-light: #7C8AEA;
+
+/* Background */
+--bg-primary: #0D0D0F;
+--bg-secondary: #111113;
+
+/* Text */
+--text-primary: #FFFFFF;
+--text-secondary: #A1A1AA;
+```
+
+### Spacing
+```css
+/* Consistent spacing scale */
+4px, 8px, 12px, 16px, 20px, 24px, 32px, 40px, 48px
+```
+
+---
+
+## 📚 Resources
+
+- [Design System Guide](/DESIGN_SYSTEM.md)
+- [Accessibility Guide](/docs/ACCESSIBILITY_GUIDE_2025-12-21.md)
+- [Tailwind Config](/tailwind.config.ts)
+
+---
+
+**Built with ❤️ by HEPHAITOS Team**

@@ -42,7 +42,7 @@ export const PerformanceMetrics = memo(function PerformanceMetrics() {
       change: portfolioMetrics.vsLastWeek,
       changeLabel: 'vs last week',
       format: 'percent',
-      icon: <ChartBarIcon className="w-5 h-5 text-[#5E6AD2]" />,
+      icon: <ChartBarIcon className="w-5 h-5 text-primary" />,
       variant: 'primary',
     },
     {

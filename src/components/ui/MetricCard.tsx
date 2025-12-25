@@ -39,9 +39,9 @@ const variantStyles = {
     accent: 'bg-red-500/20',
   },
   primary: {
-    bg: 'bg-[#5E6AD2]/[0.05]',
-    border: 'border-[#5E6AD2]/20',
-    accent: 'bg-[#5E6AD2]/20',
+    bg: 'bg-primary/[0.05]',
+    border: 'border-primary/20',
+    accent: 'bg-primary/20',
   },
 }
 

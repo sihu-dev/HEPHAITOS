@@ -61,7 +61,7 @@ export function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
           isScrolled
-            ? 'bg-[#0D0D0F]/95 backdrop-blur-sm border-b border-[#1F1F1F]'
+            ? 'bg-background-primary/95 backdrop-blur-sm border-b border-[#1F1F1F]'
             : 'bg-transparent'
         }`}
       >
@@ -72,7 +72,7 @@ export function Navbar() {
               <Link href="/" className="flex items-center gap-2">
                 {/* Logo Icon - HEPHAITOS Anvil/Forge Symbol */}
                 <svg
-                  className="w-5 h-5 text-[#5E6AD2]"
+                  className="w-5 h-5 text-primary"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >

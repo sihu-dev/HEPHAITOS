@@ -99,7 +99,7 @@ export function SignupForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-background-secondary flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center">
           <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-amber-500/10 flex items-center justify-center">
             <svg className="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +126,7 @@ export function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
+    <div className="min-h-screen bg-background-secondary flex flex-col">
       {/* Header */}
       <header className="w-full px-6 py-4">
         <Link href="/" className="inline-flex items-center gap-2">
@@ -182,7 +182,7 @@ export function SignupForm() {
                 <div className="w-full border-t border-zinc-800" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-[#0A0A0A] px-2 text-zinc-500">or</span>
+                <span className="bg-background-secondary px-2 text-zinc-500">or</span>
               </div>
             </div>
 

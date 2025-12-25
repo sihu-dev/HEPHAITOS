@@ -52,7 +52,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 
   const supabase = await createServerSupabaseClient()
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
     .eq('user_id', userId)
@@ -102,7 +102,7 @@ export async function completeOnboarding(
   const supabase = await createServerSupabaseClient()
 
   // Upsert: 있으면 업데이트, 없으면 생성
-  const { data: result, error } = await (supabase as any)
+  const { data: result, error } = await supabase
     .from('user_profiles')
     .upsert({
       user_id: userId,
@@ -197,7 +197,7 @@ export async function saveOnboardingProgress(
   if (partialData.interests) updateData.interests = partialData.interests
   if (partialData.painPoints) updateData.pain_points = partialData.painPoints
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('user_profiles')
     .upsert({
       user_id: userId,
@@ -240,7 +240,7 @@ export async function updateUserProfile(
   if (updates.interests) updateData.interests = updates.interests
   if (updates.painPoints) updateData.pain_points = updates.painPoints
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('user_profiles')
     .update(updateData)
     .eq('user_id', userId)
@@ -289,7 +289,7 @@ export async function getUserProfileClient(userId: string): Promise<UserProfile 
 
   const supabase = getSupabaseBrowserClient()
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
     .eq('user_id', userId)

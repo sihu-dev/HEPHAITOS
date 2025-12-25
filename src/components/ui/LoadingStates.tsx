@@ -40,7 +40,7 @@ export function PageLoading({ message }: PageLoadingProps) {
   const { t } = useI18n()
   const displayMessage = message || (t('dashboard.loading.default') as string)
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0D0D0F]">
+    <div className="min-h-screen flex items-center justify-center bg-background-primary">
       <div className="text-center">
         <Spinner size="lg" className="mx-auto mb-3" />
         <p className="text-sm text-zinc-400">{displayMessage}</p>

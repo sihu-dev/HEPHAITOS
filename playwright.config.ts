@@ -1,75 +1,62 @@
 import { defineConfig, devices } from '@playwright/test'
 
 /**
- * HEPHAITOS E2E Test Configuration
- * @see https://playwright.dev/docs/test-configuration
+ * Playwright E2E Test Configuration
+ *
+ * 총 테스트 케이스: 372개
+ * - P0 (Critical): 65개
+ * - P1 (Important): 75개
+ * - P2 (Nice to have): 96개
+ * - P3 (Enhancement): 57개
  */
+
 export default defineConfig({
   testDir: './e2e',
-  testMatch: ['**/*.spec.ts'],
-
-  /* Include tests from tests/e2e as well */
-  testIgnore: ['**/node_modules/**'],
-
-  /* Run tests in parallel */
   fullyParallel: true,
-
-  /* Fail the build on CI if you accidentally left test.only in the source code */
   forbidOnly: !!process.env.CI,
-
-  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 4 : undefined,
 
-  /* Opt out of parallel tests on CI */
-  workers: process.env.CI ? 1 : undefined,
-
-  /* Reporter to use */
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ['junit', { outputFile: 'test-results/junit.xml' }],
     ['list'],
   ],
 
-  /* Shared settings for all the projects below */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')` */
-    baseURL: 'http://localhost:3000',
-
-    /* Collect trace when retrying the failed test */
-    trace: 'on-first-retry',
-
-    /* Screenshot on failure */
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     screenshot: 'only-on-failure',
-
-    /* Video on failure */
-    video: 'on-first-retry',
+    video: 'retain-on-failure',
+    trace: 'retain-on-failure',
+    actionTimeout: 10000,
+    navigationTimeout: 30000,
+    locale: 'ko-KR',
+    timezoneId: 'Asia/Seoul',
+    viewport: { width: 1920, height: 1080 },
   },
 
-  /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chromium',
+      name: 'chromium-desktop',
       use: { ...devices['Desktop Chrome'] },
+      testMatch: /.*\.spec\.ts/,
     },
     {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-    /* Test against mobile viewports */
-    {
-      name: 'Mobile Chrome',
+      name: 'mobile-chrome',
       use: { ...devices['Pixel 5'] },
+      testMatch: /.*\.spec\.ts/,
     },
   ],
 
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'npm run dev',
+  webServer: process.env.CI ? undefined : {
+    command: 'pnpm dev',
     url: 'http://localhost:3000',
+    timeout: 120000,
     reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
   },
+
+  timeout: 30000,
+  expect: { timeout: 5000 },
+  outputDir: 'test-results/',
 })

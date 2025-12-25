@@ -118,7 +118,7 @@ function ErrorFallback({ error, errorInfo, onReset, showDetails = false }: Error
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#5E6AD2] hover:bg-[#4F5ABF] text-white rounded-lg font-medium text-sm transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-[#4F5ABF] text-white rounded-lg font-medium text-sm transition-colors"
           >
             <ArrowPathIcon className="w-4 h-4" />
             {t('dashboard.errors.boundary.retry') as string}

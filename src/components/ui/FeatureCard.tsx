@@ -27,8 +27,8 @@ const variantStyles = {
     'hover:bg-white/[0.04] hover:border-white/[0.12]'
   ),
   primary: clsx(
-    'bg-[#5E6AD2]/10 border border-[#5E6AD2]/30',
-    'hover:bg-[#5E6AD2]/15 hover:border-[#5E6AD2]/50'
+    'bg-primary/10 border border-primary/30',
+    'hover:bg-primary/15 hover:border-primary/50'
   ),
   glass: clsx(
     'glass',
@@ -41,7 +41,7 @@ const variantStyles = {
 
 const badgeVariants = {
   default: 'bg-white/[0.08] text-zinc-400',
-  primary: 'bg-[#5E6AD2]/20 text-[#7C8AEA]',
+  primary: 'bg-primary/20 text-[#7C8AEA]',
   success: 'bg-emerald-500/20 text-emerald-400',
   warning: 'bg-amber-500/20 text-amber-400',
 }
@@ -101,7 +101,7 @@ export function FeatureCard({
           className={clsx(
             'flex items-center justify-center rounded-lg mb-4',
             'bg-white/[0.06] text-zinc-400',
-            'group-hover:bg-[#5E6AD2]/20 group-hover:text-[#7C8AEA]',
+            'group-hover:bg-primary/20 group-hover:text-[#7C8AEA]',
             'transition-all duration-300',
             sizes.icon
           )}

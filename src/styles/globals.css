@@ -141,20 +141,30 @@ body {
 }
 
 /* ============================================
-   FOCUS STYLES
+   FOCUS STYLES (WCAG 2.1 AA Enhanced)
    ============================================ */
 
 :focus-visible {
-  outline: 1px solid rgba(255, 255, 255, 0.2);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Enhanced focus for interactive elements */
 button:focus-visible,
 a:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(94, 106, 210, 0.15);
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 0;
+  box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.1);
 }
 
 /* Skip link styles */
@@ -749,6 +759,22 @@ a:hover {
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
+}
+
+/* Slide In Right (for ChartAnalysisPanel) */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Data Grid Lines (Bloomberg-style) */
