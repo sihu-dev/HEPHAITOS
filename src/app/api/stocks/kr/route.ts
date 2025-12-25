@@ -8,6 +8,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { safeLogger } from '@/lib/utils/safe-logger'
 import { createKISClient, type KISConfig } from '@/lib/broker/kis-client'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic'
 // GET /api/stocks/kr
 // ============================================
 
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'price'
@@ -162,7 +163,7 @@ export async function GET(request: NextRequest) {
 // POST /api/stocks/kr
 // ============================================
 
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   try {
     // 사용자 인증
     const cookieStore = await cookies()
@@ -365,3 +366,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface FunnelStage {
   stage_name: string
@@ -88,7 +89,7 @@ export function FunnelDashboard() {
       })
     } catch (err) {
       setError('Failed to load funnel data')
-      console.error('[Funnel] Fetch error:', err)
+      safeLogger.error('[Funnel] Fetch error:', err)
     } finally {
       setIsLoading(false)
     }

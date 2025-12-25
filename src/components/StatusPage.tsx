@@ -6,6 +6,7 @@
 // ============================================
 
 import { useState, useEffect, useCallback } from 'react'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface Service {
   service_id: string
@@ -99,7 +100,7 @@ export function StatusPage() {
       setMaintenance(data.upcoming_maintenance || [])
       setLastUpdated(new Date(data.last_updated))
     } catch (err) {
-      console.error('[StatusPage] Fetch error:', err)
+      safeLogger.error('[StatusPage] Fetch error:', err)
     } finally {
       setIsLoading(false)
     }

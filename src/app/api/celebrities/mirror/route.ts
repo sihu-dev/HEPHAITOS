@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { celebrityPortfolioManager } from '@/lib/mirroring'
+import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +14,7 @@ export const dynamic = 'force-dynamic'
  * GET /api/celebrities/mirror
  * Calculate mirror portfolio allocation
  */
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const celebrityId = searchParams.get('celebrityId')
@@ -55,7 +57,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[API] Calculate mirror failed:', error)
+    safeLogger.error('[API] Calculate mirror failed:', error)
     return NextResponse.json(
       {
         success: false,
@@ -70,7 +72,7 @@ export async function GET(request: NextRequest) {
  * POST /api/celebrities/mirror
  * Setup mirror configuration
  */
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   try {
     const body = await request.json()
     const {
@@ -108,7 +110,7 @@ export async function POST(request: NextRequest) {
       message: 'Mirror configuration saved',
     })
   } catch (error) {
-    console.error('[API] Setup mirror failed:', error)
+    safeLogger.error('[API] Setup mirror failed:', error)
     return NextResponse.json(
       {
         success: false,
@@ -123,7 +125,7 @@ export async function POST(request: NextRequest) {
  * PUT /api/celebrities/mirror
  * Compare user portfolio with celebrity
  */
-export async function PUT(request: NextRequest) {
+async function PUTHandler(request: NextRequest) {
   try {
     const body = await request.json()
     const { celebrityId, userHoldings } = body
@@ -154,7 +156,7 @@ export async function PUT(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[API] Compare portfolios failed:', error)
+    safeLogger.error('[API] Compare portfolios failed:', error)
     return NextResponse.json(
       {
         success: false,
@@ -179,3 +181,7 @@ function calculateMatchScore(
   // Score: 100 = perfect match, 0 = completely different
   return Math.max(0, Math.round(100 - avgDiff * 2))
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })
+export const PUT = withRateLimit(PUTHandler, { category: 'api' })

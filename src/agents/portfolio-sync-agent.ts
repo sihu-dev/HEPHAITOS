@@ -20,26 +20,14 @@ import type {
   IExchangeCredentials,
   ISyncResult,
 } from '@hephaitos/types';
-// TODO: 아래 core 서비스들은 추후 구현 필요
-// import {
-//   ExchangeServiceFactory,
-//   type IPortfolioRepository,
-//   type IExchangeService,
-// } from '@hephaitos/core';
 import { calculateTotalValue, filterDust, sortByValue } from '@hephaitos/utils';
+import type { IPortfolioRepository } from '@hephaitos/core';
 
 // ═══════════════════════════════════════════════════════════════════
-// Temporary interfaces until core package is fully implemented
-// Using IResult wrapper pattern for consistency with original code
+// Temporary ExchangeService Mock - TODO: Replace with real implementation
+// The real ExchangeService from @hephaitos/core has a different interface
+// (requires connect/disconnect). Need to create an adapter or update agent.
 // ═══════════════════════════════════════════════════════════════════
-
-interface IPortfolioRepository {
-  save(portfolio: IPortfolio): Promise<IResult<IPortfolio>>;
-  getById(id: string): Promise<IResult<IPortfolio | null>>;
-  getByUserId(userId: string): Promise<IResult<IPortfolio[]>>;
-  updateAssets(portfolioId: string, assets: IAsset[], syncedAt: string): Promise<IResult<IPortfolio>>;
-  saveSnapshot(snapshot: IPortfolioSnapshot): Promise<IResult<IPortfolioSnapshot>>;
-}
 
 interface IExchangeService {
   getBalance(credentials: IExchangeCredentials): Promise<IResult<IAsset[]>>;

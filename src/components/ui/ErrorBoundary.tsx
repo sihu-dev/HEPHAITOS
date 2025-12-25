@@ -3,6 +3,7 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react'
 import { ExclamationTriangleIcon, ArrowPathIcon, HomeIcon } from '@heroicons/react/24/outline'
 import { useI18n } from '@/i18n/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -35,7 +36,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     this.setState({ errorInfo })
 
     // Log to console
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    safeLogger.error('ErrorBoundary caught an error:', { error, errorInfo })
 
     // Call custom error handler
     this.props.onError?.(error, errorInfo)

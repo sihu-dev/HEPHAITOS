@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -110,7 +111,7 @@ export function usePortfolioHistory(options: UsePortfolioHistoryOptions = {}): U
         } as never)
 
       if (perfError) {
-        console.warn('[usePortfolioHistory] RPC error, trying direct query:', perfError)
+        safeLogger.warn('[usePortfolioHistory] RPC error, trying direct query:', perfError)
 
         // Fallback to direct query
         const baseQuery = supabase
@@ -198,7 +199,7 @@ export function usePortfolioHistory(options: UsePortfolioHistoryOptions = {}): U
       const orderList = orderData as OrderRow[] | null
 
       if (orderError) {
-        console.warn('[usePortfolioHistory] Order fetch error:', orderError)
+        safeLogger.warn('[usePortfolioHistory] Order fetch error:', orderError)
         setTransactions(DEMO_TRANSACTIONS)
       } else if (orderList && orderList.length > 0) {
         const txData: Transaction[] = orderList.map((o) => ({
@@ -215,7 +216,7 @@ export function usePortfolioHistory(options: UsePortfolioHistoryOptions = {}): U
         setTransactions(DEMO_TRANSACTIONS)
       }
     } catch (err) {
-      console.error('[usePortfolioHistory] Error:', err)
+      safeLogger.error('[usePortfolioHistory] Error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch portfolio history'))
       setHistory(generateDemoHistory(days))
       setTransactions(DEMO_TRANSACTIONS)

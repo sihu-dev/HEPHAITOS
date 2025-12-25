@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // Database row types for type safety
 interface PricingDisplayRow {
@@ -133,7 +134,7 @@ export function usePricing() {
 
         setIsLoading(false)
       } catch (err) {
-        console.error('[Pricing] Error fetching pricing:', err)
+        safeLogger.error('[Pricing] Error fetching pricing:', err)
         setError(err instanceof Error ? err.message : 'Failed to load pricing')
         setIsLoading(false)
       }

@@ -7,18 +7,11 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getExchange } from '@/lib/exchange'
 import type { ExchangeId } from '@/types'
-import { exchangeRateLimiter, getClientIP, createRateLimitResponse } from '@/lib/rate-limiter'
+import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 // GET /api/exchange/orderbook?exchange=binance&symbol=BTC/USDT&limit=20
-export async function GET(request: NextRequest) {
-  // Rate limiting
-  const clientIP = getClientIP(request)
-  const rateLimitResult = exchangeRateLimiter.check(`orderbook:${clientIP}`)
-
-  if (!rateLimitResult.allowed) {
-    return createRateLimitResponse(rateLimitResult.retryAfter!)
-  }
-
+async function orderbookHandler(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const exchangeId = searchParams.get('exchange') as ExchangeId
@@ -50,7 +43,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('OrderBook API Error:', error)
+    safeLogger.error('OrderBook API Error:', error)
     return NextResponse.json(
       {
         success: false,
@@ -63,3 +56,5 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withRateLimit(orderbookHandler, { category: 'exchange' })

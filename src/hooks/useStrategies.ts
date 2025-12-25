@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { Strategy as SupabaseStrategy } from '@/lib/supabase/types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface Strategy {
   id: string
@@ -160,7 +161,7 @@ export function useStrategies(options: UseStrategiesOptions = {}): UseStrategies
         setStrategies([])
       }
     } catch (err) {
-      console.error('[useStrategies] Fetch error:', err)
+      safeLogger.error('[useStrategies] Fetch error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch strategies'))
       // Fallback to demo on error
       setStrategies(DEMO_STRATEGIES)
@@ -199,7 +200,7 @@ export function useStrategies(options: UseStrategiesOptions = {}): UseStrategies
       setStrategies(prev => [newStrategy, ...prev])
       return newStrategy
     } catch (err) {
-      console.error('[useStrategies] Create error:', err)
+      safeLogger.error('[useStrategies] Create error:', err)
       return null
     }
   }, [])
@@ -233,7 +234,7 @@ export function useStrategies(options: UseStrategiesOptions = {}): UseStrategies
       )
       return true
     } catch (err) {
-      console.error('[useStrategies] Update error:', err)
+      safeLogger.error('[useStrategies] Update error:', err)
       return false
     }
   }, [])
@@ -256,7 +257,7 @@ export function useStrategies(options: UseStrategiesOptions = {}): UseStrategies
       setStrategies(prev => prev.filter(s => s.id !== id))
       return true
     } catch (err) {
-      console.error('[useStrategies] Delete error:', err)
+      safeLogger.error('[useStrategies] Delete error:', err)
       return false
     }
   }, [])

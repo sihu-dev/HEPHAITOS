@@ -20,6 +20,7 @@ import type {
 } from './types'
 import type { ExchangeId, OHLCV } from '@/types'
 import { v4 as uuidv4 } from 'uuid'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // Upbit API Response Types
 interface UpbitTicker {
@@ -450,7 +451,7 @@ export class UpbitExchange extends BaseExchange {
       this.ws = new WebSocket(this.wsUrl)
       this.ws.onmessage = (event) => this.handleWSMessage(event)
       this.ws.onclose = () => this.handleWSClose()
-      this.ws.onerror = (error) => console.error('Upbit WS Error:', error)
+      this.ws.onerror = (error) => safeLogger.error('Upbit WS Error:', error)
     }
 
     subscriptions.forEach(sub => {
@@ -578,7 +579,7 @@ export class UpbitExchange extends BaseExchange {
           break
       }
     } catch (error) {
-      console.error('Failed to parse Upbit WebSocket message:', error)
+      safeLogger.error('Failed to parse Upbit WebSocket message:', error)
     }
   }
 

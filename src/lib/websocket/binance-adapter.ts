@@ -4,6 +4,7 @@
 // ============================================
 
 import type { WSMessage, Ticker } from '@/lib/exchange/types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -263,7 +264,7 @@ export function parseBinanceMessage(rawData: string): WSMessage | null {
       timestamp: Date.now(),
     }
   } catch {
-    console.warn('[BinanceAdapter] Failed to parse message:', rawData.substring(0, 100))
+    safeLogger.warn('[BinanceAdapter] Failed to parse message:', rawData.substring(0, 100))
     return null
   }
 }

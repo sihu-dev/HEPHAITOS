@@ -15,6 +15,7 @@ import type { Strategy, StrategyConfig, Condition, RiskManagement, Timeframe } f
 import { generateId } from '@/lib/utils'
 import { riskProfiler, type UserRiskProfile } from './risk-profiler'
 import { LegalCompliance } from './legal-compliance'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Strategy Builder Class (Enhanced with Quant 2.0)
@@ -282,14 +283,14 @@ export class StrategyBuilder {
       // Use dynamic values only if user didn't specify
       if (!risk.stopLoss) {
         risk.stopLoss = dynamicRisk.stopLoss
-        console.log(
+        safeLogger.info(
           `[StrategyBuilder] Dynamic stop loss calculated for ${symbol}: ${dynamicRisk.stopLoss}% (based on volatility)`
         )
       }
 
       if (!risk.takeProfit) {
         risk.takeProfit = dynamicRisk.takeProfit
-        console.log(
+        safeLogger.info(
           `[StrategyBuilder] Dynamic take profit calculated for ${symbol}: ${dynamicRisk.takeProfit}% (risk/reward ratio)`
         )
       }
@@ -305,7 +306,7 @@ export class StrategyBuilder {
 
     // Log risk warnings
     if (compliance.warnings.length > 0) {
-      console.warn('[StrategyBuilder] Risk warnings:', compliance.warnings)
+      safeLogger.warn('[StrategyBuilder] Risk warnings:', compliance.warnings)
     }
 
     return risk

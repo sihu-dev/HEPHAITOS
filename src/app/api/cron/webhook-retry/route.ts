@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { notifyDLQItem } from '@/lib/notifications/slack'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,7 +29,7 @@ function verifyCronSecret(request: NextRequest): boolean {
   return authHeader === `Bearer ${cronSecret}`
 }
 
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   // 개발 환경에서는 인증 스킵
   if (process.env.NODE_ENV === 'production' && !verifyCronSecret(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -238,3 +239,5 @@ async function processWebhookRetry(
 // Vercel Cron 설정
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })

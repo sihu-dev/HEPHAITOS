@@ -1,4 +1,5 @@
 // ============================================
+import { safeLogger } from '@/lib/utils/safe-logger'
 // Claude API Client
 // 시장 분석 및 자연어 처리
 // ============================================
@@ -169,7 +170,7 @@ export class ClaudeClient {
       const data: ClaudeResponse = await response.json()
       return data.content[0]?.text || ''
     } catch (error) {
-      console.error('[Claude] API call failed:', error)
+      safeLogger.error('[Claude] API call failed:', error)
       throw error
     }
   }

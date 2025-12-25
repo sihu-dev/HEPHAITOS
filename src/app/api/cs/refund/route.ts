@@ -5,14 +5,22 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 /**
  * POST /api/cs/refund
  * 환불 요청 생성 + Edge Function 트리거
  */
-export async function POST(req: NextRequest) {
+async function POSTHandler(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: { code: 'SUPABASE_ERROR', message: 'Database connection failed' } },
+        { status: 500 }
+      )
+    }
 
     // 1. 인증 확인
     const {
@@ -62,7 +70,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (eligibleError) {
-      console.error('[Refund API] Eligibility check error:', eligibleError);
+      safeLogger.error('[Refund API] Eligibility check error:', eligibleError);
       return NextResponse.json(
         {
           success: false,
@@ -97,7 +105,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (createError) {
-      console.error('[Refund API] Create error:', createError);
+      safeLogger.error('[Refund API] Create error:', createError);
       return NextResponse.json(
         {
           success: false,
@@ -123,7 +131,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (functionError) {
-      console.error('[Refund API] Edge Function error:', functionError);
+      safeLogger.error('[Refund API] Edge Function error:', functionError);
       // Edge Function 실패해도 요청은 생성됨 (나중에 수동 처리 가능)
     }
 
@@ -137,7 +145,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Refund API] POST error:', error);
+    safeLogger.error('[Refund API] POST error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -152,9 +160,15 @@ export async function POST(req: NextRequest) {
  * GET /api/cs/refund
  * 사용자의 환불 이력 조회
  */
-export async function GET(req: NextRequest) {
+async function GETHandler(req: NextRequest) {
   try {
     const supabase = await createServerSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: { code: 'SUPABASE_ERROR', message: 'Database connection failed' } },
+        { status: 500 }
+      )
+    }
 
     // 1. 인증 확인
     const {
@@ -180,7 +194,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (historyError) {
-      console.error('[Refund API] History error:', historyError);
+      safeLogger.error('[Refund API] History error:', historyError);
       return NextResponse.json(
         {
           success: false,
@@ -197,7 +211,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('[Refund API] GET error:', error);
+    safeLogger.error('[Refund API] GET error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -207,3 +221,6 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

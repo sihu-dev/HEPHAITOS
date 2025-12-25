@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server'
 import type { ApiResponse } from '@/types'
 import { ERROR_CODES, type ErrorCode, getUserFriendlyMessage } from './error-handler'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 /**
  * Create success response

@@ -5,6 +5,7 @@
 
 import { createClaudeClient } from '@/lib/ai/claude-client'
 import type { SafetyPolicy } from './policies'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface SoftenRequest {
   content: string
@@ -87,7 +88,7 @@ ${content}
     // JSON 파싱 실패 시 Fallback
     return ruleBasedSoften(content, policy)
   } catch (error) {
-    console.error('[Softener] LLM failed, using rule-based:', error)
+    safeLogger.error('[Softener] LLM failed, using rule-based:', error)
     return ruleBasedSoften(content, policy)
   }
 }

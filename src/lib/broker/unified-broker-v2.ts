@@ -196,22 +196,22 @@ const CIRCUIT_CONFIG = {
  * // 연결
  * const connection = await broker.connect();
  * if (!connection.success) {
- *   console.error('연결 실패:', connection.error);
+ *   safeLogger.error('연결 실패:', connection.error);
  *   return;
  * }
  *
  * // 잔고 조회
  * const balance = await broker.getBalance();
- * console.log('사용 가능 금액:', balance.available);
+ * safeLogger.info('사용 가능 금액:', balance.available);
  *
  * // 보유 종목 조회
  * const holdings = await broker.getHoldings();
- * console.log('보유 종목 수:', holdings.length);
+ * safeLogger.info('보유 종목 수:', holdings.length);
  *
  * // 주문 실행
  * const order = await broker.buy('AAPL', 10, 150.50);
  * if (order.success) {
- *   console.log('주문 ID:', order.orderId);
+ *   safeLogger.info('주문 ID:', order.orderId);
  * }
  * ```
  *

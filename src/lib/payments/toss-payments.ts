@@ -1,4 +1,5 @@
 // ============================================
+import { safeLogger } from '@/lib/utils/safe-logger'
 // Toss Payments Integration
 // 토스페이먼츠 결제 연동
 // ============================================
@@ -223,7 +224,7 @@ export class TossPaymentsClient {
     this.secretKey = process.env.TOSS_SECRET_KEY || ''
 
     if (!this.clientKey || !this.secretKey) {
-      console.warn('[TossPayments] API keys not configured')
+      safeLogger.warn('[TossPayments] API keys not configured')
     }
   }
 
@@ -283,7 +284,7 @@ export class TossPaymentsClient {
       const data = await response.json()
       return { checkoutUrl: data.checkout?.url || '' }
     } catch (error) {
-      console.error('[TossPayments] Initiate payment error:', error)
+      safeLogger.error('[TossPayments] Initiate payment error:', error)
       throw error
     }
   }
@@ -335,7 +336,7 @@ export class TossPaymentsClient {
         receipt: data.receipt ? { url: data.receipt.url } : undefined,
       }
     } catch (error) {
-      console.error('[TossPayments] Confirm payment error:', error)
+      safeLogger.error('[TossPayments] Confirm payment error:', error)
       throw error
     }
   }
@@ -375,7 +376,7 @@ export class TossPaymentsClient {
         status: 'cancelled',
       }
     } catch (error) {
-      console.error('[TossPayments] Cancel payment error:', error)
+      safeLogger.error('[TossPayments] Cancel payment error:', error)
       throw error
     }
   }
@@ -410,7 +411,7 @@ export class TossPaymentsClient {
         method: data.method?.toLowerCase() as PaymentMethod,
       }
     } catch (error) {
-      console.error('[TossPayments] Get payment error:', error)
+      safeLogger.error('[TossPayments] Get payment error:', error)
       return null
     }
   }

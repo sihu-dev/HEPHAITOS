@@ -6,6 +6,7 @@
 // ============================================
 
 import { useState, useEffect } from 'react'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import {
   TrendingUp,
   TrendingDown,
@@ -162,7 +163,7 @@ export default function KoreanStockWidget() {
         setQuote(quoteData.data)
       }
     } catch (err) {
-      console.error('Failed to load stock detail:', err)
+      safeLogger.error('Failed to load stock detail:', err)
     }
   }
 
@@ -178,7 +179,7 @@ export default function KoreanStockWidget() {
         loadStockDetail(searchQuery)
       }
     } catch (err) {
-      console.error('Search failed:', err)
+      safeLogger.error('Search failed:', err)
     } finally {
       setLoading(false)
     }

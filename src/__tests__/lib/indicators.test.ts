@@ -14,7 +14,7 @@ import {
   stochastic,
   calculateIndicator,
 } from '@/lib/backtest/indicators'
-import type { OHLCV } from '@/types'
+import type { OHLCV, IndicatorType } from '@/types'
 
 describe('sma (Simple Moving Average)', () => {
   it('should calculate SMA correctly', () => {
@@ -388,7 +388,8 @@ describe('calculateIndicator', () => {
   })
 
   it('should return closes for unknown indicator type', () => {
-    const result = calculateIndicator('unknown' as any, candles, {})
+    // @ts-expect-error - Testing invalid indicator type
+    const result = calculateIndicator('unknown' as IndicatorType, candles, {})
 
     expect(result.values).toEqual(candles.map(c => c.close))
   })

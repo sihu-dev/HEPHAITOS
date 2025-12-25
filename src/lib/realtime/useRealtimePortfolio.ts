@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Portfolio Realtime Hook
@@ -74,7 +75,7 @@ export function useRealtimePortfolio(userId?: string) {
         }))
       }
     } catch (err) {
-      console.error('[useRealtimePortfolio] Fetch error:', err)
+      safeLogger.error('[useRealtimePortfolio] Fetch error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch portfolio'))
     } finally {
       setIsLoading(false)
@@ -153,11 +154,11 @@ export function useRealtimePortfolio(userId?: string) {
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           setIsConnected(true)
-          console.log('[Realtime] Connected to portfolio channel')
+          safeLogger.info('[Realtime] Connected to portfolio channel')
         }
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           setIsConnected(false)
-          console.error('[Realtime] Portfolio channel error')
+          safeLogger.error('[Realtime] Portfolio channel error')
         }
       })
 

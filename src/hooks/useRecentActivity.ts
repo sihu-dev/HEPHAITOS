@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export type ActivityType = 'trade' | 'backtest' | 'strategy' | 'notification' | 'system'
 
@@ -209,7 +210,7 @@ export function useRecentActivity(limit: number = 10): UseRecentActivityReturn {
       allActivities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       setActivities(allActivities.slice(0, limit))
     } catch (err) {
-      console.error('[useRecentActivity] Fetch error:', err)
+      safeLogger.error('[useRecentActivity] Fetch error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch activities'))
       setActivities(DEMO_ACTIVITIES.slice(0, limit))
     } finally {

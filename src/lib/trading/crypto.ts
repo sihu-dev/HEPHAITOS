@@ -5,6 +5,7 @@
 
 import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto'
 import { promisify } from 'util'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 const scryptAsync = promisify(scrypt)
 
@@ -248,7 +249,7 @@ export class CredentialStore {
 
       return credentials
     } catch (error) {
-      console.error(`Failed to decrypt credentials for ${exchangeId}:`, error)
+      safeLogger.error(`Failed to decrypt credentials for ${exchangeId}:`, error)
       return null
     }
   }

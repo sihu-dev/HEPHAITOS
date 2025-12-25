@@ -4,11 +4,14 @@
 // ============================================
 
 import { NextResponse } from 'next/server'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
-export async function GET() {
+async function GETHandler() {
   return NextResponse.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
   })
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })

@@ -4,6 +4,7 @@
 // ============================================
 
 import { trackAIUsage, type FeatureName, type ModelName } from './cost-tracking'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 /**
  * AI 호출 옵션
@@ -189,7 +190,7 @@ export async function exampleUsage() {
     systemPrompt: '너는 트레이딩 전략 전문가야.',
   })
 
-  console.log('Generated strategy:', result.content)
-  console.log('Cost:', result.costKRW, 'KRW')
-  console.log('Latency:', result.latencyMs, 'ms')
+  safeLogger.info('Generated strategy:', result.content)
+  safeLogger.info(`Cost: ${result.costKRW} KRW`)
+  safeLogger.info(`Latency: ${result.latencyMs} ms`)
 }

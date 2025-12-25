@@ -1,4 +1,5 @@
 // ============================================
+import { safeLogger } from '@/lib/utils/safe-logger'
 // Sentry Error Monitoring
 // 프로덕션 에러 모니터링 및 성능 추적
 // ============================================
@@ -14,7 +15,7 @@ let isInitialized = false
  */
 export async function initSentry(): Promise<boolean> {
   if (isInitialized) return true
-  console.info('[Sentry] Disabled - package not installed')
+  safeLogger.info('[Sentry] Disabled - package not installed')
   return false
 }
 
@@ -30,7 +31,7 @@ export function captureError(
     level?: 'critical' | 'high' | 'medium' | 'low'
   }
 ): string | undefined {
-  console.error('[Sentry disabled] Error:', error.message, context)
+  safeLogger.error('[Sentry disabled] Error:', { message: error.message, context })
   return undefined
 }
 
@@ -45,7 +46,7 @@ export function captureMessage(
     extra?: Record<string, unknown>
   }
 ): string | undefined {
-  console.log(`[Sentry disabled] ${level}: ${message}`, context)
+  safeLogger.info(`[Sentry disabled] ${level}: ${message}`, context)
   return undefined
 }
 

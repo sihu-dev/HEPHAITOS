@@ -19,6 +19,7 @@ import type {
   Balance,
 } from './types'
 import type { ExchangeId, OHLCV } from '@/types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // Binance API Response Types
 interface BinanceTicker {
@@ -526,7 +527,7 @@ export class BinanceExchange extends BaseExchange {
         })
       }
     } catch (error) {
-      console.error('Failed to parse WebSocket message:', error)
+      safeLogger.error('Failed to parse WebSocket message:', error)
     }
   }
 

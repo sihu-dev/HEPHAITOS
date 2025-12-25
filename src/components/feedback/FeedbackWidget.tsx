@@ -6,6 +6,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useI18n } from '@/i18n/client'
 import { useFeatureFlags } from '@/lib/feature-flags/useFeatureFlags'
 import { clsx } from 'clsx'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface FeedbackData {
   type: 'bug' | 'feature' | 'improvement' | 'other'
@@ -14,6 +15,27 @@ interface FeedbackData {
   title: string
   description: string
   email?: string
+}
+
+// Supabase feedback 테이블 insert 타입
+interface FeedbackInsert {
+  user_id: string | null
+  email: string | null
+  type: string
+  category: string
+  severity: string
+  page_url: string
+  title: string
+  description: string
+  browser_info: {
+    userAgent: string
+    viewport: { width: number; height: number }
+    language: string
+  }
+  device_info: {
+    platform: string
+    screenResolution: string
+  }
 }
 
 export function FeedbackWidget() {
@@ -86,7 +108,7 @@ export function FeedbackWidget() {
         screenResolution: `${screen.width}x${screen.height}`,
       }
 
-      const { error: insertError } = await supabase.from('feedback').insert({
+      const feedbackData: FeedbackInsert = {
         user_id: user?.id || null,
         email: formData.email || user?.email || null,
         type: formData.type,
@@ -97,7 +119,9 @@ export function FeedbackWidget() {
         description: formData.description,
         browser_info: browserInfo,
         device_info: deviceInfo,
-      } as any)
+      }
+
+      const { error: insertError } = await supabase.from('feedback').insert(feedbackData as any)
 
       if (insertError) {
         throw insertError
@@ -108,7 +132,7 @@ export function FeedbackWidget() {
         setIsOpen(false)
       }, 2000)
     } catch (err) {
-      console.error('Feedback submission error:', err)
+      safeLogger.error('Feedback submission error:', err)
       setError(isKo ? '피드백 전송에 실패했습니다' : 'Failed to submit feedback')
     } finally {
       setIsSubmitting(false)

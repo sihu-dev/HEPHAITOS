@@ -2,12 +2,14 @@
 // Backtest Queue API
 // Loop 12: 백테스트 큐 시스템
 // P-1 CRITICAL: 크레딧 소비 통합
+// P2: Rate limiting 적용
 // ============================================
 
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { addBacktestJob, getJobStatus } from '@/lib/queue/backtest-queue'
 import { spendCredits, InsufficientCreditsError } from '@/lib/credits/spend-helper'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 import { safeLogger } from '@/lib/utils/safe-logger'
 
 const supabaseAdmin = createClient(
@@ -19,7 +21,7 @@ const supabaseAdmin = createClient(
  * POST /api/backtest/queue
  * 백테스트 잡을 큐에 추가
  */
-export async function POST(req: Request) {
+async function backtestQueueHandler(req: NextRequest) {
   try {
     const { strategyId, timeframe, startDate, endDate, symbol } = await req.json()
 
@@ -122,7 +124,7 @@ export async function POST(req: Request) {
     })
 
     if (rpcErr) {
-      console.error('[Backtest Queue] Job creation error:', rpcErr)
+      safeLogger.error('[Backtest Queue] Job creation error:', rpcErr)
       return NextResponse.json({ error: 'JOB_CREATION_FAILED' }, { status: 500 })
     }
 
@@ -132,7 +134,7 @@ export async function POST(req: Request) {
       message: '백테스트가 큐에 추가되었습니다. 잠시 후 결과를 확인하세요.',
     })
   } catch (error) {
-    console.error('[Backtest Queue] POST error:', error)
+    safeLogger.error('[Backtest Queue] POST error:', error)
     return NextResponse.json(
       { error: 'INTERNAL_SERVER_ERROR' },
       { status: 500 }
@@ -144,7 +146,7 @@ export async function POST(req: Request) {
  * GET /api/backtest/queue?jobId=xxx
  * 잡 상태 조회
  */
-export async function GET(req: Request) {
+async function backtestStatusHandler(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     const jobId = searchParams.get('jobId')
@@ -182,7 +184,7 @@ export async function GET(req: Request) {
       completedAt: job.completed_at,
     })
   } catch (error) {
-    console.error('[Backtest Queue] GET error:', error)
+    safeLogger.error('[Backtest Queue] GET error:', error)
     return NextResponse.json({ error: 'INTERNAL_SERVER_ERROR' }, { status: 500 })
   }
 }
@@ -190,10 +192,14 @@ export async function GET(req: Request) {
 /**
  * 사용자 인증 (TODO: 실제 구현)
  */
-async function requireUserId(req: Request): Promise<string> {
+async function requireUserId(req: NextRequest): Promise<string> {
   const userId = req.headers.get('x-user-id')
   if (!userId) {
     throw new Error('UNAUTHORIZED')
   }
   return userId
 }
+
+// Apply rate limiting
+export const POST = withRateLimit(backtestQueueHandler, { category: 'backtest' })
+export const GET = withRateLimit(backtestStatusHandler, { category: 'api' })

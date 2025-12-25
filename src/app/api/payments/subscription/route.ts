@@ -4,6 +4,8 @@
 // ============================================
 
 import { NextRequest, NextResponse } from 'next/server'
+import { safeLogger } from '@/lib/utils/safe-logger'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 import {
   PRICING_PLANS,
   type PlanType,
@@ -27,7 +29,7 @@ const mockSubscription: Subscription = {
 }
 
 // GET: 현재 구독 정보 조회
-export async function GET() {
+async function GETHandler() {
   try {
     // TODO: 실제 구현 시 세션에서 userId 가져와서 DB 조회
     // const userId = await getCurrentUserId()
@@ -48,7 +50,7 @@ export async function GET() {
       },
     })
   } catch (error) {
-    console.error('[Subscription GET] Error:', error)
+    safeLogger.error('[Subscription GET] Error:', error)
     return NextResponse.json(
       { error: '구독 정보 조회 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -57,7 +59,7 @@ export async function GET() {
 }
 
 // POST: 구독 생성/변경
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   try {
     const body = await request.json()
     const {
@@ -104,7 +106,7 @@ export async function POST(request: NextRequest) {
       message: '결제를 진행해주세요.',
     })
   } catch (error) {
-    console.error('[Subscription POST] Error:', error)
+    safeLogger.error('[Subscription POST] Error:', error)
     return NextResponse.json(
       { error: '구독 변경 중 오류가 발생했습니다.' },
       { status: 500 }
@@ -113,7 +115,7 @@ export async function POST(request: NextRequest) {
 }
 
 // DELETE: 구독 취소
-export async function DELETE() {
+async function DELETEHandler() {
   try {
     // TODO: 실제 구현 시 구독 취소 예약
     // - cancelAtPeriodEnd = true 설정
@@ -127,10 +129,14 @@ export async function DELETE() {
       currentPeriodEnd: mockSubscription.currentPeriodEnd,
     })
   } catch (error) {
-    console.error('[Subscription DELETE] Error:', error)
+    safeLogger.error('[Subscription DELETE] Error:', error)
     return NextResponse.json(
       { error: '구독 취소 중 오류가 발생했습니다.' },
       { status: 500 }
     )
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })
+export const POST = withRateLimit(POSTHandler, { category: 'api' })
+export const DELETE = withRateLimit(DELETEHandler, { category: 'api' })

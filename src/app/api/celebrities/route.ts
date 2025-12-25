@@ -6,6 +6,8 @@
 import { NextRequest } from 'next/server'
 import { celebrityPortfolioManager } from '@/lib/mirroring'
 import { jsonSuccess, notFoundError, internalError } from '@/lib/api-response'
+import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +15,7 @@ export const dynamic = 'force-dynamic'
  * GET /api/celebrities
  * Get all celebrities or specific celebrity
  */
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const celebrityId = searchParams.get('id')
@@ -45,9 +47,11 @@ export async function GET(request: NextRequest) {
 
     return jsonSuccess(celebritiesWithPerformance)
   } catch (error) {
-    console.error('[API] Get celebrities failed:', error)
+    safeLogger.error('[API] Get celebrities failed:', error)
     return internalError(
       error instanceof Error ? error.message : '셀러브리티 조회에 실패했습니다.'
     )
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })

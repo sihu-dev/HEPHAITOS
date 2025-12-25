@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { celebrityPortfolioManager } from '@/lib/mirroring'
+import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +38,7 @@ interface ComparisonResult {
  * POST /api/portfolio/compare
  * Compare user portfolio with celebrity portfolio
  */
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   try {
     const body = await request.json()
     const { celebrityId, userHoldings } = body as {
@@ -128,7 +130,7 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[API] Portfolio comparison failed:', error)
+    safeLogger.error('[API] Portfolio comparison failed:', error)
     return NextResponse.json(
       {
         success: false,
@@ -143,7 +145,7 @@ export async function POST(request: NextRequest) {
  * PUT /api/portfolio/compare
  * Execute portfolio sync (rebalancing)
  */
-export async function PUT(request: NextRequest) {
+async function PUTHandler(request: NextRequest) {
   try {
     const body = await request.json()
     const { celebrityId, syncItems, userId } = body as {
@@ -176,7 +178,7 @@ export async function PUT(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[API] Portfolio sync failed:', error)
+    safeLogger.error('[API] Portfolio sync failed:', error)
     return NextResponse.json(
       {
         success: false,
@@ -186,3 +188,6 @@ export async function PUT(request: NextRequest) {
     )
   }
 }
+
+export const POST = withRateLimit(POSTHandler, { category: 'api' })
+export const PUT = withRateLimit(PUTHandler, { category: 'api' })

@@ -4,6 +4,7 @@
 // ============================================
 
 import { generateId } from '@/lib/utils'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -128,7 +129,7 @@ export class SimulationAccountManager {
 
     // Check balance
     if (account.currentBalance < totalWithCommission) {
-      console.warn('[SimulationAccount] Insufficient balance')
+      safeLogger.warn('[SimulationAccount] Insufficient balance')
       return null
     }
 
@@ -200,7 +201,7 @@ export class SimulationAccountManager {
       (p) => p.symbol === symbol && p.side === 'long'
     )
     if (!position || position.quantity < quantity) {
-      console.warn('[SimulationAccount] Insufficient position')
+      safeLogger.warn('[SimulationAccount] Insufficient position')
       return null
     }
 

@@ -13,6 +13,7 @@ import {
 import { DisclaimerInline, TradeWarning } from '@/components/ui/Disclaimer'
 import { useI18n } from '@/i18n/client'
 import { useHoldings, type HoldingItem } from '@/hooks/useHoldings'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 
 // ============================================
@@ -388,7 +389,7 @@ export function CompareContent() {
   ]
 
   const handleSync = (items: ComparisonResult[]) => {
-    console.log('Syncing portfolio:', items)
+    safeLogger.info('Syncing portfolio:', items)
     // TODO: Implement actual sync logic
   }
 

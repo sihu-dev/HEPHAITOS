@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface CostSummary {
   period_days: number
@@ -105,7 +106,7 @@ export function CostDashboard() {
       const alertsData = await alertsRes.json()
       setAlerts(alertsData.data || [])
     } catch (err) {
-      console.error('[Cost] Fetch error:', err)
+      safeLogger.error('[Cost] Fetch error:', err)
     } finally {
       setIsLoading(false)
     }
@@ -127,7 +128,7 @@ export function CostDashboard() {
       })
       fetchData()
     } catch (err) {
-      console.error('[Cost] Acknowledge error:', err)
+      safeLogger.error('[Cost] Acknowledge error:', err)
     }
   }
 

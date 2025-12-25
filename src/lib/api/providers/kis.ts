@@ -4,6 +4,7 @@
 // ============================================
 
 import { requireKISConfig } from '@/lib/config/env'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -584,7 +585,7 @@ class KISProvider {
     // KIS API는 직접적인 종목 검색 API가 없어서
     // 클라이언트 측에서 종목 마스터 데이터를 캐싱하여 검색해야 함
     // 여기서는 예시로 빈 배열 반환
-    console.warn('Stock search requires local master data cache')
+    safeLogger.warn('Stock search requires local master data cache')
     return []
   }
 }

@@ -19,6 +19,7 @@ import type {
   QuoteCallback,
   OrderCallback,
 } from '../types'
+import { safeLogger } from '@/lib/utils/safe-logger'
 
 /**
  * Alpaca API 응답 타입
@@ -162,7 +163,7 @@ export class AlpacaBroker implements UnifiedBroker {
         balance,
       }
     } catch (error) {
-      console.error('[AlpacaBroker] Connect failed:', error)
+      safeLogger.error('[AlpacaBroker] Connect failed:', error)
       return {
         success: false,
         message: '연결 실패',
@@ -428,7 +429,7 @@ export class AlpacaBroker implements UnifiedBroker {
 
   private connectWebSocket(symbol: string): void {
     // TODO: Implement Alpaca WebSocket connection
-    console.log(`[AlpacaBroker] WebSocket subscription for ${symbol}`)
+    safeLogger.info(`[AlpacaBroker] WebSocket subscription for ${symbol}`)
   }
 
   subscribeOrders(callback: OrderCallback): () => void {

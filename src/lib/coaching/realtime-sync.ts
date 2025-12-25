@@ -4,6 +4,7 @@
 // ============================================
 
 import { generateId } from '@/lib/utils'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -299,7 +300,7 @@ export class RealtimeSyncManager {
         this.ws = new WebSocket(url)
 
         this.ws.onopen = () => {
-          console.log('[RealtimeSync] Connected')
+          safeLogger.info('[RealtimeSync] Connected')
           this.reconnectAttempts = 0
           resolve()
         }
@@ -309,12 +310,12 @@ export class RealtimeSyncManager {
         }
 
         this.ws.onclose = () => {
-          console.log('[RealtimeSync] Disconnected')
+          safeLogger.info('[RealtimeSync] Disconnected')
           this.attemptReconnect(url)
         }
 
         this.ws.onerror = (error) => {
-          console.error('[RealtimeSync] Error:', error)
+          safeLogger.error('[RealtimeSync] Error:', error)
           reject(error)
         }
       } catch (error) {
@@ -351,7 +352,7 @@ export class RealtimeSyncManager {
         try {
           callback(data)
         } catch (error) {
-          console.error('[RealtimeSync] Callback error:', error)
+          safeLogger.error('[RealtimeSync] Callback error:', error)
         }
       }
     })
@@ -385,17 +386,17 @@ export class RealtimeSyncManager {
 
   private attemptReconnect(url: string): void {
     if (this.reconnectAttempts >= this.MAX_RECONNECT_ATTEMPTS) {
-      console.error('[RealtimeSync] Max reconnect attempts reached')
+      safeLogger.error('[RealtimeSync] Max reconnect attempts reached')
       return
     }
 
     this.reconnectAttempts++
     const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000)
 
-    console.log(`[RealtimeSync] Reconnecting in ${delay}ms...`)
+    safeLogger.info(`[RealtimeSync] Reconnecting in ${delay}ms...`)
 
     setTimeout(() => {
-      this.connect(url).catch(console.error)
+      this.connect(url).catch((error) => safeLogger.error('[RealtimeSync] Reconnect failed:', error))
     }, delay)
   }
 }

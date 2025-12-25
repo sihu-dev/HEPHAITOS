@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createHmac } from 'crypto'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,14 +19,14 @@ const supabaseAdmin = createClient(
  * POST /api/payments/webhook/toss
  * 토스페이먼츠 웹훅 수신
  */
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const body = await req.text()
     const signature = req.headers.get('toss-signature')
 
     // 1. 서명 검증
     if (!verifyTossSignature(body, signature)) {
-      console.error('[Toss Webhook] Invalid signature')
+      safeLogger.error('[Toss Webhook] Invalid signature')
       return NextResponse.json({ error: 'INVALID_SIGNATURE' }, { status: 401 })
     }
 
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
     const eventId = payload.eventId || crypto.randomUUID()
     const orderId = payload.orderId
 
-    console.log(`[Toss Webhook] Received event ${eventId} for order ${orderId}`)
+    safeLogger.info(`[Toss Webhook] Received event ${eventId} for order ${orderId}`)
 
     // 2. 웹훅 이벤트 저장 (멱등성)
     const { error: insertError } = await supabaseAdmin
@@ -49,11 +50,11 @@ export async function POST(req: Request) {
     if (insertError) {
       // 중복 이벤트 (멱등)
       if (insertError.code === '23505') {
-        console.log(`[Toss Webhook] Duplicate event ${eventId}, ignoring`)
+        safeLogger.info(`[Toss Webhook] Duplicate event ${eventId}, ignoring`)
         return NextResponse.json({ received: true })
       }
 
-      console.error('[Toss Webhook] Event insert error:', insertError)
+      safeLogger.error('[Toss Webhook] Event insert error:', insertError)
       return NextResponse.json({ error: 'EVENT_INSERT_FAILED' }, { status: 500 })
     }
 
@@ -61,13 +62,13 @@ export async function POST(req: Request) {
     try {
       await processWebhookEvent(eventId, payload)
     } catch (error) {
-      console.error('[Toss Webhook] Processing error:', error)
+      safeLogger.error('[Toss Webhook] Processing error:', error)
       // 실패해도 200 반환 (나중에 재처리)
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('[Toss Webhook] POST error:', error)
+    safeLogger.error('[Toss Webhook] POST error:', error)
     return NextResponse.json({ error: 'INTERNAL_SERVER_ERROR' }, { status: 500 })
   }
 }
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
 function verifyTossSignature(body: string, signature: string | null): boolean {
   if (!signature) return false
   if (!process.env.TOSS_WEBHOOK_SECRET) {
-    console.warn('[Toss Webhook] TOSS_WEBHOOK_SECRET not set, skipping verification')
+    safeLogger.warn('[Toss Webhook] TOSS_WEBHOOK_SECRET not set, skipping verification')
     return true // 개발 환경
   }
 
@@ -90,14 +91,25 @@ function verifyTossSignature(body: string, signature: string | null): boolean {
 }
 
 /**
+ * Toss 웹훅 페이로드 타입
+ */
+interface TossWebhookPayload {
+  orderId: string;
+  status: string;
+  paymentKey: string;
+  totalAmount: number;
+  [key: string]: unknown; // 추가 필드 허용
+}
+
+/**
  * 웹훅 이벤트 처리
  */
-async function processWebhookEvent(eventId: string, payload: any): Promise<void> {
+async function processWebhookEvent(eventId: string, payload: TossWebhookPayload): Promise<void> {
   const { orderId, status, paymentKey, totalAmount } = payload
 
   // 결제 성공 이벤트만 처리
   if (status !== 'DONE') {
-    console.log(`[Toss Webhook] Event ${eventId} status is ${status}, skipping`)
+    safeLogger.info(`[Toss Webhook] Event ${eventId} status is ${status}, skipping`)
     await supabaseAdmin
       .from('payment_webhook_events')
       .update({ process_status: 'ignored' })
@@ -117,7 +129,7 @@ async function processWebhookEvent(eventId: string, payload: any): Promise<void>
     if (error) {
       // 이미 지급된 경우는 OK (멱등성)
       if (error.message.includes('paid')) {
-        console.log(`[Toss Webhook] Order ${orderId} already paid, ignoring`)
+        safeLogger.info(`[Toss Webhook] Order ${orderId} already paid, ignoring`)
         await supabaseAdmin
           .from('payment_webhook_events')
           .update({ process_status: 'processed', processed_at: new Date().toISOString() })
@@ -134,7 +146,7 @@ async function processWebhookEvent(eventId: string, payload: any): Promise<void>
       .update({ process_status: 'processed', processed_at: new Date().toISOString() })
       .eq('event_id', eventId)
 
-    console.log(`[Toss Webhook] Event ${eventId} processed successfully`)
+    safeLogger.info(`[Toss Webhook] Event ${eventId} processed successfully`)
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     safeLogger.error(`[Toss Webhook] Event ${eventId} processing failed`, { error: errorMessage })
@@ -190,3 +202,5 @@ async function processRetryQueue(): Promise<{ processed: number; failed: number 
   safeLogger.info('[Toss Webhook] Retry queue processed', { processed, failed })
   return { processed, failed }
 }
+
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

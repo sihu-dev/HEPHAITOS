@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 type SortBy = 'sharpe' | 'cagr' | 'return' | 'backtest_count';
 
@@ -15,7 +17,7 @@ interface LeaderboardQuery {
   minBacktests?: number;
 }
 
-export async function GET(req: NextRequest) {
+async function GETHandler(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
 
@@ -29,6 +31,12 @@ export async function GET(req: NextRequest) {
     const minBacktests = parseInt(searchParams.get('minBacktests') || '3');
 
     const supabase = await createServerSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: { code: 'SUPABASE_ERROR', message: 'Database connection failed' } },
+        { status: 500 }
+      )
+    }
 
     // Leaderboard entry type
     interface LeaderboardEntry {
@@ -55,7 +63,7 @@ export async function GET(req: NextRequest) {
     }).returns<LeaderboardEntry[]>();
 
     if (error) {
-      console.error('[Leaderboard] Query error:', error);
+      safeLogger.error('[Leaderboard] Query error:', error);
       return NextResponse.json(
         {
           success: false,
@@ -119,7 +127,7 @@ export async function GET(req: NextRequest) {
       }
     );
   } catch (error) {
-    console.error('[Leaderboard] Error:', error);
+    safeLogger.error('[Leaderboard] Error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -132,3 +140,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })

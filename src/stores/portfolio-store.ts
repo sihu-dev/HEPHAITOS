@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import type { Portfolio, Position, Trade, MarketData } from '@/types'
 import { apiClient, getErrorMessage } from '@/lib/api-client'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import type {
   PortfolioStore,
   PortfolioStoreState,
@@ -100,7 +101,7 @@ export const usePortfolioStore = create<PortfolioStore>()(
           set({ marketData }, false, 'fetchMarketData/fulfilled')
         } catch (error) {
           // Silent fail for market data - non-critical
-          console.error('Failed to fetch market data:', getErrorMessage(error))
+          safeLogger.error('Failed to fetch market data:', getErrorMessage(error))
         }
       },
 

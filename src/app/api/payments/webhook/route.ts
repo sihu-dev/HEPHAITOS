@@ -6,6 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTossPaymentsClient } from '@/lib/payments/toss-payments'
 import { verifyWebhookSignature } from '@/lib/api/providers/toss-payments'
+import { safeLogger } from '@/lib/utils/safe-logger'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 // Webhook event types
 type WebhookEventType =
@@ -26,7 +28,7 @@ interface WebhookPayload {
   }
 }
 
-export async function POST(request: NextRequest) {
+async function POSTHandler(request: NextRequest) {
   try {
     // Raw body와 signature 추출
     const rawBody = await request.text()
@@ -36,25 +38,25 @@ export async function POST(request: NextRequest) {
     // Production 환경에서 시그니처 검증 필수
     if (process.env.NODE_ENV === 'production') {
       if (!webhookSecret) {
-        console.error('[Webhook] TOSS_WEBHOOK_SECRET not configured in production')
+        safeLogger.error('[Webhook] TOSS_WEBHOOK_SECRET not configured in production')
         return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
       }
 
       if (!signature) {
-        console.warn('[Webhook] Missing signature header')
+        safeLogger.warn('[Webhook] Missing signature header')
         return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
       }
 
       const isValid = verifyWebhookSignature(rawBody, signature, webhookSecret)
       if (!isValid) {
-        console.warn('[Webhook] Invalid signature')
+        safeLogger.warn('[Webhook] Invalid signature')
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
       }
     }
 
     const payload: WebhookPayload = JSON.parse(rawBody)
 
-    console.log('[Webhook] Received:', {
+    safeLogger.info('[Webhook] Received:', {
       eventType: payload.eventType,
       createdAt: payload.createdAt,
       orderId: payload.data.orderId,
@@ -74,12 +76,12 @@ export async function POST(request: NextRequest) {
         break
 
       default:
-        console.log('[Webhook] Unhandled event type:', payload.eventType)
+        safeLogger.info('[Webhook] Unhandled event type:', payload.eventType)
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[Webhook] Error:', error)
+    safeLogger.error('[Webhook] Error:', error)
     // Webhook은 항상 200을 반환해야 재시도를 방지할 수 있음
     return NextResponse.json({ success: false })
   }
@@ -92,11 +94,11 @@ async function handlePaymentStatusChanged(data: WebhookPayload['data']) {
   const payment = await client.getPayment(data.paymentKey)
 
   if (!payment) {
-    console.warn('[Webhook] Payment not found:', data.paymentKey)
+    safeLogger.warn('[Webhook] Payment not found:', data.paymentKey)
     return
   }
 
-  console.log('[Webhook] Payment status:', {
+  safeLogger.info('[Webhook] Payment status:', {
     orderId: payment.orderId,
     status: payment.status,
   })
@@ -108,11 +110,13 @@ async function handlePaymentStatusChanged(data: WebhookPayload['data']) {
 }
 
 async function handleBillingKeyChanged(data: WebhookPayload['data']) {
-  console.log('[Webhook] Billing key changed:', data)
+  safeLogger.info('[Webhook] Billing key changed:', data)
   // TODO: 정기결제 키 상태 변경 처리
 }
 
 async function handleDepositCallback(data: WebhookPayload['data']) {
-  console.log('[Webhook] Deposit callback:', data)
+  safeLogger.info('[Webhook] Deposit callback:', data)
   // TODO: 가상계좌 입금 완료 처리
 }
+
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

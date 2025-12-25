@@ -6,6 +6,7 @@
 import { Worker, Queue } from 'bullmq'
 import { Redis } from 'ioredis'
 import { createClient } from '@supabase/supabase-js'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 const redis = new Redis(process.env.UPSTASH_REDIS_URL!, {
   maxRetriesPerRequest: null,
@@ -38,7 +39,7 @@ export const webhookWorker = new Worker(
   async (job) => {
     const { eventId } = job.data
 
-    console.log(`[Webhook Worker] Processing event ${eventId}`)
+    safeLogger.info(`[Webhook Worker] Processing event ${eventId}`)
 
     // 1. 이벤트 조회
     const { data: event, error } = await supabaseAdmin
@@ -48,13 +49,13 @@ export const webhookWorker = new Worker(
       .single()
 
     if (error || !event) {
-      console.error(`[Webhook Worker] Event ${eventId} not found`)
+      safeLogger.error(`[Webhook Worker] Event ${eventId} not found`)
       throw new Error('EVENT_NOT_FOUND')
     }
 
     // 이미 처리됨
     if (event.process_status === 'processed') {
-      console.log(`[Webhook Worker] Event ${eventId} already processed`)
+      safeLogger.info(`[Webhook Worker] Event ${eventId} already processed`)
       return { status: 'already_processed' }
     }
 
@@ -97,10 +98,10 @@ export const webhookWorker = new Worker(
         .update({ process_status: 'processed', processed_at: new Date().toISOString() })
         .eq('event_id', eventId)
 
-      console.log(`[Webhook Worker] Event ${eventId} processed successfully`)
+      safeLogger.info(`[Webhook Worker] Event ${eventId} processed successfully`)
       return { status: 'success' }
     } catch (error) {
-      console.error(`[Webhook Worker] Event ${eventId} processing failed:`, error)
+      safeLogger.error(`[Webhook Worker] Event ${eventId} processing failed:`, error)
 
       await supabaseAdmin
         .from('payment_webhook_events')
@@ -123,11 +124,11 @@ export const webhookWorker = new Worker(
  * Worker 이벤트 핸들러
  */
 webhookWorker.on('completed', (job) => {
-  console.log(`[Webhook Worker] Job ${job.id} completed:`, job.returnvalue)
+  safeLogger.info(`[Webhook Worker] Job ${job.id} completed:`, job.returnvalue)
 })
 
 webhookWorker.on('failed', (job, err) => {
-  console.error(`[Webhook Worker] Job ${job?.id} failed:`, err.message)
+  safeLogger.error(`[Webhook Worker] Job ${job?.id} failed:`, err.message)
 })
 
 /**
@@ -141,11 +142,11 @@ export async function retryFailedWebhookEvents(): Promise<void> {
     .limit(10)
 
   if (!failedEvents || failedEvents.length === 0) {
-    console.log('[Webhook Retry] No failed events to retry')
+    safeLogger.info('[Webhook Retry] No failed events to retry')
     return
   }
 
-  console.log(`[Webhook Retry] Retrying ${failedEvents.length} failed events`)
+  safeLogger.info(`[Webhook Retry] Retrying ${failedEvents.length} failed events`)
 
   for (const event of failedEvents) {
     await webhookQueue.add('retry-event', { eventId: event.event_id })
@@ -156,7 +157,7 @@ export async function retryFailedWebhookEvents(): Promise<void> {
  * Graceful shutdown
  */
 process.on('SIGTERM', async () => {
-  console.log('[Webhook Worker] Shutting down gracefully...')
+  safeLogger.info('[Webhook Worker] Shutting down gracefully...')
   await webhookWorker.close()
   process.exit(0)
 })

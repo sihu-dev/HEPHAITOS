@@ -5,14 +5,22 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
-export async function GET(
+async function GETHandler(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id: strategyId } = await context.params;
     const supabase = await createServerSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json(
+        { success: false, error: { code: 'SUPABASE_ERROR', message: 'Database connection failed' } },
+        { status: 500 }
+      )
+    }
 
     // 1. 집계 성과 조회 (Materialized View)
     interface StrategyPerformanceData {
@@ -33,7 +41,7 @@ export async function GET(
     }).single();
 
     if (aggError) {
-      console.error('[Strategy Performance] Aggregate error:', aggError);
+      safeLogger.error('[Strategy Performance] Aggregate error:', aggError);
       return NextResponse.json(
         {
           success: false,
@@ -69,7 +77,7 @@ export async function GET(
       .limit(20);
 
     if (historyError) {
-      console.error('[Strategy Performance] History error:', historyError);
+      safeLogger.error('[Strategy Performance] History error:', historyError);
     }
 
     // 3. 응답
@@ -104,7 +112,7 @@ export async function GET(
       }
     );
   } catch (error) {
-    console.error('[Strategy Performance] Error:', error);
+    safeLogger.error('[Strategy Performance] Error:', error);
     return NextResponse.json(
       {
         success: false,
@@ -117,3 +125,5 @@ export async function GET(
     );
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })

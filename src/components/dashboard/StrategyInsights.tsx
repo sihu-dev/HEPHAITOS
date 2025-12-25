@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface PopularStrategy {
   strategy_hash: string
@@ -99,7 +100,7 @@ export function StrategyInsights() {
       const typeData = await typeRes.json()
       setTypePerformance(typeData.data || [])
     } catch (err) {
-      console.error('[StrategyInsights] Fetch error:', err)
+      safeLogger.error('[StrategyInsights] Fetch error:', err)
     } finally {
       setIsLoading(false)
     }

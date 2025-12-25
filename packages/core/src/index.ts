@@ -29,6 +29,30 @@ export {
   createPositionRepository,
 } from './repositories/position-repository.js';
 
+export {
+  type IPortfolioRepository,
+  InMemoryPortfolioRepository,
+  createPortfolioRepository,
+} from './repositories/portfolio-repository.js';
+
+export {
+  type IUserRepository,
+  InMemoryUserRepository,
+  createUserRepository,
+} from './repositories/user-repository.js';
+
+export {
+  type ITransactionRepository,
+  InMemoryTransactionRepository,
+  createTransactionRepository,
+} from './repositories/transaction-repository.js';
+
+export {
+  type IAlertRepository,
+  InMemoryAlertRepository,
+  createAlertRepository,
+} from './repositories/alert-repository.js';
+
 // Services
 export {
   type IPriceDataQuery,
@@ -36,3 +60,72 @@ export {
   type IPriceDataService,
   MockPriceDataService,
 } from './services/price-data-service.js';
+
+export {
+  type ICredentialsService,
+  CredentialsService,
+  createCredentialsService,
+} from './services/credentials-service.js';
+
+export {
+  type IExchangeService,
+  type IBrokerCredentials,
+  type IConnectionResult,
+  type IBalance,
+  type IHolding,
+  type IOrderRequest,
+  type IOrderResult,
+  type OrderStatus,
+  type BrokerProvider,
+  ExchangeService,
+  createExchangeService,
+} from './services/exchange-service.js';
+
+export {
+  type IRiskManagementService,
+  type IPositionSizeInput,
+  type IPositionSizeResult,
+  type ITradeValidationInput,
+  type ITradeValidationResult,
+  type IStopLossTakeProfitInput,
+  type IStopLossTakeProfitResult,
+  RiskManagementService,
+  createRiskManagementService,
+} from './services/risk-management-service.js';
+
+export {
+  type IMarketDataService,
+  type ITickerInfo,
+  type PriceCallback,
+  MarketDataService,
+  createMarketDataService,
+} from './services/market-data-service.js';
+
+export {
+  type IReportGenerationService,
+  type ReportType,
+  type ReportFormat,
+  type IGenerateReportInput,
+  type IGeneratedReport,
+  ReportGenerationService,
+  createReportGenerationService,
+} from './services/report-generation-service.js';
+
+export {
+  type INotificationService,
+  type NotificationChannel,
+  type ISendNotificationInput,
+  type ISentNotification,
+  NotificationService,
+  createNotificationService,
+} from './services/notification-service.js';
+
+export {
+  type IAnalyticsService,
+  type ITradingStats,
+  type ISymbolStats,
+  type ITimebasedStats,
+  type IPortfolioAnalysis,
+  AnalyticsService,
+  createAnalyticsService,
+} from './services/analytics-service.js';

@@ -8,6 +8,8 @@
 import { useState, useCallback } from 'react'
 import type { Node, Edge } from 'reactflow'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { createTypedStrategiesQuery } from '@/lib/supabase/typed-client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface StrategyGraph {
   nodes: Node[]
@@ -106,10 +108,13 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
         updated_at: new Date().toISOString(),
       }
 
+      const strategiesQuery = createTypedStrategiesQuery(supabase)
+
       if (params.id && !params.id.startsWith('local_')) {
-        // Update existing strategy (type-cast for missing database types)
-        const { data, error: updateError } = await (supabase as any)
+        // Update existing strategy
+        const { data, error: updateError } = await supabase
           .from('strategies')
+          // @ts-ignore - Supabase generated types conflict
           .update(strategyData)
           .eq('id', params.id)
           .eq('user_id', user.id)
@@ -119,12 +124,8 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
         if (updateError) throw updateError
         return (data as { id: string } | null)?.id || null
       } else {
-        // Create new strategy (type-cast for missing database types)
-        const { data, error: insertError } = await (supabase as any)
-          .from('strategies')
-          .insert(strategyData)
-          .select('id')
-          .single()
+        // Create new strategy
+        const { data, error: insertError } = await strategiesQuery.insert(strategyData as any)
 
         if (insertError) throw insertError
         return (data as { id: string } | null)?.id || null
@@ -132,7 +133,7 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save strategy'
       setError(message)
-      console.error('Save strategy error:', err)
+      safeLogger.error('Save strategy error:', err)
       return null
     } finally {
       setIsSaving(false)
@@ -167,7 +168,7 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load strategy'
       setError(message)
-      console.error('Load strategy error:', err)
+      safeLogger.error('Load strategy error:', err)
       return null
     } finally {
       setIsLoading(false)
@@ -217,7 +218,7 @@ export function useStrategyPersistence(): UseStrategyPersistenceReturn {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load strategies'
       setError(message)
-      console.error('Load user strategies error:', err)
+      safeLogger.error('Load user strategies error:', err)
       return []
     } finally {
       setIsLoading(false)

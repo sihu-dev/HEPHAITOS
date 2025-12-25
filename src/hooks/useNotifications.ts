@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface Notification {
   id: string
@@ -133,7 +134,7 @@ export function useNotifications(): UseNotificationsReturn {
         setNotifications([])
       }
     } catch (err) {
-      console.error('[useNotifications] Fetch error:', err)
+      safeLogger.error('[useNotifications] Fetch error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch notifications'))
       setNotifications(DEMO_NOTIFICATIONS)
     } finally {
@@ -217,7 +218,7 @@ export function useNotifications(): UseNotificationsReturn {
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
       return true
     } catch (err) {
-      console.error('[useNotifications] Mark as read error:', err)
+      safeLogger.error('[useNotifications] Mark as read error:', err)
       return false
     }
   }, [])
@@ -247,7 +248,7 @@ export function useNotifications(): UseNotificationsReturn {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })))
       return true
     } catch (err) {
-      console.error('[useNotifications] Mark all as read error:', err)
+      safeLogger.error('[useNotifications] Mark all as read error:', err)
       return false
     }
   }, [])

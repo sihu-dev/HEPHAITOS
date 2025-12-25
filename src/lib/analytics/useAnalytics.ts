@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface AnalyticsEvent {
   event: string
@@ -14,6 +15,18 @@ declare global {
     va?: (event: string, properties?: Record<string, unknown>) => void
     _hephaitosSessionId?: string
   }
+}
+
+// Supabase analytics_events 테이블 insert 타입
+interface AnalyticsEventInsert {
+  user_id: string | null
+  session_id: string
+  event_name: string
+  event_type: string
+  page_url: string | null
+  referrer: string | null
+  properties: Record<string, unknown>
+  user_agent: string | null
 }
 
 // 세션 ID 생성/재사용
@@ -37,7 +50,7 @@ async function saveEventToSupabase(
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    await supabase.from('analytics_events').insert({
+    const eventData: AnalyticsEventInsert = {
       user_id: user?.id || null,
       session_id: getSessionId(),
       event_name: event,
@@ -46,11 +59,13 @@ async function saveEventToSupabase(
       referrer: typeof document !== 'undefined' ? document.referrer : null,
       properties: properties || {},
       user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
-    } as any)
+    }
+
+    await supabase.from('analytics_events').insert(eventData as any)
   } catch (error) {
     // 테이블이 없으면 조용히 실패 (마이그레이션 전)
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Analytics] Supabase save skipped:', error)
+      safeLogger.info('[Analytics] Supabase save skipped:', error)
     }
   }
 }
@@ -83,7 +98,7 @@ export function useAnalytics() {
 
     // Development 로그
     if (process.env.NODE_ENV === 'development') {
-      console.log('[Analytics]', event, properties)
+      safeLogger.info('[Analytics]', { event, properties })
     }
   }, [])
 
@@ -101,7 +116,7 @@ export function trackEvent(event: string, properties?: Record<string, unknown>) 
   }
 
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics]', event, properties)
+    safeLogger.info('[Analytics]', { event, properties })
   }
 }
 

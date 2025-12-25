@@ -43,6 +43,47 @@ export interface Database {
         }
       }
 
+
+      // User Profiles (onboarding and preferences)
+      user_profiles: {
+        Row: {
+          id: string
+          user_id: string
+          nickname: string
+          investment_style: 'conservative' | 'moderate' | 'aggressive'
+          experience: 'beginner' | 'intermediate' | 'advanced'
+          interests: string[]
+          pain_points: string[]
+          onboarding_completed: boolean
+          onboarding_step: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          nickname: string
+          investment_style: 'conservative' | 'moderate' | 'aggressive'
+          experience: 'beginner' | 'intermediate' | 'advanced'
+          interests?: string[]
+          pain_points?: string[]
+          onboarding_completed?: boolean
+          onboarding_step?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          nickname?: string
+          investment_style?: 'conservative' | 'moderate' | 'aggressive'
+          experience?: 'beginner' | 'intermediate' | 'advanced'
+          interests?: string[]
+          pain_points?: string[]
+          onboarding_completed?: boolean
+          onboarding_step?: number
+          updated_at?: string
+        }
+      }
+
       // Exchange Connections
       exchange_connections: {
         Row: {

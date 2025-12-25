@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface PortfolioMetrics {
   // Portfolio value
@@ -132,7 +133,7 @@ export function usePortfolioMetrics(): UsePortfolioMetricsReturn {
       // Fallback: calculate from trades table
       await fetchMetricsManually(supabase, user.id)
     } catch (err) {
-      console.error('[usePortfolioMetrics] Fetch error:', err)
+      safeLogger.error('[usePortfolioMetrics] Fetch error:', err)
       setError(err instanceof Error ? err : new Error('Failed to fetch portfolio metrics'))
       setMetrics(DEMO_METRICS)
     } finally {
@@ -217,7 +218,7 @@ export function usePortfolioMetrics(): UsePortfolioMetricsReturn {
         vsLastMonth: 0,
       })
     } catch (err) {
-      console.error('[usePortfolioMetrics] Manual calculation error:', err)
+      safeLogger.error('[usePortfolioMetrics] Manual calculation error:', err)
       setMetrics(DEMO_METRICS)
     }
   }

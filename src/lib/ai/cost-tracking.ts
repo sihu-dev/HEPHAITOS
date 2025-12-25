@@ -1,4 +1,5 @@
 // ============================================
+import { safeLogger } from '@/lib/utils/safe-logger'
 // AI 비용 추적 라이브러리
 // Loop 11: Observability
 // ============================================
@@ -46,7 +47,7 @@ export function calculateAICost(
   const costs = MODEL_COSTS[model]
 
   if (!costs) {
-    console.warn(`[Cost Tracking] Unknown model: ${model}, using default cost`)
+    safeLogger.warn(`[Cost Tracking] Unknown model: ${model}, using default cost`)
     return 0
   }
 
@@ -134,7 +135,7 @@ export async function trackAIUsage(event: AIUsageEvent): Promise<void> {
   })
 
   if (error) {
-    console.error('[AI Usage Tracking] Failed to insert event:', error)
+    safeLogger.error('[AI Usage Tracking] Failed to insert event:', error)
   }
 }
 

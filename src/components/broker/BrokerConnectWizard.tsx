@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { SUPPORTED_BROKERS, type BrokerId, type BrokerInfo } from '@/lib/broker'
 import { BrokerStatusBadge } from './BrokerStatusBadge'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -146,7 +147,7 @@ function BrokerCard({
     e.stopPropagation()
     setNotificationRequested(true)
     // TODO: 실제 알림 신청 API 호출
-    console.log(`알림 신청: ${broker.id}`)
+    safeLogger.info(`알림 신청: ${broker.id}`)
   }
 
   return (

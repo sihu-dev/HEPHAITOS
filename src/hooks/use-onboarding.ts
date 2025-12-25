@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 export interface UserProfile {
   nickname: string
@@ -87,7 +88,7 @@ export function useOnboarding() {
         return apiCompleted
       }
     } catch (err) {
-      console.error('[useOnboarding] checkOnboardingStatus error:', err)
+      safeLogger.error('[useOnboarding] checkOnboardingStatus error:', err)
     }
 
     // 에러 시 로컬 스토리지 값 사용
@@ -136,12 +137,12 @@ export function useOnboarding() {
       })
 
       if (!response.ok && response.status !== 401) {
-        console.warn('[useOnboarding] API save failed, using local storage')
+        safeLogger.warn('[useOnboarding] API save failed, using local storage')
       }
 
       return true
     } catch (err) {
-      console.error('[useOnboarding] completeOnboarding error:', err)
+      safeLogger.error('[useOnboarding] completeOnboarding error:', err)
       // 에러가 발생해도 로컬에 저장되어 있으므로 true 반환
       return true
     }
@@ -165,10 +166,10 @@ export function useOnboarding() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ step, data }),
       }).catch(err => {
-        console.warn('[useOnboarding] saveProgress API error:', err)
+        safeLogger.warn('[useOnboarding] saveProgress API error:', err)
       })
     } catch (err) {
-      console.error('[useOnboarding] saveProgress error:', err)
+      safeLogger.error('[useOnboarding] saveProgress error:', err)
     }
   }, [])
 

@@ -4,6 +4,7 @@
 // ============================================
 
 import type { Strategy } from '@/types'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -297,7 +298,7 @@ export class AIReportGenerator {
 
       return response.json()
     } catch (error) {
-      console.warn('[AIReportGenerator] AI generation failed, using rules:', error)
+      safeLogger.warn('[AIReportGenerator] AI generation failed, using rules:', error)
       return this.generateRuleBased(params)
     }
   }

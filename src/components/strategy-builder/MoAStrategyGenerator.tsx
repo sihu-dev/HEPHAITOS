@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Textarea';
 import { Spinner } from '@/components/ui/Spinner';
 import { Badge } from '@/components/ui/Badge';
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface Perspective {
   perspectiveId: string;
@@ -97,7 +98,7 @@ export function MoAStrategyGenerator() {
       setPerspectives(data.perspectives);
       setAggregated(data.aggregated);
     } catch (error) {
-      console.error('MoA 생성 오류:', error);
+      safeLogger.error('MoA 생성 오류:', error);
       alert('전략 생성 중 오류가 발생했습니다.');
     } finally {
       setIsGenerating(false);

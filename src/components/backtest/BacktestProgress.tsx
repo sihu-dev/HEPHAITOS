@@ -9,10 +9,29 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Progress } from '@/components/ui/progress';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { safeLogger } from '@/lib/utils/safe-logger';
+
+// Backtest result 타입 정의
+interface BacktestResult {
+  totalReturn?: number
+  sharpeRatio?: number
+  winRate?: number
+  maxDrawdown?: number
+  trades?: number
+  [key: string]: unknown // 추가 메트릭 허용
+}
+
+// Realtime payload 타입
+interface BacktestJobUpdate {
+  progress?: number
+  status: 'pending' | 'active' | 'completed' | 'failed'
+  message?: string
+  result?: BacktestResult | { error?: string }
+}
 
 interface BacktestProgressProps {
   jobId: string;
-  onComplete?: (result: any) => void;
+  onComplete?: (result: BacktestResult) => void;
   onError?: (error: string) => void;
 }
 
@@ -20,7 +39,7 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<'pending' | 'active' | 'completed' | 'failed'>('pending');
   const [message, setMessage] = useState('대기 중...');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<BacktestResult | null>(null);
 
   const supabase = createClient();
 
@@ -46,24 +65,25 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
             filter: `job_id=eq.${jobId}`,
           },
           (payload) => {
-            const data = payload.new as any;
+            const data = payload.new as BacktestJobUpdate;
 
-            console.log('[BacktestProgress] Realtime update:', data);
+            safeLogger.info('[BacktestProgress] Realtime update:', data);
 
             setProgress(data.progress || 0);
             setStatus(data.status);
             setMessage(data.message || '처리 중...');
 
-            if (data.status === 'completed') {
+            if (data.status === 'completed' && data.result && !('error' in data.result)) {
               setResult(data.result);
               onComplete?.(data.result);
             } else if (data.status === 'failed') {
-              onError?.(data.result?.error || '알 수 없는 오류');
+              const errorResult = data.result as { error?: string } | undefined;
+              onError?.(errorResult?.error || '알 수 없는 오류');
             }
           }
         )
         .subscribe((status) => {
-          console.log('[BacktestProgress] Realtime status:', status);
+          safeLogger.info('[BacktestProgress] Realtime status:', status);
         });
 
       // 2. Polling Fallback (Realtime 실패 시)
@@ -88,7 +108,7 @@ export function BacktestProgress({ jobId, onComplete, onError }: BacktestProgres
             clearInterval(pollInterval);
           }
         } catch (error) {
-          console.error('[BacktestProgress] Polling error:', error);
+          safeLogger.error('[BacktestProgress] Polling error:', error);
         }
       }, 2000); // 2초마다 폴링
     };

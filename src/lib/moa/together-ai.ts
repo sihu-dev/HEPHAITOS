@@ -9,6 +9,8 @@
  * vs Claude Sonnet: $9 / 1M tokens (평균)
  */
 
+import { safeLogger } from '@/lib/utils/safe-logger'
+
 const TOGETHER_API_KEY = process.env.TOGETHER_API_KEY;
 const TOGETHER_BASE_URL = 'https://api.together.xyz/v1';
 
@@ -134,7 +136,7 @@ export async function checkTogetherAIHealth(): Promise<boolean> {
     );
     return result.text.toLowerCase().includes('ok');
   } catch (error) {
-    console.error('[Together AI] Health check failed:', error);
+    safeLogger.error('[Together AI] Health check failed:', error);
     return false;
   }
 }

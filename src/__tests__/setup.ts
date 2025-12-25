@@ -5,6 +5,7 @@
 
 import '@testing-library/jest-dom'
 import { vi, beforeAll, afterAll } from 'vitest'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // Mock Next.js router
 vi.mock('next/navigation', () => ({

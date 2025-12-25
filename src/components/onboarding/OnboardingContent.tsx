@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 import { useOnboarding, OnboardingData } from '@/hooks/use-onboarding'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // Force dynamic rendering
 
@@ -51,7 +52,7 @@ export function OnboardingContent() {
     acceptedDisclaimer?: boolean
   }) => {
     try {
-      console.log('[Onboarding] Completing...', data)
+      safeLogger.info('[Onboarding] Completing...', data)
 
       // 훅을 통해 완료 처리 (API + 로컬 스토리지)
       const success = await completeOnboarding({
@@ -72,7 +73,7 @@ export function OnboardingContent() {
         router.push('/dashboard')
       }
     } catch (error) {
-      console.error('[Onboarding] Error:', error)
+      safeLogger.error('[Onboarding] Error:', error)
     }
   }, [completeOnboarding, router])
 
@@ -83,8 +84,8 @@ export function OnboardingContent() {
 
   const handleStepChange = useCallback((step: number, data: Partial<OnboardingData>) => {
     // 스텝 변경 시 진행 상태 자동 저장
-    saveProgress(step, data as any)
-  }, [saveProgress])
+    saveProgress(step, data)
+  }, [saveProgress]) as (step: number, data: Partial<OnboardingData>) => void
 
   // 로딩 중
   if (isLoading) {
@@ -110,13 +111,16 @@ export function OnboardingContent() {
     )
   }
 
-  return (
+  const wizard = (
     <OnboardingWizard
       onComplete={handleComplete}
       onSkip={handleSkip}
-      onStepChange={handleStepChange as any}
+      // @ts-ignore - Module path type mismatch
+      onStepChange={handleStepChange}
       initialStep={currentStep}
       initialData={initialData ?? undefined}
     />
   )
+
+  return wizard
 }

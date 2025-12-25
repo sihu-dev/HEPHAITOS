@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 interface MarketData {
   symbol: string
@@ -48,11 +49,11 @@ export function useRealtimeMarketData(initialMarkets: MarketData[]) {
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           setIsConnected(true)
-          console.log('[Realtime] Connected to market_data channel')
+          safeLogger.info('[Realtime] Connected to market_data channel')
         }
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           setIsConnected(false)
-          console.error('[Realtime] Channel error or timeout')
+          safeLogger.error('[Realtime] Channel error or timeout')
         }
       })
 

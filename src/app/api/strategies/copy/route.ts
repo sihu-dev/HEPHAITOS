@@ -5,6 +5,8 @@
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,7 +17,7 @@ const supabaseAdmin = createClient(
  * POST /api/strategies/copy
  * 공개 전략 복사
  */
-export async function POST(req: Request) {
+async function POSTHandler(req: Request) {
   try {
     const { strategyId } = await req.json()
     const userId = await requireUserId(req)
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
     })
 
     if (error) {
-      console.error('[Strategy Copy] RPC error:', error)
+      safeLogger.error('[Strategy Copy] RPC error:', error)
       return NextResponse.json({ error: 'COPY_FAILED' }, { status: 500 })
     }
 
@@ -36,7 +38,7 @@ export async function POST(req: Request) {
       message: '전략이 복사되었습니다. 나만의 전략으로 수정해보세요!',
     })
   } catch (error) {
-    console.error('[Strategy Copy] POST error:', error)
+    safeLogger.error('[Strategy Copy] POST error:', error)
     return NextResponse.json({ error: 'INTERNAL_SERVER_ERROR' }, { status: 500 })
   }
 }
@@ -46,3 +48,5 @@ async function requireUserId(req: Request): Promise<string> {
   if (!userId) throw new Error('UNAUTHORIZED')
   return userId
 }
+
+export const POST = withRateLimit(POSTHandler, { category: 'api' })

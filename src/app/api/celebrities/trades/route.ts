@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { celebrityPortfolioManager } from '@/lib/mirroring'
+import { safeLogger } from '@/lib/utils/safe-logger';
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +14,7 @@ export const dynamic = 'force-dynamic'
  * GET /api/celebrities/trades
  * Get recent trades from celebrities
  */
-export async function GET(request: NextRequest) {
+async function GETHandler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const celebrityId = searchParams.get('celebrityId')
@@ -43,7 +45,7 @@ export async function GET(request: NextRequest) {
       data: tradesWithCelebrity,
     })
   } catch (error) {
-    console.error('[API] Get celebrity trades failed:', error)
+    safeLogger.error('[API] Get celebrity trades failed:', error)
     return NextResponse.json(
       {
         success: false,
@@ -53,3 +55,5 @@ export async function GET(request: NextRequest) {
     )
   }
 }
+
+export const GET = withRateLimit(GETHandler, { category: 'api' })

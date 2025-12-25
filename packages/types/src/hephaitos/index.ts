@@ -115,3 +115,36 @@ export {
   DEFAULT_RISK_CONFIG,
   DEFAULT_SIMULATION_CONFIG,
 } from './order.js';
+
+// User Types
+export {
+  type UserRole,
+  type UserStatus,
+  type IUser,
+  type IUserSettings,
+  type INotificationSettings,
+  type ITradingSettings,
+  type ICreateUserInput,
+  type IUpdateUserInput,
+  type IUserStats,
+  DEFAULT_USER_SETTINGS,
+} from './user.js';
+
+// Transaction Types
+export {
+  type TransactionType,
+  type ITransaction,
+  type ICreateTransactionInput,
+  type ITransactionFilter,
+  type ITransactionStats,
+  type IDailyTransactionSummary,
+} from './transaction.js';
+
+// Alert Types
+export {
+  type AlertType,
+  type AlertStatus,
+  type AlertPriority,
+  type IAlert,
+  type ICreateAlertInput,
+} from './alert.js';

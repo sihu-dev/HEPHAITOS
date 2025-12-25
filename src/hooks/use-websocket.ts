@@ -9,6 +9,7 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import { WSManager, WSConfig, WSConnectionState, createWSManager } from '@/lib/websocket/ws-manager'
 import type { WSMessage, WSSubscription, WSEventType, Ticker } from '@/lib/exchange/types'
 import { useExchangeStore } from '@/stores'
+import { safeLogger } from '@/lib/utils/safe-logger'
 import {
   getTickerStreamName,
   formatSubscribeMessage,
@@ -65,14 +66,14 @@ export function useWebSocket(options: UseWebSocketOptions): UseWebSocketReturn {
         setWsConnected(false)
       },
       onError: (error) => {
-        console.error('[useWebSocket] Error:', error)
+        safeLogger.error('[useWebSocket] Error:', error)
       },
       onMessage: (message) => {
         handleWsMessage(message)
       },
       onReconnect: (attempt) => {
         setConnectionState('reconnecting')
-        console.log(`[useWebSocket] Reconnecting... attempt ${attempt}`)
+        safeLogger.info(`[useWebSocket] Reconnecting... attempt ${attempt}`)
       },
     }
 
@@ -170,7 +171,7 @@ export function useTickerStream(options: UseTickerStreamOptions): UseTickerStrea
       wsRef.current = new WebSocket(wsUrl)
 
       wsRef.current.onopen = () => {
-        console.log('[BinanceWS] Connected')
+        safeLogger.info('[BinanceWS] Connected')
         setIsConnected(true)
         reconnectAttemptsRef.current = 0
 
@@ -191,7 +192,7 @@ export function useTickerStream(options: UseTickerStreamOptions): UseTickerStrea
       }
 
       wsRef.current.onclose = () => {
-        console.log('[BinanceWS] Disconnected')
+        safeLogger.info('[BinanceWS] Disconnected')
         setIsConnected(false)
 
         // Auto-reconnect with exponential backoff
@@ -205,10 +206,10 @@ export function useTickerStream(options: UseTickerStreamOptions): UseTickerStrea
       }
 
       wsRef.current.onerror = (error) => {
-        console.error('[BinanceWS] Error:', error)
+        safeLogger.error('[BinanceWS] Error:', error)
       }
     } catch (error) {
-      console.error('[BinanceWS] Connection failed:', error)
+      safeLogger.error('[BinanceWS] Connection failed:', error)
     }
   }, [wsUrl, updateTicker])
 

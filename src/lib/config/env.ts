@@ -4,6 +4,7 @@
 // ============================================
 
 import { z } from 'zod'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Schema Definitions
@@ -91,8 +92,7 @@ export function validateServerEnv(): ServerEnv {
   const result = serverEnvSchema.safeParse(process.env)
 
   if (!result.success) {
-    console.error('❌ Invalid server environment variables:')
-    console.error(result.error.flatten().fieldErrors)
+    safeLogger.error('❌ Invalid server environment variables:', result.error.flatten().fieldErrors)
 
     // Development에서는 경고만, Production에서는 에러
     if (process.env.NODE_ENV === 'production') {
@@ -120,8 +120,7 @@ export function validateClientEnv(): ClientEnv {
   const result = clientEnvSchema.safeParse(clientEnv)
 
   if (!result.success) {
-    console.error('❌ Invalid client environment variables:')
-    console.error(result.error.flatten().fieldErrors)
+    safeLogger.error('❌ Invalid client environment variables:', result.error.flatten().fieldErrors)
   }
 
   return result.data ?? (clientEnv as unknown as ClientEnv)

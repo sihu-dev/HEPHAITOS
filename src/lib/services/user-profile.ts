@@ -5,6 +5,10 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { safeLogger } from '@/lib/utils/safe-logger'
+import type { Database } from '@/lib/supabase/types'
+
+type UserProfileRow = Database['public']['Tables']['user_profiles']['Row']
 
 // 환경 설정: Supabase 사용 여부
 const USE_SUPABASE = process.env.NEXT_PUBLIC_USE_SUPABASE === 'true'
@@ -52,14 +56,18 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 
   const supabase = await createServerSupabaseClient()
 
-  const { data, error } = await (supabase as any)
+  if (!supabase) {
+    return mockProfiles.get(userId) ?? null
+  }
+
+  const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
     .eq('user_id', userId)
-    .single()
+    .single<UserProfileRow>()
 
   if (error) {
-    console.error('[UserProfileService] getUserProfile error:', error)
+    safeLogger.error('[UserProfileService] getUserProfile error:', error)
     return mockProfiles.get(userId) ?? null
   }
 
@@ -100,9 +108,12 @@ export async function completeOnboarding(
   }
 
   const supabase = await createServerSupabaseClient()
+  if (!supabase) {
+    throw new Error('Database connection failed')
+  }
 
   // Upsert: 있으면 업데이트, 없으면 생성
-  const { data: result, error } = await (supabase as any)
+  const { data: result, error } = await supabase
     .from('user_profiles')
     .upsert({
       user_id: userId,
@@ -113,14 +124,14 @@ export async function completeOnboarding(
       pain_points: data.painPoints,
       onboarding_completed: true,
       onboarding_step: 6,
-    }, {
+    } as any, {
       onConflict: 'user_id',
     })
     .select()
-    .single()
+    .single<UserProfileRow>()
 
   if (error) {
-    console.error('[UserProfileService] completeOnboarding error:', error)
+    safeLogger.error('[UserProfileService] completeOnboarding error:', error)
     // Fallback to mock
     const profile: UserProfile = {
       id: `profile_${Date.now()}`,
@@ -186,8 +197,11 @@ export async function saveOnboardingProgress(
   }
 
   const supabase = await createServerSupabaseClient()
+  if (!supabase) {
+    return
+  }
 
-  const updateData: Record<string, any> = {
+  const updateData: Record<string, unknown> = {
     onboarding_step: step,
   }
 
@@ -197,17 +211,17 @@ export async function saveOnboardingProgress(
   if (partialData.interests) updateData.interests = partialData.interests
   if (partialData.painPoints) updateData.pain_points = partialData.painPoints
 
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('user_profiles')
     .upsert({
       user_id: userId,
       ...updateData,
-    }, {
+    } as any, {
       onConflict: 'user_id',
     })
 
   if (error) {
-    console.error('[UserProfileService] saveOnboardingProgress error:', error)
+    safeLogger.error('[UserProfileService] saveOnboardingProgress error:', error)
   }
 }
 
@@ -232,23 +246,27 @@ export async function updateUserProfile(
   }
 
   const supabase = await createServerSupabaseClient()
+  if (!supabase) {
+    return null
+  }
 
-  const updateData: Record<string, any> = {}
+  const updateData: Record<string, unknown> = {}
   if (updates.nickname) updateData.nickname = updates.nickname
   if (updates.investmentStyle) updateData.investment_style = updates.investmentStyle
   if (updates.experience) updateData.experience = updates.experience
   if (updates.interests) updateData.interests = updates.interests
   if (updates.painPoints) updateData.pain_points = updates.painPoints
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('user_profiles')
+    // @ts-ignore - Supabase generated types conflict
     .update(updateData)
     .eq('user_id', userId)
     .select()
-    .single()
+    .single<UserProfileRow>()
 
   if (error) {
-    console.error('[UserProfileService] updateUserProfile error:', error)
+    safeLogger.error('[UserProfileService] updateUserProfile error:', error)
     return null
   }
 
@@ -288,15 +306,18 @@ export async function getUserProfileClient(userId: string): Promise<UserProfile 
   }
 
   const supabase = getSupabaseBrowserClient()
+  if (!supabase) {
+    return null
+  }
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('user_profiles')
     .select('*')
     .eq('user_id', userId)
-    .single()
+    .single<UserProfileRow>()
 
   if (error) {
-    console.error('[UserProfileService] getUserProfileClient error:', error)
+    safeLogger.error('[UserProfileService] getUserProfileClient error:', error)
     return null
   }
 

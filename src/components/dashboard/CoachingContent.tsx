@@ -10,6 +10,7 @@ import { DisclaimerInline } from '@/components/ui/Disclaimer'
 import { AIAnalysisButton } from '@/components/widgets/AIAnalysisWidget'
 import { useI18n } from '@/i18n/client'
 import { useCoachingSessions, type Mentor, type LiveSession, type CoachingMessage } from '@/hooks/useCoachingSessions'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 
 // ============================================
@@ -473,7 +474,7 @@ function LiveChat({
 
   const handleSend = () => {
     if (!newMessage.trim()) return
-    console.log('Send message:', { sessionId, content: newMessage })
+    safeLogger.info('Send message:', { sessionId, content: newMessage })
     setNewMessage('')
   }
 
@@ -675,7 +676,7 @@ export function CoachingContent() {
                 <MentorCard
                   key={mentor.id}
                   mentor={mentor}
-                  onBook={() => console.log('Book mentor:', mentor.id)}
+                  onBook={() => safeLogger.info('Book mentor:', mentor.id)}
                   t={t}
                 />
               ))}

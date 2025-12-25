@@ -8,6 +8,7 @@ import { NextRequest } from 'next/server'
 import { validateRequestBody } from '@/lib/api/middleware'
 import { tradeAnalysisSchema } from '@/lib/validations/ai'
 import { safeLogger } from '@/lib/utils/safe-logger'
+import { withRateLimit } from '@/lib/api/middleware/rate-limit'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY
 
@@ -114,7 +115,7 @@ ${data.celebrity}의 투자 철학과 패턴
 // POST Handler - Streaming Analysis
 // ============================================
 
-export async function POST(request: NextRequest) {
+async function tradeAnalysisHandler(request: NextRequest) {
   try {
     if (!ANTHROPIC_API_KEY) {
       safeLogger.error('[Trade Analysis API] API key not configured')
@@ -230,7 +231,7 @@ export async function POST(request: NextRequest) {
 // GET Handler - Non-streaming (fallback)
 // ============================================
 
-export async function GET(request: NextRequest) {
+async function tradeAnalysisFallbackHandler(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const celebrity = searchParams.get('celebrity')
   const ticker = searchParams.get('ticker')
@@ -258,3 +259,6 @@ export async function GET(request: NextRequest) {
     },
   })
 }
+
+export const POST = withRateLimit(tradeAnalysisHandler, { category: 'ai' })
+export const GET = withRateLimit(tradeAnalysisFallbackHandler, { category: 'ai' })

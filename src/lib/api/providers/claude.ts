@@ -5,6 +5,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { requireClaudeConfig } from '@/lib/config/env'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 // ============================================
 // Types
@@ -119,13 +120,13 @@ class ClaudeProvider {
   private parseJsonResponse<T>(text: string, errorContext: string): T {
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
-      console.error(`[Claude] Failed to parse JSON response for ${errorContext}:`, text.slice(0, 200))
+      safeLogger.error(`[Claude] Failed to parse JSON response for ${errorContext}:`, text.slice(0, 200))
       throw new Error(`Failed to parse ${errorContext} response - no JSON found`)
     }
     try {
       return JSON.parse(jsonMatch[0]) as T
     } catch (parseError) {
-      console.error(`[Claude] JSON parse error for ${errorContext}:`, parseError)
+      safeLogger.error(`[Claude] JSON parse error for ${errorContext}:`, parseError)
       throw new Error(`Failed to parse ${errorContext} response - invalid JSON`)
     }
   }

@@ -428,20 +428,32 @@ export class OrderExecutorAgent {
    * 모든 포지션 청산
    */
   async closeAllPositions(
-    currentPrices: Record<string, number>
-  ): Promise<IClosePositionResult[]> {
+    currentPrices: Record<string, number> | number
+  ): Promise<{ closed: number; failed: number; results: IClosePositionResult[] }> {
     const positions = await this.positionRepo.getOpenPositions();
     const results: IClosePositionResult[] = [];
+    let closed = 0;
+    let failed = 0;
+
+    // If single price provided, use it for all positions
+    const priceMap = typeof currentPrices === 'number'
+      ? Object.fromEntries(positions.map(p => [p.symbol, currentPrices]))
+      : currentPrices;
 
     for (const position of positions) {
-      const exitPrice = currentPrices[position.symbol];
+      const exitPrice = priceMap[position.symbol];
       if (exitPrice) {
-        const result = await this.closePosition(position.id, exitPrice);
-        results.push(result);
+        try {
+          const result = await this.closePosition(position.id, exitPrice);
+          results.push(result);
+          closed++;
+        } catch (error) {
+          failed++;
+        }
       }
     }
 
-    return results;
+    return { closed, failed, results };
   }
 
   /**
@@ -517,6 +529,10 @@ export class OrderExecutorAgent {
       dailyLimitReached,
       canTrade,
       blockReason,
+      openPositions: openPositionCount,
+      maxPositions: this.config.riskConfig.maxOpenPositions,
+      maxDailyTrades: this.config.riskConfig.dailyTradeLimit,
+      isWithinLimits: canTrade && !dailyLimitReached,
     };
   }
 
@@ -546,6 +562,9 @@ export class OrderExecutorAgent {
       avgSlippage: this.config.simulationSlippagePercent, // 시뮬레이션에서는 설정값
       totalFees: 0, // 별도 집계 필요
       avgLatencyMs: this.config.simulationLatencyMs,
+      winningTrades: 0, // TODO: 포지션 데이터에서 계산
+      losingTrades: 0, // TODO: 포지션 데이터에서 계산
+      winRate: 0, // TODO: 포지션 데이터에서 계산
       bySymbol: {},
     };
   }
@@ -619,6 +638,8 @@ export class OrderExecutorAgent {
       executedPrice,
       latencyMs: this.config.simulationLatencyMs,
       executedAt: new Date().toISOString(),
+      quantity: trade.quantity,
+      price: trade.price,
     };
   }
 

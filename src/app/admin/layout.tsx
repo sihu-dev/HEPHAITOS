@@ -5,9 +5,14 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import type { User } from '@supabase/supabase-js';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
+
+  if (!supabase) {
+    redirect('/auth/login?error=database_error');
+  }
 
   // 인증 확인
   const {
@@ -77,14 +82,14 @@ function AdminNavLink({ href, label }: { href: string; label: string }) {
  * Admin 권한 확인
  * TODO: 실제 구현 시 Supabase user metadata 또는 별도 admin_users 테이블 확인
  */
-function checkAdminRole(user: any): boolean {
+function checkAdminRole(user: User): boolean {
   // 방법 1: 이메일 화이트리스트
   const adminEmails = [
     'admin@hephaitos.io',
     // 실제 관리자 이메일 추가
   ];
 
-  if (adminEmails.includes(user.email)) {
+  if (user.email && adminEmails.includes(user.email)) {
     return true;
   }
 

@@ -5,9 +5,11 @@
 
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { createTypedStrategiesQuery } from '@/lib/supabase/typed-client'
 import type { Strategy, StrategyConfig, StrategyPerformance } from '@/types'
 import type { Database } from '@/lib/supabase/types'
 import { mockStrategies, addStrategy as addMockStrategy, updateStrategy as updateMockStrategy, deleteStrategy as deleteMockStrategy } from '@/lib/mock-data'
+import { safeLogger } from '@/lib/utils/safe-logger';
 
 type StrategyRow = Database['public']['Tables']['strategies']['Row']
 
@@ -71,14 +73,18 @@ export async function getStrategies(options?: {
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  let query = (supabase as any)
+  if (!supabase) {
+    return { data: [], total: 0 }
+  }
+  const strategiesQuery = createTypedStrategiesQuery(supabase)
+
+  let query = supabase
     .from('strategies')
     .select('*', { count: 'exact' })
 
   if (userId) query = query.eq('user_id', userId)
   if (status) query = query.eq('status', status)
-  
+
   // Supabase column name mapping
   const columnMap: Record<string, string> = {
     createdAt: 'created_at',
@@ -87,14 +93,14 @@ export async function getStrategies(options?: {
   }
   const dbColumn = columnMap[sortBy as string] ?? sortBy
   query = query.order(dbColumn, { ascending: sortOrder === 'asc' })
-  
+
   const start = (page - 1) * limit
   query = query.range(start, start + limit - 1)
 
   const { data, error, count } = await query
 
   if (error) {
-    console.error('[StrategyService] getStrategies error:', error)
+    safeLogger.error('[StrategyService] getStrategies error:', error)
     // Fallback to mock - but prevent infinite loop
     let filtered = [...mockStrategies]
     if (userId) filtered = filtered.filter(s => s.userId === userId)
@@ -103,7 +109,7 @@ export async function getStrategies(options?: {
   }
 
   return {
-    data: (data ?? []).map((row: any) => rowToStrategy(row as StrategyRow)),
+    data: (data ?? []).map((row) => rowToStrategy(row as StrategyRow)),
     total: count ?? 0,
   }
 }
@@ -117,15 +123,15 @@ export async function getStrategyById(id: string): Promise<Strategy | null> {
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  const { data, error } = await (supabase as any)
-    .from('strategies')
-    .select('*')
-    .eq('id', id)
-    .single()
+  if (!supabase) {
+    return null
+  }
+  const strategiesQuery = createTypedStrategiesQuery(supabase)
+
+  const { data, error } = await strategiesQuery.selectById(id)
 
   if (error) {
-    console.error('[StrategyService] getStrategyById error:', error)
+    safeLogger.error('[StrategyService] getStrategyById error:', error)
     return mockStrategies.find(s => s.id === id) ?? null
   }
 
@@ -150,21 +156,21 @@ export async function createStrategy(
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  const { data, error } = await (supabase as any)
-    .from('strategies')
-    .insert({
-      user_id: strategy.userId,
-      name: strategy.name,
-      description: strategy.description ?? null,
-      status: strategy.status ?? 'draft',
-      config: strategy.config ?? {},
-    })
-    .select()
-    .single()
+  if (!supabase) {
+    throw new Error('Database connection failed')
+  }
+  const strategiesQuery = createTypedStrategiesQuery(supabase)
+
+  const { data, error } = await strategiesQuery.insert({
+    user_id: strategy.userId,
+    name: strategy.name,
+    description: strategy.description ?? null,
+    status: strategy.status ?? 'draft',
+    config: strategy.config as any,
+  })
 
   if (error) {
-    console.error('[StrategyService] createStrategy error:', error)
+    safeLogger.error('[StrategyService] createStrategy error:', error)
     throw new Error('전략 생성에 실패했습니다')
   }
 
@@ -183,23 +189,22 @@ export async function updateStrategy(
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  const updateData: Record<string, any> = {}
+  if (!supabase) {
+    return null
+  }
+  const strategiesQuery = createTypedStrategiesQuery(supabase)
+
+  const updateData: Database['public']['Tables']['strategies']['Update'] = {}
   if (updates.name !== undefined) updateData.name = updates.name
   if (updates.description !== undefined) updateData.description = updates.description
   if (updates.status !== undefined) updateData.status = updates.status
-  if (updates.config !== undefined) updateData.config = updates.config
-  if (updates.performance !== undefined) updateData.performance = updates.performance
+  if (updates.config !== undefined) updateData.config = updates.config as never
+  if (updates.performance !== undefined) updateData.performance = updates.performance as never
 
-  const { data, error } = await (supabase as any)
-    .from('strategies')
-    .update(updateData)
-    .eq('id', id)
-    .select()
-    .single()
+  const { data, error } = await strategiesQuery.update(id, updateData)
 
   if (error) {
-    console.error('[StrategyService] updateStrategy error:', error)
+    safeLogger.error('[StrategyService] updateStrategy error:', error)
     return updateMockStrategy(id, updates)
   }
 
@@ -215,14 +220,15 @@ export async function deleteStrategy(id: string): Promise<boolean> {
   }
 
   const supabase = await createServerSupabaseClient()
-  
-  const { error } = await (supabase as any)
-    .from('strategies')
-    .delete()
-    .eq('id', id)
+  if (!supabase) {
+    return false
+  }
+  const strategiesQuery = createTypedStrategiesQuery(supabase)
+
+  const { error } = await strategiesQuery.delete(id)
 
   if (error) {
-    console.error('[StrategyService] deleteStrategy error:', error)
+    safeLogger.error('[StrategyService] deleteStrategy error:', error)
     return deleteMockStrategy(id)
   }
 
@@ -252,7 +258,7 @@ export async function getStrategiesClient(options?: {
     return mockStrategies
   }
 
-  let query = (supabase as any)
+  let query = supabase
     .from('strategies')
     .select('*')
     .order('updated_at', { ascending: false })
@@ -263,11 +269,11 @@ export async function getStrategiesClient(options?: {
   const { data, error } = await query
 
   if (error) {
-    console.error('[StrategyService] getStrategiesClient error:', error)
+    safeLogger.error('[StrategyService] getStrategiesClient error:', error)
     return mockStrategies
   }
 
-  return (data ?? []).map((row: any) => rowToStrategy(row as StrategyRow))
+  return (data ?? []).map((row) => rowToStrategy(row as StrategyRow))
 }
 
 /**

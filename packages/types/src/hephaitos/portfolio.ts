@@ -11,7 +11,9 @@ import type { IAsset, IAssetBreakdown } from './asset.js';
  */
 export type SyncStatus =
   | 'idle'
+  | 'pending'
   | 'syncing'
+  | 'synced'
   | 'success'
   | 'error';
 
@@ -36,6 +38,8 @@ export interface IPortfolio {
   created_at: string;
   /** 마지막 동기화 일시 */
   synced_at: string;
+  /** 마지막 동기화 일시 (별칭, synced_at와 동일) */
+  last_synced_at?: string;
   /** 동기화 상태 */
   sync_status: SyncStatus;
 }
